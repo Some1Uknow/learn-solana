@@ -12,16 +12,16 @@ export default function Home() {
   const [waitlistCount, setWaitlistCount] = useState<number>(0);
 
   // Fetch waitlist count
-  useEffect(() => {
-    fetch('/api/beta-signup')
-      .then(res => res.json())
-      .then(data => {
-        if (data.count !== undefined) {
-          setWaitlistCount(data.count);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  // useEffect(() => {
+  //   fetch('/api/beta-signup')
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       if (data.count !== undefined) {
+  //         setWaitlistCount(data.count);
+  //       }
+  //     })
+  //     .catch(console.error);
+  // }, []);
 
   return (
     <div className="min-h-screen bg-[#0c0c10] text-white">

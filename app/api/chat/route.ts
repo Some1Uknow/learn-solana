@@ -32,13 +32,19 @@ export async function POST(req: Request) {
     // Call the streamText API
     const result = streamText({
       system:
-        "You are learn.sol AI bot. Users can ask you anything about Solana, Rust, Anchor, or web3 development and your job is to answer it with perfection (detailed answer, easy language yet technical, conclusive advice). If the user asks for a code sample, provide working code examples that they can copy directly into the editor.",
+        "You are learn.sol AI bot. Users can ask you anything about Solana, Rust, Anchor, or web3 development and your job is to answer it with perfection (detailed answer, easy language yet technical, conclusive advice).",
       model,
-      messages,
+      messages: messages, // Assuming messages are already in the correct format for AI SDK
+      // Add generationConfig if needed, mapping from the old format
+      // generationConfig: {
+      //   maxOutputTokens: 1000,
+      //   temperature: 0.7,
+      //   topP: 0.95,
+      // },
     });
-    console.log("Result:", result);
+
     // Return the stream using the correct method
-    return result.toTextStreamResponse();
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error("Chat API error:", error);
     // Use a generic error message for security
