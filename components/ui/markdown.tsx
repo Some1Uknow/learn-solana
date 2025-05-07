@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import React from 'react';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
@@ -74,6 +75,26 @@ export function Markdown({ children, className }: MarkdownProps) {
               </a>
             );
           },
+          // Make sure paragraphs don't contain block elements
+          p: ({ children, ...props }) => {
+            // Check if children contain block elements
+            const hasBlockElements = React.Children.toArray(children).some(
+              child => typeof child === 'object' && React.isValidElement(child) && 
+              ['div', 'pre', 'ul', 'ol', 'table'].includes((child.type as any)?.name || child.type as string)
+            );
+
+            // If paragraph contains block elements, render children directly
+            if (hasBlockElements) {
+              return <>{children}</>;
+            }
+
+            // Otherwise render as normal paragraph
+            return (
+              <p className="break-words" {...props}>
+                {children}
+              </p>
+            );
+          },
           pre: ({ children }) => {
             // The pre component just acts as a container, but we want
             // the header and code content to be handled by the code component
@@ -136,12 +157,6 @@ export function Markdown({ children, className }: MarkdownProps) {
               </div>
             );
           },
-          // Keep paragraphs from overflowing
-          p: ({ children, ...props }) => (
-            <p className="break-words" {...props}>
-              {children}
-            </p>
-          ),
           // Enhance tables with responsive container
           table: ({ children, ...props }) => (
             <div className="overflow-x-auto w-full my-6">
