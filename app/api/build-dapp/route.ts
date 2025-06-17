@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const { config, messages, files } = await req.json();
     
     // Initialize the Gemini model
-    const model = google("gemini-1.5-flash");
+    const model = google("gemini-2.0-flash");
 
     // Build our system prompt with improved instructions for balanced code generation
     const systemPrompt = `You are a Solana full-stack dApp developer assistant specializing in Next.js and Anchor/Rust. Your task is to help users build complete Solana dApps with smart contracts and frontends.

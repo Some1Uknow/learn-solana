@@ -7,7 +7,7 @@ const sampleCode = `
 // Let the magic weave! Rust, Anchor, and Solana are your tools of choice :)
 `;
 
-export default function CodeEditor({ code }: { code?: string }) {
+export default function CodeEditor({ code, onChange }: { code?: string; onChange?: (value: string) => void }) {
   const [value, setValue] = useState(code || sampleCode);
   const [mounted, setMounted] = useState(false);
 
@@ -32,8 +32,11 @@ export default function CodeEditor({ code }: { code?: string }) {
       <Editor
         defaultLanguage="rust"
         defaultValue={sampleCode}
-        value={value} // Use the state value instead of code directly
-        onChange={(value) => setValue(value ?? "")}
+        value={value}
+        onChange={(value) => {
+          setValue(value ?? "");
+          onChange?.(value ?? "");
+        }}
         theme="vs-dark"
         options={{
           minimap: { enabled: false },

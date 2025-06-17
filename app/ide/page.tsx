@@ -16,6 +16,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
+  Trash2,
+  Github,
+  FolderInput,
+  Upload,
+  Beaker,
+  Copy,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +40,10 @@ import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { contractSchema } from "../api/contract-generator/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Markdown from "react-markdown";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { FileExplorer } from "@/components/ide/file-explorer";
+import { FileSystemNode, Project } from "@/types/file-system";
 
 const SAMPLE_FUNCTIONS = [
   {
@@ -52,19 +63,78 @@ export default function IDEPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [currentTab, setCurrentTab] = useState("code");
-  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editorCode, setEditorCode] = useState<string>("");
+  const [currentFile, setCurrentFile] = useState<FileSystemNode | null>(null);
+  const [fileContents, setFileContents] = useState<Record<string, string>>({
+    'src/lib.rs': '// Write your Solana program here',
+    'client/client.ts': '// Client code here',
+    'tests/anchor.test.ts': '// Test code here'
+  });
   const [userMessages, setUserMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([
     {
       role: "assistant",
       content:
-        "Hi! I'm your Solana smart contract assistant. How can I help you build your project today?",
+        "Hi! I'm your SageIDE assistant. How can I help you build your project today?",
     },
   ]);
   const [currentInput, setCurrentInput] = useState("");
+  const [activeTab, setActiveTab] = useState("explorer");
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      name: "My Project",
+      root: {
+        id: "root",
+        name: "My Project",
+        type: "directory",
+        children: [
+          {
+            id: "src",
+            name: "src",
+            type: "directory",
+            children: [
+              {
+                id: "lib",
+                name: "lib.rs",
+                type: "file",
+                content: "// Write your Solana program here"
+              }
+            ]
+          },
+          {
+            id: "client",
+            name: "client",
+            type: "directory",
+            children: [
+              {
+                id: "client-file",
+                name: "client.ts",
+                type: "file",
+                content: "// Client code here"
+              }
+            ]
+          },
+          {
+            id: "tests",
+            name: "tests",
+            type: "directory",
+            children: [
+              {
+                id: "anchor-test",
+                name: "anchor.test.ts",
+                type: "file",
+                content: "// Test code here"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]);
+  const [selectedProject, setSelectedProject] = useState<string>("My Project");
 
   // Use the AI SDK's useObject hook for contract generation
   const { object, submit, isLoading } = useObject({
@@ -267,6 +337,514 @@ export default function IDEPage() {
     };
   }, [verticalDragging]);
 
+  // File system operations
+  const createFile = (parentId: string, name: string) => {
+    setProjects(currentProjects => {
+      const newProjects = [...currentProjects];
+      const project = newProjects.find(p => p.name === selectedProject);
+      if (!project) return currentProjects;
+
+      const findAndUpdateParent = (node: FileSystemNode): boolean => {
+        if (node.id === parentId && node.type === 'directory') {
+          const newFile: FileSystemNode = {
+            id: Math.random().toString(36).substr(2, 9),
+            name,
+            type: 'file',
+            content: '',
+            parentId: node.id
+          };
+          node.children = node.children || [];
+          node.children.push(newFile);
+          return true;
+        }
+        if (node.children) {
+          return node.children.some(findAndUpdateParent);
+        }
+        return false;
+      };
+
+      findAndUpdateParent(project.root);
+      return newProjects;
+    });
+  };
+
+  const createDirectory = (parentId: string, name: string) => {
+    setProjects(currentProjects => {
+      const newProjects = [...currentProjects];
+      const project = newProjects.find(p => p.name === selectedProject);
+      if (!project) return currentProjects;
+
+      const findAndUpdateParent = (node: FileSystemNode): boolean => {
+        if (node.id === parentId && node.type === 'directory') {
+          const newDir: FileSystemNode = {
+            id: Math.random().toString(36).substr(2, 9),
+            name,
+            type: 'directory',
+            children: [],
+            parentId: node.id
+          };
+          node.children = node.children || [];
+          node.children.push(newDir);
+          return true;
+        }
+        if (node.children) {
+          return node.children.some(findAndUpdateParent);
+        }
+        return false;
+      };
+
+      findAndUpdateParent(project.root);
+      return newProjects;
+    });
+  };
+
+  const deleteNode = (nodeId: string) => {
+    setProjects(currentProjects => {
+      const newProjects = [...currentProjects];
+      const project = newProjects.find(p => p.name === selectedProject);
+      if (!project) return currentProjects;
+
+      const findAndDeleteNode = (parent: FileSystemNode): boolean => {
+        if (parent.children) {
+          const index = parent.children.findIndex(child => child.id === nodeId);
+          if (index !== -1) {
+            parent.children.splice(index, 1);
+            return true;
+          }
+          return parent.children.some(findAndDeleteNode);
+        }
+        return false;
+      };
+
+      findAndDeleteNode(project.root);
+      return newProjects;
+    });
+
+    if (currentFile?.id === nodeId) {
+      setCurrentFile(null);
+      setEditorCode("");
+    }
+  };
+
+  const openFile = (node: FileSystemNode) => {
+    if (node.type === 'file') {
+      // Save current file content before switching
+      if (currentFile) {
+        setFileContents(prev => ({
+          ...prev,
+          [getFullPath(currentFile)]: editorCode
+        }));
+      }
+      
+      // Set the new current file
+      setCurrentFile(node);
+      
+      // Load content from fileContents or use default content
+      const fullPath = getFullPath(node);
+      setEditorCode(fileContents[fullPath] ?? node.content ?? '');
+    }
+  };
+
+  // Add a function to save file content
+  const saveFileContent = (fileId: string, content: string) => {
+    setFileContents(prev => ({
+      ...prev,
+      [fileId]: content
+    }));
+  };
+
+  const saveCurrentFile = () => {
+    if (!currentFile) return;
+    const fullPath = getFullPath(currentFile);
+    setFileContents(prev => ({
+      ...prev,
+      [fullPath]: editorCode
+    }));
+  };
+
+  // Effect to save file content when switching tabs or closing
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentFile) {
+        const fullPath = getFullPath(currentFile);
+        setFileContents(prev => ({
+          ...prev,
+          [fullPath]: editorCode
+        }));
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentFile, editorCode]);
+
+  // Add debounced auto-save
+  useEffect(() => {
+    if (!currentFile) return;
+
+    const timeoutId = setTimeout(() => {
+      const fullPath = getFullPath(currentFile);
+      setFileContents(prev => ({
+        ...prev,
+        [fullPath]: editorCode
+      }));
+    }, 1000); // 1 second debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [editorCode, currentFile]);
+
+  // Sidebar renderer function
+  const renderSidebar = () => {
+    switch (activeTab) {
+      case "explorer":
+        const currentProject = projects.find(p => p.name === selectedProject);
+        return (
+          <div className="flex flex-col h-full">
+            {/* Project Actions */}
+            <div className="p-4 border-b border-white/10">
+              <Button variant="outline" className="w-full mb-2 text-[#14F195] border-[#14F195]/30 hover:bg-[#14F195]/10">
+                <FileCode className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+              <Select value={selectedProject} onValueChange={setSelectedProject}>
+                <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((project) => (
+                    <SelectItem key={project.name} value={project.name}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Project Options */}
+            <div className="p-4 border-b border-white/10 flex flex-wrap gap-2">
+              <Button variant="ghost" size="sm" className="h-7">
+                <Settings className="h-3 w-3 mr-1" />
+                Rename
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 text-red-400 hover:text-red-300">
+                <Trash2 className="h-3 w-3 mr-1" />
+                Delete
+              </Button>
+            </div>
+
+            {/* File Explorer */}
+            <div className="flex-1 overflow-auto p-4">
+              {currentProject && (
+                <FileExplorer
+                  node={currentProject.root}
+                  onFileOpen={openFile}
+                  onCreateFile={createFile}
+                  onCreateFolder={createDirectory}
+                  onDelete={deleteNode}
+                  currentFileId={currentFile?.id}
+                />
+              )}
+            </div>
+          </div>
+        );
+      case "build":
+        return (
+          <div className="flex flex-col h-full">
+            {/* Build Button */}
+            <div className="p-4">
+              <Button 
+                className="w-full bg-[#14F195] hover:bg-[#14F195]/80 text-black border-none h-10"
+              >
+                Build
+              </Button>
+            </div>
+
+            {/* Program ID Section */}
+            <ProgramSection />
+
+            {/* Program Binary Section */}
+            <Collapsible className="border-t border-white/10">
+              <CollapsibleTrigger className="w-full p-4 flex items-center justify-between text-white/70 hover:bg-white/5">
+                <div className="flex items-center">
+                  <ChevronRight className="h-4 w-4 mr-2 transition-transform duration-200 data-[state=open]:rotate-90" />
+                  Program binary
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-4 pb-4">
+                <p className="text-sm text-white/60 mb-3">
+                  Import your program and deploy without failure.
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                >
+                  Import
+                </Button>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* IDL Section */}
+            <Collapsible className="border-t border-white/10">
+              <CollapsibleTrigger className="w-full p-4 flex items-center justify-between text-white/70 hover:bg-white/5">
+                <div className="flex items-center">
+                  <ChevronRight className="h-4 w-4 mr-2 transition-transform duration-200 data-[state=open]:rotate-90" />
+                  IDL
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-4 pb-4">
+                <p className="text-sm text-white/60 mb-3">
+                  Anchor IDL interactions.
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                >
+                  Import
+                </Button>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+        );
+      case "test":
+        return (
+          <div className="flex flex-col h-full">
+            {/* Test Configuration */}
+            <div className="p-4 border-b border-white/10">
+              <h3 className="text-sm font-medium text-white/70 mb-3">Test Configuration</h3>
+              <Select defaultValue="all">
+                <SelectTrigger className="bg-white/5 border-white/10 mb-2">
+                  <SelectValue placeholder="Select test scope" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tests</SelectItem>
+                  <SelectItem value="unit">Unit Tests</SelectItem>
+                  <SelectItem value="integration">Integration Tests</SelectItem>
+                  <SelectItem value="e2e">E2E Tests</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" className="w-full mb-2 text-white/70 border-white/10 hover:bg-white/5">
+                <Settings className="h-4 w-4 mr-2" />
+                Test Settings
+              </Button>
+            </div>
+
+            {/* Test Actions */}
+            <div className="p-4 border-b border-white/10">
+              <h3 className="text-sm font-medium text-white/70 mb-3">Test Actions</h3>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-start text-[#14F195] border-[#14F195]/30 hover:bg-[#14F195]/10">
+                  <Play className="h-4 w-4 mr-2" />
+                  Run All Tests
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-white/70 border-white/10 hover:bg-white/5">
+                  <Code className="h-4 w-4 mr-2" />
+                  Run Current File Tests
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-white/70 border-white/10 hover:bg-white/5">
+                  <Terminal className="h-4 w-4 mr-2" />
+                  Debug Test
+                </Button>
+              </div>
+            </div>
+
+            {/* Test Coverage */}
+            <div className="p-4 border-b border-white/10">
+              <h3 className="text-sm font-medium text-white/70 mb-3">Coverage</h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-white/70">Overall</span>
+                    <span className="text-sm text-[#14F195]">85%</span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#14F195] rounded-full" style={{ width: '85%' }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-white/70">Functions</span>
+                    <span className="text-sm text-[#14F195]">92%</span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#14F195] rounded-full" style={{ width: '92%' }} />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm text-white/70">Branches</span>
+                    <span className="text-sm text-[#14F195]">78%</span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#14F195] rounded-full" style={{ width: '78%' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Test Runs */}
+            <div className="p-4 flex-1 overflow-auto">
+              <h3 className="text-sm font-medium text-white/70 mb-3">Recent Test Runs</h3>
+              <div className="space-y-2">
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white/70">All Tests</span>
+                    <div className="flex items-center">
+                      <span className="text-xs text-[#14F195] mr-2">42/45 passed</span>
+                      <span className="text-xs text-white/50">2min ago</span>
+                    </div>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#14F195] rounded-full" style={{ width: '93%' }} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white/70">Unit Tests</span>
+                    <div className="flex items-center">
+                      <span className="text-xs text-[#14F195] mr-2">28/28 passed</span>
+                      <span className="text-xs text-white/50">15min ago</span>
+                    </div>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#14F195] rounded-full" style={{ width: '100%' }} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white/70">Integration Tests</span>
+                    <div className="flex items-center">
+                      <span className="text-xs text-red-400 mr-2">14/17 passed</span>
+                      <span className="text-xs text-white/50">1hr ago</span>
+                    </div>
+                  </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-400 rounded-full" style={{ width: '82%' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Template modal section replacement
+  const TemplateDialog = () => (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogContent className="bg-black/80 backdrop-blur-md border border-white/10">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-medium mb-2">Template Gallery</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2">
+          {SAMPLE_FUNCTIONS.map((template, index) => (
+            <button
+              key={index}
+              className="w-full text-left p-2 hover:bg-white/10 rounded-md transition-colors"
+              onClick={() => {
+                setSelectedTemplate(template.name);
+                setDialogOpen(false);
+              }}
+            >
+              <p className="text-sm font-medium">{template.name}</p>
+              <p className="text-xs text-white/60">{template.description}</p>
+            </button>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
+  // Program ID section replacement using Collapsible
+  const ProgramSection = () => (
+    <Collapsible className="border-t border-white/10">
+      <CollapsibleTrigger className="w-full p-4 flex items-center justify-between text-white/70 hover:bg-white/5">
+        <div className="flex items-center">
+          <ChevronRight className="h-4 w-4 mr-2 transition-transform duration-200 data-[state=open]:rotate-90" />
+          Program ID
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-4 pb-4">
+        <p className="text-sm text-white/60 mb-3">
+          Import/export program keypair or input a public key for the program.
+        </p>
+        <div className="flex gap-2 mb-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+          >
+            New
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+          >
+            Import
+          </Button>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm text-white/60">Program ID:</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Your program's public key"
+              className="w-full bg-black/20 border border-white/10 rounded-md p-2 text-sm text-white/80 focus:border-[#14F195]/50 focus:ring-1 focus:ring-[#14F195]/50 outline-none"
+            />
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white/40 hover:text-[#14F195] hover:bg-[#14F195]/10"
+              aria-label="Copy program ID"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-start gap-2 mt-3 p-3 bg-[#14F195]/5 rounded-md border border-[#14F195]/20">
+            <AlertTriangle className="h-4 w-4 text-[#14F195] mt-0.5" />
+            <p className="text-xs text-white/70">
+              Note that you need to have this program's authority to upgrade
+            </p>
+          </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+
+  // Replace fileContents state with this function to get full path
+  const getFullPath = (node: FileSystemNode | null): string => {
+    if (!node) return '';
+    const getParentPath = (currentNode: FileSystemNode, path: string = ''): string => {
+      const project = projects.find(p => p.name === selectedProject);
+      if (!project) return path;
+
+      const findParent = (parentNode: FileSystemNode): FileSystemNode | null => {
+        if (parentNode.children?.some(child => child.id === currentNode.id)) {
+          return parentNode;
+        }
+        for (const child of parentNode.children || []) {
+          const found = findParent(child);
+          if (found) return found;
+        }
+        return null;
+      };
+
+      const parent = findParent(project.root);
+      if (!parent || parent.id === project.root.id) {
+        return `${currentNode.name}${path}`;
+      }
+      return getParentPath(parent, `/${currentNode.name}${path}`);
+    };
+
+    return getParentPath(node);
+  };
+
   return (
     <div className="h-screen bg-[#0c0c10] text-white flex flex-col overflow-hidden">
       {/* Gradient background effect */}
@@ -285,7 +863,7 @@ export default function IDEPage() {
               <span className="sr-only">Back to Home</span>
             </Link>
             <h1 className="text-xl font-bold font-space-grotesk flex items-center gap-2">
-              Solana AI Smart Contract IDE
+              SageIDE
               <div className="h-2 w-2 rounded-full bg-[#14F195] animate-pulse" />
             </h1>
           </div>
@@ -294,38 +872,17 @@ export default function IDEPage() {
               <Button
                 variant="outline"
                 className="border-white/10 text-white/80 hover:text-white"
-                onClick={() => setShowTemplateModal(!showTemplateModal)}
+                onClick={() => setDialogOpen(true)}
               >
                 <FileCode className="h-4 w-4 mr-2" />
                 Templates
               </Button>
-
-              {showTemplateModal && (
-                <div className="absolute top-full right-0 mt-2 w-64 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-lg p-4 z-50">
-                  <h3 className="text-sm font-medium mb-2">Template Gallery</h3>
-                  <div className="space-y-2">
-                    {SAMPLE_FUNCTIONS.map((template, index) => (
-                      <button
-                        key={index}
-                        className="w-full text-left p-2 hover:bg-white/10 rounded-md transition-colors"
-                        onClick={() => {
-                          setSelectedTemplate(template.name);
-                          setShowTemplateModal(false);
-                        }}
-                      >
-                        <p className="text-sm font-medium">{template.name}</p>
-                        <p className="text-xs text-white/60">
-                          {template.description}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <TemplateDialog />
             </div>
             <Button
               variant="outline"
               className="border-white/10 text-white/80 hover:text-white"
+              onClick={saveCurrentFile}
             >
               <Save className="h-4 w-4 mr-2" />
               Save
@@ -364,18 +921,43 @@ export default function IDEPage() {
         </div>
       </header>
 
-      {/* Main IDE Area with collapsible sidebar */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Collapsible File Explorer - Left Side */}
+      {/* Main IDE Area with activity bar and panels */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Activity Bar */}
+        <div className="w-12 bg-black/40 flex flex-col items-center py-4 space-y-6 border-r border-white/10">
+          <button 
+            className={`p-2 rounded-lg transition-colors ${activeTab === "explorer" ? "bg-[#14F195]/20 text-[#14F195]" : "text-white/60 hover:text-white/80 hover:bg-white/10"}`}
+            onClick={() => { setActiveTab("explorer"); setSidebarCollapsed(false); }}
+            aria-label="File explorer"
+          >
+            <FileCode className="h-5 w-5" />
+          </button>
+          <button 
+            className={`p-2 rounded-lg transition-colors ${activeTab === "build" ? "bg-[#14F195]/20 text-[#14F195]" : "text-white/60 hover:text-white/80 hover:bg-white/10"}`}
+            onClick={() => { setActiveTab("build"); setSidebarCollapsed(false); }}
+            aria-label="Build settings"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+          <button 
+            className={`p-2 rounded-lg transition-colors ${activeTab === "test" ? "bg-[#14F195]/20 text-[#14F195]" : "text-white/60 hover:text-white/80 hover:bg-white/10"}`}
+            onClick={() => { setActiveTab("test"); setSidebarCollapsed(false); }}
+            aria-label="Test settings"
+          >
+            <Beaker className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Sidebar Panel */}
         <div
-          className={`border-r border-white/10 bg-black/20 ${
-            sidebarCollapsed ? "w-10" : "w-52"
-          } 
-                    transition-all duration-300 md:flex flex-col relative`}
+          className={`${
+            sidebarCollapsed ? "w-0" : "w-72"
+          } transition-all duration-300 relative bg-black/20 border-r border-white/10`}
         >
           <button
             className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-[#14F195] rounded-full p-1 z-10"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? (
               <ChevronRight className="h-3 w-3 text-black" />
@@ -384,84 +966,10 @@ export default function IDEPage() {
             )}
           </button>
 
-          {sidebarCollapsed ? (
-            <div className="flex flex-col items-center py-4 space-y-6">
-              <Code className="h-5 w-5 text-[#14F195]" />
-              <FileCode className="h-5 w-5 text-white/60" />
-              <Settings className="h-5 w-5 text-white/60" />
+          {!sidebarCollapsed && (
+            <div className="h-full">
+              {renderSidebar()}
             </div>
-          ) : (
-            <>
-              <h2 className="text-sm font-medium mb-3 p-4 pb-0">
-                Project Files
-              </h2>
-              <div className="space-y-1 px-4">
-                <div className="flex items-center px-2 py-1 bg-white/10 rounded-md">
-                  <Code className="h-4 w-4 mr-2 text-[#14F195]" />
-                  <span className="text-sm">main.rs</span>
-                </div>
-                <div className="flex items-center px-2 py-1 hover:bg-white/5 rounded-md cursor-pointer">
-                  <Code className="h-4 w-4 mr-2 text-white/60" />
-                  <span className="text-sm text-white/80">lib.rs</span>
-                </div>
-                <div className="flex items-center px-2 py-1 hover:bg-white/5 rounded-md cursor-pointer">
-                  <Code className="h-4 w-4 mr-2 text-white/60" />
-                  <span className="text-sm text-white/80">error.rs</span>
-                </div>
-                <div className="flex items-center px-2 py-1 hover:bg-white/5 rounded-md cursor-pointer">
-                  <Code className="h-4 w-4 mr-2 text-white/60" />
-                  <span className="text-sm text-white/80">types.rs</span>
-                </div>
-              </div>
-
-              <div className="mt-6 px-4">
-                <h2 className="text-sm font-medium mb-3">Project Settings</h2>
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-white/70 block">
-                      Solana Cluster
-                    </label>
-                    <Select defaultValue="localnet">
-                      <SelectTrigger className="bg-white/5 border-white/10 h-8 text-xs">
-                        <SelectValue placeholder="Select cluster" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="localnet">Localnet</SelectItem>
-                        <SelectItem value="devnet">Devnet</SelectItem>
-                        <SelectItem value="testnet">Testnet</SelectItem>
-                        <SelectItem value="mainnet">Mainnet</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs text-white/70 block">
-                      Anchor Version
-                    </label>
-                    <Select defaultValue="0.29.0">
-                      <SelectTrigger className="bg-white/5 border-white/10 h-8 text-xs">
-                        <SelectValue placeholder="Select version" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0.29.0">0.29.0</SelectItem>
-                        <SelectItem value="0.28.0">0.28.0</SelectItem>
-                        <SelectItem value="0.27.0">0.27.0</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-white/10 text-white/80 hover:text-white h-8"
-                    onClick={deployToDevnet}
-                  >
-                    <Download className="h-3 w-3 mr-1" />
-                    Deploy to Devnet
-                  </Button>
-                </div>
-              </div>
-            </>
           )}
         </div>
 
@@ -561,10 +1069,17 @@ export default function IDEPage() {
                   <TabsList className="bg-transparent border-b-0 h-10">
                     <TabsTrigger
                       value="code"
-                      className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-[#14F195] h-10"
+                      className="data-[state=active]:bg-white/10 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-[#14F195] h-10 flex items-center gap-2"
                     >
-                      <Code className="h-4 w-4 mr-2" />
-                      Code
+                      <Code className="h-4 w-4" />
+                      {currentFile ? (
+                        <div className="flex flex-col items-start">
+                          <span className="text-sm">{currentFile.name}</span>
+                          <span className="text-[10px] text-white/50">{getFullPath(currentFile)}</span>
+                        </div>
+                      ) : (
+                        'Code'
+                      )}
                     </TabsTrigger>
                     <TabsTrigger
                       value="terminal"
@@ -596,7 +1111,10 @@ export default function IDEPage() {
                       className="flex-1 overflow-hidden"
                       style={{ height: `${100 - outputHeight}%` }}
                     >
-                      <CodeEditor code={editorCode} />
+                      <CodeEditor 
+                        code={editorCode} 
+                        onChange={(value) => setEditorCode(value)}
+                      />
                     </div>
 
                     {/* Horizontal Resize Handle */}
