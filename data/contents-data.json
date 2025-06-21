@@ -1,0 +1,431 @@
+{
+    "header": {
+        "title": "Solana Engineer's Checkpoint",
+        "description": "Go from beginner to pro. Miss Nothng."
+    },
+    "modules": [
+        {
+            "id": "part-0",
+            "title": "Introduction & Environment Setup",
+            "description": "Get started with Solana development environment and basic concepts",
+            "image": "/solanaLogo.png",
+            "icon": "setup",
+            "topics": [
+                {
+                    "id": "why-solana",
+                    "title": "Why Solana?",
+                    "description": "Blockchain refresher: blocks, consensus, smart contracts. Solana's architecture: Proof-of-History, Tower BFT, high TPS. Trade-offs & use-cases",
+                    "type": "theory"
+                },
+                {
+                    "id": "tooling-localnet",
+                    "title": "Tooling & Localnet",
+                    "description": "Installing Rust & Cargo, Solana CLI, Anchor (AVM), Node.js & Yarn. Configuring PATHs and version checks",
+                    "type": "theory"
+                },
+                {
+                    "id": "local-workflow",
+                    "title": "Local Development Workflow",
+                    "description": "Starting solana-test-validator, creating keypairs, airdrops, balances, cluster selection",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-0-1",
+                    "title": "Exercise 0.1: First Steps",
+                    "description": "Start localnet, create two wallets, transfer SOL between them. Inspect transaction and account data via CLI",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-0",
+                    "title": "Project 0: Hello, Solana!",
+                    "description": "Scaffold Anchor project, write minimal program returning a constant. Deploy to localnet & build a tiny React page",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-1",
+            "title": "Rust Fundamentals (for Blockchain)",
+            "description": "Master Rust programming language essentials for blockchain development",
+            "image": "https://rustacean.net/assets/rustacean-flat-happy.svg",
+            "icon": "rust",
+            "topics": [
+                {
+                    "id": "basic-syntax",
+                    "title": "Basic Syntax & Control Flow",
+                    "description": "Variables (let vs let mut), types, expressions. if/else, match, loops (for, while)",
+                    "type": "theory"
+                },
+                {
+                    "id": "ownership-borrowing",
+                    "title": "Ownership, Borrowing & Lifetimes",
+                    "description": "Move semantics, references, mutable vs immutable borrows. Why Solana programs rely on strict memory safety",
+                    "type": "theory"
+                },
+                {
+                    "id": "data-structures",
+                    "title": "Data Structures",
+                    "description": "Primitive types, String & str, arrays & slices. Collections: Vec, HashMap, enums (Option, Result)",
+                    "type": "theory"
+                },
+                {
+                    "id": "functions-modules",
+                    "title": "Functions, Modules & Crates",
+                    "description": "Defining functions, methods, closures. mod, use, crates, Cargo.toml basics",
+                    "type": "theory"
+                },
+                {
+                    "id": "error-handling",
+                    "title": "Error Handling & Testing",
+                    "description": "Result/Option patterns, ? operator. Writing unit tests with #[cfg(test)]",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-1-1",
+                    "title": "Exercise 1.1: To-Do Manager",
+                    "description": "Build a CLI to-do manager: add/list/remove tasks serialized to JSON. Write tests for core functions",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-1",
+                    "title": "Project 1: Rust CLI Library",
+                    "description": "Package your to-do manager as a reusable crate. Publish locally and consume it in a separate Rust app",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-2",
+            "title": "Advanced Rust for Smart Contracts",
+            "description": "Deep dive into advanced Rust concepts essential for smart contract development",
+            "image": "/rust-2.png",
+            "icon": "advanced-rust",
+            "topics": [
+                {
+                    "id": "generics-traits",
+                    "title": "Generics & Traits",
+                    "description": "Writing generic structs/functions. Defining and implementing traits",
+                    "type": "theory"
+                },
+                {
+                    "id": "serialization",
+                    "title": "Serialization",
+                    "description": "Borsh vs Serde: packing/unpacking for on-chain use. Custom derive macros",
+                    "type": "theory"
+                },
+                {
+                    "id": "async-concurrency",
+                    "title": "Async & Concurrency (Off-chain)",
+                    "description": "async/await, tokio runtime basics. When to use async in dApp clients",
+                    "type": "theory"
+                },
+                {
+                    "id": "unsafe-ffi",
+                    "title": "Unsafe & FFI (Optional)",
+                    "description": "Raw pointers, unsafe blocks, C FFI – why generally avoided on Solana",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-2-1",
+                    "title": "Exercise 2.1: Key-Value Store",
+                    "description": "Implement a generic in-memory key-value store with Borsh serialization. Add error types and tests",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-2",
+                    "title": "Project 2: Data-Serializing Library",
+                    "description": "Create a library that reads/writes multiple record types to disk or memory buffer",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-3",
+            "title": "Solana Core Concepts",
+            "description": "Understanding Solana's architecture, accounts, transactions, and runtime",
+            "image": "/solanaLogo.png",
+            "icon": "solana-core",
+            "topics": [
+                {
+                    "id": "accounts-state",
+                    "title": "Accounts & State",
+                    "description": "How accounts store data & lamports. Account metadata: owner, space, rent exemption",
+                    "type": "theory"
+                },
+                {
+                    "id": "transactions-instructions",
+                    "title": "Transactions & Instructions",
+                    "description": "Anatomy of a transaction: instructions, signers, blockhash. Sending SOL transfers vs custom program calls",
+                    "type": "theory"
+                },
+                {
+                    "id": "runtime-validators",
+                    "title": "Solana Runtime & Validators",
+                    "description": "Leader rotation, epochs, clusters (devnet/testnet/mainnet). BPF execution environment",
+                    "type": "theory"
+                },
+                {
+                    "id": "program-deployment",
+                    "title": "Low-Level Program Deployment",
+                    "description": "Compiling Rust to BPF (cargo build-bpf). Deploying without Anchor: solana program deploy",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-3-1",
+                    "title": "Exercise 3.1: BPF Counter",
+                    "description": "Write a bare-bones BPF Rust program that stores a counter in an account. Deploy & call via @solana/web3.js script",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-3",
+                    "title": "Project 3: Anchor Counter (Local)",
+                    "description": "Scaffold with Anchor, implement increment, deploy locally, test with JS",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-4",
+            "title": "Anchor Basics (On-Chain)",
+            "description": "Learn Anchor framework fundamentals for building Solana programs",
+            "image": "/anchor.png",
+            "icon": "anchor",
+            "topics": [
+                {
+                    "id": "anchor-overview",
+                    "title": "Anchor Overview",
+                    "description": "What Anchor adds: macros, IDL, client codegen. anchor init workspace structure",
+                    "type": "theory"
+                },
+                {
+                    "id": "writing-programs",
+                    "title": "Writing Programs",
+                    "description": "#[program] modules and handlers. Context<…> and #[derive(Accounts)] for account validation",
+                    "type": "theory"
+                },
+                {
+                    "id": "account-constraints",
+                    "title": "Account Constraints",
+                    "description": "init, mut, payer, space, seeds & bump. Automatic rent exemption",
+                    "type": "theory"
+                },
+                {
+                    "id": "idl-typescript",
+                    "title": "IDL & TypeScript Client",
+                    "description": "Generating & reading IDL JSON. Using Anchor's TS client to call RPC",
+                    "type": "theory"
+                },
+                {
+                    "id": "local-testing",
+                    "title": "Local Testing",
+                    "description": "Anchor's Mocha/TS tests and Rust program tests",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-4-1",
+                    "title": "Exercise 4.1: Greeting Program",
+                    "description": "Build a greeting program: store/update a user's greeting string. Write tests verifying correct behavior",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-4",
+                    "title": "Project 4: Counter dApp, Phase 1",
+                    "description": "Full Anchor counter: initialize account & increment method. Write TS-based test suite",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-5",
+            "title": "Advanced Anchor Patterns",
+            "description": "Master advanced Anchor concepts: PDAs, CPI, events, and security",
+            "image": "/anchor.png",
+            "icon": "advanced-anchor",
+            "topics": [
+                {
+                    "id": "pdas",
+                    "title": "Program-Derived Addresses (PDAs)",
+                    "description": "Seeds, bump, use cases (per-user state)",
+                    "type": "theory"
+                },
+                {
+                    "id": "cpi",
+                    "title": "Cross-Program Invocation (CPI)",
+                    "description": "Calling SPL Token or another Anchor program. Building CPI contexts",
+                    "type": "theory"
+                },
+                {
+                    "id": "errors-events",
+                    "title": "Custom Errors & Events",
+                    "description": "#[error_code], custom error messages. Emitting events and subscribing off-chain",
+                    "type": "theory"
+                },
+                {
+                    "id": "upgrades-migrations",
+                    "title": "Upgrades & Migrations",
+                    "description": "Upgradeable loader, anchor upgrade. State migration strategies",
+                    "type": "theory"
+                },
+                {
+                    "id": "security-optimization",
+                    "title": "Security & Optimization",
+                    "description": "Account size planning, signer checks, avoiding DOS. Gas (compute) budgeting",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-5-1",
+                    "title": "Exercise 5.1: PDA Escrow",
+                    "description": "Create a PDA-based escrow: deposit/release SPL tokens via CPI. Test edge cases (unauthorized, insufficient funds)",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-5",
+                    "title": "Project 5: Counter dApp, Phase 2",
+                    "description": "Migrate counter to PDA per user, add events, and upgrade workflow",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-6",
+            "title": "Frontend with React & Next.js",
+            "description": "Build modern user interfaces for your decentralized applications",
+            "image": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
+            "icon": "frontend",
+            "topics": [
+                {
+                    "id": "js-ts-crash",
+                    "title": "JS/TS Crash Course",
+                    "description": "Modern JS features, TS types/interfaces, modules, promises",
+                    "type": "theory"
+                },
+                {
+                    "id": "react-fundamentals",
+                    "title": "React Fundamentals",
+                    "description": "Components, JSX, props, state, hooks (useState, useEffect)",
+                    "type": "theory"
+                },
+                {
+                    "id": "nextjs-essentials",
+                    "title": "Next.js Essentials",
+                    "description": "File-based routing, pages vs API routes, SSR/SSG basics",
+                    "type": "theory"
+                },
+                {
+                    "id": "styling-ui",
+                    "title": "Styling & UI Libraries",
+                    "description": "Tailwind CSS setup or component libraries",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-6-1",
+                    "title": "Exercise 6.1: Multi-Page App",
+                    "description": "Build a multi-page Next.js site with navigation, CSS, and dynamic data fetch",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-6",
+                    "title": "Project 6: Static Counter UI",
+                    "description": "Mock-data version of counter: display count, button to increment (local state)",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-7",
+            "title": "Blockchain Frontend Integration",
+            "description": "Connect your frontend to Solana blockchain with wallet adapters and RPC",
+            "image": "/nextjs.png",
+            "icon": "integration",
+            "topics": [
+                {
+                    "id": "wallet-adapter",
+                    "title": "Wallet Adapter",
+                    "description": "Setting up @solana/wallet-adapter in React. Connecting Phantom/other wallets, managing connection state",
+                    "type": "theory"
+                },
+                {
+                    "id": "rpc-anchor-client",
+                    "title": "RPC & Anchor Client",
+                    "description": "Configuring Connection, Provider, and Anchor's Program in TS. Reading account data & handling deserialization",
+                    "type": "theory"
+                },
+                {
+                    "id": "sending-instructions",
+                    "title": "Sending Instructions",
+                    "description": "Building & sending transaction with wallet signer. Handling confirmations & logs",
+                    "type": "theory"
+                },
+                {
+                    "id": "state-refresh",
+                    "title": "State Refresh Patterns",
+                    "description": "Polling vs subscriptions (connection.onAccountChange). UI feedback (loading spinners, toasts)",
+                    "type": "theory"
+                },
+                {
+                    "id": "exercise-7-1",
+                    "title": "Exercise 7.1: Wallet Connection",
+                    "description": "Connect wallet, fetch/display SOL balance, and display public key",
+                    "type": "exercise"
+                },
+                {
+                    "id": "project-7",
+                    "title": "Project 7: Counter dApp, Phase 3",
+                    "description": "Full end-to-end: connect wallet, read counter PDA, invoke increment, refresh UI",
+                    "type": "project"
+                }
+            ]
+        },
+        {
+            "id": "part-8",
+            "title": "Capstone dApp & Deployment",
+            "description": "Design, build, test, and deploy a complete production-ready dApp",
+            "image": "https://solana.com/_next/static/media/logotype-dark.f79d530e.svg",
+            "icon": "capstone",
+            "topics": [
+                {
+                    "id": "dapp-design",
+                    "title": "dApp Design & Architecture",
+                    "description": "Requirements gathering, UI/UX flow, data models (accounts & PDAs)",
+                    "type": "theory"
+                },
+                {
+                    "id": "state-management",
+                    "title": "Advanced State Management",
+                    "description": "React Context, custom hooks, or Redux for complex flows",
+                    "type": "theory"
+                },
+                {
+                    "id": "offchain-apis",
+                    "title": "Off-Chain APIs (Optional)",
+                    "description": "Building a Next.js API route or Node.js microservice for off-chain logic",
+                    "type": "theory"
+                },
+                {
+                    "id": "testing-cicd",
+                    "title": "Testing & CI/CD",
+                    "description": "Frontend integration tests (e.g. Cypress), GitHub Actions for build/deploy",
+                    "type": "theory"
+                },
+                {
+                    "id": "mainnet-deployment",
+                    "title": "Mainnet Deployment",
+                    "description": "Anchor config for devnet vs mainnet, environment variables. Program deployment to devnet/mainnet-beta, frontend hosting",
+                    "type": "theory"
+                },
+                {
+                    "id": "security-audit",
+                    "title": "Security Audit Checklist",
+                    "description": "Common pitfalls, third-party audits, bug bounties",
+                    "type": "theory"
+                },
+                {
+                    "id": "capstone-project",
+                    "title": "Capstone Project: Your Chosen dApp",
+                    "description": "Examples: NFT minter (Metaplex), token swap (SPL Token), DAO governance. Must include on-chain program(s), React/Next frontend, wallet integration, tests, and live deployment",
+                    "type": "project"
+                }
+            ]
+        }
+    ]
+}

@@ -5,9 +5,48 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
-  },
-  images: {
+  },  images: {
     unoptimized: true,
+    domains: [
+      'docs.solana.com',
+      'rustacean.net',
+      'foundation.rust-lang.org',
+      'solana.com',
+      'www.anchor-lang.com',
+      'cdn.jsdelivr.net'
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'docs.solana.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'rustacean.net',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'foundation.rust-lang.org',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'solana.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.anchor-lang.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.jsdelivr.net',
+        pathname: '**',
+      },
+    ],
   },
 }
 
