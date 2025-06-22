@@ -109,7 +109,7 @@ export function ContentsSection() {
                 }
                 Icon={Icon}
                 description={module.description}
-                href={`#${module.id}`}
+                href={`/learn/${module.id}`}
                 cta="Start Learning"
                 topicsCount={module.topics?.length}
                 moduleId={module.id}

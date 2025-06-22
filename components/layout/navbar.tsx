@@ -66,37 +66,29 @@ export function Navbar() {
   // Fetch stars on component mount
   useEffect(() => {
     fetchGithubStars();
-  }, []);
-  const renderNavButton = (
+  }, []);  const renderNavButton = (
     item: (typeof navigationItems)[0],
     isMobile = false
   ) => {
-    const buttonContent = (
-      <Button
-        variant="ghost"
-        className={`text-white/80 hover:text-white hover:bg-transparent transition-all duration-300 relative group h-10 px-4 ${
-          isMobile ? "w-full justify-start" : ""
-        }`}
-      >
-        <span className="relative z-10">{item.label}</span>
-        {!isMobile && (
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
-        )}
-      </Button>
-    );
-
     if (item.href.startsWith("#")) {
       return (
-        <button
+        <Button
           key={item.label}
+          variant="ghost"
           onClick={() =>
             document
               .querySelector(item.href)
               ?.scrollIntoView({ behavior: "smooth" })
           }
+          className={`text-white/80 hover:text-white hover:bg-transparent transition-all duration-300 relative group h-10 px-4 ${
+            isMobile ? "w-full justify-start" : ""
+          }`}
         >
-          {buttonContent}
-        </button>
+          <span className="relative z-10">{item.label}</span>
+          {!isMobile && (
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
+          )}
+        </Button>
       );
     }
 
@@ -106,7 +98,17 @@ export function Navbar() {
         href={item.href}
         className={isMobile ? "w-full" : ""}
       >
-        {buttonContent}
+        <Button
+          variant="ghost"
+          className={`text-white/80 hover:text-white hover:bg-transparent transition-all duration-300 relative group h-10 px-4 ${
+            isMobile ? "w-full justify-start" : ""
+          }`}
+        >
+          <span className="relative z-10">{item.label}</span>
+          {!isMobile && (
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
+          )}
+        </Button>
       </Link>
     );
   };
@@ -157,6 +159,7 @@ export function Navbar() {
                     />
                     <span className="text-sm font-semibold">
                       {githubStars || "..."}
+
                     </span>
                   </div>
                 </Button>
