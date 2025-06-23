@@ -22,6 +22,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ShootingStars } from "@/components/ui/shooting-stars";
+import { StarsBackground } from "@/components/ui/stars-background";
 
 interface Topic {
   id: string;
@@ -42,7 +44,8 @@ interface Module {
 export default function ModulePage() {
   const params = useParams();
   const router = useRouter();
-  const moduleId = params.moduleId as string;  const [module, setModule] = useState<Module | null>(null);
+  const moduleId = params.moduleId as string;
+  const [module, setModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ export default function ModulePage() {
       try {
         // Load the contents data
         const response = await fetch("/data/contents-data.json");
-        const data = await response.json();        // Find the module by ID
+        const data = await response.json(); // Find the module by ID
         const foundModule = data.modules.find((m: Module) => m.id === moduleId);
         setModule(foundModule || null);
       } catch (error) {
@@ -58,7 +61,8 @@ export default function ModulePage() {
       } finally {
         setLoading(false);
       }
-    };fetchModuleData();
+    };
+    fetchModuleData();
   }, [moduleId]);
 
   const navigateToTopic = (topicId: string) => {
@@ -77,59 +81,12 @@ export default function ModulePage() {
         return <PlayCircle className="h-5 w-5" />;
     }
   };
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "theory":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "exercise":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "project":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
-  };
 
-  const getBackgroundTheme = (moduleId: string) => {
-    // Rust modules (part-1, part-2) - Copper/Orange theme
-    if (moduleId === "part-1" || moduleId === "part-2") {
-      return {
-        gradientStyle: {
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(249, 115, 22, 0.25), transparent 70%), #000000",
-        },
-        containerClass: "min-h-screen w-full relative bg-black",
-      };
-    }
-
-    // Anchor modules (part-4, part-5) - Light Blue theme
-    if (moduleId === "part-4" || moduleId === "part-5") {
-      return {
-        gradientStyle: {
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56, 189, 248, 0.25), transparent 70%), #000000",
-        },
-        containerClass: "min-h-screen w-full relative bg-black",
-      };
-    }
-
-    // Solana theme (part-0, part-3, and others) - Emerald Radial Glow
-    return {
-      gradientStyle: {
-        backgroundImage:
-          "radial-gradient(circle 500px at 50% 300px, rgba(16,185,129,0.35), transparent)",
-      },
-      containerClass: "min-h-screen w-full bg-[#020617] relative",
-    };
-  };
   if (loading) {
-    const backgroundTheme = getBackgroundTheme(moduleId);
     return (
-      <div className={backgroundTheme.containerClass}>
-        <div
-          className="absolute inset-0 z-0"
-          style={backgroundTheme.gradientStyle}
-        />
+      <div className="bg-black min-h-screen relative overflow-hidden">
+        <ShootingStars className="z-0" />
+        <StarsBackground className="z-0" />
         <div className="min-h-screen flex items-center justify-center relative z-10">
           <div className="text-white">Loading module...</div>
         </div>
@@ -137,13 +94,10 @@ export default function ModulePage() {
     );
   }
   if (!module) {
-    const backgroundTheme = getBackgroundTheme(moduleId);
     return (
-      <div className={backgroundTheme.containerClass}>
-        <div
-          className="absolute inset-0 z-0"
-          style={backgroundTheme.gradientStyle}
-        />
+      <div className="bg-black min-h-screen relative overflow-hidden">
+        <ShootingStars className="z-0" />
+        <StarsBackground className="z-0" />
         <div className="min-h-screen flex items-center justify-center relative z-10">
           <div className="text-center text-white">
             <h1 className="text-2xl font-bold mb-4">Module not found</h1>
@@ -158,17 +112,14 @@ export default function ModulePage() {
         </div>
       </div>
     );
-  }  const progressPercentage = 0; // Will be calculated from database later
-
-  const backgroundTheme = getBackgroundTheme(moduleId);
+  }
+  const progressPercentage = 0; // Will be calculated from database later
 
   return (
-    <div className={backgroundTheme.containerClass}>
-      {/* Dynamic Background based on module type */}
-      <div
-        className="absolute inset-0 z-0"
-        style={backgroundTheme.gradientStyle}
-      />
+    <div className="bg-black min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <ShootingStars className="z-0" />
+      <StarsBackground className="z-0" />
 
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
@@ -177,15 +128,15 @@ export default function ModulePage() {
           <Link href="/learn">
             <Button
               variant="ghost"
-              className="text-white hover:bg-white/10 mb-6"
+              className="bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-white/20 mb-6"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Learning
             </Button>
-          </Link>
-          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg rounded-lg border border-purple-500/30 shadow-lg shadow-purple-500/10 p-6">
+          </Link>{" "}
+          <div className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl p-6">
             <div className="flex items-start space-x-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600/30 to-emerald-600/30 rounded-lg flex items-center justify-center backdrop-blur-sm border border-purple-400/20">
+              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
                 {module.image ? (
                   <img
                     src={module.image}
@@ -206,11 +157,15 @@ export default function ModulePage() {
 
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
-                    <Progress value={progressPercentage} className="w-32 h-2" />                    <span className="text-white/80 text-sm">
+                    <Progress value={progressPercentage} className="w-32 h-2" />{" "}
+                    <span className="text-white/80 text-sm">
                       0/{module.topics.length} completed
                     </span>
-                  </div>
-                  <Badge variant="secondary">
+                  </div>{" "}
+                  <Badge
+                    variant="secondary"
+                    className="bg-white/10 backdrop-blur-sm border border-white/20 text-white"
+                  >
                     {module.topics.length} topics
                   </Badge>
                 </div>
@@ -218,31 +173,32 @@ export default function ModulePage() {
             </div>
           </div>
         </div>
-
         {/* Topics Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">        {module.topics.map((topic, index) => {
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {" "}
+          {module.topics.map((topic, index) => {
             const isCompleted = false; // Will be connected to database later
             const isAccessible = true; // All topics accessible for now, will add progression logic later
 
-            return (<Card
+            return (
+              <Card
                 key={topic.id}
-                className={`bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-purple-500/30 transition-all duration-200 hover:from-white/15 hover:to-white/10 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20 cursor-pointer ${
+                className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-xl transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-2xl cursor-pointer ${
                   !isAccessible ? "opacity-60 cursor-not-allowed" : ""
                 }`}
                 onClick={() => isAccessible && navigateToTopic(topic.id)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
+                    {" "}
                     <div className="flex items-center space-x-2">
-                      <div
-                        className={`p-2 rounded-lg ${getTypeColor(topic.type)}`}
-                      >
+                      <div className="p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
                         {getTopicIcon(topic.type)}
                       </div>
                       <div>
                         <Badge
                           variant="outline"
-                          className={getTypeColor(topic.type)}
+                          className="bg-white/10 backdrop-blur-sm border-white/20 text-white"
                         >
                           {topic.type}
                         </Badge>
@@ -265,10 +221,12 @@ export default function ModulePage() {
                     <div className="flex items-center space-x-2 text-white/60 text-sm">
                       <Clock className="h-4 w-4" />
                       <span>~15 min</span>
-                    </div>
-
+                    </div>{" "}
                     {!isAccessible && (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge
+                        variant="destructive"
+                        className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 text-xs"
+                      >
                         Locked
                       </Badge>
                     )}
@@ -277,17 +235,16 @@ export default function ModulePage() {
               </Card>
             );
           })}
-        </div>
-
+        </div>{" "}
         {/* Navigation */}
         <div className="mt-12 flex justify-between">
           <Button
             variant="outline"
-            className="text-white border-white/20 hover:bg-white/10"
+            className="bg-white/5 backdrop-blur-md border border-white/20 text-white hover:bg-white/10 hover:border-white/30"
           >
             Previous Module
           </Button>
-          <Button className="bg-purple-600 hover:bg-purple-700">
+          <Button className="bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/15 hover:border-white/30">
             Next Module
           </Button>
         </div>
