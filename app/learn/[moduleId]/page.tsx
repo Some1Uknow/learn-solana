@@ -68,6 +68,12 @@ export default function ModulePage() {
   const navigateToTopic = (topicId: string) => {
     router.push(`/learn/${moduleId}/${topicId}`);
   };
+  
+  // Check if a topic has MDX content available
+  const topicHasMdxContent = (topicId: string) => {
+    // For now, only the "why-solana" topic has MDX content
+    return topicId === "why-solana";
+  };
 
   const getTopicIcon = (type: string) => {
     switch (type) {
@@ -87,8 +93,8 @@ export default function ModulePage() {
       <div className="bg-black min-h-screen relative overflow-hidden">
         <ShootingStars className="z-0" />
         <StarsBackground className="z-0" />
-        <div className="min-h-screen flex items-center justify-center relative z-10">
-          <div className="text-white">Loading module...</div>
+        <div className="min-h-screen flex items-center justify-center relative z-10 px-6 sm:px-8 md:px-12">
+          <div className="text-white text-xl font-medium">Loading module...</div>
         </div>
       </div>
     );
@@ -98,12 +104,12 @@ export default function ModulePage() {
       <div className="bg-black min-h-screen relative overflow-hidden">
         <ShootingStars className="z-0" />
         <StarsBackground className="z-0" />
-        <div className="min-h-screen flex items-center justify-center relative z-10">
-          <div className="text-center text-white">
+        <div className="min-h-screen flex items-center justify-center relative z-10 px-6 sm:px-8 md:px-12">
+          <div className="text-center text-white bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 shadow-xl max-w-md">
             <h1 className="text-2xl font-bold mb-4">Module not found</h1>
             <p className="mb-6">The module "{moduleId}" could not be found.</p>
             <Link href="/learn">
-              <Button variant="outline">
+              <Button variant="outline" className="bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-white/20">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Learning
               </Button>
@@ -121,7 +127,7 @@ export default function ModulePage() {
       <ShootingStars className="z-0" />
       <StarsBackground className="z-0" />
 
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="container mx-auto px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 py-8 relative z-10 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           {" "}
@@ -207,30 +213,34 @@ export default function ModulePage() {
                     {isCompleted && (
                       <CheckCircle2 className="h-6 w-6 text-green-400" />
                     )}
-                  </div>
-                  <CardTitle className="text-white text-lg">
-                    {topic.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-white/70">
-                    {topic.description}
-                  </CardDescription>
+                  </div>                <CardTitle className="text-white text-lg">
+                  {topic.title}
+                  {topicHasMdxContent(topic.id) && (
+                    <span className="ml-2 inline-block px-1.5 py-0.5 text-xs bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-200 rounded-full">
+                      MDX
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-white/70">
+                  {topic.description}
+                </CardDescription>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-white/60 text-sm">
-                      <Clock className="h-4 w-4" />
-                      <span>~15 min</span>
-                    </div>{" "}
-                    {!isAccessible && (
-                      <Badge
-                        variant="destructive"
-                        className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 text-xs"
-                      >
-                        Locked
-                      </Badge>
-                    )}
-                  </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-white/60 text-sm">
+                    <Clock className="h-4 w-4" />
+                    <span>~15 min</span>
+                  </div>{" "}
+                  {!isAccessible && (
+                    <Badge
+                      variant="destructive"
+                      className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 text-red-200 text-xs"
+                    >
+                      Locked
+                    </Badge>
+                  )}
+                </div>
                 </CardContent>
               </Card>
             );

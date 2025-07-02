@@ -54,7 +54,7 @@ const BentoCard = ({
 }: BentoCardProps) => (<div
     key={name}
     className={cn(
-      "group relative overflow-hidden rounded-xl",
+      "group relative overflow-hidden rounded-2xl",
       "border transition-all duration-300",
       "flex flex-col justify-end p-6 min-h-full h-full",
       className,

@@ -36,53 +36,53 @@ const getCreativeGridLayout = (index: number, total: number) => {
   // Check if this is the last item (part-8)
   if (index === total - 1) {
     // Last item gets full width
-    return "col-span-1 md:col-span-2 lg:col-span-3 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]";
+    return "col-span-1 md:col-span-2 lg:col-span-3 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]";
   }
 
   // Alternating pattern: 2/3 width, 1/3 width for even rows
   // Pattern: part 0 (2/3), part 1 (1/3), then part 2 (1/3), part 3 (2/3), then part 4 (2/3), part 5 (1/3), etc.
   const layouts = [
     // Part 0 - 2/3 width with proper height
-    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 1 - 1/3 width with same height as part 0
-    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 2 - 1/3 width
-    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 3 - 2/3 width
-    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 4 - 2/3 width
-    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 5 - 1/3 width
-    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 6 - 1/3 width
-    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
 
     // Part 7 - 2/3 width
-    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]",
+    "col-span-1 md:col-span-2 lg:col-span-2 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]",
   ];
 
   return (
     layouts[index] ||
-    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[12rem] md:min-h-[14rem] lg:min-h-[16rem]"
+    "col-span-1 md:col-span-1 lg:col-span-1 row-span-2 min-h-[9rem] md:min-h-[11rem] lg:min-h-[13rem]"
   );
 };
 
 export function ContentsSection() {
   return (
-    <div className="bg-black min-h-screen py-20 mt-10 rounded-2xl relative overflow-hidden">
+    <div className="bg-black min-h-screen py-10 mt-10 rounded-2xl relative overflow-hidden">
       {/* Animated Background */}
       <ShootingStars className="z-0" />
       <StarsBackground className="z-0" />
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+
+      <div className="max-w-7xl mx-auto px-16 md:px-24 lg:px-32 relative z-10">
         {/* Header */}
-        <div className="m-32 text-center">
+        <div className="my-12 text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-white mb-4">
             {contentsData.header.title}
           </h2>
@@ -91,7 +91,7 @@ export function ContentsSection() {
           </p>
         </div>{" "}
         {/* Creative Bento Grid Layout */}
-        <BentoGrid className="auto-rows-[12rem] md:auto-rows-[14rem] lg:auto-rows-[16rem] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <BentoGrid className="auto-rows-[9rem] md:auto-rows-[11rem] lg:auto-rows-[13rem] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {contentsData.modules.map((module, index) => {
             const Icon =
               moduleIcons[module.id as keyof typeof moduleIcons] || BookOpen;

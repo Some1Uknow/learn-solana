@@ -87,7 +87,9 @@ export default function ModuleCard({
 
           <CardTitle className="text-lg font-semibold text-white mb-2 leading-tight">
             {module.title}
-          </CardTitle>          <p className="text-sm text-gray-400 leading-relaxed">
+          </CardTitle>
+          
+          <p className="text-sm text-gray-400 leading-relaxed line-clamp-2">
             {module.description}
           </p>
         </CardHeader>

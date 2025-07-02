@@ -22,9 +22,7 @@ export default function LearningProgressDashboard() {
 
   return (
     <div className={`min-h-screen w-full bg-black relative ${inter.className}`}>
-      <DashboardBackground />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+      <DashboardBackground />      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
         <DashboardHeader />
 
         <StatsCards
