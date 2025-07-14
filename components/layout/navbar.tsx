@@ -114,34 +114,86 @@ export function Navbar() {
   };
 
   return (
-    <nav className="relative z-20 w-full">
-      {/* Backdrop blur effect */}
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-md" />
+    <nav className="w-full max-w-7xl mx-auto relative z-20">
+      <div className="flex items-center justify-between px-6 md:px-10 py-3">
+        {/* Logo (unchanged) */}
+        <Link
+          href={logoConfig.href}
+          className="flex items-center gap-2 group min-w-[120px]"
+        >
+          <span className="text-xl font-bold font-space-grotesk">
+            {logoConfig.text}
+          </span>
+          {logoConfig.showPulse && (
+            <div
+              className={`h-2 w-2 rounded-full ${logoConfig.pulseColor} animate-pulse`}
+            />
+          )}
+        </Link>
 
-      <div className="relative container mx-auto py-4 px-6">
-        <div className="flex items-center justify-between">
-          {" "}
-          {/* Logo */}
+        {/* Centered navigation (desktop) */}
+        <div className="hidden md:flex flex-1 justify-center">
+          <div className="flex items-center gap-2">
+            {navigationItems.map((item) => (
+              <div key={item.label} className="relative group">
+                {renderNavButton(item)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA and GitHub (desktop) */}
+        <div className="hidden md:flex items-center gap-3 min-w-[220px] justify-end">
           <Link
-            href={logoConfig.href}
-            className="flex items-center gap-2 group"
+            href={githubConfig.url}
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <span className="text-xl font-bold font-space-grotesk">
-              {logoConfig.text}
-            </span>
-            {logoConfig.showPulse && (
-              <div
-                className={`h-2 w-2 rounded-full ${logoConfig.pulseColor} animate-pulse`}
-              />
-            )}
-          </Link>{" "}
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            <div className="flex items-center gap-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 h-12">
-              {navigationItems.map((item) => renderNavButton(item))}
-            </div>
-            <div className="ml-4 flex items-center gap-3">
-              {/* GitHub Button */}
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 h-10 px-4 rounded-full"
+            >
+              <Github size={16} />
+              <div className="flex items-center gap-1">
+                <Star size={14} className="fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-semibold">
+                  {githubStars || "..."}
+                </span>
+              </div>
+            </Button>
+          </Link>
+          <Button
+            onClick={handleWalletConnect}
+            className="relative overflow-hidden bg-[#14F195] hover:bg-[#12d182] text-black font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[#14F195]/25 flex items-center gap-2 h-10 px-6 rounded-full"
+          >
+            <walletButtonConfig.icon size={18} className="relative z-10" />
+            <span className="relative z-10">{walletButtonConfig.text}</span>
+          </Button>
+        </div>
+
+        {/* Mobile menu button */}
+        <div className="md:hidden flex items-center">
+          <Button
+            variant="ghost"
+            className="text-white hover:bg-white/10 transition-colors duration-300 h-10 w-10 p-0 flex items-center justify-center"
+            onClick={toggleMenu}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute left-0 right-0 mt-2 mx-2 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden z-30">
+          <div className="flex flex-col p-4 space-y-2">
+            {navigationItems.map((item) => (
+              <div key={item.label} className="relative group">
+                {renderNavButton(item, true)}
+              </div>
+            ))}
+            <div className="pt-2 border-t border-white/10 space-y-2">
+              {/* GitHub Button Mobile */}
               <Link
                 href={githubConfig.url}
                 target="_blank"
@@ -149,84 +201,29 @@ export function Navbar() {
               >
                 <Button
                   variant="outline"
-                  className="bg-white/5 border-white/20 text-white/90 hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center gap-2 h-10 px-4 rounded-full"
+                  className="w-full flex items-center justify-center gap-2 h-10"
                 >
                   <Github size={16} />
                   <div className="flex items-center gap-1">
-                    <Star
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
+                    <Star size={14} className="fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-semibold">
                       {githubStars || "..."}
-
                     </span>
                   </div>
                 </Button>
-              </Link>{" "}
-              {/* Connect Wallet Button */}
+              </Link>
+              {/* Connect Wallet Button Mobile */}
               <Button
                 onClick={handleWalletConnect}
-                className="relative overflow-hidden bg-[#14F195] hover:bg-[#12d182] text-black font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-[#14F195]/25 flex items-center gap-2 h-10 px-6 rounded-full"
+                className="w-full bg-[#14F195] hover:bg-[#12d182] text-black font-semibold hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 h-10 rounded-full"
               >
-                <walletButtonConfig.icon size={18} className="relative z-10" />
-                <span className="relative z-10">{walletButtonConfig.text}</span>
+                <walletButtonConfig.icon size={18} />
+                {walletButtonConfig.text}
               </Button>
             </div>
-          </div>{" "}
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10 transition-colors duration-300 h-10 w-10 p-0 flex items-center justify-center"
-              onClick={toggleMenu}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
           </div>
         </div>
-        {/* Mobile Navigation Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 mt-2 mx-6 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden">
-            {" "}
-            <div className="flex flex-col p-4 space-y-2">
-              {navigationItems.map((item) => renderNavButton(item, true))}
-              <div className="pt-2 border-t border-white/10 space-y-2">
-                {/* GitHub Button Mobile */}
-                <Link
-                  href={githubConfig.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/20 text-white/90 hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-2 h-10"
-                  >
-                    <Github size={16} />
-                    <div className="flex items-center gap-1">
-                      <Star
-                        size={14}
-                        className="fill-yellow-400 text-yellow-400"
-                      />
-                      <span className="text-sm font-semibold">
-                        {githubStars || "..."}
-                      </span>
-                    </div>
-                  </Button>
-                </Link>{" "}
-                {/* Connect Wallet Button Mobile */}
-                <Button
-                  onClick={handleWalletConnect}
-                  className="w-full bg-[#14F195] hover:bg-[#12d182] text-black font-semibold hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 h-10 rounded-full"
-                >
-                  <walletButtonConfig.icon size={18} />
-                  {walletButtonConfig.text}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </nav>
   );
 }

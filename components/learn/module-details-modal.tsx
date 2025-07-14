@@ -23,7 +23,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Module } from "@/types/learning";
-import { getModuleProgress, getTopicCompletion } from "@/lib/progress-data";
+// Removed getModuleProgress, getTopicCompletion imports for fixed values
 
 interface ModuleDetailsModalProps {
   module: Module | null;
@@ -40,16 +40,14 @@ export default function ModuleDetailsModal({
 
   if (!module) return null;
 
-  const progress = getModuleProgress(module.id);
-  const completedTopics =
-    module.topics?.filter((topic) => getTopicCompletion(module.id, topic.id))
-      .length || 0;
-  const totalTopics = module.topics?.length || 0;
-  
-  const estimatedHours = Math.ceil((totalTopics * 30) / 60); // 30 min per topic average
-  const theoryTopics = module.topics?.filter(topic => topic.type === 'theory').length || 0;
-  const exerciseTopics = module.topics?.filter(topic => topic.type === 'exercise').length || 0;
-  const projectTopics = module.topics?.filter(topic => topic.type === 'project').length || 0;
+  // Fixed values for demonstration
+  const progress = 60; // e.g., 60% progress
+  const completedTopics = 3;
+  const totalTopics = 5;
+  const estimatedHours = 2;
+  const theoryTopics = 2;
+  const exerciseTopics = 2;
+  const projectTopics = 1;
 
   const handleStartModule = () => {
     router.push(`/learn/${module.id}`);
@@ -197,11 +195,13 @@ export default function ModuleDetailsModal({
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-white mb-4">Module Contents</h3>
             {module.topics && module.topics.length > 0 ? (
-              module.topics.map((topic, index) => {
-                const isCompleted = getTopicCompletion(module.id, topic.id);
+              // Show 5 fixed topics for demo
+              Array.from({ length: totalTopics }).map((_, index) => {
+                const isCompleted = index < completedTopics;
+                const topicType = index === 4 ? 'project' : index % 2 === 0 ? 'theory' : 'exercise';
                 return (
                   <motion.div
-                    key={topic.id}
+                    key={index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -229,17 +229,17 @@ export default function ModuleDetailsModal({
                           </motion.div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-medium text-white">{topic.title}</h4>
+                              <h4 className="font-medium text-white">Topic {index + 1}</h4>
                               <Badge 
                                 variant="outline" 
-                                className={`text-xs ${getTopicColor(topic.type)}`}
+                                className={`text-xs ${getTopicColor(topicType)}`}
                               >
-                                {getTopicIcon(topic.type)}
-                                <span className="ml-1 capitalize">{topic.type}</span>
+                                {getTopicIcon(topicType)}
+                                <span className="ml-1 capitalize">{topicType}</span>
                               </Badge>
                             </div>
                             <p className="text-sm text-gray-400 leading-relaxed">
-                              {topic.description}
+                              This is a demo topic description.
                             </p>
                           </div>
                         </div>

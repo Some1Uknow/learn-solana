@@ -1,0 +1,80 @@
+---
+title: Why Solana?
+description: "Blockchain refresher: blocks, consensus, smart contracts. Solana's architecture: Proof-of-History, Tower BFT, high TPS. Trade-offs & use-cases"
+date: "2025-07-02"
+type: "theory"
+---
+
+# Why Solana?
+
+## Blockchain Refresher
+
+Before diving into Solana's unique features, let's quickly revisit some key blockchain concepts:
+
+### Blocks & Consensus
+
+Blockchains are distributed ledgers that store data in blocks linked together cryptographically. To add new blocks, network participants (nodes) must reach consensus on the current state.
+
+Traditional blockchains like Bitcoin and Ethereum use consensus mechanisms like Proof of Work (PoW) or Proof of Stake (PoS) to determine who gets to add the next block.
+
+### Smart Contracts
+
+Smart contracts are self-executing programs that run on blockchains. They enable developers to create decentralized applications (dApps) with business logic that executes automatically when predefined conditions are met.
+
+## Solana's Architecture
+
+Solana takes a fundamentally different approach to blockchain design, focusing on performance and scalability.
+
+### Proof of History (PoH)
+
+The core innovation of Solana is Proof of History, a cryptographic clock that provides a timestamp for every event on the blockchain. This allows nodes to agree on the order of events without having to communicate with each other first.
+
+```rust
+// Example of how Solana represents time in its architecture (simplified)
+struct PoHState {
+    // Hash of all previously recorded events
+    prev_hash: Hash,
+    // Number of iterations since genesis
+    tick_height: u64,
+    // Real-world timestamp of the last recorded tick
+    timestamp: UnixTimestamp,
+}
+```
+
+### Tower BFT
+
+Building on PoH, Solana implements a modified version of Practical Byzantine Fault Tolerance called Tower BFT. This consensus algorithm can achieve agreement among nodes with minimal communication overhead.
+
+### Parallel Transaction Processing
+
+Solana's runtime can process thousands of transactions in parallel using:
+
+- **Transaction Processing Unit (TPU)**: Breaks down transactions into smaller units
+- **Gulf Stream**: Mempool-less transaction forwarding protocol
+- **Sealevel**: Parallel smart contract runtime
+- **Turbine**: Block propagation protocol
+- **Cloudbreak**: Horizontally scaled accounts database
+- **Archivers**: Distributed ledger storage
+- **Pipelining**: GPU-optimized signature verification
+
+## Trade-offs & Use Cases
+
+### Speed vs. Decentralization
+
+Solana prioritizes high throughput (65,000+ TPS) and low fees (fractions of a cent) over maximum decentralization. The hardware requirements to run a validator are higher than other networks.
+
+### Ideal Use Cases for Solana
+
+- **DeFi Applications**: High-frequency trading, order books, lending protocols
+- **NFT Marketplaces**: Low fees make minting and trading NFTs economical
+- **Gaming**: Low latency enables real-time gameplay and transactions
+- **Social Applications**: Microtransactions and high-volume content posting
+
+## Why Build on Solana?
+
+1. **Developer Experience**: Solana uses Rust, a modern systems programming language with memory safety guarantees
+2. **Growing Ecosystem**: Vibrant community and tooling, including the Anchor framework
+3. **User Experience**: Fast finality and low fees provide a near-Web2 experience
+4. **Sustainability**: Proof of Stake with minimal energy requirements
+
+Ready to start building on the fastest blockchain in the world? Let's dive in!

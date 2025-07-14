@@ -10,11 +10,13 @@ import {
   Clock,
   PlayCircle,
   Eye,
+  ArrowRight,
+  Hexagon,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Module } from "@/types/learning";
-import { getModuleProgress, getTopicCompletion } from "@/lib/progress-data";
+// Removed getModuleProgress, getTopicCompletion imports for fixed values
 
 interface ModuleCardProps {
   module: Module;
@@ -28,21 +30,40 @@ export default function ModuleCard({
   onViewDetails,
 }: ModuleCardProps) {
   const router = useRouter();
-  const progress = getModuleProgress(module.id);
-  const isCompleted = progress === 100;
-  const isStarted = progress > 0;
-  const completedTopics =
-    module.topics?.filter((topic) => getTopicCompletion(module.id, topic.id))
-      .length || 0;
-  const totalTopics = module.topics?.length || 0;
-  
-  const estimatedHours = Math.ceil((totalTopics * 30) / 60); // 30 min per topic average
-  const theoryTopics = module.topics?.filter(topic => topic.type === 'theory').length || 0;
-  const exerciseTopics = module.topics?.filter(topic => topic.type === 'exercise').length || 0;
-  const projectTopics = module.topics?.filter(topic => topic.type === 'project').length || 0;
+  // Fixed values for demonstration
+  const progress = 60; // e.g., 60% progress
+  const isCompleted = false;
+  const isStarted = true;
+  const completedTopics = 3;
+  const totalTopics = 5;
+  const estimatedHours = 2;
+  const theoryTopics = 2;
+  const exerciseTopics = 2;
+  const projectTopics = 1;
 
   const handleStartModule = () => {
     router.push(`/learn/${module.id}`);
+  };
+
+  const getCategoryFromTitle = (title: string): string => {
+    const lowerTitle = title.toLowerCase();
+    
+    // Programming Languages
+    if (lowerTitle.includes('rust') || lowerTitle.includes('solidity') || lowerTitle.includes('javascript') || lowerTitle.includes('typescript')) return 'Programming';
+    
+    // AI/ML related
+    if (lowerTitle.includes('ai') || lowerTitle.includes('artificial intelligence') || lowerTitle.includes('machine learning') || lowerTitle.includes('smart contract ai')) return 'Core AI';
+    
+    // Data & Analytics
+    if (lowerTitle.includes('data') || lowerTitle.includes('analytics') || lowerTitle.includes('analysis')) return 'Analytics';
+    
+    // Blockchain & Web3
+    if (lowerTitle.includes('blockchain') || lowerTitle.includes('solana') || lowerTitle.includes('web3') || lowerTitle.includes('defi') || lowerTitle.includes('crypto')) return 'Blockchain';
+    
+    // Development
+    if (lowerTitle.includes('development') || lowerTitle.includes('programming') || lowerTitle.includes('coding')) return 'Development';
+    
+    return 'General';
   };
 
   const getStatusText = () => {
@@ -56,132 +77,101 @@ export default function ModuleCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
+      className="group"
     >
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm hover:border-green-500/30 transition-all duration-300 h-full">
-        <CardHeader className="pb-4">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-16 h-16 flex-shrink-0">
-              <Image
-                src={module.image}
-                alt={module.title}
-                width={64}
-                height={64}
-                className="w-full h-full object-contain"
-              />
-            </div>
+      <Card className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/30 border-0 shadow-lg hover:shadow-xl transition-all duration-500 h-full overflow-hidden backdrop-blur-sm hover:scale-[1.02]">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+        
+        <CardContent className="p-8 h-full flex flex-col">
+          {/* Logo Container with Background */}
+          <div className="relative mb-8">
             <motion.div
-              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                isCompleted
-                  ? "bg-green-500/20 text-green-400"
-                  : isStarted
-                  ? "bg-yellow-500/20 text-yellow-400"
-                  : "bg-gray-600/20 text-gray-400"
-              }`}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: index * 0.1 + 0.3 }}
+              className="w-full h-48 mx-auto relative"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ 
+                delay: index * 0.1 + 0.2, 
+                duration: 0.6,
+                type: "spring",
+                stiffness: 200
+              }}
             >
-              {getStatusText()}
+              {/* Rectangle container with subtle background */}
+              <div className="w-full h-full rounded-2xl flex items-center justify-center p-6 shadow-sm">
+                {module.image ? (
+                  <Image
+                    src={module.image}
+                    alt={module.title}
+                    width={156}
+                    height={156}
+                    className="w-39 h-39 object-contain"
+                  />
+                ) : (
+                  <Hexagon className="w-30 h-30 text-gray-400 dark:text-gray-500" />
+                )}
+              </div>
             </motion.div>
           </div>
 
-          <CardTitle className="text-lg font-semibold text-white mb-2 leading-tight">
-            {module.title}
-          </CardTitle>          <p className="text-sm text-gray-400 leading-relaxed">
-            {module.description}
-          </p>
-        </CardHeader>
-
-        <CardContent className="pt-0">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Clock className="h-3 w-3 text-gray-400" />
-                <span className="text-xs text-gray-400">Duration</span>
-              </div>
-              <p className="text-sm font-semibold text-white">{estimatedHours}h</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <BookOpen className="h-3 w-3 text-gray-400" />
-                <span className="text-xs text-gray-400">Topics</span>
-              </div>
-              <p className="text-sm font-semibold text-white">{totalTopics}</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Target className="h-3 w-3 text-gray-400" />
-                <span className="text-xs text-gray-400">Progress</span>
-              </div>
-              <p className="text-sm font-semibold text-white">{progress}%</p>
-            </div>
-          </div>
-
-          {/* Topic Types */}
-          <div className="flex flex-wrap gap-1 mb-4">
-            {theoryTopics > 0 && (
-              <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-400 border-blue-500/20">
-                {theoryTopics} Theory
-              </Badge>
-            )}
-            {exerciseTopics > 0 && (
-              <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
-                {exerciseTopics} Exercise
-              </Badge>
-            )}
-            {projectTopics > 0 && (
-              <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-400 border-purple-500/20">
-                {projectTopics} Project
-              </Badge>
-            )}
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400">Completion</span>
-              <span className="text-xs text-white font-medium">
-                {completedTopics}/{totalTopics} topics
-              </span>
-            </div>
-            <motion.div
-              className="w-full bg-gray-800 rounded-full h-2"
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{ delay: index * 0.1 + 0.5, duration: 0.5 }}
+          {/* Content */}
+          <div className="flex-1 flex flex-col text-center">
+            <motion.h3
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.5 }}
+              className="text-xl font-bold text-gray-900 dark:text-white mb-4 leading-tight"
             >
+              {module.title}
+            </motion.h3>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.6 }}
+              className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-8 flex-1"
+            >
+              {module.description}
+            </motion.p>
+
+            {/* Progress indicator */}
+            {progress > 0 && (
               <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{
-                  delay: index * 0.1 + 0.7,
-                  duration: 0.8,
-                  ease: "easeOut",
-                }}
-              />
-            </motion.div>
-          </div>
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 + 0.7 }}
+                className="mb-6"
+              >
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{
+                      delay: index * 0.1 + 0.8,
+                      duration: 1,
+                      ease: "easeOut",
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                  <span>{getStatusText()}</span>
+                  <span>{progress}% complete</span>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={onViewDetails}
-              className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              View Details
-            </button>
-            <button
+            {/* Read more button */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 + 0.8 }}
               onClick={handleStartModule}
-              className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors duration-200 flex items-center justify-center gap-2"
+              className="group/btn inline-flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-all duration-300 font-medium text-sm"
             >
-              <PlayCircle className="h-4 w-4" />
-              {isStarted ? 'Continue' : 'Start'}
-            </button>
+              <span>{isStarted ? 'Continue learning' : 'Read more'}</span>
+              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+            </motion.button>
           </div>
         </CardContent>
       </Card>

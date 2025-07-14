@@ -3,18 +3,10 @@
 import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  BookOpen,
-  Code,
-  Target,
-  Clock,
-  PlayCircle,
-  Eye,
-} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Module } from "@/types/learning";
-import { getModuleProgress, getTopicCompletion } from "@/lib/progress-data";
+import { BookOpen, Target, Clock, PlayCircle, Eye } from "lucide-react";
 
 interface ModuleCardProps {
   module: Module;
@@ -28,18 +20,16 @@ export default function ModuleCard({
   onViewDetails,
 }: ModuleCardProps) {
   const router = useRouter();
-  const progress = getModuleProgress(module.id);
-  const isCompleted = progress === 100;
-  const isStarted = progress > 0;
-  const completedTopics =
-    module.topics?.filter((topic) => getTopicCompletion(module.id, topic.id))
-      .length || 0;
-  const totalTopics = module.topics?.length || 0;
-  
-  const estimatedHours = Math.ceil((totalTopics * 30) / 60); // 30 min per topic average
-  const theoryTopics = module.topics?.filter(topic => topic.type === 'theory').length || 0;
-  const exerciseTopics = module.topics?.filter(topic => topic.type === 'exercise').length || 0;
-  const projectTopics = module.topics?.filter(topic => topic.type === 'project').length || 0;
+  // Fixed values for demonstration
+  const progress = 60; // e.g., 60% progress
+  const isCompleted = false;
+  const isStarted = true;
+  const completedTopics = 3;
+  const totalTopics = 5;
+  const estimatedHours = 2;
+  const theoryTopics = 2;
+  const exerciseTopics = 2;
+  const projectTopics = 1;
 
   const handleStartModule = () => {
     router.push(`/learn/${module.id}`);
