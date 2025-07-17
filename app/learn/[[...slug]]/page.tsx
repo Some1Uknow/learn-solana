@@ -1,20 +1,20 @@
-import { source } from '@/lib/source';
+import { source } from "@/lib/source";
 import {
   DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
-} from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-import { getMDXComponents } from '@/mdx-components';
+} from "fumadocs-ui/page";
+import { notFound } from "next/navigation";
+import { getMDXComponents } from "@/mdx-components";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
-  console.log('Params1:', params);
+  console.log("params", params);
   const page = source.getPage(params.slug);
-  console.log('Page data:', page);
+  console.log("Page data:", page);
   if (!page) notFound();
 
   const MDX = page.data.body;
@@ -39,7 +39,6 @@ export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
-  // This is already correct - using params.slug
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
