@@ -211,7 +211,7 @@ export default function AIAnimation() {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full rounded-xl" />
 
       <div className="relative z-10 w-full h-full flex flex-col p-2 sm:p-4">
-        <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 sm:p-4 h-full flex flex-col">
+        <div className="bg-black/30 backdrop-blur-xs border border-white/10 rounded-xl p-3 sm:p-4 h-full flex flex-col">
           {/* Chat header */}
           <div className="flex items-center gap-2 pb-2 sm:pb-3 border-b border-white/10">
             <div className="h-2 w-2 rounded-full bg-[#14F195]"></div>
@@ -252,7 +252,7 @@ export default function AIAnimation() {
                 type="text"
                 disabled
                 placeholder={userTyping ? "Typing..." : "Ask a question..."}
-                className="bg-transparent text-xs sm:text-sm text-white/80 flex-1 outline-none placeholder:text-white/50"
+                className="bg-transparent text-xs sm:text-sm text-white/80 flex-1 outline-hidden placeholder:text-white/50"
               />
               <button className="text-[#14F195] rounded-md p-1 hover:bg-white/5">
                 <svg

@@ -86,7 +86,7 @@ export default function ModuleDetailsModal({
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 flex-shrink-0">
+              <div className="w-16 h-16 shrink-0">
                 <Image
                   src={module.image}
                   alt={module.title}
@@ -159,7 +159,7 @@ export default function ModuleDetailsModal({
             </div>
             <div className="w-full bg-gray-800 rounded-full h-2">
               <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                className="h-full bg-linear-to-r from-green-500 to-green-400 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}

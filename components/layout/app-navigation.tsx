@@ -81,7 +81,7 @@ export default function AppNavigation() {
           {/* User Profile - Bottom */}
           <div className="mt-auto border-t border-white/10 pt-4">
             <div className="flex items-center gap-3 rounded-lg bg-white/5 p-3">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#14F195] to-[#9945FF]" />
+              <div className="h-8 w-8 rounded-full bg-linear-to-r from-[#14F195] to-[#9945FF]" />
               <div>
                 <p className="text-sm font-medium text-white">Solana Dev</p>
                 <p className="text-xs text-white/60">Beta User</p>
@@ -115,7 +115,7 @@ export default function AppNavigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-sm md:hidden pt-16">
+        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xs md:hidden pt-16">
           <nav className="flex flex-col gap-2 p-4">
             {navItems.map((item) => {
               const isActive = pathname === item.href;

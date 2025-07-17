@@ -86,7 +86,7 @@ export function Navbar() {
         >
           <span className="relative z-10">{item.label}</span>
           {!isMobile && (
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-linear-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
           )}
         </Button>
       );
@@ -106,7 +106,7 @@ export function Navbar() {
         >
           <span className="relative z-10">{item.label}</span>
           {!isMobile && (
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-linear-to-r from-[#14F195] to-[#9945FF] group-hover:w-full transition-all duration-300" />
           )}
         </Button>
       </Link>
@@ -121,7 +121,7 @@ export function Navbar() {
           href={logoConfig.href}
           className="flex items-center gap-2 group min-w-[120px]"
         >
-          <span className="text-xl font-bold font-space-grotesk">
+          <span className="text-xl font-bold font-grotesk">
             {logoConfig.text}
           </span>
           {logoConfig.showPulse && (

@@ -50,7 +50,7 @@ export default function TopicHeader({ topic, isCompleted }: TopicHeaderProps) {
         <div className="flex items-center space-x-3">
           <Badge
             variant="outline"
-            className={`${getTypeColor(topic.type)} border-0 shadow-sm`}
+            className={`${getTypeColor(topic.type)} border-0 shadow-xs`}
           >
             {topic.type}
           </Badge>

@@ -32,13 +32,13 @@ export const TopicCard = ({
 }: TopicCardProps) => {
   return (
     <Card
-      className={`relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/30 border-0 shadow-lg hover:shadow-xl transition-all duration-500 h-full overflow-hidden backdrop-blur-sm hover:scale-[1.02] cursor-pointer ${
+      className={`relative bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/30 border-0 shadow-lg hover:shadow-xl transition-all duration-500 h-full overflow-hidden backdrop-blur-xs hover:scale-[1.02] cursor-pointer ${
         !isAccessible ? "opacity-60 cursor-not-allowed" : ""
       }`}
       onClick={() => isAccessible && onTopicClick(topic.id)}
     >
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
       
       <CardContent className="p-8 h-full flex flex-col">
         {/* Logo Container */}

@@ -47,10 +47,10 @@ export default function ModuleCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm hover:border-green-500/30 transition-all duration-300 h-full">
+      <Card className="bg-black/40 border-green-500/20 backdrop-blur-xs hover:border-green-500/30 transition-all duration-300 h-full">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-16 h-16 flex-shrink-0">
+            <div className="w-16 h-16 shrink-0">
               <Image
                 src={module.image}
                 alt={module.title}
@@ -146,7 +146,7 @@ export default function ModuleCard({
               transition={{ delay: index * 0.1 + 0.5, duration: 0.5 }}
             >
               <motion.div
-                className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                className="h-full bg-linear-to-r from-green-500 to-green-400 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{

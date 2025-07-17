@@ -79,9 +79,9 @@ export default function ModuleCard({
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className="group"
     >
-      <Card className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/30 border-0 shadow-lg hover:shadow-xl transition-all duration-500 h-full overflow-hidden backdrop-blur-sm hover:scale-[1.02]">
+      <Card className="relative bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/30 border-0 shadow-lg hover:shadow-xl transition-all duration-500 h-full overflow-hidden backdrop-blur-xs hover:scale-[1.02]">
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent pointer-events-none" />
         
         <CardContent className="p-8 h-full flex flex-col">
           {/* Logo Container with Background */}
@@ -98,7 +98,7 @@ export default function ModuleCard({
               }}
             >
               {/* Rectangle container with subtle background */}
-              <div className="w-full h-full rounded-2xl flex items-center justify-center p-6 shadow-sm">
+              <div className="w-full h-full rounded-2xl flex items-center justify-center p-6 shadow-xs">
                 {module.image ? (
                   <Image
                     src={module.image}
@@ -144,7 +144,7 @@ export default function ModuleCard({
               >
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                    className="h-full bg-linear-to-r from-blue-500 to-purple-600 rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{

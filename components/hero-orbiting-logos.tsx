@@ -11,10 +11,10 @@ export default function HeroOrbitingLogos() {
         iconSize={35}
         reverse={false}
       >
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-orange-500/20 backdrop-blur-sm border border-orange-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-orange-500/20 backdrop-blur-xs border border-orange-500/40">
           <span className="text-sm font-bold text-orange-400">🦀</span>
         </div>
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-white/20 backdrop-blur-xs border border-white/40">
           <span className="text-sm font-bold text-white">▲</span>
         </div>
       </OrbitingCircles>
@@ -27,10 +27,10 @@ export default function HeroOrbitingLogos() {
         iconSize={35}
         reverse={true}
       >
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-green-500/20 backdrop-blur-xs border border-green-500/40">
           <span className="text-sm font-bold text-green-400">⚡</span>
         </div>
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-yellow-500/20 backdrop-blur-xs border border-yellow-500/40">
           <span className="text-sm font-bold text-yellow-400">🔗</span>
         </div>
       </OrbitingCircles>
@@ -43,10 +43,10 @@ export default function HeroOrbitingLogos() {
         iconSize={35}
         reverse={false}
       >
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-purple-500/20 backdrop-blur-xs border border-purple-500/40">
           <span className="text-sm font-bold text-purple-400">⚓</span>
         </div>
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-blue-500/20 backdrop-blur-xs border border-blue-500/40">
           <span className="text-sm font-bold text-blue-400">◉</span>
         </div>
       </OrbitingCircles>
@@ -59,10 +59,10 @@ export default function HeroOrbitingLogos() {
         iconSize={35}
         reverse={true}
       >
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-pink-500/20 backdrop-blur-sm border border-pink-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-pink-500/20 backdrop-blur-xs border border-pink-500/40">
           <span className="text-sm font-bold text-pink-400">💎</span>
         </div>
-        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-cyan-500/20 backdrop-blur-sm border border-cyan-500/40">
+        <div className="flex h-[35px] w-[35px] items-center justify-center rounded-full bg-cyan-500/20 backdrop-blur-xs border border-cyan-500/40">
           <span className="text-sm font-bold text-cyan-400">🌐</span>
         </div>
       </OrbitingCircles>

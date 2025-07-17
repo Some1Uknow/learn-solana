@@ -172,7 +172,7 @@ export function BetaSignupModal({ open, onOpenChange }: BetaSignupModalProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-[#14F195] to-[#9945FF] hover:opacity-90 text-black w-full"
+              className="bg-linear-to-r from-[#14F195] to-[#9945FF] hover:opacity-90 text-black w-full"
             >
               {loading ? "Submitting..." : "Submit"}
             </Button>

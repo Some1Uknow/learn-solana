@@ -24,7 +24,7 @@ export const ModuleHeader = ({ module, progressPercentage = 0 }: ModuleHeaderPro
       </Link>
       <div className="bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl p-6">
         <div className="flex items-center space-x-6">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             {module.image ? (
               <img
                 src={module.image}
@@ -52,7 +52,7 @@ export const ModuleHeader = ({ module, progressPercentage = 0 }: ModuleHeaderPro
               </div>
               <Badge
                 variant="secondary"
-                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white"
+                className="bg-white/10 backdrop-blur-xs border border-white/20 text-white"
               >
                 {module.topics.length} topics
               </Badge>

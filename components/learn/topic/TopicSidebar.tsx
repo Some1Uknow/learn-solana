@@ -140,7 +140,7 @@ export default function TopicSidebar({
               <div
                 className={`
                 w-14 h-7 rounded-md border-2 transition-all duration-500 ease-out
-                peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400/50
+                peer-focus:outline-hidden peer-focus:ring-2 peer-focus:ring-blue-400/50
                 ${
                   isInitialized
                     ? "bg-blue-500/30 border-blue-400/60 shadow-lg shadow-blue-500/20"
@@ -161,7 +161,7 @@ export default function TopicSidebar({
                   absolute inset-0 rounded-md transition-all duration-500
                   ${
                     isInitialized
-                      ? "bg-gradient-to-r from-blue-500/20 to-blue-400/20"
+                      ? "bg-linear-to-r from-blue-500/20 to-blue-400/20"
                       : ""
                   }
                 `}

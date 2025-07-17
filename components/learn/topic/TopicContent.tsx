@@ -55,7 +55,7 @@ export default function TopicContent({ topic }: TopicContentProps) {
         </div>
       )}
 
-      <div className="mt-8 p-6 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+      <div className="mt-8 p-6 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xs">
         <p className="text-white/70 leading-relaxed">
           💡 This is placeholder content. Real implementation would
           include interactive elements, code editors, video content, and

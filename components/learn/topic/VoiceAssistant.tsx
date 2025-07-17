@@ -4,7 +4,7 @@ import { BookOpen, FileCode, Mic } from "lucide-react";
 export default function VoiceAssistant() {
   return (
     <>
-      <SidebarTrigger className="fixed right-8 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm p-3 rounded-full shadow-lg z-40">
+      <SidebarTrigger className="fixed right-8 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-xs p-3 rounded-full shadow-lg z-40">
         <Mic className="h-5 w-5" />
       </SidebarTrigger>
 
@@ -14,7 +14,7 @@ export default function VoiceAssistant() {
         collapsible="offcanvas"
         className="z-50"
       >
-        <div className="h-full bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/20 rounded-l-2xl">
+        <div className="h-full bg-linear-to-br from-white/15 to-white/5 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/20 rounded-l-2xl">
           <SidebarHeader className="border-b border-white/10 p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-white">
@@ -34,7 +34,7 @@ export default function VoiceAssistant() {
               </p>
 
               <div className="space-y-4">
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xs">
                   <div className="flex items-center space-x-3 mb-2">
                     <Mic className="h-5 w-5 text-blue-400" />
                     <h4 className="font-semibold text-white">
@@ -46,7 +46,7 @@ export default function VoiceAssistant() {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xs">
                   <div className="flex items-center space-x-3 mb-2">
                     <BookOpen className="h-5 w-5 text-purple-400" />
                     <h4 className="font-semibold text-white">
@@ -58,7 +58,7 @@ export default function VoiceAssistant() {
                   </p>
                 </div>
 
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xs">
                   <div className="flex items-center space-x-3 mb-2">
                     <FileCode className="h-5 w-5 text-green-400" />
                     <h4 className="font-semibold text-white">Voice Notes</h4>
@@ -69,7 +69,7 @@ export default function VoiceAssistant() {
                 </div>
               </div>
 
-              <div className="mt-8 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-white/10">
+              <div className="mt-8 p-4 bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-white/10">
                 <p className="text-sm text-white/60 text-center">
                   Try saying: "Explain this topic" or "What comes next?"
                 </p>

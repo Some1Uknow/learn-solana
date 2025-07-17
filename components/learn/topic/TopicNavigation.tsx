@@ -19,7 +19,7 @@ export default function TopicNavigation({ moduleId, prev, next, markTopicComplet
           <Link href={`/learn/${moduleId}/${prev.id}`}>
             <Button
               variant="outline"
-              className="text-white border-white/30 hover:bg-white/10 backdrop-blur-sm bg-white/5"
+              className="text-white border-white/30 hover:bg-white/10 backdrop-blur-xs bg-white/5"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               {prev.title}
@@ -33,7 +33,7 @@ export default function TopicNavigation({ moduleId, prev, next, markTopicComplet
           <Link href={`/learn/${moduleId}/${next.id}`}>
             <Button
               variant="outline"
-              className="text-white border-white/30 hover:bg-white/10 backdrop-blur-sm bg-white/5"
+              className="text-white border-white/30 hover:bg-white/10 backdrop-blur-xs bg-white/5"
             >
               {next.title}
               <ChevronRight className="ml-2 h-4 w-4" />
@@ -48,7 +48,7 @@ export default function TopicNavigation({ moduleId, prev, next, markTopicComplet
       <div className="text-center">
         <Button
           onClick={markTopicComplete}
-          className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 text-lg font-semibold shadow-lg shadow-green-600/25 backdrop-blur-sm"
+          className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 text-lg font-semibold shadow-lg shadow-green-600/25 backdrop-blur-xs"
           size="lg"
         >
           <CheckCircle2 className="mr-3 h-6 w-6" />

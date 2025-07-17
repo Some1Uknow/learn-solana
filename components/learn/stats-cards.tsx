@@ -19,7 +19,7 @@ export default function StatsCards({
 }: StatsCardsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm">
+      <Card className="bg-black/40 border-green-500/20 backdrop-blur-xs">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-300">
             Overall Progress
@@ -35,14 +35,14 @@ export default function StatsCards({
             className="mt-2 h-2 bg-gray-800"
           >
             <div
-              className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all rounded-full"
+              className="h-full bg-linear-to-r from-green-500 to-green-400 transition-all rounded-full"
               style={{ width: `${overallProgress}%` }}
             />
           </Progress>
         </CardContent>
       </Card>
 
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm">
+      <Card className="bg-black/40 border-green-500/20 backdrop-blur-xs">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-300">
             Completed Modules
@@ -59,7 +59,7 @@ export default function StatsCards({
         </CardContent>
       </Card>
 
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm">
+      <Card className="bg-black/40 border-green-500/20 backdrop-blur-xs">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-300">
             In Progress
@@ -74,7 +74,7 @@ export default function StatsCards({
         </CardContent>
       </Card>
 
-      <Card className="bg-black/40 border-green-500/20 backdrop-blur-sm">
+      <Card className="bg-black/40 border-green-500/20 backdrop-blur-xs">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-300">
             Total Modules
