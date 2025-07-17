@@ -7,10 +7,10 @@ import { Menu, X, Wallet, Github, Star } from "lucide-react";
 
 // Navigation data
 const navigationItems = [
-  { label: "About", href: "#about" },
-  { label: "Contents", href: "#contents" },
-  { label: "FAQ", href: "#docs" },
-  { label: "IDE", href: "/ide" },
+  { label: "Learn", href: "/learn" },
+  { label: "Games", href: "/games" },
+  { label: "Projects", href: "/projects" },
+  { label: "Jobs", href: "/jobs" },
 ];
 
 // Logo configuration

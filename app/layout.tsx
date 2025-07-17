@@ -5,6 +5,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
+import { RootProvider } from "react-day-picker";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -63,7 +64,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <RootProvider>{children}</RootProvider>
           <Analytics />
           <Toaster />
         </ThemeProvider>
