@@ -12,7 +12,9 @@ export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
+  console.log('Params1:', params);
   const page = source.getPage(params.slug);
+  console.log('Page data:', page);
   if (!page) notFound();
 
   const MDX = page.data.body;
@@ -37,6 +39,7 @@ export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
+  // This is already correct - using params.slug
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
