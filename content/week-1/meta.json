@@ -1,0 +1,14 @@
+{
+  "title": "Solana",
+  "description": "Learn the basics of Solana",
+  "icon": "Solana",
+  "root": true,
+  "pages": [
+    "index",
+    "devnet-setup",
+    "accounts-lamports-exercise",
+    "transaction-anatomy",
+    "program-interaction-project",
+    "basic-exploration-challenge"
+  ]
+}

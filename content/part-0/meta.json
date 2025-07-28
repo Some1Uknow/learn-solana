@@ -1,6 +1,0 @@
-{
-  "title": "Part 0: Introduction",
-  "description": "The documentation for Part 0",
-  "root": true,
-  "pages": ["index", "solana"]
-}

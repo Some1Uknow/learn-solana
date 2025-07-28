@@ -1,0 +1,15 @@
+{
+  "title": "Rust",
+  "description": "Learn the basics of Rust",
+  "icon": "Rust",
+  "root": true,
+  "pages": [
+    "index",
+    "result-error-handling",
+    "borsh-serialization",
+    "counter-program-project",
+    "security-patterns-exercise",
+    "defensive-programming-challenge",
+    "program-structure-deep-dive"
+  ]
+}

@@ -1,6 +1,0 @@
-{
-  "title": "Part 1: Introduction",
-  "description": "The documentation for Part 1",
-  "root": true,
-  "pages": ["index", "rust"]
-}

@@ -1,0 +1,16 @@
+{
+  "title": "NextJS",
+  "description": "Learn Client Side Development with NextJS",
+  "icon": "NextJS",
+  "root": true,
+  "pages": [
+    "index",
+    "wallet-integration-exercise",
+    "react-integration-project",
+    "ux-enhancements",
+    "testing-cicd-setup",
+    "deployment-strategies",
+    "architecture-optimization",
+    "upgrades-maintenance-challenge"
+  ]
+}

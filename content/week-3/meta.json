@@ -1,0 +1,16 @@
+{
+  "title": "Anchor",
+  "description": "Learn the basics of Anchor",
+  "icon": "Anchor",
+  "root": true,
+  "pages": [
+    "anchor-introduction",
+    "spl-token-integration",
+    "token-minting-project",
+    "pda-seed-derivation",
+    "escrow-mechanism-project",
+    "cpi-cross-program",
+    "defi-integration-challenge",
+    "anchor-ergonomics"
+  ]
+}
