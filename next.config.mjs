@@ -6,6 +6,14 @@ const withMDX = createMDX(
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:path*.mdx',
+        destination: '/llms.mdx/:path*',
+      },
+    ];
+  },
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,

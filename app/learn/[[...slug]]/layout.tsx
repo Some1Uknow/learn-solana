@@ -1,10 +1,10 @@
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import type { ReactNode } from 'react';
-import { MessageCircle } from 'lucide-react';
-import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
-import { AISearchTrigger } from '@/components/fumadocs/ai';
-import DocsBackground from '@/components/docs-background';
+import { DocsLayout, type DocsLayoutProps } from "fumadocs-ui/layouts/docs";
+import type { ReactNode } from "react";
+import { MessageCircle } from "lucide-react";
+import { baseOptions } from "@/app/layout.config";
+import { source } from "@/lib/source";
+import DocsBackground from "@/components/docs-background";
+import { AISearchTrigger } from "@/components/ai";
 
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
