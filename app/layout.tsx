@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Analytics } from "@vercel/analytics/react";
 import { RootProvider } from "fumadocs-ui/provider";
+import DocsChat from "@/components/docs-chat";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -65,6 +66,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <RootProvider>{children}</RootProvider>
+          <DocsChat />
           <Analytics />
           <Toaster />
         </ThemeProvider>
