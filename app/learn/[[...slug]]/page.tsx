@@ -9,7 +9,6 @@ export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
-  console.log("params", params);
 
   if (!params.slug || params.slug.length === 0) {
     const modules = contentsData.modules as any;
@@ -17,7 +16,6 @@ export default async function Page(props: {
   }
 
   const page = source.getPage(params.slug);
-  console.log("Page data:", page);
   if (!page) notFound();
 
   const MDX = page.data.body;
