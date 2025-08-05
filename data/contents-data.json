@@ -161,7 +161,7 @@
            "title": "🧑‍💻 Client-Side & Full-Stack",
            "description": "Integrate smart contracts with React, wallets, and full dApp flows",
            "goal": "Build production-ready frontend applications with seamless blockchain integration",
-           "image": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg", 
+           "image": "/nextjs.png",
            "icon": "fullstack",
            "topics": [
                {

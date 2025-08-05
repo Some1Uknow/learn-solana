@@ -1,12 +1,12 @@
 {
   "pages": [
-    "capstone-planning.mdx",
-    "advanced-features-implementation.mdx",
-    "fullstack-integration.mdx",
-    "testing-security-audit.mdx",
-    "deployment-production.mdx",
-    "documentation-polish.mdx",
-    "performance-optimization.mdx",
-    "portfolio-presentation.mdx"
+    "index",
+    "advanced-features-implementation",
+    "fullstack-integration",
+    "testing-security-audit",
+    "deployment-production",
+    "documentation-polish",
+    "performance-optimization",
+    "portfolio-presentation"
   ]
 }

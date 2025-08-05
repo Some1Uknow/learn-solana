@@ -7,7 +7,7 @@ import { Menu, X, Wallet, Github, Star } from "lucide-react";
 
 // Navigation data
 const navigationItems = [
-  { label: "Learn", href: "/learn" },
+  { label: "Learn", href: "/modules" },
   { label: "Games", href: "/games" },
   { label: "Projects", href: "/projects" },
   { label: "Jobs", href: "/jobs" },

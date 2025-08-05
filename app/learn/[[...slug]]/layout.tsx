@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
 import { source } from "@/lib/source";
 import DocsBackground from "@/components/docs-background";
+import { ChatProvider } from "@/components/chat-context";
+import ChatLayout from "@/components/chat-layout";
 
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
@@ -25,9 +27,13 @@ const docsOptions: DocsLayoutProps = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout {...docsOptions}>
-      <DocsBackground />
-      {children}
-    </DocsLayout>
+    <ChatProvider>
+      <ChatLayout>
+        <DocsLayout {...docsOptions}>
+          <DocsBackground />
+          {children}
+        </DocsLayout>
+      </ChatLayout>
+    </ChatProvider>
   );
 }
