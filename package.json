@@ -110,8 +110,5 @@
     "tsx": "^4.20.3",
     "typescript": "^5",
     "zod": "^4.0.14"
-  },
-  "optionalDependencies": {
-    "lightningcss-linux-x64-gnu": "^1.30.1"
   }
 }
