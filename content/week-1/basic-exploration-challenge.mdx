@@ -1,7 +1,152 @@
 ---
 title: Challenge - Devnet Program Analysis
+description: Reverse-engineer a Solana program on devnet to understand its accounts and instructions.
 type: challenge
 module: 🧱 Solana Fundamentals
 ---
 
-Discover and document how existing devnet programs work by analyzing their transactions and account structures
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This challenge will help you sharpen your skills by reverse-engineering existing Solana programs deployed on devnet.
+
+Your goal is to pick a deployed devnet program, analyze its accounts and transactions, and create a report explaining how it works. This includes the instructions it uses, what kind of accounts it manages, and any observed patterns.
+
+<Callout type="info">
+This is an open-ended investigation challenge. There is no single "correct" program to pick. The value lies in your process and what you uncover.
+</Callout>
+
+---
+
+## What You'll Do
+
+<Callout type="info">
+In this challenge, you will:
+
+-   Pick a non-trivial devnet program from public transaction history.
+-   Identify its Program ID and map out its primary instructions by observing interactions.
+-   Analyze the data structures of the accounts it creates and modifies.
+-   Interpret the program's purpose and document your findings in a clear report.
+</Callout>
+
+---
+
+## Where to Look
+
+Here are a few tools to help you discover interesting programs. Your first step is always to find a Program ID to investigate.
+
+<Accordions>
+<Accordion title="Solana Explorer (Devnet)">
+### Solana Explorer (Devnet)
+
+Visit [explorer.solana.com?cluster=devnet](https://explorer.solana.com?cluster=devnet) and watch the "Live Transaction Stream." Click on transactions and look at the "Instruction Details." If you see an instruction calling a program that isn't a common system or token program, you may have found a good candidate!
+</Accordion>
+
+<Accordion title="Solscan / SolanaFM">
+### Solscan / SolanaFM
+
+These are powerful alternatives. You can go to the "Transactions" tab on their devnet sites and look for interactions with unfamiliar programs. Their UIs are often better at "parsing" or decoding instruction data, which can give you early clues about what a program does.
+</Accordion>
+
+<Accordion title="Public GitHub Repos">
+### Public GitHub Repos
+
+Search GitHub for queries like `"solana program deploy" devnet` or `"anchor build" devnet`. You can often find open-source projects where developers have left their devnet program IDs in the README files or in test scripts. This is a great way to find a program where you can also check your work against the source code later.
+</Accordion>
+</Accordions>
+
+---
+
+## Project Steps
+
+<Steps>
+<Step>
+### Step 1: Choose a Devnet Program
+
+Find a real program deployed to devnet. For this example, let's pretend we found a program with the ID `Vote...` that appears to be a simple on-chain voting application. We'll use this hypothetical program for the next steps.
+</Step>
+
+<Step>
+### Step 2: Investigate Transactions
+
+On Solscan, look up the program ID `Vote...` and view its transaction history. You might find two common patterns:
+
+1.  **Initialization Transaction:** One instruction that involves the System Program and creates a new account. This is likely the `initialize_poll` instruction.
+2.  **Voting Transaction:** Another instruction that involves an existing "poll" account and a user's wallet. This is likely the `vote` instruction.
+
+By clicking into a "voting" transaction, you might see it takes three accounts: the user's wallet (as a signer), the poll account (writable), and the system clock. This is your first major clue about the program's mechanics.
+</Step>
+
+<Step>
+### Step 3: Analyze Account Structures
+
+Pick a "poll" account created by the program and view its details. The data will be shown in a format like Base64. Use an online tool or the `solana account <ADDRESS>` CLI command to view it.
+
+Let's say the account data (after decoding) is a 16-byte buffer:
+`[216, 128, 13, 85, 22, 16, 203, 73, 5, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0]`
+
+-   The first 8 bytes (`[216, 128, ...]`) might be the Anchor discriminator for a "Poll" account.
+-   The next 8 bytes (`[5, 0, ...]`) in little-endian format represent the number `5`. This could be `votes_for`.
+-   The final 8 bytes (`[3, 0, ...]`) represent the number `3`. This could be `votes_against`.
+
+From this, you can infer the account structure stores two counters for votes.
+</Step>
+
+<Step>
+### Step 4: Create a Short Report
+
+Based on your investigation, your report for the `Vote...` program might look like this:
+
+-   **Program ID:** `Vote...`
+-   **Description:** "This program appears to be a simple on-chain polling system. Users can create a poll, and other users can then cast 'for' or 'against' votes, which are tallied in the poll's account."
+-   **Sample Instruction (`vote`):**
+    -   `Accounts`:
+        1.  `[Signer]` User Wallet
+        2.  `[Writable]` Poll Account
+        3.  `[]` System Clock Sysvar
+    -   `Instruction Data`: A single byte, `0` for an 'against' vote and `1` for a 'for' vote.
+-   **Account Structure (`Poll`):**
+    -   Bytes 0-7: Anchor Discriminator
+    -   Bytes 8-15: `votes_for` (u64)
+    -   Bytes 16-23: `votes_against` (u64)
+-   **Unknowns:** "It's unclear if a user can vote more than once on the same poll. Further investigation is needed."
+</Step>
+</Steps>
+
+<Callout type="tip">
+You can verify an Anchor discriminator. If you suspect an account is named "Poll", you can calculate `sha256("account:Poll")`. The first 8 bytes of that hash should match the first 8 bytes of the on-chain account data.
+</Callout>
+
+---
+
+## Common Pitfalls
+
+<Callout type="warn">
+**Picking token or system programs**
+These are well-documented and not useful for reverse engineering practice. Pick something unfamiliar where you have to deduce the logic yourself.
+</Callout>
+
+<Callout type="warn">
+**Assuming too much**
+If something is unclear, write it down as a guess or a question. For example: "This 32-byte field could be a public key, but it could also be a data hash." The goal is analysis, not perfection.
+</Callout>
+
+<Callout type="warn">
+**Skipping raw instruction data**
+Be sure to inspect the base64 instruction data. It often contains a leading byte that indicates which instruction variant is being called (e.g., `0` for `initialize`, `1` for `vote`), followed by any arguments. This is a critical clue.
+</Callout>
+
+---
+
+## Summary
+
+This challenge helps you think like a blockchain detective. You now know how to:
+
+-   Explore and investigate deployed programs on devnet using block explorers.
+-   Form hypotheses about a program's function by observing its transactions.
+-   Attempt to decode on-chain account and instruction data to uncover its structure.
+-   Document your findings with clarity, curiosity, and an awareness of what you don't know.
+
+This skill will help in bug bounty work, dApp frontend integration, or just understanding what’s happening on-chain.

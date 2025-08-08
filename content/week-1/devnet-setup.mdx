@@ -4,4 +4,205 @@ type: setup
 module: 🧱 Solana Fundamentals
 ---
 
-Setting up Solana CLI, configuring clusters, managing keypairs, and understanding the development workflow
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Before you start writing smart contracts or building dApps on Solana, you need to set up your development environment. This means getting comfortable with the Solana CLI, creating wallets, switching clusters, and understanding how everything connects.
+
+We’ll walk through everything you need to get started, even if this is your first blockchain project.
+
+<Callout type="info">
+You don’t need to understand every Solana concept yet. For now, just focus on setting up your tools and learning how to inspect your environment.
+</Callout>
+
+---
+
+## What You’ll Learn
+
+<Callout type="info">
+By the end of this lesson, you’ll be able to:
+
+- Install and verify the Solana CLI on your system
+- Understand the role of keypairs and where they’re stored
+- Switch between different Solana clusters (like devnet and mainnet)
+- Use CLI commands to inspect your account and balance
+- Prepare your environment for smart contract development
+</Callout>
+
+---
+
+## Installing the Solana CLI
+
+The Solana Command Line Interface (CLI) is your main tool for interacting with the blockchain from your terminal.
+
+```bash title="install.sh"
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+```
+
+After installation, restart your terminal or update your path manually:
+
+```bash title="terminal"
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+```
+
+You can verify the installation:
+
+```bash
+solana --version
+```
+
+<Callout type="tip">
+If you're on Windows, use WSL2 (Windows Subsystem for Linux) for a better experience with Solana tooling and Rust.
+</Callout>
+
+---
+
+## Keypairs: Your Identity on Solana
+
+In Solana, your wallet is a keypair: a public key (your address) and a private key (used to sign transactions).
+
+### Create a New Wallet
+
+```bash
+solana-keygen new
+```
+
+This saves your wallet to a file, usually at `~/.config/solana/id.json`. Treat this file like a password. If you lose it, you lose access to your funds.
+
+### View Your Wallet Address
+
+```bash
+solana address
+```
+
+This prints your public key — the address you’ll use to send, receive, and test SOL.
+
+---
+
+## Understanding Solana Clusters
+
+A cluster is a running version of the Solana network. Developers typically use devnet or localnet, not mainnet.
+
+<Accordions>
+<Accordion title="Mainnet Beta">
+### Mainnet Beta
+
+The live production Solana network. Only use this when you're deploying real apps or tokens.
+</Accordion>
+
+<Accordion title="Devnet">
+### Devnet
+
+A public testing network. Use this for learning and development. You can request free SOL here.
+</Accordion>
+
+<Accordion title="Testnet">
+### Testnet
+
+Used by validators and protocol developers to test network upgrades. Less stable than devnet.
+</Accordion>
+
+<Accordion title="Localnet">
+### Localnet
+
+Runs entirely on your machine. It is useful for fast testing and debugging without internet latency.
+</Accordion>
+</Accordions>
+
+### Switch Between Clusters
+
+```bash
+solana config set --url https://api.devnet.solana.com
+```
+
+Check your current config at any time:
+
+```bash
+solana config get
+```
+
+---
+
+## Airdrop SOL for Devnet Testing
+
+You need SOL to pay for transactions, even on devnet. Luckily, you can request it for free:
+
+```bash
+solana airdrop 2
+```
+
+This gives you 2 devnet SOL. You can check your balance like this:
+
+```bash
+solana balance
+```
+
+---
+
+## CLI-First Workflow
+
+Here’s what your typical Solana dev setup will look like once the CLI is ready:
+
+<Steps>
+<Step>
+### Step 1: Generate a Wallet
+
+Use `solana-keygen new` to create your wallet, then request devnet SOL.
+</Step>
+
+<Step>
+### Step 2: Select a Cluster
+
+Set the cluster URL to devnet or localnet using `solana config set`.
+</Step>
+
+<Step>
+### Step 3: Start Building
+
+Use frameworks like Anchor or solana-program to write and test smart contracts.
+</Step>
+
+<Step>
+### Step 4: Use CLI Commands
+
+Interact with your programs using commands like `solana program deploy`, `solana transfer`, or `solana logs`.
+</Step>
+</Steps>
+
+<Callout type="info">
+We’ll cover Anchor workflows in future lessons. For now, focus on using the CLI confidently.
+</Callout>
+
+---
+
+## Common Pitfalls
+
+<Callout type="warn">
+**Losing your keypair**  
+If you delete or lose `id.json`, you lose access to your wallet. Always back it up securely and add it to `.gitignore` if using version control.
+</Callout>
+
+<Callout type="warn">
+**Forgetting your cluster**  
+Always double-check which cluster you're on. If you deploy to the wrong one, your program won't behave as expected.
+</Callout>
+
+<Callout type="warn">
+**Using mainnet too soon**  
+Avoid deploying anything to mainnet until your contract is fully tested on devnet and localnet.
+</Callout>
+
+---
+
+## Summary
+
+You now have a working Solana CLI setup. You can:
+
+- Create and manage wallets using keypairs
+- Connect to devnet, testnet, and localnet clusters
+- Request devnet SOL for free
+- Use basic CLI commands to check your account and send transactions
+
+This foundation will support all your future Solana development.

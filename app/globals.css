@@ -286,8 +286,104 @@
   animation: fadeIn 0.3s ease-out forwards;
 }
 
+/* Custom chat message styling - full control without prose */
+.chat-message-content {
+  /* Reset any default margins */
+  & * {
+    margin: 0;
+  }
+
+  /* Paragraph spacing */
+  & p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+
+  & p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* List styling */
+  & ul, & ol {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+  }
+
+  & li {
+    margin-bottom: 0.25rem;
+    line-height: 1.5;
+  }
+
+  /* Heading styling */
+  & h1, & h2, & h3, & h4, & h5, & h6 {
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  & h1 { font-size: 1.125rem; }
+  & h2 { font-size: 1.0625rem; }
+  & h3, & h4, & h5, & h6 { font-size: 1rem; }
+
+  /* First heading has no top margin */
+  & h1:first-child, & h2:first-child, & h3:first-child, 
+  & h4:first-child, & h5:first-child, & h6:first-child {
+    margin-top: 0;
+  }
+
+  /* Code block styling */
+  & pre {
+    margin: 0.75rem 0;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  & pre:first-child {
+    margin-top: 0;
+  }
+
+  & pre:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Inline code styling */
+  & code:not(pre code) {
+    font-size: 0.875rem;
+  }
+
+  /* Blockquote styling */
+  & blockquote {
+    margin: 0.75rem 0;
+    font-style: italic;
+  }
+
+  & blockquote:first-child {
+    margin-top: 0;
+  }
+
+  & blockquote:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Specific styling for user vs bot messages */
+.chat-message-user {
+  /* User messages can have different styling if needed */
+  color: rgb(255 255 255 / 0.95);
+}
+
+.chat-message-bot {
+  /* Bot messages can have different styling if needed */
+  color: rgb(243 244 246 / 0.9);
+  /* Slightly more spacing for bot responses */
+  
+  & p {
+    margin-bottom: 0.875rem;
+  }
+}
+
 /* Better typography and spacing for chat */
-.markdown-container {
+/* .markdown-container {
   letter-spacing: 0.01em;
   line-height: 1.7;
 }
@@ -311,7 +407,7 @@
   margin-top: 1.5rem;
   margin-bottom: 1rem;
   font-weight: 600;
-}
+} */
 
 /* Improve container width on larger screens */
 @media (min-width: 1280px) {
@@ -321,9 +417,9 @@
 }
 
 /* Better spacing for code blocks */
-.code-block-container {
+/* .code-block-container {
   margin: 1.25rem 0;
-}
+} */
 
 /* Orbit animation for orbiting circles */
 @keyframes orbit {

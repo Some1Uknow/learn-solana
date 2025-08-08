@@ -1,7 +1,212 @@
 ---
 title: Transaction Structure & Mechanics
+description: Learn how Solana transactions are structured, how signers and instructions work, and what happens from creation to confirmation.
 type: theory
 module: 🧱 Solana Fundamentals
 ---
 
-Instruction format, signers, recent blockhash, and transaction lifecycle from creation to confirmation
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+At the heart of every blockchain interaction is a **transaction**. Whether you're sending SOL, minting NFTs, or invoking a smart contract, you're submitting a transaction to the network.
+
+But what exactly is a transaction on Solana? What data does it carry, how does it get confirmed, and why are things like **recent blockhashes** and **signers** important?
+
+Let’s break it down step by step.
+
+<Callout type="info">
+Don’t worry if this feels abstract at first. You’ll get familiar with these concepts naturally as you start building programs and sending transactions.
+</Callout>
+
+---
+
+## What You’ll Learn
+
+<Callout type="info">
+By the end of this lesson, you’ll be able to:
+
+- Understand the internal structure of a Solana transaction
+- Explain the roles of instructions, signers, and recent blockhashes
+- Describe the lifecycle of a transaction from creation to confirmation
+- Identify how errors and replays are avoided using hashes
+</Callout>
+
+---
+
+## What Makes Up a Solana Transaction?
+
+A Solana transaction consists of:
+
+- **Instructions**: What you want the program to do
+- **Accounts**: Who is involved (including programs, data accounts, wallets)
+- **Signers**: Who has authorized the transaction
+- **Recent blockhash**: A freshness marker to prevent replay attacks
+
+<Tabs items={['Abstract View', 'Concrete Example']}>
+<Tab value="Abstract View">
+
+```txt
+Transaction {
+  signatures: [signer1, signer2],
+  message: {
+    recent_blockhash: "abc123...",
+    instructions: [
+      { program_id: ..., accounts: [...], data: ... },
+      ...
+    ]
+  }
+}
+````
+
+</Tab>
+<Tab value="Concrete Example">
+
+```bash
+solana transfer <RECIPIENT_ADDRESS> 1 --from my-keypair.json
+```
+
+This generates a transaction where:
+
+* signer = your keypair
+* instruction = transfer SOL
+* accounts = your wallet + recipient
+* recent\_blockhash = pulled from cluster
+
+</Tab>
+
+</Tabs>
+
+<Callout type="tip">
+All instructions are executed atomically. If one fails, the whole transaction fails, no partial state changes.
+</Callout>
+
+---
+
+## The Role of Signers
+
+Transactions must be signed by accounts that are either:
+
+* Writing to state (e.g., sending SOL)
+* Creating new accounts
+* Paying for the transaction
+
+This proves the transaction is authorized and prevents unauthorized access to funds or data.
+
+```bash
+solana transfer <RECIPIENT> 1 --from keypair.json
+```
+
+Here, `keypair.json` must sign the transaction since it is the sender and payer.
+
+<Callout type="warn">
+Transactions with missing or invalid signatures will be rejected immediately.
+</Callout>
+
+---
+
+## Understanding the Recent Blockhash
+
+Each transaction must include a **recent blockhash**, a hash of a recent block (within 150 blocks). This acts as:
+
+* A **timestamp** to prevent replaying old transactions
+* A **way to expire** stale or delayed transactions
+
+You can fetch it manually:
+
+```bash
+solana block-production
+```
+
+Most SDKs (like Solana Web3.js or Anchor) handle this under the hood for you.
+
+---
+
+## Lifecycle of a Transaction
+
+Let’s walk through the full journey.
+
+<Steps>
+<Step>
+### Step 1: Create the Transaction
+
+The client (like Anchor, Web3.js, or CLI) builds a transaction with instructions, signers, and a recent blockhash. 
+</Step>
+
+<Step>
+### Step 2: Sign It
+
+Each required signer signs the transaction with their private key. 
+</Step>
+
+<Step>
+### Step 3: Send to Cluster
+
+The transaction is sent to the Solana cluster (devnet, mainnet, etc.) using an RPC node or CLI. 
+</Step>
+
+<Step>
+### Step 4: Leader Processes It
+
+A validator (slot leader) picks up the transaction, executes instructions, and includes it in a block.
+</Step>
+
+<Step>
+### Step 5: Confirmation
+
+Other validators vote to finalize the block. Once confirmed, the transaction becomes part of the immutable ledger. 
+</Step> </Steps>
+
+---
+
+## Instruction Format Internals
+
+Every instruction contains:
+
+* `program_id`: the program being called
+* `accounts`: list of accounts passed to the program (read or write)
+* `data`: custom binary-encoded instruction data
+
+You’ll often see this structured when writing Solana programs in Rust or Web3.js.
+
+```rust title="example.rs"
+Instruction {
+    program_id: Pubkey,
+    accounts: Vec<AccountMeta>,
+    data: Vec<u8>,
+}
+```
+
+This layout is what your program receives in its entrypoint.
+
+---
+
+## Common Pitfalls
+
+<Callout type="warn">
+**Missing recent blockhash**  
+Transactions without a recent blockhash are rejected by the cluster. If you're manually constructing transactions, be sure to fetch and include a valid one.
+</Callout>
+
+<Callout type="warn">
+**Incorrect signer list**  
+If you forget to include a required signer (e.g., the fee payer or an account that modifies state), the transaction will fail.
+</Callout>
+
+<Callout type="warn">
+**Invalid instruction format**  
+Instructions must include the correct program ID, accounts (in order), and properly encoded data. A mismatch causes program errors.
+</Callout>
+
+---
+
+## Summary
+
+Here’s what you now understand:
+
+* A transaction contains instructions, accounts, signers, and a recent blockhash
+* Signers authorize a transaction and must match the required account permissions
+* The recent blockhash ensures freshness and avoids replay
+* The lifecycle spans creation → signing → submission → confirmation
+* Instructions are atomic and must be formatted correctly for on-chain programs to accept them

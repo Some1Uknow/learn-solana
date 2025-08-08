@@ -1,7 +1,169 @@
 ---
 title: Project - Program Interaction Toolkit
+description: This project will help you build a CLI-based toolkit that interacts directly with deployed Solana programs. You'll write TypeScript scripts using `@solana/web3.js` to query accounts, send transactions, and analyze on-chain activity, without relying on Anchor. The goal is to get comfortable with raw, lower-level Solana development.
 type: project
 module: 🧱 Solana Fundamentals
 ---
 
-Build CLI tools to interact with existing Solana programs, inspect account data, and analyze transactions (non-Anchor approach)
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="info">
+This project does not involve writing Solana smart contracts. Instead, you're building tools to interact with them, which is a key skill for frontend devs, indexers, or tooling engineers.
+</Callout>
+
+---
+
+## What You’ll Build
+
+<Callout type="info">
+By the end of this project, you will:
+
+- Write scripts to connect to devnet and read account state
+- Send custom transactions using `@solana/web3.js`
+- Query program accounts and decode their data
+- Fetch transaction logs and simulate transactions
+</Callout>
+
+---
+
+## Requirements
+
+- Node.js installed
+- A funded keypair (`solana-keygen new` + `solana airdrop`)
+- TypeScript + basic CLI project setup
+- Installed `@solana/web3.js`
+
+```bash
+npm install @solana/web3.js
+````
+
+---
+
+## Suggested Toolkit Features
+
+You don’t need to build all of these; pick at least 3 to implement fully.
+
+<Accordions>
+<Accordion title="Fetch account info">
+### Fetch account info
+
+Given a public key, print balance, owner, executable flag, and raw data. 
+</Accordion>
+
+<Accordion title="Decode account data">
+### Decode account data
+
+Given a known data layout (like a counter or token account), parse and print fields in human-readable form. 
+</Accordion>
+
+<Accordion title="Send lamports">
+### Send lamports
+
+Transfer lamports between accounts using a script. 
+</Accordion>
+
+<Accordion title="Simulate a transaction">
+### Simulate a transaction
+
+Use `simulateTransaction()` to preview logs and execution results without sending.
+</Accordion>
+
+<Accordion title="Analyze transaction logs">
+### Analyze transaction logs
+
+Fetch a transaction by signature and print its instruction list, log messages, and error (if any).
+</Accordion>
+</Accordions>
+
+---
+
+## Sample Snippets
+
+Here are some examples you can adapt.
+
+### Connect to Devnet
+
+```ts title="connect.ts"
+import { Connection, clusterApiUrl } from "@solana/web3.js";
+
+const connection = new Connection(clusterApiUrl("devnet"));
+```
+
+### Fetch Account Info
+
+```ts title="account-info.ts"
+import { PublicKey } from "@solana/web3.js";
+
+const pubkey = new PublicKey("...");
+const info = await connection.getAccountInfo(pubkey);
+
+console.log({
+  lamports: info?.lamports,
+  owner: info?.owner.toBase58(),
+  executable: info?.executable,
+  dataLength: info?.data.length
+});
+```
+
+---
+
+## Project Steps
+
+<Steps>
+<Step>
+### Step 1: Scaffold the CLI
+
+Create a basic Node.js/TypeScript project with one command per file (e.g., `send.ts`, `info.ts`). Use `ts-node` or `esbuild-runner` to run.
+</Step>
+
+<Step>
+### Step 2: Implement Script Logic
+
+Use `@solana/web3.js` to write CLI tools that can connect, fetch data, and send transactions.
+</Step>
+
+<Step>
+### Step 3: Test on Devnet
+
+Use `solana airdrop` to get funds and run your tools against devnet programs or accounts. 
+</Step>
+
+<Step>
+### Step 4: Add Flags or Arguments
+
+Use `process.argv` or libraries like `yargs` to pass CLI arguments (e.g., `--to`, `--amount`, `--program-id`). 
+</Step> </Steps>
+
+---
+
+## Common Pitfalls
+
+<Callout type="warn">
+**Missing await**  
+Most `@solana/web3.js` methods are async. Be sure to `await` or use `.then()` to get actual results.
+</Callout>
+
+<Callout type="warn">
+**Wrong cluster or account**  
+Double-check that you're connecting to the correct cluster (`devnet`, not `mainnet`) and using valid base58-encoded keys.
+</Callout>
+
+<Callout type="warn">
+**Data decoding mismatch**  
+If you’re decoding account data manually, ensure your buffer layout matches the on-chain structure exactly.
+</Callout>
+
+---
+
+## Summary
+
+This project introduced you to interacting with Solana programs and accounts through the raw JavaScript SDK. By building your own CLI tooling, you now understand:
+
+* How to read and write to the Solana blockchain from scripts
+* What happens under the hood of wallets and UIs
+* How to analyze account state and transaction logs
+
+You can now extend these tools or reuse this structure for future indexing, simulation, or debugging work.

@@ -1,4 +1,8 @@
 {
+   "title": "Capstone",
+  "description": "Build and Ship a Full-Stack Solana Application",
+  "icon": "Solana",
+  "root": true,
   "pages": [
     "index",
     "advanced-features-implementation",

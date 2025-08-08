@@ -4,7 +4,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { Analytics } from "@vercel/analytics/react";
 import { RootProvider } from "fumadocs-ui/provider";
 const inter = Inter({
   subsets: ["latin"],
@@ -27,6 +26,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
   title: "learn.sol",
   description: "The first AI-assisted Solana learning and building platform",
   openGraph: {
@@ -65,8 +67,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <RootProvider>{children}</RootProvider>
-        
-          <Analytics />
+
           <Toaster />
         </ThemeProvider>
       </body>

@@ -1,7 +1,172 @@
 ---
 title: Exercise - Accounts & Lamports Exploration
 type: exercise
+description: Practice creating accounts, transferring lamports, and understanding rent and data layout.
 module: 🧱 Solana Fundamentals
 ---
 
-Hands-on practice creating accounts, transferring lamports, understanding rent and account data structures
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This exercise helps you explore the basics of Solana's account system and lamports. You’ll create wallets, transfer funds, examine how rent works, and inspect the structure of an account.
+
+These operations are foundational for interacting with on-chain programs.
+
+<Callout type="info">
+You don’t need to understand everything about programs yet. This is all about getting comfortable with how accounts and transfers work at the CLI level.
+</Callout>
+
+---
+
+## What You’ll Practice
+
+<Callout type="info">
+By the end of this exercise, you will:
+
+</Callout>
+
+---
+
+## Step-by-Step Exercise
+
+<Steps>
+<Step>
+### Step 1: Create Two Wallets
+
+Generate two keypairs and save them as separate files.
+
+```bash
+solana-keygen new --outfile wallet1.json
+solana-keygen new --outfile wallet2.json
+````
+
+</Step>
+
+<Step>
+
+### Step 2: Check Wallet Balances
+
+Use the `--keypair` flag to check balances of both wallets.
+
+```bash
+solana balance --keypair wallet1.json
+solana balance --keypair wallet2.json
+```
+
+</Step>
+
+<Step>
+
+### Step 3: Airdrop to Wallet 1
+
+Request 2 SOL to the first wallet on devnet.
+
+```bash
+solana airdrop 2 --keypair wallet1.json
+solana balance --keypair wallet1.json
+```
+
+</Step>
+
+<Step>
+
+### Step 4: Transfer Lamports to Wallet 2
+
+Send 0.01 SOL (10,000,000 lamports) to wallet2 using its public key.
+
+```bash
+solana transfer ADDRESS_2 10000000 --from wallet1.json --allow-unfunded-recipient
+```
+
+</Step>
+
+<Step>
+
+### Step 5: Confirm Transfer
+
+Verify that the balances are updated as expected.
+
+```bash
+solana balance --keypair wallet1.json
+solana balance --keypair wallet2.json
+```
+
+</Step>
+
+<Step>
+
+### Step 6: Inspect Account Layout
+
+Use the `solana account` command to see internal fields like owner, lamports, and rent status.
+
+```bash
+solana account ADDRESS_2
+```
+
+</Step>
+</Steps>
+
+-----
+
+## Rent and Minimum Balance
+
+Accounts on Solana either:
+
+  * Stay rent-exempt by holding a minimum balance
+  * Or lose balance over time through rent fees
+
+To check the rent-exempt threshold for an empty account:
+
+```bash
+solana rent 0
+```
+
+<Callout type="tip">
+For most accounts used by smart contracts, it is best to make them rent-exempt to avoid unexpected deletion.
+</Callout>
+
+-----
+
+## Additional Practice Ideas
+
+  * Try sending lamports without the `--allow-unfunded-recipient` flag
+  * Airdrop to wallet2 directly and then inspect its account layout
+  * Run `solana account` on a known public account (e.g. SPL Token Mint) and study the fields
+
+<Callout type="info">
+Feel free to explore variations. Small tweaks help you deeply understand Solana’s account system.
+</Callout>
+
+-----
+
+## Common Pitfalls
+
+<Callout type="warn">
+**Forgetting `--keypair`**
+The CLI will default to the wallet in `~/.config/solana/id.json` if no keypair is provided, which can lead to using the wrong wallet.
+</Callout>
+
+<Callout type="warn">
+**Mixing up SOL and lamports**
+Solana CLI expects lamports in most commands. 1 SOL = 1,000,000,000 lamports.
+</Callout>
+
+<Callout type="warn">
+**Transfer fails without `--allow-unfunded-recipient`**
+If the receiving account has never existed before, Solana requires this flag to cover rent and create the account.
+</Callout>
+
+-----
+
+## Summary
+
+In this exercise, you:
+
+  * Created two Solana wallets
+  * Funded one and transferred lamports to the other
+  * Used CLI commands to inspect balances and accounts
+  * Learned how rent and lamport units affect account health
+
+These are the basic CLI skills every Solana developer should know before deploying or interacting with smart contracts.
