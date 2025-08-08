@@ -101,7 +101,6 @@
     "vaul": "^0.9.6"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.13",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^22",
     "@types/react": "^18.3.3",
@@ -112,5 +111,8 @@
     "typescript": "^5",
     "wrangler": "^4.28.1",
     "zod": "^4.0.14"
+  },
+  "resolutions": {
+    "esbuild": "0.25.0"
   }
 }
