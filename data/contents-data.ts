@@ -1,4 +1,7 @@
-{
+// This file exports the contents-data originally from contents-data.json
+// Use this for direct import in your modules/pages/components
+
+export const contentsData = {
    "modules": [
        {
            "id": "week-1",
@@ -301,4 +304,4 @@
        "user_experience": "Intuitive, responsive frontend with smooth blockchain interaction flows",
        "professional_readiness": "Portfolio-quality documentation, deployment, and presentation materials"
    }
-}
+};

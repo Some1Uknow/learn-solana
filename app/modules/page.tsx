@@ -1,7 +1,6 @@
 import React from "react";
-import fs from "node:fs/promises";
-import path from "node:path";
 import ModulesGrid from "@/components/learn/modules-grid";
+import { contentsData } from '../../data/contents-data';
 // Types for the data
 interface Topic {
   id: string;
@@ -24,16 +23,10 @@ interface ContentsData {
   modules: ModuleItem[];
 }
 
-// Server function to load JSON content
-async function loadModules(): Promise<ModuleItem[]> {
-  const filePath = path.join(process.cwd(), "data", "contents-data.json");
-  const raw = await fs.readFile(filePath, "utf-8");
-  const json = JSON.parse(raw) as ContentsData;
-  return json.modules;
-}
+// Use contentsData directly in your component logic
+const modules = contentsData.modules;
 
 export default async function ModulesPage() {
-  const modules = await loadModules();
   return (
     <div className="min-h-screen w-full relative bg-black">
       {/* Prismatic Aurora Burst - Multi-layered Gradient */}

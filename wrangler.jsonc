@@ -2,11 +2,21 @@
   "main": ".open-next/worker.js",
   "name": "learnsol",
   "compatibility_date": "2025-03-25",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "env": {
+    "staging": {
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      }
+    }
   }
 }
