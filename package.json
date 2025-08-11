@@ -71,6 +71,7 @@
     "highlight.js": "^11.11.1",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
+    "mermaid": "^11.9.0",
     "motion": "^12.18.1",
     "nanoid": "^5.1.5",
     "next": "^15.4.1",

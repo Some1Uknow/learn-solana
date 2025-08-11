@@ -1,34 +1,33 @@
-import { embed, embedMany } from "ai";
+import { embed } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { db } from "../db";
 import { cosineDistance, desc, gt, sql } from "drizzle-orm";
 import { embeddings } from "../db/schema/embeddings";
-import { generateChunks } from "../mdx/processor";
 import { config } from "dotenv";
 
 config({ path: ".env" }); // Load environment variables from .env
 
 const embeddingModel = openai.embedding("text-embedding-ada-002");
 
-export const generateEmbeddings = async (
-  value: string
-): Promise<Array<{ embedding: number[]; content: string }>> => {
-  const chunks = generateChunks(value);
+// export const generateEmbeddings = async (
+//   value: string
+// ): Promise<Array<{ embedding: number[]; content: string }>> => {
+//   const chunks = generateChunks(value);
 
-  if (chunks.length === 0) {
-    return [];
-  }
+//   if (chunks.length === 0) {
+//     return [];
+//   }
 
-  const { embeddings: embeddingResults } = await embedMany({
-    model: embeddingModel,
-    values: chunks,
-  });
+//   const { embeddings: embeddingResults } = await embedMany({
+//     model: embeddingModel,
+//     values: chunks,
+//   });
 
-  return embeddingResults.map((e, i) => ({
-    content: chunks[i],
-    embedding: e,
-  }));
-};
+//   return embeddingResults.map((e, i) => ({
+//     content: chunks[i],
+//     embedding: e,
+//   }));
+// };
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
   if (!value || typeof value !== 'string') {
@@ -63,7 +62,7 @@ export const findRelevantContent = async (userQuery: string) => {
         resourceId: embeddings.resourceId,
       })
       .from(embeddings)
-      .where(gt(similarity, 0.7)) // Higher threshold for better relevance
+      .where(gt(similarity, 0.7)) 
       .orderBy((t) => desc(t.similarity))
       .limit(5);
 

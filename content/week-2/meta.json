@@ -5,11 +5,7 @@
   "root": true,
   "pages": [
     "index",
-    "result-error-handling",
-    "borsh-serialization",
-    "counter-program-project",
-    "security-patterns-exercise",
-    "defensive-programming-challenge",
-    "program-structure-deep-dive"
+    "rust-basics",
+    "ownership-borrowing"
   ]
 }

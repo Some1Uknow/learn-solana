@@ -1,7 +1,118 @@
 ---
-title: Ownership, Borrowing & Memory Safety
-type: theory
-module: 🦀 Rust for Solana
+title: Solana Rust Development Environment
+type: setup
+module: ⚙ Solana Rust Development
 ---
 
-Deep dive into Rust's ownership model, borrowing rules, lifetimes, and why they matter for blockchain security
+This guide sets up a Rust-only Solana development environment without using Anchor. It includes installing required tools, configuring Solana CLI, and preparing your workspace for building and deploying programs directly with native Rust.
+
+## Prerequisites
+
+- Basic understanding of Rust
+- Familiarity with Solana's account and program concepts
+- Installed Git
+
+## Steps
+
+### 1. Install Rust
+
+```bash title="Install Rust"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+````
+
+Verify installation:
+
+```bash title="Verify Rust"
+rustc --version
+cargo --version
+```
+
+### 2. Install Solana CLI
+
+```bash title="Install Solana CLI"
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+```
+
+Add Solana CLI to your path:
+
+```bash title="Add to PATH"
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+```
+
+Verify installation:
+
+```bash title="Verify Solana"
+solana --version
+```
+
+### 3. Set Local Test Validator
+
+```bash title="Set Local Cluster"
+solana config set --url localhost
+```
+
+To run the local validator:
+
+```bash title="Run Validator"
+solana-test-validator
+```
+
+Keep this terminal running.
+
+### 4. Generate a Local Keypair
+
+```bash title="Generate Keypair"
+solana-keygen new --outfile ~/.config/solana/id.json
+```
+
+Check your account:
+
+```bash title="Check Balance"
+solana balance
+```
+
+### 5. Fund Your Account
+
+Airdrop test SOL:
+
+```bash title="Airdrop SOL"
+solana airdrop 2
+```
+
+### 6. Create a New Program
+
+```bash title="New Cargo Project"
+cargo new my_solana_program
+cd my_solana_program
+```
+
+Update `Cargo.toml`:
+
+```toml title="Cargo.toml"
+[package]
+name = "my_solana_program"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+solana-program = "1.18.14"
+```
+
+### 7. Build the Program
+
+```bash title="Build Program"
+cargo build-bpf
+```
+
+This produces a `.so` file in `target/deploy`.
+
+### 8. Deploy the Program
+
+```bash title="Deploy Program"
+solana program deploy target/deploy/my_solana_program.so
+```
+
+Copy the program ID from the output and save it for client-side interaction.
