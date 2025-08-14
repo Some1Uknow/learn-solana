@@ -1,0 +1,607 @@
+---
+title: "Day 4 Challenge: Solana Wallet Manager"
+description: "Build a wallet management system using enums and pattern matching"
+---
+
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Day 4 Challenge: Solana Wallet Manager
+
+<Callout type="warn">
+**Challenge Mission: Wallet Management System**
+
+Build a comprehensive wallet management system that handles different account types, transaction states, and error conditions. This challenge will test your mastery of enums, pattern matching, and error handling!
+</Callout>
+
+## 🎯 Challenge Overview
+
+Create a Solana wallet management system that can:
+- Handle different types of accounts
+- Track transaction states
+- Manage wallet operations with proper error handling
+- Process different transaction types
+- Validate operations using pattern matching
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[WalletManager] --> B[accounts: Vec Account]
+    A --> C[pending_txs: Vec Transaction]
+    
+    D[Account] --> E[address: String]
+    D --> F[balance: u64]
+    D --> G[account_type: AccountType]
+    D --> H[status: AccountStatus]
+    
+    I[AccountType] --> J[SystemAccount]
+    I --> K[TokenAccount]
+    I --> L[ProgramAccount]
+    I --> M[NFTAccount]
+    
+    N[AccountStatus] --> O[Active]
+    N --> P[Frozen]
+    N --> Q[Suspended]
+    
+    R[Transaction] --> S[id: String]
+    R --> T[from: String]
+    R --> U[to: String]
+    R --> V[tx_type: TransactionType]
+    R --> W[status: TxStatus]
+    
+    X[TransactionType] --> Y[Transfer]
+    X --> Z[Mint]
+    X --> AA[Burn]
+    X --> BB[Stake]
+    
+    CC[TxStatus] --> DD[Pending]
+    CC --> EE[Confirmed]
+    CC --> FF[Failed]
+    
+    style A fill:#e1f5fe
+    style I fill:#f3e5f5
+    style X fill:#e8f5e8
+    style CC fill:#fff3e0
+  `}
+  title="Wallet Management System Architecture"
+/>
+
+## 🏗️ Part 1: Core Enums and Structs
+
+Start by implementing the foundational types:
+
+```rust
+use std::collections::HashMap;
+
+// Account types in Solana ecosystem
+#[derive(Debug, Clone, PartialEq)]
+enum AccountType {
+    SystemAccount,
+    TokenAccount { 
+        mint: String,
+        decimals: u8 
+    },
+    ProgramAccount { 
+        executable: bool,
+        owner: String 
+    },
+    NFTAccount { 
+        collection: String,
+        metadata_uri: String 
+    },
+}
+
+// Account status
+#[derive(Debug, Clone, PartialEq)]
+enum AccountStatus {
+    Active,
+    Frozen { reason: String, until_slot: Option<u64> },
+    Suspended { violation: String },
+}
+
+// Transaction types
+#[derive(Debug, Clone)]
+enum TransactionType {
+    Transfer { amount: u64, token_mint: Option<String> },
+    Mint { amount: u64, recipient: String },
+    Burn { amount: u64 },
+    Stake { amount: u64, validator: String },
+    CreateAccount { account_type: AccountType },
+}
+
+// Transaction status
+#[derive(Debug, Clone, PartialEq)]
+enum TxStatus {
+    Pending,
+    Confirmed { slot: u64, signature: String },
+    Failed { error: String, slot: u64 },
+}
+
+// Wallet operation errors
+#[derive(Debug)]
+enum WalletError {
+    AccountNotFound(String),
+    InsufficientBalance { requested: u64, available: u64 },
+    AccountFrozen { address: String, reason: String },
+    InvalidTransaction { reason: String },
+    NetworkError(String),
+    UnauthorizedOperation,
+}
+
+// Account struct
+#[derive(Debug, Clone)]
+struct Account {
+    address: String,
+    balance: u64,
+    account_type: AccountType,
+    status: AccountStatus,
+    created_at: u64, // slot number
+}
+
+// Transaction struct
+#[derive(Debug, Clone)]
+struct Transaction {
+    id: String,
+    from: String,
+    to: Option<String>,
+    tx_type: TransactionType,
+    status: TxStatus,
+    created_at: u64,
+}
+```
+
+## 🔧 Part 2: Account Implementation
+
+Implement the `Account` with methods for different operations:
+
+```rust
+impl Account {
+    fn new(address: String, account_type: AccountType, created_at: u64) -> Self {
+        Self {
+            address,
+            balance: 0,
+            account_type,
+            status: AccountStatus::Active,
+            created_at,
+        }
+    }
+    
+    // TODO: Implement these methods using pattern matching
+    
+    fn is_active(&self) -> bool {
+        // Return true only if account is active
+        todo!()
+    }
+    
+    fn can_send(&self, amount: u64) -> Result<(), WalletError> {
+        // Check if account can send the requested amount
+        // Consider account status and balance
+        todo!()
+    }
+    
+    fn get_account_info(&self) -> String {
+        // Return formatted account information based on account type
+        // Use match to handle different account types
+        todo!()
+    }
+    
+    fn freeze(&mut self, reason: String, until_slot: Option<u64>) -> Result<(), WalletError> {
+        // Freeze account if it's currently active
+        todo!()
+    }
+    
+    fn unfreeze(&mut self, current_slot: u64) -> Result<(), WalletError> {
+        // Unfreeze account based on conditions
+        todo!()
+    }
+    
+    fn debit(&mut self, amount: u64) -> Result<(), WalletError> {
+        // Remove amount from balance with proper validation
+        todo!()
+    }
+    
+    fn credit(&mut self, amount: u64) -> Result<(), WalletError> {
+        // Add amount to balance if account can receive
+        todo!()
+    }
+}
+```
+
+## 🚀 Part 3: Transaction Implementation
+
+Implement the `Transaction` with state management:
+
+```rust
+impl Transaction {
+    fn new(
+        id: String, 
+        from: String, 
+        to: Option<String>, 
+        tx_type: TransactionType,
+        created_at: u64
+    ) -> Self {
+        Self {
+            id,
+            from,
+            to,
+            tx_type,
+            status: TxStatus::Pending,
+            created_at,
+        }
+    }
+    
+    // TODO: Implement these methods
+    
+    fn confirm(&mut self, slot: u64, signature: String) {
+        // Update status to confirmed
+        todo!()
+    }
+    
+    fn fail(&mut self, error: String, slot: u64) {
+        // Update status to failed
+        todo!()
+    }
+    
+    fn get_amount(&self) -> Option<u64> {
+        // Extract amount from transaction type using pattern matching
+        todo!()
+    }
+    
+    fn is_pending(&self) -> bool {
+        // Check if transaction is still pending
+        todo!()
+    }
+    
+    fn get_status_info(&self) -> String {
+        // Return formatted status information
+        todo!()
+    }
+    
+    fn involves_account(&self, address: &str) -> bool {
+        // Check if transaction involves the given account
+        todo!()
+    }
+}
+```
+
+## 💼 Part 4: Wallet Manager Implementation
+
+Create the main wallet manager:
+
+```rust
+struct WalletManager {
+    accounts: Vec<Account>,
+    transactions: Vec<Transaction>,
+    current_slot: u64,
+    next_tx_id: u64,
+}
+
+impl WalletManager {
+    fn new() -> Self {
+        Self {
+            accounts: Vec::new(),
+            transactions: Vec::new(),
+            current_slot: 1,
+            next_tx_id: 1,
+        }
+    }
+    
+    // TODO: Implement these core methods
+    
+    fn create_account(&mut self, address: String, account_type: AccountType) -> Result<(), WalletError> {
+        // Create new account with validation
+        todo!()
+    }
+    
+    fn get_account(&self, address: &str) -> Result<&Account, WalletError> {
+        // Find account by address
+        todo!()
+    }
+    
+    fn get_account_mut(&mut self, address: &str) -> Result<&mut Account, WalletError> {
+        // Find mutable account by address
+        todo!()
+    }
+    
+    fn transfer(
+        &mut self, 
+        from: &str, 
+        to: &str, 
+        amount: u64, 
+        token_mint: Option<String>
+    ) -> Result<String, WalletError> {
+        // Execute transfer between accounts
+        // Return transaction ID
+        todo!()
+    }
+    
+    fn mint_tokens(
+        &mut self, 
+        to: &str, 
+        amount: u64, 
+        mint_authority: &str
+    ) -> Result<String, WalletError> {
+        // Mint new tokens to account
+        todo!()
+    }
+    
+    fn burn_tokens(&mut self, from: &str, amount: u64) -> Result<String, WalletError> {
+        // Burn tokens from account
+        todo!()
+    }
+    
+    fn get_balance(&self, address: &str) -> Result<u64, WalletError> {
+        // Get account balance
+        todo!()
+    }
+    
+    fn list_accounts_by_type(&self, account_type: &AccountType) -> Vec<&Account> {
+        // Filter accounts by type using pattern matching
+        todo!()
+    }
+    
+    fn get_pending_transactions(&self) -> Vec<&Transaction> {
+        // Get all pending transactions
+        todo!()
+    }
+    
+    fn confirm_transaction(&mut self, tx_id: &str, signature: String) -> Result<(), WalletError> {
+        // Confirm a pending transaction
+        todo!()
+    }
+    
+    fn get_account_transactions(&self, address: &str) -> Vec<&Transaction> {
+        // Get all transactions involving an account
+        todo!()
+    }
+    
+    fn freeze_account(&mut self, address: &str, reason: String) -> Result<(), WalletError> {
+        // Freeze account for violations
+        todo!()
+    }
+    
+    fn advance_slot(&mut self) {
+        // Simulate blockchain progression
+        self.current_slot += 1;
+    }
+    
+    fn get_network_stats(&self) -> NetworkStats {
+        // Generate network statistics using pattern matching
+        todo!()
+    }
+}
+
+// Network statistics
+#[derive(Debug)]
+struct NetworkStats {
+    total_accounts: usize,
+    active_accounts: usize,
+    frozen_accounts: usize,
+    total_transactions: usize,
+    pending_transactions: usize,
+    confirmed_transactions: usize,
+    failed_transactions: usize,
+    total_volume: u64,
+}
+```
+
+## 🧪 Part 5: Testing Your Implementation
+
+Create a comprehensive test suite:
+
+```rust
+fn main() {
+    let mut wallet_manager = WalletManager::new();
+    
+    // Test 1: Create different account types
+    println!("=== Test 1: Creating Accounts ===");
+    
+    // Create system account
+    wallet_manager.create_account(
+        "11111111111111111111111111111112".to_string(),
+        AccountType::SystemAccount,
+    ).expect("Failed to create system account");
+    
+    // Create token account
+    wallet_manager.create_account(
+        "TokenAccount1111111111111111111111".to_string(),
+        AccountType::TokenAccount {
+            mint: "SOL".to_string(),
+            decimals: 9,
+        },
+    ).expect("Failed to create token account");
+    
+    // Create NFT account
+    wallet_manager.create_account(
+        "NFTAccount11111111111111111111111".to_string(),
+        AccountType::NFTAccount {
+            collection: "SolanaMonkeys".to_string(),
+            metadata_uri: "https://example.com/metadata/1".to_string(),
+        },
+    ).expect("Failed to create NFT account");
+    
+    // Test 2: Mint some tokens
+    println!("\n=== Test 2: Minting Tokens ===");
+    
+    match wallet_manager.mint_tokens(
+        "TokenAccount1111111111111111111111",
+        1000000000, // 1 SOL
+        "mint_authority",
+    ) {
+        Ok(tx_id) => println!("Minted tokens, transaction: {}", tx_id),
+        Err(e) => println!("Mint failed: {:?}", e),
+    }
+    
+    // Test 3: Transfer tokens
+    println!("\n=== Test 3: Transfer Operations ===");
+    
+    // First create another account to transfer to
+    wallet_manager.create_account(
+        "ReceiverAccount11111111111111111111".to_string(),
+        AccountType::TokenAccount {
+            mint: "SOL".to_string(),
+            decimals: 9,
+        },
+    ).expect("Failed to create receiver account");
+    
+    match wallet_manager.transfer(
+        "TokenAccount1111111111111111111111",
+        "ReceiverAccount11111111111111111111",
+        500000000, // 0.5 SOL
+        Some("SOL".to_string()),
+    ) {
+        Ok(tx_id) => println!("Transfer successful, transaction: {}", tx_id),
+        Err(e) => println!("Transfer failed: {:?}", e),
+    }
+    
+    // Test 4: Account freezing
+    println!("\n=== Test 4: Account Management ===");
+    
+    match wallet_manager.freeze_account(
+        "TokenAccount1111111111111111111111",
+        "Suspicious activity detected".to_string(),
+    ) {
+        Ok(()) => println!("Account frozen successfully"),
+        Err(e) => println!("Failed to freeze account: {:?}", e),
+    }
+    
+    // Try to transfer from frozen account
+    match wallet_manager.transfer(
+        "TokenAccount1111111111111111111111",
+        "ReceiverAccount11111111111111111111",
+        100000000,
+        Some("SOL".to_string()),
+    ) {
+        Ok(tx_id) => println!("Unexpected success: {}", tx_id),
+        Err(e) => println!("Expected failure from frozen account: {:?}", e),
+    }
+    
+    // Test 5: Transaction confirmation
+    println!("\n=== Test 5: Transaction Processing ===");
+    
+    let pending_txs = wallet_manager.get_pending_transactions();
+    println!("Pending transactions: {}", pending_txs.len());
+    
+    for tx in pending_txs {
+        println!("Transaction {}: {}", tx.id, tx.get_status_info());
+        
+        // Simulate confirming transaction
+        wallet_manager.advance_slot();
+        if let Err(e) = wallet_manager.confirm_transaction(&tx.id, "signature123".to_string()) {
+            println!("Failed to confirm transaction {}: {:?}", tx.id, e);
+        }
+    }
+    
+    // Test 6: Generate statistics
+    println!("\n=== Test 6: Network Statistics ===");
+    
+    let stats = wallet_manager.get_network_stats();
+    println!("Network Statistics: {:#?}", stats);
+    
+    // Test 7: Account filtering
+    println!("\n=== Test 7: Account Filtering ===");
+    
+    let token_accounts = wallet_manager.list_accounts_by_type(&AccountType::TokenAccount {
+        mint: "SOL".to_string(),
+        decimals: 9,
+    });
+    
+    println!("SOL Token accounts: {}", token_accounts.len());
+    for account in token_accounts {
+        println!("- {}: {} ({})", 
+            account.address, 
+            account.balance, 
+            account.get_account_info()
+        );
+    }
+}
+```
+
+## 🎯 Challenge Requirements
+
+Your implementation must:
+
+1. **Use Pattern Matching**: All enum handling must use `match` expressions or `if let`
+2. **Handle All Variants**: Every enum must have complete pattern coverage
+3. **Error Handling**: Use `Result<T, E>` for all fallible operations
+4. **State Validation**: Accounts and transactions must validate state changes
+5. **Memory Safety**: No panics - handle all error conditions gracefully
+
+## 🏆 Bonus Challenges
+
+If you complete the basic implementation, try these extensions:
+
+### Bonus 1: Transaction History
+```rust
+impl WalletManager {
+    fn get_transaction_history(&self, address: &str, limit: usize) -> Vec<&Transaction> {
+        // Return recent transactions for an account
+        todo!()
+    }
+    
+    fn calculate_transaction_fees(&self, tx_type: &TransactionType) -> u64 {
+        // Calculate fees based on transaction type
+        todo!()
+    }
+}
+```
+
+### Bonus 2: Account Recovery
+```rust
+#[derive(Debug)]
+enum RecoveryMethod {
+    SeedPhrase { phrase: String },
+    PrivateKey { key: String },
+    MultiSig { required_signatures: u8, signers: Vec<String> },
+}
+
+impl Account {
+    fn initiate_recovery(&mut self, method: RecoveryMethod) -> Result<String, WalletError> {
+        // Implement account recovery
+        todo!()
+    }
+}
+```
+
+### Bonus 3: Staking System
+```rust
+#[derive(Debug)]
+struct StakeAccount {
+    delegated_to: String,
+    stake_amount: u64,
+    rewards_earned: u64,
+    activation_epoch: u64,
+}
+
+impl WalletManager {
+    fn stake_tokens(&mut self, from: &str, validator: &str, amount: u64) -> Result<String, WalletError> {
+        // Implement token staking
+        todo!()
+    }
+    
+    fn unstake_tokens(&mut self, stake_account: &str) -> Result<String, WalletError> {
+        // Implement unstaking with cooldown
+        todo!()
+    }
+}
+```
+
+---
+
+## ✅ Success Criteria
+
+Your solution should demonstrate:
+
+- **Complete enum coverage** with no unreachable patterns
+- **Proper error propagation** using the `?` operator
+- **State machine logic** for account and transaction status
+- **Pattern matching expertise** for all data extraction
+- **Memory safety** with no unwrap() calls on user input
+
+<Callout type="success">
+**Challenge Complete!**
+
+Once you've implemented this wallet manager, you'll have mastered the core patterns used in Solana program development. These same concepts appear in every Anchor program - from account validation to instruction processing!
+</Callout>
+
+**Ready for tomorrow?** Day 5 will cover **Collections and String Handling** - the tools you need to efficiently manage data structures in blockchain applications!

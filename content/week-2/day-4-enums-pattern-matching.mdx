@@ -1,0 +1,893 @@
+---
+title: "Day 4: Enums and Pattern Matching"
+description: "Master Rust's powerful enum system and pattern matching for robust code"
+---
+
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Day 4: Enums and Pattern Matching
+
+<Callout type="info">
+**Today's Mission: Master Data Variants**
+
+Learn Rust's most powerful feature for handling different types of data safely. Enums and pattern matching are everywhere in Solana development - from account types to transaction results.
+</Callout>
+
+## 🎲 Understanding Enums in Rust
+
+Enums allow you to define types that can be one of several variants. They're much more powerful than enums in other languages.
+
+### Basic Enum Syntax
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[Direction Enum] --> B[North]
+    A --> C[South] 
+    A --> D[East]
+    A --> E[West]
+    
+    F[OrderStatus Enum] --> G[Pending]
+    F --> H[Confirmed]
+    F --> I[Shipped]
+    F --> J[Delivered]
+    
+    style A fill:#e1f5fe
+    style F fill:#f3e5f5
+  `}
+  title="Basic Enum Variants"
+/>
+
+```rust
+// Simple enum with unit variants
+#[derive(Debug)]
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+// Enum with associated data
+#[derive(Debug)]
+enum OrderStatus {
+    Pending,
+    Processing { estimated_days: u8 },
+    Shipped { tracking_number: String },
+    Delivered { signature: String },
+    Cancelled { reason: String },
+}
+
+fn main() {
+    let direction = Direction::North;
+    println!("{:?}", direction); // North
+    
+    let order = OrderStatus::Shipped {
+        tracking_number: "1Z999AA1234567890".to_string(),
+    };
+    println!("{:?}", order);
+}
+```
+
+### Enums with Different Data Types
+
+```rust
+#[derive(Debug)]
+enum Message {
+    Quit,                           // No data
+    Move { x: i32, y: i32 },       // Struct-like
+    Write(String),                  // Tuple-like
+    ChangeColor(i32, i32, i32),    // Multiple values
+}
+
+impl Message {
+    fn process(&self) {
+        match self {
+            Message::Quit => println!("Quitting application"),
+            Message::Move { x, y } => println!("Moving to ({}, {})", x, y),
+            Message::Write(text) => println!("Writing: {}", text),
+            Message::ChangeColor(r, g, b) => {
+                println!("Changing color to RGB({}, {}, {})", r, g, b)
+            }
+        }
+    }
+}
+
+fn main() {
+    let messages = vec![
+        Message::Move { x: 10, y: 20 },
+        Message::Write("Hello, Solana!".to_string()),
+        Message::ChangeColor(255, 0, 128),
+        Message::Quit,
+    ];
+    
+    for message in messages {
+        message.process();
+    }
+}
+```
+
+---
+
+## 🛡️ The Option&lt;T&gt; Enum
+
+The `Option<T>` enum handles the concept of "something or nothing" safely.
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[Option T] --> B[Some T]
+    A --> C[None]
+    
+    B --> D[Contains Value]
+    C --> E[No Value]
+    
+    F[Example Uses] --> G[Database Queries]
+    F --> H[Array Access]
+    F --> I[Configuration Values]
+    F --> J[Optional Parameters]
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#ffebee
+  `}
+  title="Option<T> Enum Structure"
+/>
+
+### Working with Option&lt;T&gt;
+
+```rust
+fn find_user_by_id(id: u32) -> Option<String> {
+    let users = vec![
+        (1, "Alice".to_string()),
+        (2, "Bob".to_string()),
+        (3, "Charlie".to_string()),
+    ];
+    
+    for (user_id, name) in users {
+        if user_id == id {
+            return Some(name);
+        }
+    }
+    None
+}
+
+fn main() {
+    // Different ways to handle Option
+    let user = find_user_by_id(2);
+    
+    // Method 1: Pattern matching with match
+    match user {
+        Some(name) => println!("Found user: {}", name),
+        None => println!("User not found"),
+    }
+    
+    // Method 2: if let syntax
+    let user = find_user_by_id(4);
+    if let Some(name) = user {
+        println!("Found user: {}", name);
+    } else {
+        println!("User not found");
+    }
+    
+    // Method 3: Using Option methods
+    let user = find_user_by_id(1);
+    let greeting = user
+        .map(|name| format!("Hello, {}!", name))
+        .unwrap_or("Hello, stranger!".to_string());
+    println!("{}", greeting);
+}
+```
+
+### Option Methods and Patterns
+
+```rust
+fn demonstrate_option_methods() {
+    let some_number = Some(5);
+    let no_number: Option<i32> = None;
+    
+    // is_some() and is_none()
+    println!("some_number is some: {}", some_number.is_some());
+    println!("no_number is none: {}", no_number.is_none());
+    
+    // unwrap_or() - provide default value
+    println!("Value or default: {}", no_number.unwrap_or(0));
+    
+    // unwrap_or_else() - compute default value
+    println!("Value or computed: {}", no_number.unwrap_or_else(|| {
+        println!("Computing default value...");
+        42
+    }));
+    
+    // map() - transform the value if present
+    let doubled = some_number.map(|x| x * 2);
+    println!("Doubled: {:?}", doubled);
+    
+    // and_then() - chain operations
+    let result = some_number
+        .and_then(|x| if x > 0 { Some(x * 2) } else { None })
+        .and_then(|x| if x < 20 { Some(x + 1) } else { None });
+    println!("Chained operations: {:?}", result);
+}
+```
+
+---
+
+## ⚡ The Result&lt;T, E&gt; Enum
+
+`Result<T, E>` handles operations that can succeed or fail.
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[Result T E] --> B[Ok T]
+    A --> C[Err E]
+    
+    B --> D[Success Value]
+    C --> E[Error Value]
+    
+    F[Common Uses] --> G[File Operations]
+    F --> H[Network Requests]
+    F --> I[Parsing Data]
+    F --> J[Database Operations]
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#ffebee
+  `}
+  title="Result<T, E> Enum Structure"
+/>
+
+### Basic Result Usage
+
+```rust
+use std::fs::File;
+use std::io::Read;
+
+fn read_file_contents(filename: &str) -> Result<String, std::io::Error> {
+    let mut file = File::open(filename)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
+fn parse_number(s: &str) -> Result<i32, std::num::ParseIntError> {
+    s.parse::<i32>()
+}
+
+fn divide(a: f64, b: f64) -> Result<f64, String> {
+    if b == 0.0 {
+        Err("Cannot divide by zero".to_string())
+    } else {
+        Ok(a / b)
+    }
+}
+
+fn main() {
+    // Handling different Result types
+    match divide(10.0, 2.0) {
+        Ok(result) => println!("10 / 2 = {}", result),
+        Err(error) => println!("Error: {}", error),
+    }
+    
+    match parse_number("42") {
+        Ok(number) => println!("Parsed number: {}", number),
+        Err(error) => println!("Parse error: {}", error),
+    }
+    
+    // Using the ? operator for error propagation
+    match read_file_contents("example.txt") {
+        Ok(contents) => println!("File contents: {}", contents),
+        Err(error) => println!("Failed to read file: {}", error),
+    }
+}
+```
+
+### Custom Error Types
+
+```rust
+#[derive(Debug)]
+enum CalculatorError {
+    DivisionByZero,
+    InvalidOperation,
+    Overflow,
+}
+
+fn safe_divide(a: i32, b: i32) -> Result<i32, CalculatorError> {
+    if b == 0 {
+        return Err(CalculatorError::DivisionByZero);
+    }
+    
+    match a.checked_div(b) {
+        Some(result) => Ok(result),
+        None => Err(CalculatorError::Overflow),
+    }
+}
+
+fn calculator_operation(op: &str, a: i32, b: i32) -> Result<i32, CalculatorError> {
+    match op {
+        "add" => a.checked_add(b).ok_or(CalculatorError::Overflow),
+        "sub" => a.checked_sub(b).ok_or(CalculatorError::Overflow),
+        "mul" => a.checked_mul(b).ok_or(CalculatorError::Overflow),
+        "div" => safe_divide(a, b),
+        _ => Err(CalculatorError::InvalidOperation),
+    }
+}
+```
+
+---
+
+## 🎯 Pattern Matching with match
+
+The `match` expression is Rust's most powerful control flow construct.
+
+### Comprehensive Match Patterns
+
+```rust
+#[derive(Debug)]
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(String), // Quarter from a specific state
+}
+
+fn coin_value(coin: &Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("Quarter from {}!", state);
+            25
+        }
+    }
+}
+
+fn analyze_number(x: i32) {
+    match x {
+        // Exact values
+        0 => println!("Zero"),
+        1 => println!("One"),
+        
+        // Ranges
+        2..=10 => println!("Small number (2-10)"),
+        11..=100 => println!("Medium number (11-100)"),
+        
+        // Guards
+        n if n < 0 => println!("Negative number: {}", n),
+        n if n > 1000 => println!("Large number: {}", n),
+        
+        // Catch-all
+        _ => println!("Some other number: {}", x),
+    }
+}
+
+fn main() {
+    let coins = vec![
+        Coin::Penny,
+        Coin::Nickel,
+        Coin::Quarter("Alaska".to_string()),
+        Coin::Dime,
+    ];
+    
+    for coin in &coins {
+        println!("{:?} = {} cents", coin, coin_value(coin));
+    }
+    
+    // Pattern matching with numbers
+    for number in [0, 5, 15, -5, 2000] {
+        analyze_number(number);
+    }
+}
+```
+
+### Advanced Pattern Matching
+
+```rust
+#[derive(Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+#[derive(Debug)]
+enum Shape {
+    Circle { radius: f64 },
+    Rectangle { width: f64, height: f64 },
+    Triangle { base: f64, height: f64 },
+}
+
+fn analyze_point(point: &Point) {
+    match point {
+        Point { x: 0, y: 0 } => println!("Origin"),
+        Point { x: 0, y } => println!("On Y-axis at y = {}", y),
+        Point { x, y: 0 } => println!("On X-axis at x = {}", x),
+        Point { x, y } if x == y => println!("On diagonal at ({}, {})", x, y),
+        Point { x, y } => println!("Point at ({}, {})", x, y),
+    }
+}
+
+fn calculate_area(shape: &Shape) -> f64 {
+    match shape {
+        Shape::Circle { radius } => std::f64::consts::PI * radius * radius,
+        Shape::Rectangle { width, height } => width * height,
+        Shape::Triangle { base, height } => 0.5 * base * height,
+    }
+}
+
+fn main() {
+    let points = vec![
+        Point { x: 0, y: 0 },
+        Point { x: 5, y: 0 },
+        Point { x: 0, y: 3 },
+        Point { x: 4, y: 4 },
+        Point { x: 2, y: 7 },
+    ];
+    
+    for point in &points {
+        analyze_point(point);
+    }
+    
+    let shapes = vec![
+        Shape::Circle { radius: 5.0 },
+        Shape::Rectangle { width: 4.0, height: 3.0 },
+        Shape::Triangle { base: 6.0, height: 4.0 },
+    ];
+    
+    for shape in &shapes {
+        println!("{:?} has area: {:.2}", shape, calculate_area(shape));
+    }
+}
+```
+
+---
+
+## 🎈 Control Flow with if let
+
+`if let` provides a concise way to handle specific patterns.
+
+```rust
+fn process_config_value(config: Option<String>) {
+    // Instead of this verbose match:
+    // match config {
+    //     Some(value) => println!("Config: {}", value),
+    //     None => {}
+    // }
+    
+    // Use if let for cleaner code:
+    if let Some(value) = config {
+        println!("Config: {}", value);
+    }
+}
+
+fn handle_operation_result(result: Result<i32, String>) {
+    if let Ok(value) = result {
+        println!("Operation succeeded: {}", value);
+    } else if let Err(error) = result {
+        println!("Operation failed: {}", error);
+    }
+}
+
+// while let for iterating until pattern fails
+fn process_stack(mut stack: Vec<i32>) {
+    while let Some(value) = stack.pop() {
+        println!("Processing: {}", value);
+        
+        // Break on specific condition
+        if value == 0 {
+            break;
+        }
+    }
+}
+
+fn main() {
+    process_config_value(Some("debug".to_string()));
+    process_config_value(None);
+    
+    handle_operation_result(Ok(42));
+    handle_operation_result(Err("Invalid input".to_string()));
+    
+    let stack = vec![1, 2, 3, 0, 4, 5];
+    process_stack(stack);
+}
+```
+
+---
+
+## 🔧 Practical Example: Token Management System
+
+Let's build a token management system that demonstrates all enum concepts:
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[TokenManager] --> B[tokens: Vec Token]
+    
+    C[Token] --> D[id: u32]
+    C --> E[symbol: String]
+    C --> F[status: TokenStatus]
+    C --> G[metadata: TokenMetadata]
+    
+    H[TokenStatus] --> I[Active]
+    H --> J[Paused]
+    H --> K[Frozen]
+    H --> L[Burned]
+    
+    M[TokenMetadata] --> N[Standard]
+    M --> O[NFT]
+    M --> P[Utility]
+    
+    Q[TokenError] --> R[NotFound]
+    Q --> S[InvalidStatus]
+    Q --> T[InsufficientSupply]
+    
+    style A fill:#e1f5fe
+    style H fill:#f3e5f5
+    style Q fill:#ffebee
+  `}
+  title="Token Management System Architecture"
+/>
+
+```rust
+use std::collections::HashMap;
+
+// Token status enum
+#[derive(Debug, Clone, PartialEq)]
+enum TokenStatus {
+    Active { supply: u64 },
+    Paused { reason: String },
+    Frozen { until_block: u64 },
+    Burned,
+}
+
+// Token metadata enum
+#[derive(Debug, Clone)]
+enum TokenMetadata {
+    Standard {
+        decimals: u8,
+        description: String,
+    },
+    NFT {
+        image_url: String,
+        attributes: HashMap<String, String>,
+    },
+    Utility {
+        purpose: String,
+        burn_rate: f64,
+    },
+}
+
+// Custom error enum
+#[derive(Debug)]
+enum TokenError {
+    NotFound(u32),
+    InvalidStatus { expected: String, found: String },
+    InsufficientSupply { requested: u64, available: u64 },
+    PermissionDenied,
+}
+
+// Token struct
+#[derive(Debug, Clone)]
+struct Token {
+    id: u32,
+    symbol: String,
+    status: TokenStatus,
+    metadata: TokenMetadata,
+}
+
+impl Token {
+    fn new(id: u32, symbol: String, metadata: TokenMetadata) -> Self {
+        Self {
+            id,
+            symbol,
+            status: TokenStatus::Active { supply: 0 },
+            metadata,
+        }
+    }
+    
+    fn is_active(&self) -> bool {
+        matches!(self.status, TokenStatus::Active { .. })
+    }
+    
+    fn get_supply(&self) -> Option<u64> {
+        match &self.status {
+            TokenStatus::Active { supply } => Some(*supply),
+            _ => None,
+        }
+    }
+    
+    fn mint(&mut self, amount: u64) -> Result<(), TokenError> {
+        match &mut self.status {
+            TokenStatus::Active { supply } => {
+                *supply += amount;
+                Ok(())
+            }
+            status => Err(TokenError::InvalidStatus {
+                expected: "Active".to_string(),
+                found: format!("{:?}", status),
+            }),
+        }
+    }
+    
+    fn burn(&mut self, amount: u64) -> Result<(), TokenError> {
+        match &mut self.status {
+            TokenStatus::Active { supply } => {
+                if *supply >= amount {
+                    *supply -= amount;
+                    if *supply == 0 {
+                        self.status = TokenStatus::Burned;
+                    }
+                    Ok(())
+                } else {
+                    Err(TokenError::InsufficientSupply {
+                        requested: amount,
+                        available: *supply,
+                    })
+                }
+            }
+            status => Err(TokenError::InvalidStatus {
+                expected: "Active".to_string(),
+                found: format!("{:?}", status),
+            }),
+        }
+    }
+    
+    fn pause(&mut self, reason: String) -> Result<(), TokenError> {
+        if self.is_active() {
+            self.status = TokenStatus::Paused { reason };
+            Ok(())
+        } else {
+            Err(TokenError::InvalidStatus {
+                expected: "Active".to_string(),
+                found: format!("{:?}", self.status),
+            })
+        }
+    }
+    
+    fn freeze(&mut self, until_block: u64) -> Result<(), TokenError> {
+        if self.is_active() {
+            self.status = TokenStatus::Frozen { until_block };
+            Ok(())
+        } else {
+            Err(TokenError::InvalidStatus {
+                expected: "Active".to_string(),
+                found: format!("{:?}", self.status),
+            })
+        }
+    }
+    
+    fn resume(&mut self, current_block: u64) -> Result<(), TokenError> {
+        match &self.status {
+            TokenStatus::Paused { .. } => {
+                self.status = TokenStatus::Active { supply: 0 };
+                Ok(())
+            }
+            TokenStatus::Frozen { until_block } => {
+                if current_block >= *until_block {
+                    self.status = TokenStatus::Active { supply: 0 };
+                    Ok(())
+                } else {
+                    Err(TokenError::PermissionDenied)
+                }
+            }
+            _ => Err(TokenError::InvalidStatus {
+                expected: "Paused or Frozen".to_string(),
+                found: format!("{:?}", self.status),
+            }),
+        }
+    }
+}
+
+// Token manager
+struct TokenManager {
+    tokens: Vec<Token>,
+    next_id: u32,
+}
+
+impl TokenManager {
+    fn new() -> Self {
+        Self {
+            tokens: Vec::new(),
+            next_id: 1,
+        }
+    }
+    
+    fn create_token(&mut self, symbol: String, metadata: TokenMetadata) -> u32 {
+        let id = self.next_id;
+        self.next_id += 1;
+        
+        let token = Token::new(id, symbol, metadata);
+        self.tokens.push(token);
+        
+        id
+    }
+    
+    fn get_token(&self, id: u32) -> Result<&Token, TokenError> {
+        self.tokens.iter()
+            .find(|token| token.id == id)
+            .ok_or(TokenError::NotFound(id))
+    }
+    
+    fn get_token_mut(&mut self, id: u32) -> Result<&mut Token, TokenError> {
+        self.tokens.iter_mut()
+            .find(|token| token.id == id)
+            .ok_or(TokenError::NotFound(id))
+    }
+    
+    fn mint_tokens(&mut self, id: u32, amount: u64) -> Result<(), TokenError> {
+        let token = self.get_token_mut(id)?;
+        token.mint(amount)
+    }
+    
+    fn burn_tokens(&mut self, id: u32, amount: u64) -> Result<(), TokenError> {
+        let token = self.get_token_mut(id)?;
+        token.burn(amount)
+    }
+    
+    fn list_active_tokens(&self) -> Vec<&Token> {
+        self.tokens.iter()
+            .filter(|token| token.is_active())
+            .collect()
+    }
+    
+    fn get_total_supply(&self) -> u64 {
+        self.tokens.iter()
+            .filter_map(|token| token.get_supply())
+            .sum()
+    }
+}
+
+fn main() {
+    let mut manager = TokenManager::new();
+    
+    // Create different types of tokens
+    let sol_id = manager.create_token(
+        "SOL".to_string(),
+        TokenMetadata::Standard {
+            decimals: 9,
+            description: "Solana native token".to_string(),
+        },
+    );
+    
+    let nft_id = manager.create_token(
+        "MONKEY".to_string(),
+        TokenMetadata::NFT {
+            image_url: "https://example.com/monkey.png".to_string(),
+            attributes: {
+                let mut attrs = HashMap::new();
+                attrs.insert("rarity".to_string(), "rare".to_string());
+                attrs.insert("background".to_string(), "blue".to_string());
+                attrs
+            },
+        },
+    );
+    
+    // Mint some tokens
+    match manager.mint_tokens(sol_id, 1000000) {
+        Ok(()) => println!("Minted SOL tokens successfully"),
+        Err(e) => println!("Failed to mint SOL: {:?}", e),
+    }
+    
+    // Try operations and handle results
+    match manager.mint_tokens(nft_id, 1) {
+        Ok(()) => println!("Minted NFT successfully"),
+        Err(e) => println!("Failed to mint NFT: {:?}", e),
+    }
+    
+    // Pause a token
+    if let Ok(token) = manager.get_token_mut(sol_id) {
+        if let Err(e) = token.pause("Maintenance".to_string()) {
+            println!("Failed to pause token: {:?}", e);
+        } else {
+            println!("Token paused for maintenance");
+        }
+    }
+    
+    // List active tokens
+    println!("\nActive tokens:");
+    for token in manager.list_active_tokens() {
+        println!("- {} (ID: {}): {:?}", token.symbol, token.id, token.status);
+    }
+    
+    println!("Total supply across all active tokens: {}", manager.get_total_supply());
+}
+```
+
+---
+
+## 🎯 Day 4 Practice Exercises
+
+### Exercise 1: Traffic Light System
+Create a traffic light controller with states and transitions:
+
+```rust
+#[derive(Debug, PartialEq)]
+enum TrafficLight {
+    Red { duration: u32 },
+    Yellow { duration: u32 },
+    Green { duration: u32 },
+}
+
+impl TrafficLight {
+    fn next(&self) -> TrafficLight {
+        // Implement state transitions
+        todo!()
+    }
+    
+    fn time_remaining(&self) -> u32 {
+        // Return remaining time
+        todo!()
+    }
+    
+    fn can_go(&self) -> bool {
+        // Return true if traffic can proceed
+        todo!()
+    }
+}
+```
+
+### Exercise 2: Configuration Parser
+Build a configuration system that handles different value types:
+
+```rust
+#[derive(Debug)]
+enum ConfigValue {
+    String(String),
+    Integer(i64),
+    Boolean(bool),
+    Array(Vec<ConfigValue>),
+}
+
+fn parse_config(input: &str) -> Result<ConfigValue, String> {
+    // Parse string input into ConfigValue
+    todo!()
+}
+```
+
+### Exercise 3: Simple Calculator
+Create a calculator that handles different operations and errors:
+
+```rust
+#[derive(Debug)]
+enum Operation {
+    Add(f64, f64),
+    Subtract(f64, f64),
+    Multiply(f64, f64),
+    Divide(f64, f64),
+    Power(f64, f64),
+}
+
+#[derive(Debug)]
+enum CalculatorError {
+    DivisionByZero,
+    InvalidInput,
+    Overflow,
+}
+
+fn calculate(op: Operation) -> Result<f64, CalculatorError> {
+    // Implement calculator logic
+    todo!()
+}
+```
+
+---
+
+## 🚀 What's Next?
+
+You've now mastered:
+
+- ✅ **Enum definitions and variants**
+- ✅ **Option&lt;T&gt; and Result&lt;T, E&gt; handling**
+- ✅ **Pattern matching with match**
+- ✅ **Control flow with if let and while let**
+- ✅ **Custom error types**
+
+Tomorrow we'll dive into **Collections and String Handling** - the tools you need to manage data efficiently in Solana programs!
+
+<Callout type="tip">
+**Solana Connection**
+
+Enums are heavily used in Solana development: account types, instruction variants, program errors, and state transitions. The patterns you learned today will appear in every Anchor program you write!
+</Callout>

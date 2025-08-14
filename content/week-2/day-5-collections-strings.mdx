@@ -1,0 +1,1180 @@
+---
+title: "Day 5: Collections and String Handling"
+description: "Master Rust's powerful collection types and string processing for efficient data management"
+---
+
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Day 5: Collections and String Handling
+
+<Callout type="info">
+**Today's Mission: Data Organization Masters**
+
+Learn to efficiently store, organize, and manipulate data using Rust's collection types. Essential for managing accounts, transactions, and program state in Solana applications.
+</Callout>
+
+## 📊 Rust Collections Overview
+
+Rust provides several powerful collection types for different use cases:
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[Rust Collections] --> B[Vector T]
+    A --> C[HashMap K V]
+    A --> D[BTreeMap K V]
+    A --> E[HashSet T]
+    A --> F[VecDeque T]
+    A --> G[BinaryHeap T]
+    
+    B --> H[Dynamic Arrays]
+    C --> I[Key-Value Store]
+    D --> J[Sorted Key-Value]
+    E --> K[Unique Values]
+    F --> L[Double-Ended Queue]
+    G --> M[Priority Queue]
+    
+    N[String Types] --> O[String]
+    N --> P[&str]
+    N --> Q[OsString]
+    N --> R[CString]
+    
+    style A fill:#e1f5fe
+    style N fill:#f3e5f5
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+  `}
+  title="Rust Collections Landscape"
+/>
+
+---
+
+## 🚀 Vectors: Dynamic Arrays
+
+Vectors are the most commonly used collection type in Rust.
+
+### Creating and Manipulating Vectors
+
+```rust
+fn vector_basics() {
+    // Creating vectors
+    let mut numbers = Vec::new();
+    let mut fruits = vec!["apple", "banana", "orange"];
+    let zeros = vec![0; 5]; // [0, 0, 0, 0, 0]
+    
+    // Adding elements
+    numbers.push(1);
+    numbers.push(2);
+    numbers.push(3);
+    
+    fruits.push("grape");
+    
+    println!("Numbers: {:?}", numbers);
+    println!("Fruits: {:?}", fruits);
+    
+    // Accessing elements
+    let first = &numbers[0]; // Panics if index doesn't exist
+    let second = numbers.get(1); // Returns Option<&T>
+    
+    match second {
+        Some(value) => println!("Second number: {}", value),
+        None => println!("No second number"),
+    }
+    
+    // Iterating over vectors
+    println!("Iterating over numbers:");
+    for (index, number) in numbers.iter().enumerate() {
+        println!("Index {}: {}", index, number);
+    }
+    
+    // Mutable iteration
+    for number in &mut numbers {
+        *number *= 2;
+    }
+    println!("Doubled numbers: {:?}", numbers);
+}
+```
+
+### Advanced Vector Operations
+
+```rust
+#[derive(Debug, Clone)]
+struct Transaction {
+    id: String,
+    amount: u64,
+    timestamp: u64,
+}
+
+fn advanced_vector_operations() {
+    let mut transactions = vec![
+        Transaction { id: "tx1".to_string(), amount: 100, timestamp: 1000 },
+        Transaction { id: "tx2".to_string(), amount: 250, timestamp: 1001 },
+        Transaction { id: "tx3".to_string(), amount: 75, timestamp: 1002 },
+        Transaction { id: "tx4".to_string(), amount: 300, timestamp: 1003 },
+    ];
+    
+    // Filtering
+    let large_transactions: Vec<&Transaction> = transactions
+        .iter()
+        .filter(|tx| tx.amount > 150)
+        .collect();
+    
+    println!("Large transactions: {:#?}", large_transactions);
+    
+    // Mapping
+    let transaction_ids: Vec<String> = transactions
+        .iter()
+        .map(|tx| tx.id.clone())
+        .collect();
+    
+    println!("Transaction IDs: {:?}", transaction_ids);
+    
+    // Finding elements
+    let tx_by_id = transactions
+        .iter()
+        .find(|tx| tx.id == "tx2");
+    
+    if let Some(tx) = tx_by_id {
+        println!("Found transaction: {:?}", tx);
+    }
+    
+    // Sorting
+    transactions.sort_by(|a, b| a.amount.cmp(&b.amount));
+    println!("Sorted by amount: {:#?}", transactions);
+    
+    // Grouping (using itertools would be easier, but let's do it manually)
+    let mut high_value = Vec::new();
+    let mut low_value = Vec::new();
+    
+    for tx in transactions {
+        if tx.amount > 200 {
+            high_value.push(tx);
+        } else {
+            low_value.push(tx);
+        }
+    }
+    
+    println!("High value transactions: {:?}", high_value.len());
+    println!("Low value transactions: {:?}", low_value.len());
+}
+```
+
+### Vector Performance Tips
+
+```rust
+fn vector_performance_tips() {
+    // Pre-allocate capacity when size is known
+    let mut large_vec = Vec::with_capacity(1000);
+    
+    // This is more efficient than letting the vector grow dynamically
+    for i in 0..1000 {
+        large_vec.push(i);
+    }
+    
+    println!("Vector capacity: {}, length: {}", large_vec.capacity(), large_vec.len());
+    
+    // Using extend for multiple elements
+    let mut numbers = vec![1, 2, 3];
+    numbers.extend([4, 5, 6]);
+    println!("Extended vector: {:?}", numbers);
+    
+    // Draining elements
+    let drained: Vec<i32> = numbers.drain(2..5).collect();
+    println!("Drained elements: {:?}", drained);
+    println!("Remaining numbers: {:?}", numbers);
+    
+    // Removing elements efficiently
+    let mut items = vec!["a", "b", "c", "d", "e"];
+    
+    // Remove by index (preserves order)
+    let removed = items.remove(2);
+    println!("Removed '{}', remaining: {:?}", removed, items);
+    
+    // Swap remove (doesn't preserve order, but O(1))
+    items.swap_remove(1);
+    println!("After swap_remove: {:?}", items);
+}
+```
+
+---
+
+## 🗺️ HashMap: Key-Value Storage
+
+HashMap provides fast key-value lookups with O(1) average performance.
+
+### Basic HashMap Operations
+
+```rust
+use std::collections::HashMap;
+
+fn hashmap_basics() {
+    // Creating HashMaps
+    let mut scores = HashMap::new();
+    let mut account_balances: HashMap<String, u64> = HashMap::new();
+    
+    // Inserting values
+    scores.insert("Alice", 95);
+    scores.insert("Bob", 87);
+    scores.insert("Charlie", 92);
+    
+    account_balances.insert("wallet1".to_string(), 1000000);
+    account_balances.insert("wallet2".to_string(), 500000);
+    
+    // Accessing values
+    let alice_score = scores.get("Alice");
+    match alice_score {
+        Some(score) => println!("Alice's score: {}", score),
+        None => println!("Alice not found"),
+    }
+    
+    // Using unwrap_or for defaults
+    let david_score = scores.get("David").unwrap_or(&0);
+    println!("David's score: {}", david_score);
+    
+    // Iterating over HashMap
+    println!("All scores:");
+    for (name, score) in &scores {
+        println!("{}: {}", name, score);
+    }
+    
+    // Checking if key exists
+    if scores.contains_key("Alice") {
+        println!("Alice is in the scores map");
+    }
+    
+    // Removing entries
+    let removed_score = scores.remove("Charlie");
+    if let Some(score) = removed_score {
+        println!("Removed Charlie with score: {}", score);
+    }
+}
+```
+
+### Advanced HashMap Patterns
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct AccountInfo {
+    balance: u64,
+    last_transaction: u64,
+    transaction_count: u32,
+}
+
+impl Default for AccountInfo {
+    fn default() -> Self {
+        Self {
+            balance: 0,
+            last_transaction: 0,
+            transaction_count: 0,
+        }
+    }
+}
+
+fn advanced_hashmap_patterns() {
+    let mut accounts: HashMap<String, AccountInfo> = HashMap::new();
+    
+    // Using entry API for complex insertions
+    let account1 = "wallet_abc123".to_string();
+    
+    // Insert if not present, otherwise update
+    accounts.entry(account1.clone())
+        .and_modify(|info| {
+            info.balance += 1000;
+            info.transaction_count += 1;
+        })
+        .or_insert(AccountInfo {
+            balance: 1000,
+            last_transaction: 12345,
+            transaction_count: 1,
+        });
+    
+    // Counting occurrences pattern
+    let transactions = vec!["wallet1", "wallet2", "wallet1", "wallet3", "wallet1"];
+    let mut transaction_counts: HashMap<&str, u32> = HashMap::new();
+    
+    for wallet in transactions {
+        *transaction_counts.entry(wallet).or_insert(0) += 1;
+    }
+    
+    println!("Transaction counts: {:#?}", transaction_counts);
+    
+    // Grouping data
+    #[derive(Debug)]
+    struct Transfer {
+        from: String,
+        to: String,
+        amount: u64,
+    }
+    
+    let transfers = vec![
+        Transfer { from: "A".to_string(), to: "B".to_string(), amount: 100 },
+        Transfer { from: "A".to_string(), to: "C".to_string(), amount: 200 },
+        Transfer { from: "B".to_string(), to: "C".to_string(), amount: 150 },
+        Transfer { from: "A".to_string(), to: "D".to_string(), amount: 300 },
+    ];
+    
+    // Group transfers by sender
+    let mut transfers_by_sender: HashMap<String, Vec<&Transfer>> = HashMap::new();
+    
+    for transfer in &transfers {
+        transfers_by_sender
+            .entry(transfer.from.clone())
+            .or_insert_with(Vec::new)
+            .push(transfer);
+    }
+    
+    println!("Transfers by sender: {:#?}", transfers_by_sender);
+    
+    // Calculate total sent by each account
+    let mut total_sent: HashMap<String, u64> = HashMap::new();
+    
+    for transfer in &transfers {
+        *total_sent.entry(transfer.from.clone()).or_insert(0) += transfer.amount;
+    }
+    
+    println!("Total sent by account: {:#?}", total_sent);
+}
+```
+
+### HashMap vs BTreeMap
+
+```rust
+use std::collections::{HashMap, BTreeMap};
+
+fn map_comparison() {
+    // HashMap: Fast, unordered
+    let mut hash_map = HashMap::new();
+    hash_map.insert("zebra", 26);
+    hash_map.insert("apple", 1);
+    hash_map.insert("banana", 2);
+    
+    println!("HashMap iteration (random order):");
+    for (key, value) in &hash_map {
+        println!("{}: {}", key, value);
+    }
+    
+    // BTreeMap: Slower insertion/lookup, but ordered
+    let mut btree_map = BTreeMap::new();
+    btree_map.insert("zebra", 26);
+    btree_map.insert("apple", 1);
+    btree_map.insert("banana", 2);
+    
+    println!("\nBTreeMap iteration (sorted order):");
+    for (key, value) in &btree_map {
+        println!("{}: {}", key, value);
+    }
+    
+    // BTreeMap supports range operations
+    println!("\nEntries from 'a' to 'c':");
+    for (key, value) in btree_map.range("a".."d") {
+        println!("{}: {}", key, value);
+    }
+}
+```
+
+---
+
+## 🔤 String Handling in Rust
+
+Rust has two main string types: `String` (owned) and `&str` (borrowed).
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[String Types] --> B[String]
+    A --> C[&str]
+    
+    B --> D[Owned]
+    B --> E[Growable]
+    B --> F[Heap Allocated]
+    
+    C --> G[Borrowed]
+    C --> H[Fixed Size]
+    C --> I[Stack/Heap Reference]
+    
+    J[String Operations] --> K[Creation]
+    J --> L[Concatenation]
+    J --> M[Slicing]
+    J --> N[Parsing]
+    J --> O[Formatting]
+    J --> P[Pattern Matching]
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style J fill:#f3e5f5
+  `}
+  title="String Types and Operations"
+/>
+
+### String Basics
+
+```rust
+fn string_basics() {
+    // String literals (&str)
+    let greeting = "Hello, Solana!";
+    let multiline = "This is a
+multiline string";
+    
+    // Creating String (owned)
+    let mut owned_string = String::new();
+    let from_literal = String::from("Hello");
+    let from_str = "World".to_string();
+    
+    // String operations
+    owned_string.push_str("Hello");
+    owned_string.push(' ');
+    owned_string.push_str("Rust");
+    
+    println!("Owned string: {}", owned_string);
+    
+    // String concatenation
+    let first = String::from("Hello");
+    let second = String::from("World");
+    
+    // Method 1: Using + (moves first string)
+    let combined = first + " " + &second;
+    println!("Combined: {}", combined);
+    // Note: `first` is no longer available here
+    
+    // Method 2: Using format! macro
+    let greeting = format!("{} {}!", "Hello", "Solana");
+    println!("Formatted: {}", greeting);
+    
+    // Method 3: Using push_str (mutating)
+    let mut message = String::from("Building on");
+    message.push_str(" Solana");
+    message.push('!');
+    println!("Message: {}", message);
+}
+```
+
+### String Slicing and Indexing
+
+```rust
+fn string_slicing() {
+    let text = "Hello, 世界"; // Mixed ASCII and Unicode
+    
+    // Length in bytes vs characters
+    println!("Length in bytes: {}", text.len());
+    println!("Length in chars: {}", text.chars().count());
+    
+    // Slicing (be careful with Unicode!)
+    let hello = &text[0..5]; // This works because "Hello" is ASCII
+    println!("Slice: {}", hello);
+    
+    // Safe slicing with get
+    let safe_slice = text.get(0..5);
+    match safe_slice {
+        Some(s) => println!("Safe slice: {}", s),
+        None => println!("Invalid slice range"),
+    }
+    
+    // Iterating over characters
+    println!("Characters:");
+    for (i, c) in text.chars().enumerate() {
+        println!("  {}: {}", i, c);
+    }
+    
+    // Iterating over bytes
+    println!("Bytes:");
+    for (i, b) in text.bytes().enumerate() {
+        println!("  {}: {}", i, b);
+    }
+    
+    // Working with lines
+    let multiline = "Line 1\nLine 2\nLine 3";
+    for (i, line) in multiline.lines().enumerate() {
+        println!("Line {}: {}", i + 1, line);
+    }
+}
+```
+
+### String Parsing and Validation
+
+```rust
+use std::str::FromStr;
+
+#[derive(Debug)]
+struct WalletAddress(String);
+
+impl FromStr for WalletAddress {
+    type Err = String;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // Simple validation for demo purposes
+        if s.len() != 44 {
+            return Err("Wallet address must be 44 characters long".to_string());
+        }
+        
+        if !s.chars().all(|c| c.is_alphanumeric()) {
+            return Err("Wallet address must be alphanumeric".to_string());
+        }
+        
+        Ok(WalletAddress(s.to_string()))
+    }
+}
+
+fn string_parsing() {
+    // Parsing numbers
+    let number_str = "42";
+    let parsed_number: Result<i32, _> = number_str.parse();
+    
+    match parsed_number {
+        Ok(n) => println!("Parsed number: {}", n),
+        Err(e) => println!("Parse error: {}", e),
+    }
+    
+    // Parsing with turbofish syntax
+    let float_result = "3.14159".parse::<f64>();
+    println!("Parsed float: {:?}", float_result);
+    
+    // Custom parsing
+    let address_str = "1234567890abcdef1234567890abcdef12345678";
+    let wallet_address = WalletAddress::from_str(address_str);
+    
+    match wallet_address {
+        Ok(addr) => println!("Valid wallet address: {:?}", addr),
+        Err(e) => println!("Invalid address: {}", e),
+    }
+    
+    // Splitting strings
+    let csv_data = "apple,banana,orange,grape";
+    let fruits: Vec<&str> = csv_data.split(',').collect();
+    println!("Fruits: {:?}", fruits);
+    
+    // Trimming whitespace
+    let messy_string = "  Hello, World!  \n";
+    let clean_string = messy_string.trim();
+    println!("Original: '{}'", messy_string);
+    println!("Trimmed: '{}'", clean_string);
+    
+    // Case conversion
+    let mixed_case = "Hello World";
+    println!("Uppercase: {}", mixed_case.to_uppercase());
+    println!("Lowercase: {}", mixed_case.to_lowercase());
+    
+    // Checking prefixes and suffixes
+    let filename = "transaction_log.txt";
+    if filename.starts_with("transaction") {
+        println!("This is a transaction file");
+    }
+    
+    if filename.ends_with(".txt") {
+        println!("This is a text file");
+    }
+}
+```
+
+### Advanced String Processing
+
+```rust
+fn advanced_string_processing() {
+    // String replacement
+    let text = "The quick brown fox jumps over the lazy dog";
+    let replaced = text.replace("fox", "cat");
+    println!("Replaced: {}", replaced);
+    
+    // Multiple replacements
+    let mut log_entry = "User: alice, Action: transfer, Amount: 100".to_string();
+    log_entry = log_entry.replace("alice", "user_123");
+    log_entry = log_entry.replace("transfer", "send_tokens");
+    println!("Processed log: {}", log_entry);
+    
+    // Pattern matching with contains
+    let commands = vec![
+        "create account wallet1",
+        "transfer 100 from wallet1 to wallet2",
+        "check balance wallet1",
+        "delete account wallet2",
+    ];
+    
+    for command in commands {
+        if command.contains("create") {
+            println!("Account creation command: {}", command);
+        } else if command.contains("transfer") {
+            println!("Transfer command: {}", command);
+        } else if command.contains("balance") {
+            println!("Balance query: {}", command);
+        } else if command.contains("delete") {
+            println!("Account deletion: {}", command);
+        }
+    }
+    
+    // Extracting data from strings
+    let transaction_data = "tx:abc123,amount:1500,fee:5";
+    let mut tx_info = std::collections::HashMap::new();
+    
+    for pair in transaction_data.split(',') {
+        let parts: Vec<&str> = pair.split(':').collect();
+        if parts.len() == 2 {
+            tx_info.insert(parts[0], parts[1]);
+        }
+    }
+    
+    println!("Transaction info: {:?}", tx_info);
+    
+    // String validation
+    fn is_valid_token_symbol(symbol: &str) -> bool {
+        symbol.len() >= 3 
+            && symbol.len() <= 5 
+            && symbol.chars().all(|c| c.is_ascii_uppercase())
+    }
+    
+    let symbols = vec!["SOL", "USDC", "BTC", "a", "TOOLONG", "invalid"];
+    
+    for symbol in symbols {
+        if is_valid_token_symbol(symbol) {
+            println!("{} is a valid token symbol", symbol);
+        } else {
+            println!("{} is NOT a valid token symbol", symbol);
+        }
+    }
+}
+```
+
+---
+
+## 🏗️ Practical Example: Transaction Log Processor
+
+Let's build a comprehensive transaction log processor that demonstrates all collection concepts:
+
+<MermaidWithZoom 
+  chart={`
+graph TD
+    A[TransactionProcessor] --> B[logs: Vec&lt;LogEntry&gt;]
+    A --> C[accounts: HashMap&lt;String, AccountSummary&gt;]
+    A --> D[daily_volumes: BTreeMap&lt;String, u64&gt;]
+    A --> E[error_counts: HashMap&lt;String, u32&gt;]
+    
+    F[LogEntry] --> G[timestamp: String]
+    F --> H[tx_type: TransactionType]
+    F --> I[status: Status]
+    F --> J[details: String]
+    
+    K[AccountSummary] --> L[total_sent: u64]
+    K --> M[total_received: u64]
+    K --> N[transaction_count: u32]
+    K --> O[last_activity: String]
+    
+    P[Analysis Results] --> Q[Top Accounts]
+    P --> R[Error Patterns]
+    P --> S[Daily Trends]
+    P --> T[Volume Statistics]
+    
+    style A fill:#e1f5fe
+    style F fill:#f3e5f5
+    style K fill:#e8f5e8
+    style P fill:#fff3e0
+  `}
+  title="Transaction Log Processor Architecture"
+/>
+
+```rust
+use std::collections::{HashMap, BTreeMap};
+
+#[derive(Debug, Clone)]
+enum TransactionType {
+    Transfer,
+    Mint,
+    Burn,
+    Stake,
+    Unstake,
+}
+
+impl std::str::FromStr for TransactionType {
+    type Err = String;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "transfer" => Ok(TransactionType::Transfer),
+            "mint" => Ok(TransactionType::Mint),
+            "burn" => Ok(TransactionType::Burn),
+            "stake" => Ok(TransactionType::Stake),
+            "unstake" => Ok(TransactionType::Unstake),
+            _ => Err(format!("Unknown transaction type: {}", s)),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+enum Status {
+    Success,
+    Failed(String),
+    Pending,
+}
+
+#[derive(Debug, Clone)]
+struct LogEntry {
+    timestamp: String,
+    tx_id: String,
+    tx_type: TransactionType,
+    from_account: Option<String>,
+    to_account: Option<String>,
+    amount: u64,
+    status: Status,
+    gas_fee: u64,
+}
+
+#[derive(Debug, Default)]
+struct AccountSummary {
+    total_sent: u64,
+    total_received: u64,
+    transaction_count: u32,
+    last_activity: String,
+    failed_transactions: u32,
+}
+
+struct TransactionProcessor {
+    logs: Vec<LogEntry>,
+    accounts: HashMap<String, AccountSummary>,
+    daily_volumes: BTreeMap<String, u64>,
+    error_patterns: HashMap<String, u32>,
+}
+
+impl TransactionProcessor {
+    fn new() -> Self {
+        Self {
+            logs: Vec::new(),
+            accounts: HashMap::new(),
+            daily_volumes: BTreeMap::new(),
+            error_patterns: HashMap::new(),
+        }
+    }
+    
+    fn parse_log_line(&self, line: &str) -> Result<LogEntry, String> {
+        // Parse format: "timestamp|tx_id|type|from|to|amount|status|fee"
+        let parts: Vec<&str> = line.split('|').collect();
+        
+        if parts.len() != 8 {
+            return Err("Invalid log format".to_string());
+        }
+        
+        let tx_type = parts[2].parse::<TransactionType>()?;
+        
+        let from_account = if parts[3].is_empty() { 
+            None 
+        } else { 
+            Some(parts[3].to_string()) 
+        };
+        
+        let to_account = if parts[4].is_empty() { 
+            None 
+        } else { 
+            Some(parts[4].to_string()) 
+        };
+        
+        let amount = parts[5].parse::<u64>()
+            .map_err(|_| "Invalid amount".to_string())?;
+        
+        let gas_fee = parts[7].parse::<u64>()
+            .map_err(|_| "Invalid gas fee".to_string())?;
+        
+        let status = match parts[6] {
+            "SUCCESS" => Status::Success,
+            "PENDING" => Status::Pending,
+            error_msg => Status::Failed(error_msg.to_string()),
+        };
+        
+        Ok(LogEntry {
+            timestamp: parts[0].to_string(),
+            tx_id: parts[1].to_string(),
+            tx_type,
+            from_account,
+            to_account,
+            amount,
+            status,
+            gas_fee,
+        })
+    }
+    
+    fn add_log_entry(&mut self, entry: LogEntry) {
+        // Extract date from timestamp for daily volume tracking
+        let date = entry.timestamp.split('T').next()
+            .unwrap_or("unknown")
+            .to_string();
+        
+        // Update daily volume for successful transactions
+        if matches!(entry.status, Status::Success) {
+            *self.daily_volumes.entry(date).or_insert(0) += entry.amount;
+        }
+        
+        // Track error patterns
+        if let Status::Failed(error) = &entry.status {
+            *self.error_patterns.entry(error.clone()).or_insert(0) += 1;
+        }
+        
+        // Update account summaries
+        if let Some(from) = &entry.from_account {
+            let summary = self.accounts.entry(from.clone()).or_default();
+            summary.transaction_count += 1;
+            summary.last_activity = entry.timestamp.clone();
+            
+            match entry.status {
+                Status::Success => summary.total_sent += entry.amount,
+                Status::Failed(_) => summary.failed_transactions += 1,
+                Status::Pending => {}
+            }
+        }
+        
+        if let Some(to) = &entry.to_account {
+            let summary = self.accounts.entry(to.clone()).or_default();
+            summary.transaction_count += 1;
+            summary.last_activity = entry.timestamp.clone();
+            
+            if matches!(entry.status, Status::Success) {
+                summary.total_received += entry.amount;
+            }
+        }
+        
+        self.logs.push(entry);
+    }
+    
+    fn process_log_file(&mut self, log_data: &str) -> Result<usize, String> {
+        let mut processed_count = 0;
+        let mut error_count = 0;
+        
+        for (line_num, line) in log_data.lines().enumerate() {
+            if line.trim().is_empty() {
+                continue;
+            }
+            
+            match self.parse_log_line(line.trim()) {
+                Ok(entry) => {
+                    self.add_log_entry(entry);
+                    processed_count += 1;
+                }
+                Err(e) => {
+                    println!("Error parsing line {}: {} ({})", line_num + 1, e, line);
+                    error_count += 1;
+                }
+            }
+        }
+        
+        if error_count > 0 {
+            println!("Processed {} entries with {} errors", processed_count, error_count);
+        }
+        
+        Ok(processed_count)
+    }
+    
+    fn get_top_accounts_by_volume(&self, limit: usize) -> Vec<(&String, &AccountSummary)> {
+        let mut accounts: Vec<_> = self.accounts.iter().collect();
+        accounts.sort_by(|a, b| {
+            (b.1.total_sent + b.1.total_received)
+                .cmp(&(a.1.total_sent + a.1.total_received))
+        });
+        accounts.into_iter().take(limit).collect()
+    }
+    
+    fn get_most_active_accounts(&self, limit: usize) -> Vec<(&String, &AccountSummary)> {
+        let mut accounts: Vec<_> = self.accounts.iter().collect();
+        accounts.sort_by(|a, b| b.1.transaction_count.cmp(&a.1.transaction_count));
+        accounts.into_iter().take(limit).collect()
+    }
+    
+    fn analyze_transaction_patterns(&self) -> HashMap<String, u32> {
+        let mut patterns = HashMap::new();
+        
+        for entry in &self.logs {
+            let pattern = match entry.tx_type {
+                TransactionType::Transfer => {
+                    if entry.amount > 1000000 {
+                        "large_transfer"
+                    } else {
+                        "small_transfer"
+                    }
+                }
+                TransactionType::Mint => "token_creation",
+                TransactionType::Burn => "token_destruction",
+                TransactionType::Stake => "staking_activity",
+                TransactionType::Unstake => "unstaking_activity",
+            };
+            
+            *patterns.entry(pattern.to_string()).or_insert(0) += 1;
+        }
+        
+        patterns
+    }
+    
+    fn find_suspicious_accounts(&self) -> Vec<&String> {
+        self.accounts.iter()
+            .filter(|(_, summary)| {
+                // High failure rate or unusual activity patterns
+                let failure_rate = summary.failed_transactions as f64 / summary.transaction_count as f64;
+                failure_rate > 0.3 || summary.transaction_count > 100
+            })
+            .map(|(address, _)| address)
+            .collect()
+    }
+    
+    fn get_daily_volume_trend(&self) -> Vec<(&String, &u64)> {
+        self.daily_volumes.iter().collect()
+    }
+    
+    fn search_transactions(&self, query: &str) -> Vec<&LogEntry> {
+        self.logs.iter()
+            .filter(|entry| {
+                entry.tx_id.contains(query) ||
+                entry.from_account.as_ref().map_or(false, |addr| addr.contains(query)) ||
+                entry.to_account.as_ref().map_or(false, |addr| addr.contains(query))
+            })
+            .collect()
+    }
+    
+    fn generate_report(&self) -> String {
+        let mut report = String::new();
+        
+        report.push_str("=== TRANSACTION LOG ANALYSIS REPORT ===\n\n");
+        
+        // Basic statistics
+        report.push_str(&format!("Total transactions processed: {}\n", self.logs.len()));
+        report.push_str(&format!("Unique accounts: {}\n", self.accounts.len()));
+        report.push_str(&format!("Days of activity: {}\n\n", self.daily_volumes.len()));
+        
+        // Top accounts by volume
+        report.push_str("TOP 5 ACCOUNTS BY VOLUME:\n");
+        for (i, (address, summary)) in self.get_top_accounts_by_volume(5).iter().enumerate() {
+            let total_volume = summary.total_sent + summary.total_received;
+            report.push_str(&format!(
+                "{}. {} - Volume: {}, Transactions: {}\n",
+                i + 1, address, total_volume, summary.transaction_count
+            ));
+        }
+        
+        // Transaction patterns
+        report.push_str("\nTRANSACTION PATTERNS:\n");
+        let patterns = self.analyze_transaction_patterns();
+        for (pattern, count) in patterns {
+            report.push_str(&format!("- {}: {}\n", pattern, count));
+        }
+        
+        // Error analysis
+        report.push_str("\nERROR ANALYSIS:\n");
+        for (error, count) in &self.error_patterns {
+            report.push_str(&format!("- {}: {} occurrences\n", error, count));
+        }
+        
+        // Suspicious accounts
+        let suspicious = self.find_suspicious_accounts();
+        if !suspicious.is_empty() {
+            report.push_str("\nSUSPICIOUS ACCOUNTS:\n");
+            for account in suspicious {
+                report.push_str(&format!("- {}\n", account));
+            }
+        }
+        
+        report
+    }
+}
+
+fn main() {
+    let mut processor = TransactionProcessor::new();
+    
+    // Sample log data
+    let log_data = r#"
+2024-01-15T10:30:00Z|tx001|transfer|wallet1|wallet2|500000|SUCCESS|5000
+2024-01-15T10:31:00Z|tx002|mint|system|wallet1|1000000|SUCCESS|3000
+2024-01-15T10:32:00Z|tx003|transfer|wallet2|wallet3|250000|SUCCESS|5000
+2024-01-15T10:33:00Z|tx004|transfer|wallet1|wallet4|750000|INSUFFICIENT_FUNDS|0
+2024-01-15T10:34:00Z|tx005|burn|wallet3||100000|SUCCESS|2000
+2024-01-15T10:35:00Z|tx006|stake|wallet1|validator1|200000|SUCCESS|1000
+2024-01-16T09:00:00Z|tx007|transfer|wallet4|wallet1|300000|SUCCESS|5000
+2024-01-16T09:01:00Z|tx008|unstake|validator1|wallet1|200000|SUCCESS|1000
+"#;
+    
+    // Process the log data
+    match processor.process_log_file(log_data) {
+        Ok(count) => println!("Successfully processed {} transactions", count),
+        Err(e) => println!("Error processing logs: {}", e),
+    }
+    
+    // Generate and display report
+    println!("{}", processor.generate_report());
+    
+    // Demonstrate search functionality
+    println!("=== SEARCH RESULTS ===");
+    let search_results = processor.search_transactions("wallet1");
+    println!("Transactions involving 'wallet1': {}", search_results.len());
+    
+    for tx in search_results {
+        println!("- {}: {:?} {} tokens", tx.tx_id, tx.tx_type, tx.amount);
+    }
+    
+    // Show daily volume trend
+    println!("\n=== DAILY VOLUME TREND ===");
+    for (date, volume) in processor.get_daily_volume_trend() {
+        println!("{}: {} tokens", date, volume);
+    }
+}
+```
+
+---
+
+## 🎯 Day 5 Practice Exercises
+
+### Exercise 1: Token Registry
+Build a token registry system:
+
+```rust
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct TokenInfo {
+    symbol: String,
+    name: String,
+    decimals: u8,
+    total_supply: u64,
+    holders: HashMap<String, u64>,
+}
+
+struct TokenRegistry {
+    tokens: HashMap<String, TokenInfo>, // mint address -> token info
+}
+
+impl TokenRegistry {
+    fn new() -> Self {
+        // TODO: Implement
+        todo!()
+    }
+    
+    fn register_token(&mut self, mint: String, info: TokenInfo) -> Result<(), String> {
+        // TODO: Implement token registration
+        todo!()
+    }
+    
+    fn transfer(&mut self, mint: &str, from: &str, to: &str, amount: u64) -> Result<(), String> {
+        // TODO: Implement token transfer between holders
+        todo!()
+    }
+    
+    fn get_balance(&self, mint: &str, holder: &str) -> Option<u64> {
+        // TODO: Get holder balance for specific token
+        todo!()
+    }
+    
+    fn get_top_holders(&self, mint: &str, limit: usize) -> Vec<(String, u64)> {
+        // TODO: Get top holders for a token
+        todo!()
+    }
+}
+```
+
+### Exercise 2: Log Parser
+Create a flexible log parsing system:
+
+```rust
+#[derive(Debug)]
+enum LogLevel {
+    Info,
+    Warning,
+    Error,
+    Debug,
+}
+
+#[derive(Debug)]
+struct LogMessage {
+    timestamp: String,
+    level: LogLevel,
+    component: String,
+    message: String,
+}
+
+struct LogParser {
+    messages: Vec<LogMessage>,
+}
+
+impl LogParser {
+    fn parse_line(&self, line: &str) -> Result<LogMessage, String> {
+        // TODO: Parse log line format: "[timestamp] LEVEL component: message"
+        todo!()
+    }
+    
+    fn filter_by_level(&self, level: LogLevel) -> Vec<&LogMessage> {
+        // TODO: Filter messages by log level
+        todo!()
+    }
+    
+    fn search_messages(&self, query: &str) -> Vec<&LogMessage> {
+        // TODO: Search in message content
+        todo!()
+    }
+    
+    fn group_by_component(&self) -> HashMap<String, Vec<&LogMessage>> {
+        // TODO: Group messages by component
+        todo!()
+    }
+}
+```
+
+### Exercise 3: Word Counter
+Build an advanced word counting and analysis tool:
+
+```rust
+use std::collections::HashMap;
+
+struct TextAnalyzer {
+    word_counts: HashMap<String, u32>,
+    total_words: u32,
+}
+
+impl TextAnalyzer {
+    fn analyze_text(&mut self, text: &str) {
+        // TODO: Count word frequencies, handle punctuation
+        todo!()
+    }
+    
+    fn most_common_words(&self, n: usize) -> Vec<(String, u32)> {
+        // TODO: Return top N most common words
+        todo!()
+    }
+    
+    fn words_starting_with(&self, prefix: &str) -> Vec<&String> {
+        // TODO: Find words with specific prefix
+        todo!()
+    }
+    
+    fn get_statistics(&self) -> TextStats {
+        // TODO: Calculate various text statistics
+        todo!()
+    }
+}
+
+struct TextStats {
+    total_words: u32,
+    unique_words: u32,
+    average_word_length: f64,
+    longest_word: String,
+}
+```
+
+---
+
+## 🚀 What's Next?
+
+You've now mastered:
+
+- ✅ **Vector operations and performance optimization**
+- ✅ **HashMap and BTreeMap for key-value storage**
+- ✅ **String creation, manipulation, and parsing**
+- ✅ **Collection iteration and transformation**
+- ✅ **Real-world data processing patterns**
+
+Next up is our **Practical Build Session** where you'll combine everything you've learned to build real Solana-related projects!
+
+<div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-6 my-8">
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+      <span className="text-white font-bold text-sm">🔧</span>
+    </div>
+    <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
+      Solana Connection
+    </h3>
+  </div>
+  <p className="text-purple-800 dark:text-purple-200">
+    Collections are fundamental in Solana development: managing account data, processing transaction batches, storing program state, and analyzing blockchain data. The patterns you learned today will be essential for building efficient Solana applications!
+  </p>
+</div>
