@@ -1,0 +1,774 @@
+---
+title: "🎮 Mid-Course Challenge Break"
+description: "Apply Days 1-3 concepts with comprehensive project builds"
+---
+
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+# 🎮 Mid-Course Challenge Break
+
+<Callout type="info">
+**Time to Build Something Real!**
+
+You've mastered Rust fundamentals, ownership, and structs. Now let's combine everything into practical projects that demonstrate real-world patterns used in Solana development.
+</Callout>
+
+## 🎯 Project Selection
+
+Choose **one primary project** to focus on, or tackle both if you're feeling ambitious:
+
+<Tabs items={['📈 Crypto Portfolio Tracker', '⛓️ Simple Blockchain Simulator']}>
+<Tab value="📈 Crypto Portfolio Tracker">
+**Build a comprehensive portfolio management system**
+
+- **Beginner Friendly** - Clear structure
+- **Time:** 1-2 hours  
+- **Focus:** Structs, methods, ownership
+
+Build a CLI application that manages cryptocurrency portfolios with real-world patterns.
+</Tab>
+<Tab value="⛓️ Simple Blockchain Simulator">
+**Create a basic blockchain with blocks and validation**
+
+- **More Challenging** - Complex interactions
+- **Time:** 1-2 hours
+- **Focus:** References, validation, chains
+
+Create a basic blockchain that demonstrates fundamental concepts used in Solana.
+</Tab>
+</Tabs>
+
+---
+
+## 📈 Project 1: Crypto Portfolio Tracker
+
+Build a CLI application that manages cryptocurrency portfolios with real-world patterns.
+
+### 🏗️ Architecture Overview
+
+<MermaidWithZoom 
+  chart={`
+graph TB
+    A[Portfolio] --> B[Vec Asset]
+    A --> C[total_value]
+    A --> D[add_asset]
+    
+    B --> E[Asset 1]
+    B --> F[Asset 2]
+    B --> G[Asset N]
+    
+    E --> H[symbol: String]
+    E --> I[quantity: f64]
+    E --> J[purchase_price: f64]
+    E --> K[current_price: f64]
+    
+    E --> L[market_value]
+    E --> M[profit_loss]
+    E --> N[update_price]
+    
+    style A fill:#e1f5fe
+    style E fill:#f3e5f5
+    style L fill:#e8f5e8
+  `}
+  title="Portfolio Tracker Architecture"
+/>
+
+### 📋 Implementation Steps
+
+<Steps>
+<Step>
+### Step 1: Define the Asset Struct
+
+```rust
+// src/asset.rs
+#[derive(Debug, Clone)]
+pub struct Asset {
+    pub symbol: String,
+    pub quantity: f64,
+    pub purchase_price: f64,
+    pub current_price: f64,
+    pub purchase_date: String,
+}
+
+impl Asset {
+    pub fn new(symbol: String, quantity: f64, purchase_price: f64) -> Self {
+        Self {
+            symbol,
+            quantity,
+            purchase_price,
+            current_price: purchase_price, // Initially same as purchase price
+            purchase_date: "2024-01-01".to_string(), // Simplified for now
+        }
+    }
+    
+    pub fn market_value(&self) -> f64 {
+        self.quantity * self.current_price
+    }
+    
+    pub fn profit_loss(&self) -> f64 {
+        (self.current_price - self.purchase_price) * self.quantity
+    }
+    
+    pub fn profit_loss_percentage(&self) -> f64 {
+        ((self.current_price - self.purchase_price) / self.purchase_price) * 100.0
+    }
+    
+    pub fn update_price(&mut self, new_price: f64) {
+        self.current_price = new_price;
+    }
+}
+```
+</Step>
+
+<Step>
+### Step 2: Create the Portfolio Manager
+
+```rust
+// src/portfolio.rs
+use crate::asset::Asset;
+
+#[derive(Debug)]
+pub struct Portfolio {
+    assets: Vec<Asset>,
+    name: String,
+}
+
+impl Portfolio {
+    pub fn new(name: String) -> Self {
+        Self {
+            assets: Vec::new(),
+            name,
+        }
+    }
+    
+    pub fn add_asset(&mut self, asset: Asset) {
+        // Check if asset already exists
+        if let Some(existing) = self.assets.iter_mut()
+            .find(|a| a.symbol == asset.symbol) {
+            // Update existing asset (average cost basis)
+            let total_value = existing.market_value() + asset.market_value();
+            existing.quantity += asset.quantity;
+            existing.purchase_price = total_value / existing.quantity;
+        } else {
+            self.assets.push(asset);
+        }
+    }
+    
+    pub fn remove_asset(&mut self, symbol: &str) -> Option<Asset> {
+        if let Some(pos) = self.assets.iter().position(|a| a.symbol == symbol) {
+            Some(self.assets.remove(pos))
+        } else {
+            None
+        }
+    }
+    
+    pub fn total_value(&self) -> f64 {
+        self.assets.iter().map(|asset| asset.market_value()).sum()
+    }
+    
+    pub fn total_profit_loss(&self) -> f64 {
+        self.assets.iter().map(|asset| asset.profit_loss()).sum()
+    }
+    
+    pub fn get_asset(&self, symbol: &str) -> Option<&Asset> {
+        self.assets.iter().find(|asset| asset.symbol == symbol)
+    }
+    
+    pub fn get_asset_mut(&mut self, symbol: &str) -> Option<&mut Asset> {
+        self.assets.iter_mut().find(|asset| asset.symbol == symbol)
+    }
+    
+    pub fn list_assets(&self) -> &Vec<Asset> {
+        &self.assets
+    }
+    
+    pub fn update_all_prices(&mut self, price_updates: &[(String, f64)]) {
+        for (symbol, new_price) in price_updates {
+            if let Some(asset) = self.get_asset_mut(symbol) {
+                asset.update_price(*new_price);
+            }
+        }
+    }
+}
+```
+</Step>
+
+<Step>
+### Step 3: Build the CLI Interface
+
+```rust
+// src/main.rs
+mod asset;
+mod portfolio;
+
+use asset::Asset;
+use portfolio::Portfolio;
+use std::io::{self, Write};
+
+fn main() {
+    let mut portfolio = Portfolio::new("My Crypto Portfolio".to_string());
+    
+    loop {
+        println!("\n=== Crypto Portfolio Tracker ===");
+        println!("1. Add Asset");
+        println!("2. Remove Asset");
+        println!("3. Update Prices");
+        println!("4. View Portfolio");
+        println!("5. View Asset Details");
+        println!("6. Exit");
+        print!("Choose an option: ");
+        io::stdout().flush().unwrap();
+        
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        
+        match input.trim() {
+            "1" => add_asset(&mut portfolio),
+            "2" => remove_asset(&mut portfolio),
+            "3" => update_prices(&mut portfolio),
+            "4" => view_portfolio(&portfolio),
+            "5" => view_asset_details(&portfolio),
+            "6" => {
+                println!("Thanks for using Portfolio Tracker!");
+                break;
+            }
+            _ => println!("Invalid option, please try again."),
+        }
+    }
+}
+
+fn add_asset(portfolio: &mut Portfolio) {
+    println!("\n--- Add New Asset ---");
+    
+    print!("Symbol (e.g., BTC, ETH): ");
+    io::stdout().flush().unwrap();
+    let mut symbol = String::new();
+    io::stdin().read_line(&mut symbol).unwrap();
+    let symbol = symbol.trim().to_uppercase();
+    
+    print!("Quantity: ");
+    io::stdout().flush().unwrap();
+    let mut quantity_str = String::new();
+    io::stdin().read_line(&mut quantity_str).unwrap();
+    let quantity: f64 = match quantity_str.trim().parse() {
+        Ok(q) => q,
+        Err(_) => {
+            println!("Invalid quantity!");
+            return;
+        }
+    };
+    
+    print!("Purchase price: $");
+    io::stdout().flush().unwrap();
+    let mut price_str = String::new();
+    io::stdin().read_line(&mut price_str).unwrap();
+    let price: f64 = match price_str.trim().parse() {
+        Ok(p) => p,
+        Err(_) => {
+            println!("Invalid price!");
+            return;
+        }
+    };
+    
+    let asset = Asset::new(symbol, quantity, price);
+    portfolio.add_asset(asset);
+    println!("Asset added successfully!");
+}
+
+fn view_portfolio(portfolio: &Portfolio) {
+    println!("\n--- Portfolio Overview ---");
+    
+    let assets = portfolio.list_assets();
+    if assets.is_empty() {
+        println!("No assets in portfolio.");
+        return;
+    }
+    
+    println!("{:<8} {:<12} {:<12} {:<12} {:<12}", 
+             "Symbol", "Quantity", "Avg Cost", "Current", "Value");
+    println!("{}", "-".repeat(60));
+    
+    for asset in assets {
+        println!("{:<8} {:<12.4} ${:<11.2} ${:<11.2} ${:<11.2}",
+                 asset.symbol,
+                 asset.quantity,
+                 asset.purchase_price,
+                 asset.current_price,
+                 asset.market_value());
+    }
+    
+    println!("{}", "-".repeat(60));
+    println!("Total Portfolio Value: ${:.2}", portfolio.total_value());
+    
+    let total_pl = portfolio.total_profit_loss();
+    let pl_indicator = if total_pl >= 0.0 { "+" } else { "" };
+    println!("Total Profit/Loss: {}{:.2}", pl_indicator, total_pl);
+}
+
+// Additional helper functions...
+fn remove_asset(portfolio: &mut Portfolio) {
+    print!("Enter symbol to remove: ");
+    io::stdout().flush().unwrap();
+    let mut symbol = String::new();
+    io::stdin().read_line(&mut symbol).unwrap();
+    let symbol = symbol.trim().to_uppercase();
+    
+    match portfolio.remove_asset(&symbol) {
+        Some(asset) => println!("Removed {} from portfolio", asset.symbol),
+        None => println!("Asset {} not found", symbol),
+    }
+}
+
+fn update_prices(portfolio: &mut Portfolio) {
+    // Simulate price updates
+    let price_updates = vec![
+        ("BTC".to_string(), 45000.0),
+        ("ETH".to_string(), 3200.0),
+        ("SOL".to_string(), 120.0),
+    ];
+    
+    portfolio.update_all_prices(&price_updates);
+    println!("Prices updated!");
+}
+
+fn view_asset_details(portfolio: &Portfolio) {
+    print!("Enter symbol: ");
+    io::stdout().flush().unwrap();
+    let mut symbol = String::new();
+    io::stdin().read_line(&mut symbol).unwrap();
+    let symbol = symbol.trim().to_uppercase();
+    
+    match portfolio.get_asset(&symbol) {
+        Some(asset) => {
+            println!("\n--- {} Details ---", asset.symbol);
+            println!("Quantity: {:.4}", asset.quantity);
+            println!("Average Cost: ${:.2}", asset.purchase_price);
+            println!("Current Price: ${:.2}", asset.current_price);
+            println!("Market Value: ${:.2}", asset.market_value());
+            println!("Profit/Loss: ${:.2} ({:.1}%)", 
+                     asset.profit_loss(), 
+                     asset.profit_loss_percentage());
+        }
+        None => println!("Asset {} not found", symbol),
+    }
+}
+```
+</Step>
+</Steps>
+
+### 🎯 Key Learning Objectives
+
+- **Ownership**: Passing references vs moving values
+- **Borrowing**: Mutable and immutable references
+- **Structs**: Complex data organization
+- **Methods**: Associated functions and self methods
+- **Control Flow**: Menu-driven applications
+- **Error Handling**: Basic input validation
+
+---
+
+## ⛓️ Project 2: Simple Blockchain Simulator
+
+Create a basic blockchain that demonstrates fundamental concepts used in Solana.
+
+### 🏗️ Architecture Overview
+
+<MermaidWithZoom 
+  chart={`
+graph LR
+    A[Genesis Block] --> B[Block 1]
+    B --> C[Block 2] 
+    C --> D[Block 3]
+    
+    subgraph "Block Structure"
+        E[index: u64]
+        F[timestamp: u64]
+        G[data: String]
+        H[previous_hash: String]
+        I[hash: String]
+    end
+    
+    subgraph "Blockchain"
+        J[blocks: Vec<Block>]
+        K[validate_chain()]
+        L[add_block()]
+        M[get_latest_block()]
+    end
+    
+    style A fill:#e1f5fe
+    style E fill:#f3e5f5
+    style J fill:#e8f5e8
+  `}
+  title="Blockchain Simulator Architecture"
+/>
+
+### 📋 Implementation Steps
+
+<Steps>
+<Step>
+### Step 1: Create the Block Structure
+
+```rust
+// src/block.rs
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+
+#[derive(Debug, Clone)]
+pub struct Block {
+    pub index: u64,
+    pub timestamp: u64,
+    pub data: String,
+    pub previous_hash: String,
+    pub hash: String,
+    pub nonce: u64, // For simple proof of work
+}
+
+impl Block {
+    pub fn new(index: u64, data: String, previous_hash: String) -> Self {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        
+        let mut block = Self {
+            index,
+            timestamp,
+            data,
+            previous_hash,
+            hash: String::new(),
+            nonce: 0,
+        };
+        
+        block.hash = block.calculate_hash();
+        block
+    }
+    
+    pub fn calculate_hash(&self) -> String {
+        let mut hasher = DefaultHasher::new();
+        self.index.hash(&mut hasher);
+        self.timestamp.hash(&mut hasher);
+        self.data.hash(&mut hasher);
+        self.previous_hash.hash(&mut hasher);
+        self.nonce.hash(&mut hasher);
+        format!("{:x}", hasher.finish())
+    }
+    
+    pub fn mine_block(&mut self, difficulty: usize) {
+        let target = "0".repeat(difficulty);
+        
+        while !self.hash.starts_with(&target) {
+            self.nonce += 1;
+            self.hash = self.calculate_hash();
+        }
+        
+        println!("Block mined: {}", self.hash);
+    }
+    
+    pub fn is_valid(&self, previous_block: Option<&Block>) -> bool {
+        // Check if hash is correct
+        if self.hash != self.calculate_hash() {
+            return false;
+        }
+        
+        // Check if previous hash matches
+        if let Some(prev) = previous_block {
+            if self.previous_hash != prev.hash {
+                return false;
+            }
+            
+            // Check if index is sequential
+            if self.index != prev.index + 1 {
+                return false;
+            }
+        }
+        
+        true
+    }
+}
+```
+</Step>
+
+<Step>
+### Step 2: Build the Blockchain
+
+```rust
+// src/blockchain.rs
+use crate::block::Block;
+
+#[derive(Debug)]
+pub struct Blockchain {
+    pub blocks: Vec<Block>,
+    pub difficulty: usize,
+}
+
+impl Blockchain {
+    pub fn new() -> Self {
+        let mut blockchain = Self {
+            blocks: Vec::new(),
+            difficulty: 2, // Number of leading zeros required
+        };
+        
+        blockchain.create_genesis_block();
+        blockchain
+    }
+    
+    fn create_genesis_block(&mut self) {
+        let mut genesis = Block::new(
+            0,
+            "Genesis Block".to_string(),
+            "0".to_string(),
+        );
+        
+        genesis.mine_block(self.difficulty);
+        self.blocks.push(genesis);
+    }
+    
+    pub fn get_latest_block(&self) -> &Block {
+        self.blocks.last().unwrap()
+    }
+    
+    pub fn add_block(&mut self, data: String) {
+        let previous_block = self.get_latest_block();
+        let mut new_block = Block::new(
+            previous_block.index + 1,
+            data,
+            previous_block.hash.clone(),
+        );
+        
+        new_block.mine_block(self.difficulty);
+        self.blocks.push(new_block);
+    }
+    
+    pub fn is_chain_valid(&self) -> bool {
+        for i in 1..self.blocks.len() {
+            let current_block = &self.blocks[i];
+            let previous_block = &self.blocks[i - 1];
+            
+            if !current_block.is_valid(Some(previous_block)) {
+                return false;
+            }
+        }
+        
+        // Check genesis block separately
+        if !self.blocks[0].is_valid(None) {
+            return false;
+        }
+        
+        true
+    }
+    
+    pub fn get_block(&self, index: u64) -> Option<&Block> {
+        self.blocks.iter().find(|block| block.index == index)
+    }
+    
+    pub fn get_chain_info(&self) -> ChainInfo {
+        ChainInfo {
+            length: self.blocks.len(),
+            latest_hash: self.get_latest_block().hash.clone(),
+            is_valid: self.is_chain_valid(),
+            difficulty: self.difficulty,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ChainInfo {
+    pub length: usize,
+    pub latest_hash: String,
+    pub is_valid: bool,
+    pub difficulty: usize,
+}
+```
+</Step>
+
+<Step>
+### Step 3: CLI Interface
+
+```rust
+// src/main.rs
+mod block;
+mod blockchain;
+
+use blockchain::Blockchain;
+use std::io::{self, Write};
+
+fn main() {
+    let mut blockchain = Blockchain::new();
+    println!("🔗 Simple Blockchain Simulator");
+    println!("Genesis block created!");
+    
+    loop {
+        println!("\n=== Blockchain Menu ===");
+        println!("1. Add Block");
+        println!("2. View Blockchain");
+        println!("3. Validate Chain");
+        println!("4. View Block Details");
+        println!("5. Chain Statistics");
+        println!("6. Exit");
+        print!("Choose an option: ");
+        io::stdout().flush().unwrap();
+        
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        
+        match input.trim() {
+            "1" => add_block(&mut blockchain),
+            "2" => view_blockchain(&blockchain),
+            "3" => validate_chain(&blockchain),
+            "4" => view_block_details(&blockchain),
+            "5" => show_statistics(&blockchain),
+            "6" => {
+                println!("Thanks for using Blockchain Simulator!");
+                break;
+            }
+            _ => println!("Invalid option, please try again."),
+        }
+    }
+}
+
+fn add_block(blockchain: &mut Blockchain) {
+    print!("Enter block data: ");
+    io::stdout().flush().unwrap();
+    let mut data = String::new();
+    io::stdin().read_line(&mut data).unwrap();
+    let data = data.trim().to_string();
+    
+    if data.is_empty() {
+        println!("Block data cannot be empty!");
+        return;
+    }
+    
+    println!("Mining block...");
+    blockchain.add_block(data);
+    println!("Block added successfully!");
+}
+
+fn view_blockchain(blockchain: &Blockchain) {
+    println!("\n--- Blockchain Overview ---");
+    
+    for block in &blockchain.blocks {
+        println!("Block #{}", block.index);
+        println!("  Timestamp: {}", block.timestamp);
+        println!("  Data: {}", block.data);
+        println!("  Hash: {}", block.hash);
+        println!("  Previous Hash: {}", block.previous_hash);
+        println!("  Nonce: {}", block.nonce);
+        println!();
+    }
+}
+
+fn validate_chain(blockchain: &Blockchain) {
+    println!("\n--- Chain Validation ---");
+    if blockchain.is_chain_valid() {
+        println!("✅ Blockchain is valid!");
+    } else {
+        println!("❌ Blockchain is invalid!");
+    }
+}
+
+fn view_block_details(blockchain: &Blockchain) {
+    print!("Enter block index: ");
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).unwrap();
+    
+    let index: u64 = match input.trim().parse() {
+        Ok(i) => i,
+        Err(_) => {
+            println!("Invalid index!");
+            return;
+        }
+    };
+    
+    match blockchain.get_block(index) {
+        Some(block) => {
+            println!("\n--- Block #{} Details ---", block.index);
+            println!("Timestamp: {}", block.timestamp);
+            println!("Data: {}", block.data);
+            println!("Hash: {}", block.hash);
+            println!("Previous Hash: {}", block.previous_hash);
+            println!("Nonce: {}", block.nonce);
+            
+            // Validate this specific block
+            let previous_block = if index > 0 {
+                blockchain.get_block(index - 1)
+            } else {
+                None
+            };
+            
+            if block.is_valid(previous_block) {
+                println!("Status: ✅ Valid");
+            } else {
+                println!("Status: ❌ Invalid");
+            }
+        }
+        None => println!("Block #{} not found!", index),
+    }
+}
+
+fn show_statistics(blockchain: &Blockchain) {
+    let info = blockchain.get_chain_info();
+    
+    println!("\n--- Blockchain Statistics ---");
+    println!("Chain Length: {} blocks", info.length);
+    println!("Latest Hash: {}", info.latest_hash);
+    println!("Mining Difficulty: {} leading zeros", info.difficulty);
+    println!("Chain Valid: {}", if info.is_valid { "✅ Yes" } else { "❌ No" });
+    
+    // Calculate total nonce work
+    let total_nonce: u64 = blockchain.blocks.iter().map(|b| b.nonce).sum();
+    println!("Total Mining Work: {} nonce calculations", total_nonce);
+}
+```
+</Step>
+</Steps>
+
+### 🎯 Key Learning Objectives
+
+- **References**: Borrowing blocks for validation
+- **Ownership**: Moving vs borrowing in collections  
+- **Method Design**: Associated functions vs methods
+- **Data Validation**: Chain integrity checks
+- **Memory Management**: Efficient vector operations
+
+---
+
+## 🚀 Extension Challenges
+
+If you complete your chosen project early, try these enhancements:
+
+### For Portfolio Tracker:
+- Add transaction history tracking
+- Implement portfolio rebalancing suggestions
+- Add support for different asset types (stocks, crypto, commodities)
+- Create portfolio comparison features
+
+### For Blockchain:
+- Implement transaction pools
+- Add digital signature verification
+- Create a network simulation with multiple nodes
+- Add smart contract execution simulation
+
+---
+
+## 📚 What's Next?
+
+After completing your project, you should feel confident with:
+
+- ✅ **Struct design and implementation**
+- ✅ **Method syntax and associated functions**  
+- ✅ **Ownership and borrowing patterns**
+- ✅ **Basic error handling and validation**
+- ✅ **CLI application structure**
+
+These foundations prepare you perfectly for the advanced concepts coming in Days 4-7: enums, pattern matching, collections, and error handling!
+
+<Callout type="tip">
+**Pro Tip: Document Your Journey**
+
+Keep notes about what you learned and what challenged you. These patterns will appear constantly in Solana development, so building muscle memory now pays huge dividends later!
+</Callout>
