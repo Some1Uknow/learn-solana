@@ -1,0 +1,979 @@
+---
+title: "Day 1 Challenges: Rust Fundamentals Practice"
+description: "Put your Rust fundamentals to the test with practical challenges including a temperature converter, Fibonacci generator, enhanced guessing game, and password validator."
+type: challenge
+tags: ['rust', 'challenges', 'practice', 'fundamentals', 'cli-tools']
+module: '🦀 Rust for Solana'
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Ready to put your Day 1 Rust knowledge into practice? These challenges will help solidify your understanding of variables, functions, control flow, and basic data types through practical, real-world programming tasks.
+
+Each challenge builds upon the concepts you learned today and introduces patterns you'll use frequently in Rust development.
+
+<Mermaid 
+  chart="
+    graph TD
+      A[Day 1 Challenges] --> B[Challenge 1: Temperature Converter]
+      A --> C[Challenge 2: Fibonacci Generator]
+      A --> D[Challenge 3: Enhanced Guessing Game]
+      A --> E[Challenge 4: Password Validator]
+      
+      B --> B1[Basic: °C to °F]
+      B --> B2[Intermediate: Multi-unit]
+      B --> B3[Advanced: CLI Interface]
+      
+      C --> C1[Basic: First N numbers]
+      C --> C2[Intermediate: Up to limit]
+      C --> C3[Advanced: Performance optimization]
+      
+      D --> D1[Basic: Number guessing]
+      D --> D2[Intermediate: Difficulty levels]
+      D --> D3[Advanced: Statistics tracking]
+      
+      E --> E1[Basic: Length & characters]
+      E --> E2[Intermediate: Complexity rules]
+      E --> E3[Advanced: Security scoring]
+      
+      style B fill:#e1f5fe
+      style C fill:#f3e5f5
+      style D fill:#e8f5e8
+      style E fill:#fff3e0"
+/>
+
+<Callout type="info">
+**Challenge Strategy**: Start with Challenge 1 and work your way up. Each challenge includes multiple difficulty levels, so pick the one that matches your comfort level. Don't hesitate to look back at Day 1 concepts if you get stuck!
+</Callout>
+
+---
+
+## Challenge Overview
+
+<Callout type="info">
+Today's challenges will help you practice:
+
+- Working with different data types and type conversions
+- Building command-line interfaces with user input
+- Implementing mathematical algorithms
+- Using control flow effectively
+- Organizing code with functions
+- Handling edge cases and validation
+</Callout>
+
+---
+
+## Challenge 1: Temperature Converter CLI 🌡️
+
+Build a command-line tool that converts temperatures between Celsius, Fahrenheit, and Kelvin.
+
+### Requirements
+
+**Core Features:**
+- Convert between all three temperature scales
+- Handle user input and display results
+- Validate input and handle errors gracefully
+- Provide a user-friendly interface
+
+**Learning Goals:**
+- Practice with floating-point arithmetic
+- Implement input validation
+- Use functions to organize code
+- Handle different conversion scenarios
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Create a simple converter that handles one conversion at a time.
+
+```rust title="temperature_converter.rs"
+use std::io;
+
+fn main() {
+    println!("=== Temperature Converter ===");
+    
+    // Get input temperature
+    println!("Enter temperature value:");
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    let temp: f64 = input.trim().parse().expect("Invalid number");
+    
+    // Get input scale
+    println!("Enter current scale (C/F/K):");
+    let mut scale = String::new();
+    io::stdin().read_line(&mut scale).expect("Failed to read input");
+    let scale = scale.trim().to_uppercase();
+    
+    // Perform conversions and display results
+    match scale.as_str() {
+        "C" => {
+            let fahrenheit = celsius_to_fahrenheit(temp);
+            let kelvin = celsius_to_kelvin(temp);
+            println!("{:.2}°C = {:.2}°F = {:.2}K", temp, fahrenheit, kelvin);
+        },
+        "F" => {
+            let celsius = fahrenheit_to_celsius(temp);
+            let kelvin = celsius_to_kelvin(celsius);
+            println!("{:.2}°F = {:.2}°C = {:.2}K", temp, celsius, kelvin);
+        },
+        "K" => {
+            let celsius = kelvin_to_celsius(temp);
+            let fahrenheit = celsius_to_fahrenheit(celsius);
+            println!("{:.2}K = {:.2}°C = {:.2}°F", temp, celsius, fahrenheit);
+        },
+        _ => println!("Invalid scale! Use C, F, or K"),
+    }
+}
+
+// TODO: Implement these conversion functions
+fn celsius_to_fahrenheit(celsius: f64) -> f64 {
+    // Your implementation here
+    0.0
+}
+
+fn celsius_to_kelvin(celsius: f64) -> f64 {
+    // Your implementation here
+    0.0
+}
+
+fn fahrenheit_to_celsius(fahrenheit: f64) -> f64 {
+    // Your implementation here
+    0.0
+}
+
+fn kelvin_to_celsius(kelvin: f64) -> f64 {
+    // Your implementation here
+    0.0
+}
+```
+
+**Your Tasks:**
+1. Implement the temperature conversion functions
+2. Test with various inputs
+3. Add input validation for temperature ranges
+
+**Formulas to Remember:**
+- °F = (°C × 9/5) + 32
+- K = °C + 273.15
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add a menu system and better error handling.
+
+```rust title="advanced_temp_converter.rs"
+use std::io;
+
+fn main() {
+    println!("🌡️  Advanced Temperature Converter 🌡️");
+    
+    loop {
+        display_menu();
+        
+        let choice = get_user_choice();
+        
+        match choice {
+            1 => convert_temperature(),
+            2 => show_conversion_table(),
+            3 => {
+                println!("Thank you for using the Temperature Converter!");
+                break;
+            },
+            _ => println!("❌ Invalid choice! Please try again."),
+        }
+        
+        println!(); // Add spacing
+    }
+}
+
+fn display_menu() {
+    println!("\n=== Main Menu ===");
+    println!("1. Convert Temperature");
+    println!("2. Show Conversion Table");
+    println!("3. Exit");
+    print!("Choose an option (1-3): ");
+}
+
+fn get_user_choice() -> u32 {
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    
+    match input.trim().parse() {
+        Ok(num) => num,
+        Err(_) => 0, // Invalid input returns 0
+    }
+}
+
+fn convert_temperature() {
+    // TODO: Implement interactive temperature conversion
+    // - Get temperature value with validation
+    // - Get source and target scales
+    // - Perform conversion and display result
+    // - Handle edge cases (absolute zero, etc.)
+}
+
+fn show_conversion_table() {
+    // TODO: Display a table showing common temperature conversions
+    // Example: Water freezing/boiling points, body temperature, etc.
+}
+
+// TODO: Implement all conversion functions with proper validation
+```
+
+**Additional Features to Implement:**
+1. Input validation with retry logic
+2. Temperature range validation (e.g., below absolute zero)
+3. Conversion table showing common temperatures
+4. Pretty formatting for output
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+Create a full-featured CLI with configuration and history.
+
+**Advanced Features:**
+- Command-line arguments support
+- Conversion history tracking
+- Configuration file for default settings
+- Batch conversion from file input
+- Custom temperature scales
+- Export results to file
+
+**Bonus Challenges:**
+- Add support for Rankine and Réaumur scales
+- Implement a precision setting for output
+- Add unit tests for all conversion functions
+- Create a help system with examples
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 2: Fibonacci Generator 🌀
+
+Implement the Fibonacci sequence using different approaches to understand loops vs. recursion.
+
+### Requirements
+
+**Core Features:**
+- Generate Fibonacci numbers up to a given position
+- Implement both iterative and recursive versions
+- Compare performance between approaches
+- Handle edge cases and large numbers
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Start with a simple iterative implementation.
+
+```rust title="fibonacci_basic.rs"
+fn main() {
+    println!("=== Fibonacci Generator ===");
+    
+    // Test different approaches
+    let n = 10;
+    
+    println!("First {} Fibonacci numbers:", n);
+    print_fibonacci_sequence(n);
+    
+    println!("\nFibonacci at position {}:", n);
+    println!("Iterative: {}", fibonacci_iterative(n));
+    println!("Recursive: {}", fibonacci_recursive(n));
+}
+
+fn print_fibonacci_sequence(n: u32) {
+    // TODO: Print the first n Fibonacci numbers
+    // Expected output for n=10: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34
+}
+
+fn fibonacci_iterative(n: u32) -> u64 {
+    // TODO: Calculate the nth Fibonacci number using iteration
+    // Handle edge cases: F(0) = 0, F(1) = 1
+    0
+}
+
+fn fibonacci_recursive(n: u32) -> u64 {
+    // TODO: Calculate the nth Fibonacci number using recursion
+    // Be careful with stack overflow for large n!
+    0
+}
+```
+
+**Your Tasks:**
+1. Implement the iterative version (most efficient)
+2. Implement the recursive version (educational)
+3. Test with different values
+4. Notice the performance difference for larger numbers
+
+**Fibonacci Sequence Reminder:**
+- F(0) = 0
+- F(1) = 1  
+- F(n) = F(n-1) + F(n-2) for n > 1
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add performance comparison and optimization.
+
+```rust title="fibonacci_advanced.rs"
+use std::time::Instant;
+
+fn main() {
+    println!("🌀 Advanced Fibonacci Generator 🌀");
+    
+    // Performance comparison
+    let test_values = [10, 20, 30, 35];
+    
+    for &n in &test_values {
+        println!("\n=== Fibonacci {} ===", n);
+        benchmark_fibonacci(n);
+    }
+    
+    // Interactive mode
+    interactive_fibonacci();
+}
+
+fn benchmark_fibonacci(n: u32) {
+    // Iterative timing
+    let start = Instant::now();
+    let result_iter = fibonacci_iterative(n);
+    let duration_iter = start.elapsed();
+    
+    // Recursive timing (be careful with large n!)
+    let start = Instant::now();
+    let result_rec = if n <= 35 { 
+        fibonacci_recursive(n) 
+    } else { 
+        0 // Skip recursive for large n to avoid timeout
+    };
+    let duration_rec = start.elapsed();
+    
+    // Memoized timing
+    let start = Instant::now();
+    let result_memo = fibonacci_memoized(n);
+    let duration_memo = start.elapsed();
+    
+    println!("Result: {}", result_iter);
+    println!("Iterative: {:?}", duration_iter);
+    if n <= 35 {
+        println!("Recursive: {:?}", duration_rec);
+    } else {
+        println!("Recursive: Skipped (too slow)");
+    }
+    println!("Memoized:  {:?}", duration_memo);
+}
+
+fn interactive_fibonacci() {
+    // TODO: Implement interactive mode where user can:
+    // - Enter a position to calculate
+    // - Choose which algorithm to use
+    // - See performance comparison
+    // - Generate sequences up to a limit
+}
+
+// TODO: Implement these functions
+fn fibonacci_iterative(n: u32) -> u64 { 0 }
+fn fibonacci_recursive(n: u32) -> u64 { 0 }
+fn fibonacci_memoized(n: u32) -> u64 { 0 } // Use a HashMap for caching
+```
+
+**Additional Features:**
+1. Memoization to speed up recursive calls
+2. Performance benchmarking
+3. Interactive user interface
+4. Handle overflow for very large numbers
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Challenges:**
+- Implement using big integers for arbitrary precision
+- Create a streaming Fibonacci iterator
+- Add mathematical analysis (golden ratio approximation)
+- Matrix multiplication method for O(log n) calculation
+- Command-line interface with options
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 3: Enhanced Guessing Game 🎯
+
+Extend the classic Rust guessing game with difficulty levels and advanced features.
+
+### Requirements
+
+**Core Features:**
+- Multiple difficulty levels
+- Score tracking and statistics
+- Hints and feedback system
+- Game session management
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Build a basic guessing game with difficulty levels.
+
+```rust title="guessing_game.rs"
+use std::io;
+use rand::Rng;
+
+fn main() {
+    println!("🎯 Enhanced Guessing Game 🎯");
+    
+    // Select difficulty
+    let difficulty = select_difficulty();
+    let (min, max, max_attempts) = get_difficulty_settings(difficulty);
+    
+    println!("I'm thinking of a number between {} and {}!", min, max);
+    println!("You have {} attempts to guess it!", max_attempts);
+    
+    // Generate secret number
+    let secret_number = rand::thread_rng().gen_range(min..=max);
+    
+    // Game loop
+    let mut attempts = 0;
+    let mut won = false;
+    
+    while attempts < max_attempts && !won {
+        attempts += 1;
+        println!("\nAttempt {}/{}", attempts, max_attempts);
+        print!("Enter your guess: ");
+        
+        let guess = get_user_guess();
+        
+        match guess {
+            Some(num) if num == secret_number => {
+                println!("🎉 Congratulations! You guessed it in {} attempts!", attempts);
+                won = true;
+            },
+            Some(num) => {
+                give_feedback(num, secret_number, attempts, max_attempts);
+            },
+            None => {
+                println!("❌ Invalid input! Please enter a number.");
+                attempts -= 1; // Don't count invalid attempts
+            }
+        }
+    }
+    
+    if !won {
+        println!("💀 Game over! The number was {}.", secret_number);
+    }
+    
+    calculate_score(won, attempts, max_attempts, difficulty);
+}
+
+fn select_difficulty() -> u32 {
+    // TODO: Display difficulty menu and get user choice
+    // 1. Easy (1-50, 10 attempts)
+    // 2. Medium (1-100, 8 attempts)  
+    // 3. Hard (1-200, 6 attempts)
+    // 4. Expert (1-500, 5 attempts)
+    1
+}
+
+fn get_difficulty_settings(difficulty: u32) -> (i32, i32, u32) {
+    // TODO: Return (min, max, max_attempts) based on difficulty
+    match difficulty {
+        1 => (1, 50, 10),   // Easy
+        2 => (1, 100, 8),   // Medium
+        3 => (1, 200, 6),   // Hard
+        4 => (1, 500, 5),   // Expert
+        _ => (1, 50, 10),   // Default to easy
+    }
+}
+
+fn get_user_guess() -> Option<i32> {
+    // TODO: Get and parse user input, return None for invalid input
+    None
+}
+
+fn give_feedback(guess: i32, secret: i32, attempts: u32, max_attempts: u32) {
+    // TODO: Provide helpful feedback:
+    // - Too high/low
+    // - How close they are
+    // - Remaining attempts
+    // - Hints based on attempts remaining
+}
+
+fn calculate_score(won: bool, attempts: u32, max_attempts: u32, difficulty: u32) {
+    // TODO: Calculate and display score based on:
+    // - Whether they won
+    // - Number of attempts used
+    // - Difficulty level
+}
+```
+
+**Your Tasks:**
+1. Implement all the TODO functions
+2. Add the `rand` crate to your `Cargo.toml`
+3. Test different difficulty levels
+4. Add creative feedback messages
+
+**Don't forget to add to Cargo.toml:**
+```toml
+[dependencies]
+rand = "0.8"
+```
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add statistics tracking and hint system.
+
+```rust title="advanced_guessing_game.rs"
+use std::io;
+use rand::Rng;
+
+#[derive(Debug)]
+struct GameStats {
+    games_played: u32,
+    games_won: u32,
+    total_attempts: u32,
+    best_score: u32,
+    current_streak: u32,
+    best_streak: u32,
+}
+
+impl GameStats {
+    fn new() -> Self {
+        // TODO: Initialize statistics
+        GameStats {
+            games_played: 0,
+            games_won: 0,
+            total_attempts: 0,
+            best_score: 0,
+            current_streak: 0,
+            best_streak: 0,
+        }
+    }
+    
+    fn update(&mut self, won: bool, attempts: u32, score: u32) {
+        // TODO: Update statistics after a game
+    }
+    
+    fn display(&self) {
+        // TODO: Display formatted statistics
+    }
+}
+
+fn main() {
+    let mut stats = GameStats::new();
+    let mut play_again = true;
+    
+    println!("🎯 Advanced Guessing Game with Statistics 🎯");
+    
+    while play_again {
+        play_game(&mut stats);
+        stats.display();
+        play_again = ask_play_again();
+    }
+    
+    println!("Thanks for playing! Final statistics:");
+    stats.display();
+}
+
+fn play_game(stats: &mut GameStats) {
+    // TODO: Implement main game logic with hints
+    // - Difficulty selection
+    // - Game loop with hint system
+    // - Score calculation
+    // - Statistics update
+}
+
+fn give_smart_hint(guess: i32, secret: i32, attempts: u32, range: (i32, i32)) {
+    // TODO: Provide intelligent hints:
+    // - Basic high/low feedback
+    // - Range narrowing ("between 25 and 75")
+    // - Temperature feedback ("getting warmer/colder")
+    // - Mathematical hints ("try a multiple of 5")
+}
+
+fn ask_play_again() -> bool {
+    // TODO: Ask user if they want to play again
+    false
+}
+```
+
+**Additional Features:**
+1. Persistent statistics (save to file)
+2. Hint system that adapts to remaining attempts
+3. Achievement system
+4. Multiple game modes
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Features:**
+- AI that learns from player patterns
+- Custom difficulty creation
+- Tournament mode with multiple players
+- Network multiplayer capability
+- Advanced statistics and analytics
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 4: Password Validator 🔐
+
+Create a comprehensive password strength checker and generator.
+
+### Requirements
+
+**Core Features:**
+- Analyze password strength
+- Check against common patterns
+- Generate secure passwords
+- Provide improvement suggestions
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Build a basic password strength checker.
+
+```rust title="password_validator.rs"
+fn main() {
+    println!("🔐 Password Strength Validator 🔐");
+    
+    let test_passwords = [
+        "123456",
+        "password", 
+        "MyP@ssw0rd",
+        "Tr0ub4dor&3",
+        "correcthorsebatterystaple",
+        "R4nd0m!P@ssW0rd#2023",
+    ];
+    
+    for password in test_passwords {
+        println!("\nAnalyzing: '{}'", password);
+        let strength = analyze_password(password);
+        display_analysis(password, strength);
+    }
+    
+    // Interactive mode
+    interactive_mode();
+}
+
+#[derive(Debug, PartialEq)]
+enum PasswordStrength {
+    VeryWeak,
+    Weak,
+    Medium,
+    Strong,
+    VeryStrong,
+}
+
+fn analyze_password(password: &str) -> PasswordStrength {
+    let mut score = 0;
+    
+    // TODO: Implement scoring logic based on:
+    // - Length (bonus for 8+, 12+, 16+ characters)
+    // - Character diversity (lowercase, uppercase, numbers, symbols)
+    // - No common patterns (123, abc, repeated chars)
+    // - No dictionary words
+    
+    // Convert score to strength level
+    match score {
+        0..=2 => PasswordStrength::VeryWeak,
+        3..=4 => PasswordStrength::Weak,
+        5..=6 => PasswordStrength::Medium,
+        7..=8 => PasswordStrength::Strong,
+        _ => PasswordStrength::VeryStrong,
+    }
+}
+
+fn display_analysis(password: &str, strength: PasswordStrength) {
+    println!("Length: {} characters", password.len());
+    println!("Strength: {:?}", strength);
+    
+    // TODO: Display detailed analysis:
+    // - Character type breakdown
+    // - Identified weaknesses
+    // - Suggestions for improvement
+    // - Estimated crack time
+    
+    display_improvement_suggestions(password, &strength);
+}
+
+fn display_improvement_suggestions(password: &str, strength: &PasswordStrength) {
+    // TODO: Provide specific suggestions based on analysis
+    // - "Add uppercase letters"
+    // - "Include special characters"
+    // - "Increase length to at least 12 characters"
+    // - "Avoid common patterns"
+}
+
+fn interactive_mode() {
+    // TODO: Allow user to enter passwords for analysis
+    // - Continuous input loop
+    // - Option to generate secure passwords
+    // - Comparison mode for multiple passwords
+}
+
+// Helper functions to implement:
+fn has_lowercase(password: &str) -> bool { false }
+fn has_uppercase(password: &str) -> bool { false }
+fn has_digits(password: &str) -> bool { false }
+fn has_special_chars(password: &str) -> bool { false }
+fn has_repeated_chars(password: &str) -> bool { false }
+fn has_sequential_chars(password: &str) -> bool { false }
+```
+
+**Your Tasks:**
+1. Implement the password analysis logic
+2. Create helper functions for different checks
+3. Test with various password types
+4. Add creative feedback messages
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add password generation and advanced security checks.
+
+```rust title="advanced_password_validator.rs"
+use rand::Rng;
+
+#[derive(Debug)]
+struct PasswordAnalysis {
+    strength: PasswordStrength,
+    score: u8,
+    length: usize,
+    has_lowercase: bool,
+    has_uppercase: bool,
+    has_digits: bool,
+    has_special: bool,
+    has_repeated: bool,
+    has_sequential: bool,
+    entropy: f64,
+    crack_time: String,
+}
+
+impl PasswordAnalysis {
+    fn new(password: &str) -> Self {
+        // TODO: Perform comprehensive analysis
+        PasswordAnalysis {
+            strength: PasswordStrength::VeryWeak,
+            score: 0,
+            length: password.len(),
+            has_lowercase: false,
+            has_uppercase: false,
+            has_digits: false,
+            has_special: false,
+            has_repeated: false,
+            has_sequential: false,
+            entropy: 0.0,
+            crack_time: String::from("Instantly"),
+        }
+    }
+    
+    fn display(&self) {
+        // TODO: Display comprehensive analysis
+    }
+}
+
+#[derive(Debug, Clone)]
+struct PasswordRequirements {
+    min_length: usize,
+    require_lowercase: bool,
+    require_uppercase: bool,
+    require_digits: bool,
+    require_special: bool,
+    max_repeated: usize,
+    forbidden_patterns: Vec<String>,
+}
+
+impl Default for PasswordRequirements {
+    fn default() -> Self {
+        PasswordRequirements {
+            min_length: 8,
+            require_lowercase: true,
+            require_uppercase: true,
+            require_digits: true,
+            require_special: true,
+            max_repeated: 2,
+            forbidden_patterns: vec![
+                "123".to_string(),
+                "abc".to_string(),
+                "password".to_string(),
+                "qwerty".to_string(),
+            ],
+        }
+    }
+}
+
+fn main() {
+    println!("🔐 Advanced Password Security Suite 🔐");
+    
+    loop {
+        display_menu();
+        let choice = get_user_choice();
+        
+        match choice {
+            1 => analyze_password_interactive(),
+            2 => generate_password_interactive(),
+            3 => batch_password_test(),
+            4 => security_education(),
+            5 => break,
+            _ => println!("Invalid choice!"),
+        }
+    }
+}
+
+fn generate_secure_password(length: usize, requirements: &PasswordRequirements) -> String {
+    // TODO: Generate password meeting requirements
+    // - Ensure all required character types
+    // - Avoid forbidden patterns
+    // - Maximize entropy
+    String::new()
+}
+
+fn calculate_entropy(password: &str) -> f64 {
+    // TODO: Calculate password entropy
+    // Formula: entropy = length * log2(character_set_size)
+    0.0
+}
+
+fn estimate_crack_time(entropy: f64) -> String {
+    // TODO: Estimate crack time based on entropy
+    // Consider different attack scenarios:
+    // - Online attack (1000 guesses/second)
+    // - Offline attack (1 billion guesses/second)
+    String::from("Unknown")
+}
+```
+
+**Additional Features:**
+1. Custom password requirements
+2. Entropy calculation
+3. Crack time estimation
+4. Password generation with constraints
+5. Batch testing mode
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Features:**
+- Integration with haveibeenpwned API
+- Password policy compliance checking
+- Passphrase generation (diceware method)
+- Security education module
+- Export results to different formats
+</Tab>
+</Tabs>
+
+---
+
+## Submission and Testing
+
+<Callout type="info">
+**Testing Your Solutions**: For each challenge, create a `tests` module to verify your functions work correctly:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_celsius_to_fahrenheit() {
+        assert_eq!(celsius_to_fahrenheit(0.0), 32.0);
+        assert_eq!(celsius_to_fahrenheit(100.0), 212.0);
+    }
+    
+    #[test]
+    fn test_fibonacci() {
+        assert_eq!(fibonacci_iterative(0), 0);
+        assert_eq!(fibonacci_iterative(1), 1);
+        assert_eq!(fibonacci_iterative(10), 55);
+    }
+}
+```
+
+Run tests with: `cargo test`
+</Callout>
+
+### Success Criteria
+
+<Steps>
+<Step>
+### Functionality
+Your programs should work correctly for typical inputs and handle edge cases gracefully.
+</Step>
+
+<Step>
+### Code Quality
+Use meaningful variable names, proper function organization, and clear comments.
+</Step>
+
+<Step>
+### Error Handling
+Handle invalid inputs without crashing and provide helpful error messages.
+</Step>
+
+<Step>
+### User Experience
+Create intuitive interfaces with clear prompts and formatted output.
+</Step>
+</Steps>
+
+---
+
+## Common Pitfalls to Avoid
+
+<Callout type="warn">
+**Integer Overflow**
+```rust
+// Be careful with large Fibonacci numbers
+let big_fib = fibonacci_iterative(100); // Might overflow u64!
+
+// Use checked arithmetic or bigger types
+fn fibonacci_safe(n: u32) -> Option<u64> {
+    // Implementation with overflow checking
+}
+```
+</Callout>
+
+<Callout type="warn">
+**Input Validation**
+```rust
+// Don't just unwrap user input
+let guess: i32 = input.trim().parse().unwrap(); // ❌ Can panic
+
+// Handle parsing errors gracefully
+let guess: i32 = match input.trim().parse() {
+    Ok(num) => num,
+    Err(_) => {
+        println!("Please enter a valid number");
+        return;
+    }
+}; // ✅ Safe handling
+```
+</Callout>
+
+<Callout type="warn">
+**Performance Awareness**
+For recursive Fibonacci, don't test with numbers larger than 35-40 without memoization - it will be extremely slow!
+</Callout>
+
+---
+
+## Next Steps
+
+Excellent work completing the Day 1 challenges! You've practiced:
+- ✅ Variable management and type handling
+- ✅ Function design and organization  
+- ✅ Control flow implementation
+- ✅ User input processing
+- ✅ Mathematical algorithm implementation
+
+**Tomorrow's Preview**: Day 2 introduces Rust's ownership system - the feature that makes Rust unique. You'll learn about memory management without garbage collection, which is crucial for understanding how Solana programs manage resources efficiently.
+
+Ready for the next level? Continue to [Day 2: Ownership System](/learn/week-2/day-2-ownership-system)!

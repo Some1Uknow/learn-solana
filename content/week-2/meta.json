@@ -1,11 +1,25 @@
 {
-  "title": "Rust",
-  "description": "Learn the basics of Rust",
+  "title": "Rust for Solana",
+  "description": "Master Essential Rust Concepts to Build Anchor dApps",
   "icon": "Rust",
   "root": true,
   "pages": [
     "index",
-    "rust-basics",
-    "ownership-borrowing"
+    "day-1-rust-fundamentals",
+    "day-1-challenges",
+    "day-2-ownership-system",
+    "day-2-challenges", 
+    "day-3-data-structures",
+    "day-3-challenges",
+    "mid-course-projects",
+    "day-4-enums-pattern-matching",
+    "day-4-challenges",
+    "day-5-collections-strings",
+    "day-5-challenges",
+    "practical-build-session",
+    "day-6-error-handling-organization",
+    "day-6-challenges",
+    "day-7-solana-specific-rust",
+    "day-7-challenges"
   ]
 }

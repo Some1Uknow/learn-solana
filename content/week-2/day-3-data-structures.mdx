@@ -1,0 +1,1163 @@
+---
+title: "Day 3: Data Structures - Structs and Methods"
+description: "Learn to create custom data types with structs, implement methods and associated functions, and apply object-oriented patterns in Rust for blockchain development."
+tags: ['rust', 'structs', 'methods', 'impl', 'data-structures', 'oop']
+module: '🦀 Rust for Solana'
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Welcome to Day 3! Today we'll learn how to create custom data types using structs and add behavior to them with methods. This is where Rust programming becomes object-oriented and we start building the kinds of complex data structures you'll use constantly in Solana development.
+
+Structs are fundamental to blockchain programming - they represent accounts, transactions, program state, and more. Understanding how to design and implement structs effectively is crucial for building robust Solana programs.
+
+<MermaidWithZoom 
+  title="Rust Struct Types and Applications"
+  chart="
+    graph TD
+      A[Rust Structs] --> B[Regular Structs]
+      A --> C[Tuple Structs]
+      A --> D[Unit Structs]
+      
+      B --> B1[Named Fields]
+      B --> B2[Field Access with .]
+      B --> B3[struct User { name, age }]
+      
+      C --> C1[Unnamed Fields]
+      C --> C2[Access with .0, .1]
+      C --> C3[struct Point(i32, i32)]
+      
+      D --> D1[No Fields]
+      D --> D2[Zero-sized Types]
+      D --> D3[struct Unit;]
+      
+      E[Methods & Functions] --> E1[Instance Methods]
+      E --> E2[Associated Functions]
+      
+      E1 --> E1A[impl MyStruct { fn method(&self) }]
+      E1 --> E1B[Access with instance.method()]
+      
+      E2 --> E2A[impl MyStruct { fn new() -> Self }]
+      E2 --> E2B[Access with MyStruct::new()]
+      
+      F[Blockchain Applications] --> F1[Account Structures]
+      F --> F2[Transaction Data]
+      F --> F3[Program State]
+      F --> F4[Instruction Parameters]
+      
+      style A fill:#e1f5fe
+      style E fill:#f3e5f5
+      style F fill:#e8f5e8"
+/>
+
+<Callout type="info">
+**Why Structs Matter for Solana**: In Solana, everything is structured data - accounts have specific layouts, instructions have defined parameters, and program state must be serializable. Mastering structs is essential for effective blockchain development.
+</Callout>
+
+---
+
+## What You'll Learn Today
+
+<Callout type="info">
+By the end of Day 3, you'll understand:
+
+- How to define and instantiate structs
+- Different types of structs (regular, tuple, unit)
+- Field access and modification patterns
+- Method implementation with impl blocks
+- The difference between self, &self, and &mut self
+- Associated functions (like constructors)
+- Struct destructuring and pattern matching
+- Common design patterns for blockchain data structures
+</Callout>
+
+---
+
+## Defining and Using Structs
+
+Structs let you create custom data types by grouping related values together. Think of them as blueprints for your data.
+
+### Basic Struct Definition
+
+```rust title="basic_structs.rs"
+// Define a struct for a blockchain account
+struct Account {
+    address: String,
+    balance: u64,
+    nonce: u32,
+    is_active: bool,
+}
+
+fn main() {
+    // Create an instance of the struct
+    let alice = Account {
+        address: String::from("Alice123"),
+        balance: 5000,
+        nonce: 0,
+        is_active: true,
+    };
+    
+    // Access struct fields
+    println!("Account: {}", alice.address);
+    println!("Balance: {} lamports", alice.balance);
+    println!("Nonce: {}", alice.nonce);
+    println!("Active: {}", alice.is_active);
+    
+    // Create mutable instance to modify fields
+    let mut bob = Account {
+        address: String::from("Bob456"),
+        balance: 1000,
+        nonce: 0,
+        is_active: true,
+    };
+    
+    // Modify fields
+    bob.balance += 500;
+    bob.nonce += 1;
+    
+    println!("Bob's updated balance: {}", bob.balance);
+}
+```
+
+### Field Init Shorthand
+
+When variable names match field names, you can use shorthand:
+
+```rust title="field_shorthand.rs"
+struct Transaction {
+    from: String,
+    to: String,
+    amount: u64,
+    timestamp: u64,
+}
+
+fn create_transaction(from: String, to: String, amount: u64) -> Transaction {
+    let timestamp = get_current_timestamp();
+    
+    // Shorthand syntax when variable names match field names
+    Transaction {
+        from,        // Instead of from: from,
+        to,          // Instead of to: to,
+        amount,      // Instead of amount: amount,
+        timestamp,
+    }
+}
+
+fn get_current_timestamp() -> u64 {
+    // Simulate getting current timestamp
+    1640995200
+}
+
+fn main() {
+    let tx = create_transaction(
+        String::from("Alice"),
+        String::from("Bob"),
+        1000,
+    );
+    
+    println!("Transaction: {} -> {} ({})", tx.from, tx.to, tx.amount);
+}
+```
+
+### Struct Update Syntax
+
+Create new instances based on existing ones:
+
+```rust title="struct_update.rs"
+#[derive(Debug)]  // This allows us to print the struct
+struct Config {
+    network: String,
+    rpc_url: String,
+    commitment: String,
+    timeout: u32,
+}
+
+fn main() {
+    // Base configuration
+    let mainnet_config = Config {
+        network: String::from("mainnet"),
+        rpc_url: String::from("https://api.mainnet-beta.solana.com"),
+        commitment: String::from("confirmed"),
+        timeout: 30,
+    };
+    
+    // Create devnet config based on mainnet, changing only what's different
+    let devnet_config = Config {
+        network: String::from("devnet"),
+        rpc_url: String::from("https://api.devnet.solana.com"),
+        ..mainnet_config  // Use remaining fields from mainnet_config
+    };
+    
+    // Note: mainnet_config is partially moved and can't be used completely anymore
+    
+    println!("Devnet config: {:?}", devnet_config);
+}
+```
+
+<Callout type="tip">
+**Derive Debug**: The `#[derive(Debug)]` attribute automatically implements the Debug trait, allowing you to print structs with `println!("{:?}", struct_instance)`.
+</Callout>
+
+---
+
+## Different Types of Structs
+
+Rust has three kinds of structs, each serving different purposes:
+
+<Accordions>
+<Accordion title="Regular Structs (Named Fields)">
+### Regular Structs (Named Fields)
+
+These are the most common and have named fields:
+
+```rust title="named_structs.rs"
+#[derive(Debug)]
+struct Wallet {
+    public_key: String,
+    balance: u64,
+    transactions: Vec<String>,
+}
+
+impl Wallet {
+    fn new(public_key: String) -> Self {
+        Wallet {
+            public_key,
+            balance: 0,
+            transactions: Vec::new(),
+        }
+    }
+    
+    fn add_transaction(&mut self, tx_id: String) {
+        self.transactions.push(tx_id);
+    }
+}
+
+fn main() {
+    let mut wallet = Wallet::new(String::from("7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstEg"));
+    wallet.balance = 1000;
+    wallet.add_transaction(String::from("tx_123"));
+    
+    println!("Wallet: {:?}", wallet);
+}
+```
+</Accordion>
+
+<Accordion title="Tuple Structs (Unnamed Fields)">
+### Tuple Structs (Unnamed Fields)
+
+When you want to name a type but don't need to name each field:
+
+```rust title="tuple_structs.rs"
+// Tuple structs - fields accessed by position
+struct Point3D(f64, f64, f64);  // x, y, z coordinates
+struct Color(u8, u8, u8);       // r, g, b values
+struct Lamports(u64);           // Wrapper around u64 for type safety
+
+fn main() {
+    let point = Point3D(1.0, 2.0, 3.0);
+    let color = Color(255, 128, 0);
+    let balance = Lamports(1_000_000);
+    
+    // Access fields by position
+    println!("Point: ({}, {}, {})", point.0, point.1, point.2);
+    println!("Color: RGB({}, {}, {})", color.0, color.1, color.2);
+    println!("Balance: {} lamports", balance.0);
+    
+    // Tuple structs can be destructured
+    let Point3D(x, y, z) = point;
+    println!("Coordinates: x={}, y={}, z={}", x, y, z);
+}
+
+// Tuple structs are useful for type safety
+fn transfer_lamports(amount: Lamports) -> bool {
+    println!("Transferring {} lamports", amount.0);
+    amount.0 > 0
+}
+```
+</Accordion>
+
+<Accordion title="Unit Structs (No Fields)">
+### Unit Structs (No Fields)
+
+Useful for types that don't need data but need to exist:
+
+```rust title="unit_structs.rs"
+// Unit structs - no fields, just types
+struct MainnetNetwork;
+struct DevnetNetwork;
+struct TestnetNetwork;
+
+// These can implement traits to represent different behaviors
+trait Network {
+    fn rpc_url(&self) -> &str;
+    fn name(&self) -> &str;
+}
+
+impl Network for MainnetNetwork {
+    fn rpc_url(&self) -> &str {
+        "https://api.mainnet-beta.solana.com"
+    }
+    
+    fn name(&self) -> &str {
+        "mainnet"
+    }
+}
+
+impl Network for DevnetNetwork {
+    fn rpc_url(&self) -> &str {
+        "https://api.devnet.solana.com"
+    }
+    
+    fn name(&self) -> &str {
+        "devnet"
+    }
+}
+
+fn main() {
+    let mainnet = MainnetNetwork;
+    let devnet = DevnetNetwork;
+    
+    println!("Mainnet: {} at {}", mainnet.name(), mainnet.rpc_url());
+    println!("Devnet: {} at {}", devnet.name(), devnet.rpc_url());
+}
+```
+</Accordion>
+</Accordions>
+
+---
+
+## Method Syntax
+
+Methods are functions defined within the context of a struct using `impl` blocks. They make code more organized and readable.
+
+<MermaidWithZoom 
+  title="Method Types and Usage Patterns in Rust"
+  chart="
+    graph TD
+      A[Method Types in Rust] --> B[Instance Methods]
+      A --> C[Associated Functions]
+      
+      B --> B1[&self - Read Only]
+      B --> B2[&mut self - Modify Data]
+      B --> B3[self - Take Ownership]
+      
+      B1 --> B1A[fn get_balance(&self) -> u64]
+      B1 --> B1B[Cannot modify struct]
+      B1 --> B1C[Multiple references allowed]
+      
+      B2 --> B2A[fn deposit(&mut self, amount: u64)]
+      B2 --> B2B[Can modify struct fields]
+      B2 --> B2C[Exclusive access required]
+      
+      B3 --> B3A[fn close_account(self)]
+      B3 --> B3B[Consumes the struct]
+      B3 --> B3C[Cannot use after calling]
+      
+      C --> C1[No self parameter]
+      C --> C2[Called with :: syntax]
+      C --> C3[Often used as constructors]
+      
+      C --> C1A[fn new() -> Self]
+      C --> C2A[Account::new()]
+      C --> C3A[Account::default()]
+      
+      D[Usage Patterns] --> D1[account.get_balance()]
+      D --> D2[account.deposit(100)]
+      D --> D3[Account::new()]
+      
+      style B1 fill:#e8f5e8
+      style B2 fill:#e1f5fe
+      style B3 fill:#fff3e0
+      style C fill:#f3e5f5"
+/>
+
+### Basic Method Implementation
+
+```rust title="basic_methods.rs"
+#[derive(Debug)]
+struct BankAccount {
+    account_number: String,
+    holder_name: String,
+    balance: u64,
+    is_frozen: bool,
+}
+
+impl BankAccount {
+    // Associated function (like a constructor)
+    fn new(account_number: String, holder_name: String) -> Self {
+        BankAccount {
+            account_number,
+            holder_name,
+            balance: 0,
+            is_frozen: false,
+        }
+    }
+    
+    // Method that takes immutable reference to self
+    fn get_balance(&self) -> u64 {
+        self.balance
+    }
+    
+    // Method that takes mutable reference to self
+    fn deposit(&mut self, amount: u64) -> Result<(), String> {
+        if self.is_frozen {
+            return Err("Account is frozen".to_string());
+        }
+        
+        self.balance += amount;
+        Ok(())
+    }
+    
+    // Method that takes mutable reference to self
+    fn withdraw(&mut self, amount: u64) -> Result<(), String> {
+        if self.is_frozen {
+            return Err("Account is frozen".to_string());
+        }
+        
+        if amount > self.balance {
+            return Err("Insufficient funds".to_string());
+        }
+        
+        self.balance -= amount;
+        Ok(())
+    }
+    
+    // Method that takes mutable reference to self
+    fn freeze(&mut self) {
+        self.is_frozen = true;
+    }
+    
+    // Method that takes immutable reference to self
+    fn is_active(&self) -> bool {
+        !self.is_frozen && self.balance > 0
+    }
+    
+    // Method that takes ownership of self (consumes the instance)
+    fn close_account(self) -> String {
+        format!("Account {} has been closed. Final balance: {}", 
+                self.account_number, self.balance)
+    }
+}
+
+fn main() {
+    // Create new account using associated function
+    let mut account = BankAccount::new(
+        String::from("ACC001"),
+        String::from("Alice")
+    );
+    
+    println!("New account: {:?}", account);
+    
+    // Use methods
+    account.deposit(1000).unwrap();
+    println!("After deposit: Balance = {}", account.get_balance());
+    
+    account.withdraw(250).unwrap();
+    println!("After withdrawal: Balance = {}", account.get_balance());
+    
+    println!("Account active: {}", account.is_active());
+    
+    // This consumes the account
+    let closure_message = account.close_account();
+    println!("{}", closure_message);
+    
+    // account is no longer accessible here
+}
+```
+
+### Understanding self, &self, and &mut self
+
+<Tabs items={['&self (Immutable)', '&mut self (Mutable)', 'self (Owned)']}>
+<Tab value="&self (Immutable)">
+```rust
+impl BankAccount {
+    // &self - borrows the instance immutably
+    // Use when you only need to read data
+    fn get_balance(&self) -> u64 {
+        self.balance  // Can read fields
+        // self.balance += 1;  // ❌ Can't modify
+    }
+    
+    fn display_info(&self) {
+        println!("Account: {} - Balance: {}", 
+                 self.account_number, self.balance);
+    }
+    
+    fn calculate_interest(&self, rate: f64) -> u64 {
+        (self.balance as f64 * rate) as u64
+    }
+}
+```
+</Tab>
+<Tab value="&mut self (Mutable)">
+```rust
+impl BankAccount {
+    // &mut self - borrows the instance mutably
+    // Use when you need to modify the instance
+    fn deposit(&mut self, amount: u64) {
+        self.balance += amount;  // ✅ Can modify fields
+    }
+    
+    fn update_holder_name(&mut self, new_name: String) {
+        self.holder_name = new_name;
+    }
+    
+    fn apply_interest(&mut self, rate: f64) {
+        let interest = (self.balance as f64 * rate) as u64;
+        self.balance += interest;
+    }
+}
+```
+</Tab>
+<Tab value="self (Owned)">
+```rust
+impl BankAccount {
+    // self - takes ownership of the instance
+    // Use when you want to consume/transform the instance
+    fn close_account(self) -> (String, u64) {
+        // Can access all fields
+        (self.account_number, self.balance)
+        // Instance is consumed - can't be used after this
+    }
+    
+    fn convert_to_savings(self) -> SavingsAccount {
+        SavingsAccount {
+            account_number: self.account_number,
+            balance: self.balance,
+            interest_rate: 0.02,
+        }
+    }
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## Associated Functions
+
+Associated functions are functions defined in impl blocks that don't take self as a parameter. They're often used as constructors.
+
+```rust title="associated_functions.rs"
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // Associated function - constructor
+    fn new(width: u32, height: u32) -> Self {
+        Rectangle { width, height }
+    }
+    
+    // Associated function - factory method
+    fn square(size: u32) -> Self {
+        Rectangle {
+            width: size,
+            height: size,
+        }
+    }
+    
+    // Associated function - validation constructor
+    fn new_validated(width: u32, height: u32) -> Result<Self, String> {
+        if width == 0 || height == 0 {
+            Err("Dimensions must be positive".to_string())
+        } else {
+            Ok(Rectangle { width, height })
+        }
+    }
+    
+    // Method - calculate area
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+    
+    // Method - check if it's a square
+    fn is_square(&self) -> bool {
+        self.width == self.height
+    }
+    
+    // Method - can this rectangle hold another?
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+fn main() {
+    // Using associated functions (note the :: syntax)
+    let rect1 = Rectangle::new(30, 50);
+    let square = Rectangle::square(25);
+    
+    // Using validated constructor
+    match Rectangle::new_validated(0, 10) {
+        Ok(rect) => println!("Created rectangle: {:?}", rect),
+        Err(e) => println!("Failed to create rectangle: {}", e),
+    }
+    
+    // Using methods (note the . syntax)
+    println!("Rectangle area: {}", rect1.area());
+    println!("Is square: {}", rect1.is_square());
+    println!("Can hold square: {}", rect1.can_hold(&square));
+    
+    println!("Rectangle: {:?}", rect1);
+    println!("Square: {:?}", square);
+}
+```
+
+<Callout type="tip">
+**Naming Convention**: Associated functions often use names like `new`, `default`, `from_*`, `with_*` to indicate they're constructors or factory methods.
+</Callout>
+
+---
+
+## Multiple impl Blocks
+
+You can have multiple impl blocks for the same struct, which is useful for organizing related functionality:
+
+```rust title="multiple_impl.rs"
+#[derive(Debug)]
+struct CryptoWallet {
+    address: String,
+    balance: u64,
+    private_key: String,
+    transaction_history: Vec<String>,
+}
+
+// Basic functionality
+impl CryptoWallet {
+    fn new(address: String, private_key: String) -> Self {
+        CryptoWallet {
+            address,
+            private_key,
+            balance: 0,
+            transaction_history: Vec::new(),
+        }
+    }
+    
+    fn get_balance(&self) -> u64 {
+        self.balance
+    }
+    
+    fn get_address(&self) -> &str {
+        &self.address
+    }
+}
+
+// Transaction functionality
+impl CryptoWallet {
+    fn send(&mut self, to: &str, amount: u64) -> Result<String, String> {
+        if amount > self.balance {
+            return Err("Insufficient funds".to_string());
+        }
+        
+        self.balance -= amount;
+        let tx_id = format!("tx_{}_{}", self.transaction_history.len(), amount);
+        self.transaction_history.push(tx_id.clone());
+        
+        Ok(tx_id)
+    }
+    
+    fn receive(&mut self, amount: u64) -> String {
+        self.balance += amount;
+        let tx_id = format!("rx_{}_{}", self.transaction_history.len(), amount);
+        self.transaction_history.push(tx_id.clone());
+        tx_id
+    }
+}
+
+// Analytics functionality
+impl CryptoWallet {
+    fn transaction_count(&self) -> usize {
+        self.transaction_history.len()
+    }
+    
+    fn get_transaction_history(&self) -> &[String] {
+        &self.transaction_history
+    }
+    
+    fn calculate_total_sent(&self) -> u64 {
+        self.transaction_history.iter()
+            .filter(|tx| tx.starts_with("tx_"))
+            .map(|tx| {
+                tx.split('_').last()
+                  .unwrap_or("0")
+                  .parse::<u64>()
+                  .unwrap_or(0)
+            })
+            .sum()
+    }
+}
+
+fn main() {
+    let mut wallet = CryptoWallet::new(
+        String::from("7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstEg"),
+        String::from("private_key_123")
+    );
+    
+    // Receive some tokens
+    wallet.receive(1000);
+    wallet.receive(500);
+    
+    // Send some tokens
+    match wallet.send("BobsAddress", 300) {
+        Ok(tx_id) => println!("Sent successfully: {}", tx_id),
+        Err(e) => println!("Send failed: {}", e),
+    }
+    
+    // Check analytics
+    println!("Balance: {}", wallet.get_balance());
+    println!("Transaction count: {}", wallet.transaction_count());
+    println!("Total sent: {}", wallet.calculate_total_sent());
+    println!("History: {:?}", wallet.get_transaction_history());
+}
+```
+
+---
+
+## Struct Destructuring
+
+You can extract struct fields using pattern matching:
+
+```rust title="struct_destructuring.rs"
+#[derive(Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+#[derive(Debug)]
+struct Transaction {
+    from: String,
+    to: String,
+    amount: u64,
+    fee: u64,
+}
+
+fn main() {
+    let point = Point { x: 5, y: 10 };
+    
+    // Basic destructuring
+    let Point { x, y } = point;
+    println!("Coordinates: ({}, {})", x, y);
+    
+    // Destructuring with different names
+    let Point { x: px, y: py } = Point { x: 1, y: 2 };
+    println!("Point: ({}, {})", px, py);
+    
+    // Partial destructuring
+    let Point { x, .. } = Point { x: 3, y: 4 };
+    println!("X coordinate: {}", x);
+    
+    // Destructuring in function parameters
+    let tx = Transaction {
+        from: String::from("Alice"),
+        to: String::from("Bob"),
+        amount: 1000,
+        fee: 5,
+    };
+    
+    process_transaction(&tx);
+    calculate_net_amount(&tx);
+}
+
+// Destructuring in function parameters
+fn process_transaction(Transaction { from, to, amount, .. }: &Transaction) {
+    println!("Processing: {} -> {} ({})", from, to, amount);
+}
+
+// Destructuring in match expressions
+fn calculate_net_amount(tx: &Transaction) -> u64 {
+    match tx {
+        Transaction { amount, fee, .. } => amount - fee,
+    }
+}
+
+// Destructuring with conditions
+fn categorize_point(point: &Point) -> &str {
+    match point {
+        Point { x: 0, y: 0 } => "Origin",
+        Point { x: 0, y: _ } => "On Y-axis",
+        Point { x: _, y: 0 } => "On X-axis",
+        Point { x, y } if x == y => "On diagonal",
+        _ => "Somewhere else",
+    }
+}
+```
+
+---
+
+## Practical Blockchain Examples
+
+Let's build some blockchain-relevant data structures:
+
+### NFT Metadata Structure
+
+```rust title="nft_example.rs"
+#[derive(Debug, Clone)]
+struct NFTMetadata {
+    name: String,
+    description: String,
+    image_url: String,
+    attributes: Vec<Attribute>,
+    rarity_score: f64,
+}
+
+#[derive(Debug, Clone)]
+struct Attribute {
+    trait_type: String,
+    value: String,
+    rarity: f64,
+}
+
+#[derive(Debug)]
+struct NFT {
+    token_id: u64,
+    owner: String,
+    metadata: NFTMetadata,
+    is_listed: bool,
+    price: Option<u64>,
+}
+
+impl NFTMetadata {
+    fn new(name: String, description: String, image_url: String) -> Self {
+        NFTMetadata {
+            name,
+            description,
+            image_url,
+            attributes: Vec::new(),
+            rarity_score: 0.0,
+        }
+    }
+    
+    fn add_attribute(&mut self, trait_type: String, value: String, rarity: f64) {
+        self.attributes.push(Attribute {
+            trait_type,
+            value,
+            rarity,
+        });
+        self.calculate_rarity_score();
+    }
+    
+    fn calculate_rarity_score(&mut self) {
+        self.rarity_score = self.attributes.iter()
+            .map(|attr| attr.rarity)
+            .sum::<f64>() / self.attributes.len() as f64;
+    }
+}
+
+impl NFT {
+    fn new(token_id: u64, owner: String, metadata: NFTMetadata) -> Self {
+        NFT {
+            token_id,
+            owner,
+            metadata,
+            is_listed: false,
+            price: None,
+        }
+    }
+    
+    fn list_for_sale(&mut self, price: u64) {
+        self.is_listed = true;
+        self.price = Some(price);
+    }
+    
+    fn remove_from_sale(&mut self) {
+        self.is_listed = false;
+        self.price = None;
+    }
+    
+    fn transfer_ownership(&mut self, new_owner: String) {
+        self.owner = new_owner;
+        self.remove_from_sale(); // Remove from sale when transferred
+    }
+    
+    fn get_info(&self) -> String {
+        let listing_info = if self.is_listed {
+            format!("Listed for {} SOL", self.price.unwrap_or(0))
+        } else {
+            "Not listed".to_string()
+        };
+        
+        format!(
+            "NFT #{}: {} (Owner: {}) - {} - Rarity: {:.2}",
+            self.token_id,
+            self.metadata.name,
+            self.owner,
+            listing_info,
+            self.metadata.rarity_score
+        )
+    }
+}
+
+fn main() {
+    // Create NFT metadata
+    let mut metadata = NFTMetadata::new(
+        String::from("Cool Monkey #1337"),
+        String::from("A really cool monkey with sunglasses"),
+        String::from("https://example.com/monkey1337.png")
+    );
+    
+    // Add attributes
+    metadata.add_attribute(String::from("Background"), String::from("Blue"), 0.3);
+    metadata.add_attribute(String::from("Eyes"), String::from("Sunglasses"), 0.1);
+    metadata.add_attribute(String::from("Mouth"), String::from("Smile"), 0.5);
+    
+    // Create NFT
+    let mut nft = NFT::new(1337, String::from("Alice"), metadata);
+    
+    println!("{}", nft.get_info());
+    
+    // List for sale
+    nft.list_for_sale(50);
+    println!("After listing: {}", nft.get_info());
+    
+    // Transfer ownership
+    nft.transfer_ownership(String::from("Bob"));
+    println!("After transfer: {}", nft.get_info());
+}
+```
+
+### DEX Order Book
+
+```rust title="dex_example.rs"
+#[derive(Debug, Clone)]
+enum OrderType {
+    Buy,
+    Sell,
+}
+
+#[derive(Debug, Clone)]
+enum OrderStatus {
+    Open,
+    PartiallyFilled { filled_amount: u64 },
+    Filled,
+    Cancelled,
+}
+
+#[derive(Debug, Clone)]
+struct Order {
+    id: u64,
+    trader: String,
+    order_type: OrderType,
+    token_pair: String,
+    amount: u64,
+    price: u64, // Price in lamports
+    status: OrderStatus,
+    timestamp: u64,
+}
+
+#[derive(Debug)]
+struct OrderBook {
+    token_pair: String,
+    buy_orders: Vec<Order>,
+    sell_orders: Vec<Order>,
+    next_order_id: u64,
+}
+
+impl Order {
+    fn new(
+        id: u64,
+        trader: String,
+        order_type: OrderType,
+        token_pair: String,
+        amount: u64,
+        price: u64,
+    ) -> Self {
+        Order {
+            id,
+            trader,
+            order_type,
+            token_pair,
+            amount,
+            price,
+            status: OrderStatus::Open,
+            timestamp: get_current_timestamp(),
+        }
+    }
+    
+    fn is_fillable(&self) -> bool {
+        matches!(self.status, OrderStatus::Open | OrderStatus::PartiallyFilled { .. })
+    }
+    
+    fn remaining_amount(&self) -> u64 {
+        match self.status {
+            OrderStatus::PartiallyFilled { filled_amount } => self.amount - filled_amount,
+            OrderStatus::Open => self.amount,
+            _ => 0,
+        }
+    }
+}
+
+impl OrderBook {
+    fn new(token_pair: String) -> Self {
+        OrderBook {
+            token_pair,
+            buy_orders: Vec::new(),
+            sell_orders: Vec::new(),
+            next_order_id: 1,
+        }
+    }
+    
+    fn place_order(&mut self, trader: String, order_type: OrderType, amount: u64, price: u64) -> u64 {
+        let order = Order::new(
+            self.next_order_id,
+            trader,
+            order_type.clone(),
+            self.token_pair.clone(),
+            amount,
+            price,
+        );
+        
+        let order_id = self.next_order_id;
+        self.next_order_id += 1;
+        
+        match order_type {
+            OrderType::Buy => {
+                self.buy_orders.push(order);
+                self.buy_orders.sort_by(|a, b| b.price.cmp(&a.price)); // Highest price first
+            }
+            OrderType::Sell => {
+                self.sell_orders.push(order);
+                self.sell_orders.sort_by(|a, b| a.price.cmp(&b.price)); // Lowest price first
+            }
+        }
+        
+        order_id
+    }
+    
+    fn get_best_bid(&self) -> Option<&Order> {
+        self.buy_orders.first()
+    }
+    
+    fn get_best_ask(&self) -> Option<&Order> {
+        self.sell_orders.first()
+    }
+    
+    fn display_order_book(&self) {
+        println!("=== Order Book for {} ===", self.token_pair);
+        
+        println!("\nSell Orders (Asks):");
+        for order in self.sell_orders.iter().take(5) {
+            if order.is_fillable() {
+                println!("  {} @ {} ({})", order.remaining_amount(), order.price, order.trader);
+            }
+        }
+        
+        if let (Some(best_bid), Some(best_ask)) = (self.get_best_bid(), self.get_best_ask()) {
+            println!("\nSpread: {} lamports", best_ask.price - best_bid.price);
+        }
+        
+        println!("\nBuy Orders (Bids):");
+        for order in self.buy_orders.iter().take(5) {
+            if order.is_fillable() {
+                println!("  {} @ {} ({})", order.remaining_amount(), order.price, order.trader);
+            }
+        }
+    }
+}
+
+fn get_current_timestamp() -> u64 {
+    1640995200 // Simplified timestamp
+}
+
+fn main() {
+    let mut order_book = OrderBook::new(String::from("SOL/USDC"));
+    
+    // Place some orders
+    order_book.place_order(String::from("Alice"), OrderType::Buy, 100, 95);
+    order_book.place_order(String::from("Bob"), OrderType::Buy, 50, 96);
+    order_book.place_order(String::from("Charlie"), OrderType::Sell, 75, 98);
+    order_book.place_order(String::from("Diana"), OrderType::Sell, 120, 99);
+    
+    order_book.display_order_book();
+}
+```
+
+---
+
+## Common Patterns and Best Practices
+
+<Callout type="tip">
+**Constructor Patterns**
+```rust
+impl MyStruct {
+    // Standard constructor
+    fn new(param: Type) -> Self { ... }
+    
+    // Default constructor
+    fn default() -> Self { ... }
+    
+    // Factory methods
+    fn from_string(s: String) -> Self { ... }
+    fn with_capacity(cap: usize) -> Self { ... }
+    
+    // Validated constructor
+    fn try_new(param: Type) -> Result<Self, Error> { ... }
+}
+```
+</Callout>
+
+<Callout type="tip">
+**Method Organization**
+- Group related functionality in separate impl blocks
+- Use associated functions for constructors
+- Prefer `&self` for read-only operations
+- Use `&mut self` for modifications
+- Use `self` only when consuming the instance
+</Callout>
+
+<Callout type="warn">
+**Common Pitfalls**
+```rust
+// ❌ Don't forget to make struct mutable if you need to modify it
+let account = BankAccount::new(...);
+account.deposit(100); // Error: account is not mutable
+
+// ✅ Make it mutable
+let mut account = BankAccount::new(...);
+account.deposit(100); // Works!
+
+// ❌ Don't use self when you mean &self
+fn get_balance(self) -> u64 { // This consumes the instance!
+    self.balance
+}
+
+// ✅ Use &self for read-only access
+fn get_balance(&self) -> u64 {
+    self.balance
+}
+```
+</Callout>
+
+---
+
+## Summary
+
+Congratulations! You've mastered Rust's struct system and method implementation:
+
+**Key Concepts Learned:**
+- ✅ **Struct definitions**: Regular, tuple, and unit structs
+- ✅ **Field access**: Direct access and modification patterns
+- ✅ **Method syntax**: Understanding self, &self, and &mut self
+- ✅ **Associated functions**: Constructors and factory methods
+- ✅ **Code organization**: Multiple impl blocks for related functionality
+- ✅ **Destructuring**: Pattern matching with struct fields
+- ✅ **Blockchain patterns**: NFTs, order books, and account structures
+
+**Why This Matters for Solana:**
+- Structs model all blockchain entities (accounts, instructions, state)
+- Methods organize behavior logically around data
+- Associated functions provide clean APIs for construction
+- Pattern matching enables elegant data processing
+
+**Tomorrow Preview:** Day 4 will introduce enums and pattern matching - powerful tools for handling different states and variants that are essential for blockchain development where you need to handle various transaction types, account states, and error conditions.
+
+---
+
+## Practice Time!
+
+Ready to build some complex data structures? Head to [Day 3 Challenges](/learn/week-2/day-3-challenges) to create a crypto wallet simulator, virtual pet, and library management system!

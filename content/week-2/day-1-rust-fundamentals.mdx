@@ -1,0 +1,760 @@
+---
+title: "Day 1: Rust Fundamentals & Development Environment"
+description: "Set up your Rust development environment and learn core programming concepts including variables, functions, and control flow."
+tags: ['rust', 'fundamentals', 'setup', 'variables', 'functions', 'control-flow']
+module: '🦀 Rust for Solana'
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Welcome to Day 1 of your Rust journey! Today we'll set up your development environment and explore the fundamental building blocks of Rust programming. By the end of today, you'll have written your first Rust programs and understand the basic syntax that makes Rust unique.
+
+<Mermaid 
+  chart="
+    graph TD
+      A[Rust Source Code] --> B[Rust Compiler rustc]
+      B --> C[Binary Executable]
+      B --> D[Compilation Errors]
+      
+      E[.rs Files] --> F[Cargo Build System]
+      F --> B
+      F --> G[Dependencies from Crates.io]
+      G --> B
+      
+      H[Runtime Safety] --> I[Memory Safety]
+      H --> J[Thread Safety]
+      H --> K[Type Safety]
+      
+      style A fill:#e1f5fe
+      style B fill:#f3e5f5
+      style C fill:#e8f5e8
+      style D fill:#ffebee
+      style E fill:#f1f8e9
+      style F fill:#fff3e0"
+/>
+
+<Callout type="info">
+Today's focus is on getting comfortable with Rust syntax and thinking patterns. Don't worry about advanced concepts yet - we're building a solid foundation.
+</Callout>
+
+---
+
+## What You'll Learn Today
+
+<Callout type="info">
+By the end of Day 1, you'll be able to:
+
+- Install and configure the Rust toolchain
+- Set up VS Code with Rust-analyzer for optimal development
+- Write and run basic Rust programs
+- Understand variables, mutability, and basic data types
+- Create functions with parameters and return values
+- Use control flow constructs (if/else, loops)
+- Distinguish between expressions and statements
+</Callout>
+
+---
+
+## Getting Started with Rust
+
+### Installing the Rust Toolchain
+
+Rust comes with an excellent installer called `rustup` that manages your Rust installation and keeps it up to date.
+
+<Steps>
+<Step>
+### Step 1: Install Rustup
+
+Visit [rustup.rs](https://rustup.rs/) and follow the installation instructions for your operating system.
+
+**For Windows:**
+Download and run `rustup-init.exe`
+
+**For macOS/Linux:**
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+</Step>
+
+<Step>
+### Step 2: Verify Installation
+
+Open a new terminal and verify your installation:
+
+```bash
+rustc --version
+cargo --version
+```
+
+You should see version information for both the Rust compiler (`rustc`) and Cargo (Rust's package manager).
+</Step>
+
+<Step>
+### Step 3: Update Your Toolchain
+
+Keep your Rust installation up to date:
+
+```bash
+rustup update
+```
+</Step>
+</Steps>
+
+### Understanding the Rust Ecosystem
+
+<Accordions>
+<Accordion title="rustc - The Rust Compiler">
+### rustc - The Rust Compiler
+
+`rustc` is the core Rust compiler. It transforms your Rust source code into executable binaries. While you can use it directly, most developers use Cargo instead.
+
+```bash
+# Compile a single file
+rustc main.rs
+```
+</Accordion>
+
+<Accordion title="Cargo - The Package Manager">
+### Cargo - The Package Manager
+
+Cargo is Rust's build tool and package manager. It handles:
+- Creating new projects
+- Managing dependencies
+- Building and running your code
+- Running tests
+- Publishing packages
+
+```bash
+# Create a new project
+cargo new my_project
+cd my_project
+
+# Build your project
+cargo build
+
+# Run your project
+cargo run
+```
+</Accordion>
+
+<Accordion title="rustup - The Toolchain Manager">
+### rustup - The Toolchain Manager
+
+`rustup` manages your Rust installations. It can install multiple versions of Rust and switch between them as needed.
+
+```bash
+# List installed toolchains
+rustup show
+
+# Install a specific version
+rustup install stable
+rustup install nightly
+
+# Set default toolchain
+rustup default stable
+```
+</Accordion>
+</Accordions>
+
+---
+
+## Setting Up VS Code
+
+VS Code with the Rust-analyzer extension provides an excellent Rust development experience.
+
+<Steps>
+<Step>
+### Step 1: Install VS Code
+
+Download and install [Visual Studio Code](https://code.visualstudio.com/)
+</Step>
+
+<Step>
+### Step 2: Install Rust-analyzer Extension
+
+1. Open VS Code
+2. Go to Extensions (Ctrl+Shift+X / Cmd+Shift+X)
+3. Search for "rust-analyzer"
+4. Install the official rust-analyzer extension
+</Step>
+
+<Step>
+### Step 3: Optional Extensions
+
+Consider these additional extensions for a better experience:
+- **Error Lens**: Shows errors inline
+- **Better TOML**: For Cargo.toml syntax highlighting
+- **CodeLLDB**: For debugging support
+</Step>
+</Steps>
+
+<Callout type="tip">
+**Pro Tip**: Rust-analyzer provides incredible features like inline type hints, error diagnostics, and code completion. Let it guide your learning!
+</Callout>
+
+---
+
+## Your First Rust Program
+
+Let's start with the traditional "Hello, World!" program and understand what makes it special in Rust.
+
+<Steps>
+<Step>
+### Step 1: Create a New Project
+
+```bash
+cargo new hello_rust
+cd hello_rust
+```
+
+This creates a new directory with:
+- `Cargo.toml`: Project configuration
+- `src/main.rs`: Your main source file
+</Step>
+
+<Step>
+### Step 2: Examine the Generated Code
+
+Open `src/main.rs`:
+
+```rust title="src/main.rs"
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+Let's break this down:
+- `fn main()`: Defines the main function (entry point)
+- `println!`: A macro (note the `!`) that prints to console
+- Statements end with semicolons
+</Step>
+
+<Step>
+### Step 3: Run Your Program
+
+```bash
+cargo run
+```
+
+You should see:
+```
+   Compiling hello_rust v0.1.0 (/path/to/hello_rust)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.50s
+     Running `target/debug/hello_rust`
+Hello, world!
+```
+</Step>
+</Steps>
+
+<Callout type="info">
+**Understanding macros**: `println!` is a macro, not a function. Macros in Rust are indicated by the `!` and are expanded at compile time. They're more powerful than functions but we'll cover them in detail later.
+</Callout>
+
+---
+
+## Variables and Mutability
+
+One of Rust's core principles is that variables are **immutable by default**. This prevents many common programming errors.
+
+<Mermaid 
+  chart="
+    graph TD
+      A[let x = 5] --> B{Immutable by default}
+      B --> C[✅ Can read value]
+      B --> D[❌ Cannot change value]
+      
+      E[let mut y = 5] --> F{Explicitly mutable}
+      F --> G[✅ Can read value]
+      F --> H[✅ Can change value]
+      F --> I[y = 10 // Valid]
+      
+      J[const MAX_POINTS: u32 = 100_000] --> K{Compile-time constant}
+      K --> L[✅ Always immutable]
+      K --> M[✅ Known at compile time]
+      K --> N[✅ Can use in any scope]
+      
+      style A fill:#e1f5fe
+      style E fill:#f3e5f5
+      style J fill:#e8f5e8
+      style D fill:#ffebee
+      style C fill:#e8f5e8
+      style G fill:#e8f5e8
+      style H fill:#e8f5e8"
+/>
+
+### Basic Variables
+
+```rust title="variables.rs"
+fn main() {
+    let x = 5;
+    println!("The value of x is: {}", x);
+    
+    // This would cause a compile error:
+    // x = 6; // Cannot assign twice to immutable variable
+}
+```
+
+### Mutable Variables
+
+To change a variable's value, you must explicitly make it mutable:
+
+```rust title="mutable.rs"
+fn main() {
+    let mut x = 5;
+    println!("The value of x is: {}", x);
+    
+    x = 6; // This works because x is mutable
+    println!("The value of x is now: {}", x);
+}
+```
+
+### Constants vs Variables
+
+<Tabs items={['Variables (let)', 'Constants (const)']}>
+<Tab value="Variables (let)">
+```rust
+fn main() {
+    let x = 5;          // Immutable by default
+    let mut y = 10;     // Explicitly mutable
+    
+    // Can be shadowed (redeclared)
+    let x = x + 1;      // Creates new variable
+    let x = x * 2;      // x is now 12
+    
+    println!("x: {}, y: {}", x, y);
+}
+```
+</Tab>
+<Tab value="Constants (const)">
+```rust
+// Constants are always immutable and must have type annotations
+const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
+
+fn main() {
+    println!("Three hours in seconds: {}", THREE_HOURS_IN_SECONDS);
+}
+```
+</Tab>
+</Tabs>
+
+<Callout type="tip">
+**Naming Convention**: Constants use `SCREAMING_SNAKE_CASE`, while variables use `snake_case`.
+</Callout>
+
+---
+
+## Basic Data Types
+
+Rust is a statically typed language, meaning all variable types must be known at compile time.
+
+### Scalar Types
+
+<Accordions>
+<Accordion title="Integer Types">
+### Integer Types
+
+Rust has several integer types based on size and signedness:
+
+```rust title="integers.rs"
+fn main() {
+    let a: i8 = -128;      // 8-bit signed (-128 to 127)
+    let b: u8 = 255;       // 8-bit unsigned (0 to 255)
+    let c: i32 = -50_000;  // 32-bit signed (default integer type)
+    let d: u64 = 1_000_000; // 64-bit unsigned
+    
+    // Type inference - Rust can often determine types
+    let guess = 42;        // defaults to i32
+    
+    println!("a: {}, b: {}, c: {}, d: {}, guess: {}", a, b, c, d, guess);
+}
+```
+
+**Common integer types:**
+- `i32` / `u32`: Most common, good default choice
+- `i64` / `u64`: For larger numbers
+- `usize` / `isize`: For indexing and memory addresses
+</Accordion>
+
+<Accordion title="Floating-Point Types">
+### Floating-Point Types
+
+```rust title="floats.rs"
+fn main() {
+    let x = 2.0;        // f64 by default
+    let y: f32 = 3.0;   // f32 (single precision)
+    
+    // Mathematical operations
+    let sum = x + y as f64;  // Type casting required
+    let difference = 95.5 - 4.3;
+    let product = 4.0 * 30.0;
+    let quotient = 56.7 / 32.2;
+    
+    println!("sum: {}, difference: {}, product: {}, quotient: {}", 
+             sum, difference, product, quotient);
+}
+```
+</Accordion>
+
+<Accordion title="Boolean Type">
+### Boolean Type
+
+```rust title="booleans.rs"
+fn main() {
+    let t = true;
+    let f: bool = false; // with explicit type annotation
+    
+    // Boolean operations
+    let is_morning = true;
+    let is_weekday = false;
+    let go_to_work = is_morning && is_weekday;
+    
+    println!("Go to work: {}", go_to_work);
+}
+```
+</Accordion>
+
+<Accordion title="Character Type">
+### Character Type
+
+```rust title="characters.rs"
+fn main() {
+    let c = 'z';
+    let z: char = 'ℤ';  // Unicode support
+    let heart_eyed_cat = '😻';
+    
+    println!("Characters: {}, {}, {}", c, z, heart_eyed_cat);
+}
+```
+
+**Note**: `char` literals use single quotes and represent Unicode scalar values.
+</Accordion>
+</Accordions>
+
+### Type Annotations and Inference
+
+<Tabs items={['Type Inference', 'Explicit Annotations']}>
+<Tab value="Type Inference">
+```rust
+fn main() {
+    // Rust can infer types from context
+    let mut guess = String::new();  // String type inferred
+    
+    let x = 5;          // i32 inferred
+    let y = 2.5;        // f64 inferred
+    let is_active = true; // bool inferred
+    
+    // Sometimes context helps with inference
+    let numbers: Vec<i32> = Vec::new();  // Vector of i32s
+}
+```
+</Tab>
+<Tab value="Explicit Annotations">
+```rust
+fn main() {
+    // Explicit type annotations
+    let x: i64 = 5;
+    let y: f32 = 2.5;
+    let name: String = String::from("Rust");
+    
+    // Sometimes required when multiple types are possible
+    let parsed: u32 = "42".parse().expect("Not a number!");
+}
+```
+</Tab>
+</Tabs>
+
+---
+
+## Functions and Control Flow
+
+### Function Syntax
+
+Functions in Rust are defined with the `fn` keyword:
+
+```rust title="functions.rs"
+fn main() {
+    println!("Hello from main!");
+    
+    greet_user("Alice");
+    
+    let result = add_numbers(5, 3);
+    println!("5 + 3 = {}", result);
+    
+    let (sum, product) = calculate(4, 6);
+    println!("Sum: {}, Product: {}", sum, product);
+}
+
+// Function with parameters
+fn greet_user(name: &str) {
+    println!("Hello, {}!", name);
+}
+
+// Function with return value
+fn add_numbers(a: i32, b: i32) -> i32 {
+    a + b  // No semicolon = return value (expression)
+}
+
+// Function returning multiple values (tuple)
+fn calculate(x: i32, y: i32) -> (i32, i32) {
+    (x + y, x * y)
+}
+```
+
+<Callout type="info">
+**Expressions vs Statements**: 
+- **Expressions** evaluate to a value (no semicolon at end)
+- **Statements** perform an action (end with semicolon)
+- Functions return the last expression in their body
+</Callout>
+
+### Control Flow
+
+<Accordions>
+<Accordion title="if/else Conditionals">
+### if/else Conditionals
+
+```rust title="conditionals.rs"
+fn main() {
+    let number = 6;
+    
+    // Basic if/else
+    if number % 4 == 0 {
+        println!("number is divisible by 4");
+    } else if number % 3 == 0 {
+        println!("number is divisible by 3");
+    } else if number % 2 == 0 {
+        println!("number is divisible by 2");
+    } else {
+        println!("number is not divisible by 4, 3, or 2");
+    }
+    
+    // if as an expression
+    let condition = true;
+    let number = if condition { 5 } else { 6 };
+    println!("The value of number is: {}", number);
+}
+```
+</Accordion>
+
+<Accordion title="Loop Constructs">
+### Loop Constructs
+
+Rust has three kinds of loops: `loop`, `while`, and `for`.
+
+```rust title="loops.rs"
+fn main() {
+    // Infinite loop with break
+    let mut counter = 0;
+    let result = loop {
+        counter += 1;
+        
+        if counter == 10 {
+            break counter * 2;  // Return value from loop
+        }
+    };
+    println!("The result is {}", result);
+    
+    // While loop
+    let mut number = 3;
+    while number != 0 {
+        println!("{}!", number);
+        number -= 1;
+    }
+    println!("LIFTOFF!!!");
+    
+    // For loop with range
+    for number in 1..4 {  // 1, 2, 3 (4 is excluded)
+        println!("{}!", number);
+    }
+    
+    // For loop with array
+    let a = [10, 20, 30, 40, 50];
+    for element in a {
+        println!("the value is: {}", element);
+    }
+    
+    // For loop with index
+    for (index, value) in a.iter().enumerate() {
+        println!("Index {}: {}", index, value);
+    }
+}
+```
+</Accordion>
+</Accordions>
+
+---
+
+## Comments and Documentation
+
+Good documentation is crucial for any codebase, especially in blockchain development where security and clarity are paramount.
+
+<Tabs items={['Regular Comments', 'Documentation Comments']}>
+<Tab value="Regular Comments">
+```rust
+fn main() {
+    // This is a line comment
+    let x = 5; // Comments can be at the end of lines
+    
+    /*
+     * This is a block comment
+     * spanning multiple lines
+     */
+    let y = 10;
+}
+```
+</Tab>
+<Tab value="Documentation Comments">
+```rust
+/// This function adds two numbers together
+/// 
+/// # Examples
+/// 
+/// ```
+/// let result = add(2, 3);
+/// assert_eq!(result, 5);
+/// ```
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+/// Represents a simple wallet in our blockchain
+/// 
+/// Contains a balance and can perform basic operations
+struct Wallet {
+    /// The current balance in lamports
+    balance: u64,
+    /// The public key address
+    address: String,
+}
+```
+</Tab>
+</Tabs>
+
+<Callout type="tip">
+**Documentation Best Practice**: Use `///` for documenting public APIs. These comments can be turned into HTML documentation with `cargo doc`.
+</Callout>
+
+---
+
+## Practical Example: Blockchain Basics
+
+Let's put together what we've learned by creating a simple program that demonstrates blockchain concepts:
+
+```rust title="blockchain_basics.rs"
+fn main() {
+    println!("=== Simple Blockchain Demo ===");
+    
+    // Initialize genesis block
+    let genesis_balance = 1_000_000; // 1 million tokens
+    let mut current_balance = genesis_balance;
+    
+    println!("Genesis block created with {} tokens", genesis_balance);
+    
+    // Simulate some transactions
+    let transactions = [
+        ("Alice", 50_000),
+        ("Bob", 25_000),
+        ("Charlie", 75_000),
+    ];
+    
+    for (recipient, amount) in transactions {
+        if current_balance >= amount {
+            current_balance -= amount;
+            println!("✅ Sent {} tokens to {} (Remaining: {})", 
+                     amount, recipient, current_balance);
+        } else {
+            println!("❌ Insufficient funds to send {} tokens to {}", 
+                     amount, recipient);
+        }
+    }
+    
+    // Calculate final statistics
+    let total_sent = genesis_balance - current_balance;
+    let transaction_count = transactions.len();
+    
+    print_summary(total_sent, current_balance, transaction_count);
+}
+
+/// Prints a summary of blockchain transactions
+fn print_summary(total_sent: u64, remaining: u64, tx_count: usize) {
+    println!("\n=== Transaction Summary ===");
+    println!("Total transactions: {}", tx_count);
+    println!("Total tokens sent: {}", total_sent);
+    println!("Remaining balance: {}", remaining);
+    
+    let average_tx = if tx_count > 0 {
+        total_sent / tx_count as u64
+    } else {
+        0
+    };
+    println!("Average transaction size: {}", average_tx);
+}
+```
+
+---
+
+## Common Pitfalls for Day 1
+
+<Callout type="warn">
+**Forgetting Mutability**
+```rust
+let x = 5;
+x = 6; // ❌ Error: cannot assign twice to immutable variable
+
+let mut x = 5;
+x = 6; // ✅ Works because x is mutable
+```
+</Callout>
+
+<Callout type="warn">
+**Mixing Statement and Expression Syntax**
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b;  // ❌ Error: semicolon makes this a statement, not expression
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b   // ✅ Expression returns the value
+}
+```
+</Callout>
+
+<Callout type="warn">
+**Type Mismatches**
+```rust
+let x: i32 = 5;
+let y: i64 = x; // ❌ Error: type mismatch
+
+let x: i32 = 5;
+let y: i64 = x as i64; // ✅ Explicit type conversion
+```
+</Callout>
+
+---
+
+## Summary
+
+Congratulations! You've completed Day 1 of your Rust journey. Today you:
+
+- ✅ Set up a complete Rust development environment
+- ✅ Learned about variables, mutability, and constants
+- ✅ Explored Rust's basic data types
+- ✅ Understood functions and control flow
+- ✅ Practiced with a blockchain-themed example
+
+**Key Takeaways:**
+- Rust variables are immutable by default (use `mut` for mutability)
+- Functions can return values using expressions (no semicolon)
+- Type safety is enforced at compile time
+- Documentation is built into the language
+
+**Tomorrow Preview:** Day 2 will introduce Rust's most distinctive feature - the ownership system. This is what makes Rust memory-safe without garbage collection, and it's crucial for understanding how to write efficient Solana programs.
+
+---
+
+## Next Steps
+
+Ready for some hands-on practice? Head over to [Day 1 Challenges](/learn/week-2/day-1-challenges) to test your understanding with practical exercises!

@@ -1,118 +1,254 @@
 ---
-title: Solana Rust Development Environment
-type: setup
-module: ⚙ Solana Rust Development
+title: "7-Day Rust for Solana Development Curriculum"
+description: "Master Essential Rust Concepts to Build Anchor dApps. A comprehensive journey from Rust fundamentals to Solana-specific development patterns."
+tags: ['rust', 'solana', 'anchor', 'beginner', 'fundamentals']
+module: '🦀 Rust for Solana'
 ---
 
-This guide sets up a Rust-only Solana development environment without using Anchor. It includes installing required tools, configuring Solana CLI, and preparing your workspace for building and deploying programs directly with native Rust.
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
 
-## Prerequisites
+Welcome to your intensive 7-day journey into Rust programming, specifically tailored for Solana development! This curriculum is designed to take you from Rust novice to someone ready to build sophisticated Anchor programs on Solana.
 
-- Basic understanding of Rust
-- Familiarity with Solana's account and program concepts
-- Installed Git
+**Why Rust for Solana?** Rust's ownership system, zero-cost abstractions, and memory safety make it perfect for blockchain development where security and performance are paramount. Solana programs are written in Rust, and understanding the language deeply will make you a more effective dApp developer.
 
-## Steps
+<Callout type="info">
+This course assumes no prior Rust experience but expects familiarity with basic programming concepts. Each day builds upon the previous, so follow the sequence for the best learning experience.
+</Callout>
 
-### 1. Install Rust
+---
 
-```bash title="Install Rust"
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-````
+## Course Overview
 
-Verify installation:
+This 7-day curriculum combines theoretical understanding with practical exercises. You'll learn core Rust concepts and immediately apply them to blockchain-relevant scenarios.
 
-```bash title="Verify Rust"
-rustc --version
-cargo --version
-```
+<MermaidWithZoom 
+  title="7-Day Rust Curriculum Flow"
+  chart="
+    graph TD
+      A[Day 1: Fundamentals] --> B[Day 2: Ownership System]
+      B --> C[Day 3: Data Structures]
+      C --> D[Day 4: Error Handling]
+      D --> E[Day 5: Async Programming]
+      E --> F[Day 6: External Crates]
+      F --> G[Day 7: Solana Preparation]
+      
+      A --> A1[Variables & Functions]
+      A --> A2[Control Flow]
+      B --> B1[Memory Management]
+      B --> B2[Borrowing Rules]
+      C --> C1[Structs & Enums]
+      C --> C2[Methods & Traits]
+      D --> D1[Result & Option]
+      D --> D2[Custom Errors]
+      E --> E1[async/await]
+      E --> E2[Tokio Runtime]
+      F --> F1[Cargo.toml]
+      F --> F2[External Dependencies]
+      G --> G1[Solana Programs]
+      G --> G2[Account Model]
+      
+      style A fill:#e1f5fe
+      style B fill:#f3e5f5
+      style C fill:#e8f5e8
+      style D fill:#fff3e0
+      style E fill:#fce4ec
+      style F fill:#f1f8e9
+      style G fill:#e3f2fd"
+/>
 
-### 2. Install Solana CLI
+<Callout type="tip">
+**Learning Strategy**: Each day introduces new concepts, followed by targeted challenges. Mid-course and final projects help consolidate your knowledge through practical application.
+</Callout>
 
-```bash title="Install Solana CLI"
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
-```
+---
 
-Add Solana CLI to your path:
+## Weekly Schedule
 
-```bash title="Add to PATH"
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-```
+<Steps>
+<Step>
+### Days 1-3: Core Rust Fundamentals
+**Foundation Building**
 
-Verify installation:
+- **Day 1**: Development environment, basic syntax, control flow
+- **Day 2**: Ownership system - Rust's most unique feature
+- **Day 3**: Structs and methods - building custom data types
 
-```bash title="Verify Solana"
-solana --version
-```
+*Mid-Course Project Break*: Crypto Portfolio Tracker & Blockchain Simulator
+</Step>
 
-### 3. Set Local Test Validator
+<Step>
+### Days 4-5: Advanced Data Handling
+**Practical Patterns**
 
-```bash title="Set Local Cluster"
-solana config set --url localhost
-```
+- **Day 4**: Enums and pattern matching - handling complex data
+- **Day 5**: Collections and string processing - managing data efficiently
 
-To run the local validator:
+*Practical Build Session*: NFT Metadata Manager & DEX Order Book
+</Step>
 
-```bash title="Run Validator"
-solana-test-validator
-```
+<Step>
+### Days 6-7: Production-Ready Code
+**Solana Preparation**
 
-Keep this terminal running.
+- **Day 6**: Error handling and code organization
+- **Day 7**: Solana-specific Rust patterns and Anchor preparation
+</Step>
+</Steps>
 
-### 4. Generate a Local Keypair
+---
 
-```bash title="Generate Keypair"
-solana-keygen new --outfile ~/.config/solana/id.json
-```
+## What Makes This Course Special
 
-Check your account:
+<Accordions>
+<Accordion title="Solana-Focused Examples">
+### Solana-Focused Examples
 
-```bash title="Check Balance"
-solana balance
-```
+Every concept is taught through examples relevant to blockchain development:
+- Wallet structures instead of generic data types
+- Transaction handling patterns instead of basic collections
+- Account models that mirror Solana's architecture
+</Accordion>
 
-### 5. Fund Your Account
+<Accordion title="Hands-On Projects">
+### Hands-On Projects
 
-Airdrop test SOL:
+Real projects that simulate common Solana development tasks:
+- **Crypto Portfolio Tracker**: Practice structs and ownership
+- **Blockchain Simulator**: Understand block structures
+- **NFT Metadata Manager**: Work with enums and collections
+- **DEX Order Book**: Apply pattern matching to trading logic
+</Accordion>
 
-```bash title="Airdrop SOL"
-solana airdrop 2
-```
+<Accordion title="Anchor-Ready Patterns">
+### Anchor-Ready Patterns
 
-### 6. Create a New Program
+Learn Rust patterns that directly translate to Anchor development:
+- Account deserialization patterns
+- Error handling strategies
+- Macro usage fundamentals
+- Memory management for on-chain programs
+</Accordion>
+</Accordions>
 
-```bash title="New Cargo Project"
-cargo new my_solana_program
-cd my_solana_program
-```
+---
 
-Update `Cargo.toml`:
+## Prerequisites and Setup
 
-```toml title="Cargo.toml"
-[package]
-name = "my_solana_program"
-version = "0.1.0"
-edition = "2021"
+<Callout type="warn">
+**Before Starting**: Ensure you have a working development environment. Day 1 covers the complete setup process, but having a computer with internet access and the ability to install software is essential.
+</Callout>
 
-[lib]
-crate-type = ["cdylib"]
+**What You'll Need:**
+- A computer (Windows, macOS, or Linux)
+- Internet connection for downloading tools
+- Text editor (VS Code recommended)
+- Terminal/command line access
+- About 2-3 hours per day for lessons and exercises
 
-[dependencies]
-solana-program = "1.18.14"
-```
+**Prior Knowledge:**
+- Basic programming concepts (variables, functions, loops)
+- Familiarity with command line basics
+- Understanding of basic data structures (arrays, objects)
 
-### 7. Build the Program
+---
 
-```bash title="Build Program"
-cargo build-bpf
-```
+## Learning Approach
 
-This produces a `.so` file in `target/deploy`.
+### Daily Structure
 
-### 8. Deploy the Program
+Each day follows a consistent pattern:
 
-```bash title="Deploy Program"
-solana program deploy target/deploy/my_solana_program.so
-```
+<Tabs items={['Morning: Theory', 'Afternoon: Practice', 'Evening: Challenges']}>
+<Tab value="Morning: Theory">
+**Concept Introduction (45-60 mins)**
+- New Rust concepts explained with examples
+- Interactive code demonstrations
+- Common pitfalls and best practices
+</Tab>
+<Tab value="Afternoon: Practice">
+**Guided Practice (30-45 mins)**
+- Step-by-step coding exercises
+- Building small, focused programs
+- Immediate feedback and debugging
+</Tab>
+<Tab value="Evening: Challenges">
+**Independent Challenges (60-90 mins)**
+- Multiple difficulty levels
+- Real-world problem solving
+- Portfolio-building projects
+</Tab>
+</Tabs>
 
-Copy the program ID from the output and save it for client-side interaction.
+### Assessment Strategy
+
+<Callout type="info">
+**No Formal Tests**: This course uses project-based assessment. Your understanding is measured through working code and problem-solving ability, not memorization.
+</Callout>
+
+**Progress Markers:**
+- ✅ Daily challenge completion
+- 🏗️ Mid-course project functionality
+- 🚀 Final project demonstrating integrated knowledge
+- 🎯 Code review and improvement iterations
+
+---
+
+## Course Outcomes
+
+By the end of this 7-day journey, you will:
+
+**Understand Rust Fundamentals:**
+- Master ownership, borrowing, and lifetimes
+- Write memory-safe, efficient code
+- Handle errors gracefully
+- Organize code with modules and traits
+
+**Apply Solana-Specific Patterns:**
+- Understand account models and serialization
+- Work with Program Derived Addresses (PDAs)
+- Handle transaction structures
+- Prepare for Anchor framework development
+
+**Build Real Projects:**
+- Complete portfolio of Rust programs
+- Experience with blockchain-relevant data structures
+- Confidence to tackle Solana program development
+- Ready to dive into Anchor and advanced Solana concepts
+
+---
+
+## Getting Support
+
+<Callout type="tip">
+**Community Learning**: Join our Discord channel for real-time help, code reviews, and collaboration with fellow learners. The Rust community is known for being welcoming and helpful!
+</Callout>
+
+**Resources Available:**
+- 📖 Comprehensive documentation for each concept
+- 💬 Community Discord for questions and discussion
+- 🔧 Debugging guides and common error solutions
+- 📺 Video walkthroughs for complex topics
+- 🎯 Office hours for personalized help
+
+---
+
+## Ready to Begin?
+
+Your Rust journey starts with Day 1: Rust Fundamentals & Development Environment. Remember, learning Rust can feel challenging at first - the ownership system is unlike anything in other languages. But once it "clicks," you'll have superpowers for building secure, fast systems.
+
+<Callout type="success">
+**Pro Tip**: Keep a "learning journal" throughout the week. Write down concepts that confuse you, "aha!" moments, and questions to explore further. This reflection will accelerate your learning.
+</Callout>
+
+Take your time, ask questions, and most importantly - write lots of code. Let's build something amazing together!
+
+---
+
+## Quick Navigation
+
+- 🚀 [Day 1: Rust Fundamentals](/learn/week-2/day-1-rust-fundamentals)
+- 🏗️ [Mid-Course Projects](/learn/week-2/mid-course-projects)
+- 🎯 [Final Day: Solana Preparation](/learn/week-2/day-7-solana-specific-rust)

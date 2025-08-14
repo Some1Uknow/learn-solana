@@ -1,0 +1,1643 @@
+---
+title: "Day 3 Challenges: Structs and Methods Practice"
+description: "Build complex data structures with practical challenges including a crypto wallet simulator, virtual pet tamagotchi, and library management system."
+type: challenge
+tags: ['rust', 'structs', 'methods', 'impl', 'oop', 'data-modeling']
+module: '🦀 Rust for Solana'
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Time to put your struct and method knowledge into practice! Today's challenges focus on building complete systems with custom data types, demonstrating how structs and methods work together to create organized, maintainable code.
+
+These projects simulate real-world blockchain applications and will help you understand how to model complex data relationships and behaviors.
+
+<Mermaid 
+  chart="
+    graph TD
+      A[Day 3 Struct Challenges] --> B[Challenge 1: Crypto Wallet Simulator]
+      A --> C[Challenge 2: Virtual Pet Tamagotchi]
+      A --> D[Challenge 3: Library Management System]
+      
+      B --> B1[Basic Wallet Operations]
+      B --> B2[Multiple Currencies]
+      B --> B3[Transaction History]
+      B --> B4[Security Features]
+      
+      C --> C1[Pet Stats & Needs]
+      C --> C2[Action System]
+      C --> C3[Time-based Changes]
+      C --> C4[Save/Load State]
+      
+      D --> D1[Book & User Structs]
+      D --> D2[Borrowing System]
+      D --> D3[Search & Filter]
+      D --> D4[Data Persistence]
+      
+      E[Struct Concepts Applied] --> E1[Data Modeling]
+      E --> E2[Method Implementation]
+      E --> E3[State Management]
+      E --> E4[Error Handling]
+      
+      style B fill:#e1f5fe
+      style C fill:#f3e5f5
+      style D fill:#e8f5e8
+      style E fill:#fff3e0"
+/>
+
+<Callout type="info">
+**Challenge Focus**: Today's projects emphasize designing data structures that mirror blockchain concepts - accounts, transactions, state management, and entity relationships. You'll practice the kind of structural thinking essential for Solana development.
+</Callout>
+
+---
+
+## Challenge Overview
+
+<Callout type="info">
+Today's challenges will help you practice:
+
+- Designing custom data types with structs
+- Implementing methods and associated functions
+- Organizing code with multiple impl blocks
+- Modeling real-world entities and relationships
+- Building complete object-oriented systems
+- Creating intuitive APIs for your data structures
+</Callout>
+
+---
+
+## Challenge 1: Crypto Wallet Simulator 💰
+
+Build a comprehensive cryptocurrency wallet simulator with accounts, transactions, and portfolio management.
+
+### Requirements
+
+**Core Features:**
+- Multiple cryptocurrency support
+- Transaction history tracking
+- Portfolio analysis and statistics
+- Security features (PIN protection, freeze functionality)
+- Import/export capabilities
+
+**Learning Goals:**
+- Design complex struct hierarchies
+- Implement comprehensive method APIs
+- Handle different data states
+- Build user-friendly interfaces
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Create a basic wallet with essential functionality.
+
+```rust title="crypto_wallet.rs"
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct Cryptocurrency {
+    symbol: String,
+    name: String,
+    current_price: f64, // Price in USD
+}
+
+#[derive(Debug, Clone)]
+struct Transaction {
+    id: String,
+    crypto_symbol: String,
+    transaction_type: TransactionType,
+    amount: f64,
+    price_at_time: f64,
+    timestamp: u64,
+    fee: f64,
+}
+
+#[derive(Debug, Clone)]
+enum TransactionType {
+    Buy,
+    Sell,
+    Transfer { to: String },
+    Receive { from: String },
+}
+
+#[derive(Debug)]
+struct Portfolio {
+    holdings: HashMap<String, f64>, // symbol -> amount
+    transactions: Vec<Transaction>,
+}
+
+#[derive(Debug)]
+struct CryptoWallet {
+    owner: String,
+    portfolio: Portfolio,
+    is_locked: bool,
+    pin: String,
+}
+
+impl Cryptocurrency {
+    fn new(symbol: String, name: String, current_price: f64) -> Self {
+        // TODO: Implement constructor
+        Cryptocurrency {
+            symbol,
+            name,
+            current_price,
+        }
+    }
+    
+    fn update_price(&mut self, new_price: f64) {
+        // TODO: Update the current price
+    }
+    
+    fn market_cap(&self, circulating_supply: f64) -> f64 {
+        // TODO: Calculate market cap (price * supply)
+        0.0
+    }
+}
+
+impl Transaction {
+    fn new(
+        crypto_symbol: String,
+        transaction_type: TransactionType,
+        amount: f64,
+        price_at_time: f64,
+        fee: f64,
+    ) -> Self {
+        // TODO: Generate unique ID and current timestamp
+        Transaction {
+            id: String::new(),
+            crypto_symbol,
+            transaction_type,
+            amount,
+            price_at_time,
+            timestamp: 0,
+            fee,
+        }
+    }
+    
+    fn total_cost(&self) -> f64 {
+        // TODO: Calculate total cost including fees
+        // For buy: (amount * price) + fee
+        // For sell: (amount * price) - fee
+        0.0
+    }
+    
+    fn profit_loss(&self, current_price: f64) -> f64 {
+        // TODO: Calculate P&L compared to current price
+        0.0
+    }
+}
+
+impl Portfolio {
+    fn new() -> Self {
+        // TODO: Create empty portfolio
+        Portfolio {
+            holdings: HashMap::new(),
+            transactions: Vec::new(),
+        }
+    }
+    
+    fn add_transaction(&mut self, transaction: Transaction) {
+        // TODO: Add transaction and update holdings
+        // Update the holdings HashMap based on transaction type
+    }
+    
+    fn get_balance(&self, symbol: &str) -> f64 {
+        // TODO: Return balance for given cryptocurrency
+        0.0
+    }
+    
+    fn total_value(&self, crypto_prices: &HashMap<String, f64>) -> f64 {
+        // TODO: Calculate total portfolio value in USD
+        0.0
+    }
+    
+    fn get_transaction_history(&self) -> &[Transaction] {
+        // TODO: Return reference to transaction history
+        &self.transactions
+    }
+}
+
+impl CryptoWallet {
+    fn new(owner: String, pin: String) -> Self {
+        // TODO: Create new wallet with empty portfolio
+        CryptoWallet {
+            owner,
+            portfolio: Portfolio::new(),
+            is_locked: false,
+            pin,
+        }
+    }
+    
+    fn unlock(&mut self, pin: &str) -> Result<(), String> {
+        // TODO: Unlock wallet if PIN is correct
+        Ok(())
+    }
+    
+    fn lock(&mut self) {
+        // TODO: Lock the wallet
+    }
+    
+    fn buy_crypto(&mut self, symbol: String, amount: f64, price: f64) -> Result<String, String> {
+        // TODO: Execute buy transaction if wallet is unlocked
+        // Return transaction ID or error
+        Ok(String::new())
+    }
+    
+    fn sell_crypto(&mut self, symbol: String, amount: f64, price: f64) -> Result<String, String> {
+        // TODO: Execute sell transaction if sufficient balance
+        // Return transaction ID or error
+        Ok(String::new())
+    }
+    
+    fn get_portfolio_summary(&self) -> String {
+        // TODO: Return formatted portfolio summary
+        String::new()
+    }
+}
+
+fn main() {
+    println!("=== Crypto Wallet Simulator ===");
+    
+    // Create wallet
+    let mut wallet = CryptoWallet::new(
+        String::from("Alice"),
+        String::from("1234")
+    );
+    
+    // Unlock wallet
+    wallet.unlock("1234").unwrap();
+    
+    // Buy some cryptocurrencies
+    wallet.buy_crypto(String::from("BTC"), 0.1, 45000.0).unwrap();
+    wallet.buy_crypto(String::from("ETH"), 2.0, 3000.0).unwrap();
+    wallet.buy_crypto(String::from("SOL"), 100.0, 150.0).unwrap();
+    
+    // Sell some
+    wallet.sell_crypto(String::from("SOL"), 25.0, 160.0).unwrap();
+    
+    // Display portfolio
+    println!("{}", wallet.get_portfolio_summary());
+    
+    // Lock wallet
+    wallet.lock();
+    
+    // Try to buy while locked (should fail)
+    match wallet.buy_crypto(String::from("ADA"), 1000.0, 0.5) {
+        Ok(_) => println!("Buy successful"),
+        Err(e) => println!("Buy failed: {}", e),
+    }
+}
+
+// Helper functions you might need:
+fn generate_transaction_id() -> String {
+    // Generate a unique transaction ID
+    format!("tx_{}", get_current_timestamp())
+}
+
+fn get_current_timestamp() -> u64 {
+    // Return current timestamp (simplified)
+    1640995200
+}
+```
+
+**Your Tasks:**
+1. Implement all the TODO methods
+2. Handle wallet locking/unlocking properly
+3. Maintain accurate transaction history
+4. Calculate portfolio values correctly
+5. Add error handling for edge cases
+
+**Bonus Features:**
+- Add transaction fees calculation
+- Implement profit/loss analysis
+- Create a simple CLI interface
+- Add data validation
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add advanced features like portfolio analytics and historical tracking.
+
+```rust title="advanced_crypto_wallet.rs"
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct PriceHistory {
+    symbol: String,
+    prices: Vec<(u64, f64)>, // (timestamp, price)
+}
+
+#[derive(Debug)]
+struct PortfolioAnalytics {
+    total_invested: f64,
+    total_value: f64,
+    unrealized_pnl: f64,
+    realized_pnl: f64,
+    best_performing_crypto: Option<String>,
+    worst_performing_crypto: Option<String>,
+    portfolio_diversity_score: f64,
+}
+
+#[derive(Debug)]
+struct WalletSettings {
+    default_fee_percentage: f64,
+    auto_lock_timeout: u64,
+    notification_preferences: Vec<String>,
+    preferred_currency: String,
+}
+
+impl PriceHistory {
+    fn new(symbol: String) -> Self {
+        // TODO: Create new price history
+        PriceHistory {
+            symbol,
+            prices: Vec::new(),
+        }
+    }
+    
+    fn add_price_point(&mut self, timestamp: u64, price: f64) {
+        // TODO: Add price point and maintain chronological order
+    }
+    
+    fn get_price_at_time(&self, timestamp: u64) -> Option<f64> {
+        // TODO: Find closest price to given timestamp
+        None
+    }
+    
+    fn calculate_volatility(&self) -> f64 {
+        // TODO: Calculate price volatility (standard deviation)
+        0.0
+    }
+    
+    fn get_price_change_24h(&self) -> Option<f64> {
+        // TODO: Calculate 24h price change percentage
+        None
+    }
+}
+
+impl PortfolioAnalytics {
+    fn new() -> Self {
+        // TODO: Create empty analytics
+        PortfolioAnalytics {
+            total_invested: 0.0,
+            total_value: 0.0,
+            unrealized_pnl: 0.0,
+            realized_pnl: 0.0,
+            best_performing_crypto: None,
+            worst_performing_crypto: None,
+            portfolio_diversity_score: 0.0,
+        }
+    }
+    
+    fn update_analytics(
+        &mut self,
+        portfolio: &Portfolio,
+        price_history: &HashMap<String, PriceHistory>,
+    ) {
+        // TODO: Calculate comprehensive portfolio analytics
+        // - Total invested vs current value
+        // - Unrealized and realized P&L
+        // - Best/worst performing assets
+        // - Diversity score (how spread out investments are)
+    }
+    
+    fn get_recommendation(&self) -> String {
+        // TODO: Provide investment recommendation based on analytics
+        String::new()
+    }
+}
+
+// Enhanced CryptoWallet with analytics
+impl CryptoWallet {
+    fn calculate_analytics(&self, price_history: &HashMap<String, PriceHistory>) -> PortfolioAnalytics {
+        // TODO: Generate comprehensive portfolio analytics
+        PortfolioAnalytics::new()
+    }
+    
+    fn export_portfolio_csv(&self) -> String {
+        // TODO: Export portfolio data to CSV format
+        String::new()
+    }
+    
+    fn import_transactions_csv(&mut self, csv_data: &str) -> Result<usize, String> {
+        // TODO: Import transactions from CSV data
+        // Return number of imported transactions
+        Ok(0)
+    }
+    
+    fn set_price_alerts(&mut self, symbol: String, target_price: f64) {
+        // TODO: Set price alerts for cryptocurrencies
+    }
+    
+    fn rebalance_portfolio(&mut self, target_allocations: HashMap<String, f64>) -> Result<Vec<String>, String> {
+        // TODO: Rebalance portfolio to match target allocations
+        // Return list of transactions needed
+        Ok(vec![])
+    }
+}
+
+fn main() {
+    println!("=== Advanced Crypto Wallet ===");
+    
+    // Create wallet with settings
+    let mut wallet = CryptoWallet::new(
+        String::from("Alice"),
+        String::from("1234")
+    );
+    
+    // Create price history
+    let mut price_history = HashMap::new();
+    let mut btc_history = PriceHistory::new(String::from("BTC"));
+    btc_history.add_price_point(1640995200, 45000.0);
+    btc_history.add_price_point(1640995800, 46000.0);
+    price_history.insert(String::from("BTC"), btc_history);
+    
+    // Unlock and make some trades
+    wallet.unlock("1234").unwrap();
+    wallet.buy_crypto(String::from("BTC"), 0.1, 45000.0).unwrap();
+    wallet.buy_crypto(String::from("ETH"), 2.0, 3000.0).unwrap();
+    
+    // Calculate analytics
+    let analytics = wallet.calculate_analytics(&price_history);
+    println!("Analytics: {:?}", analytics);
+    
+    // Export portfolio
+    let csv_export = wallet.export_portfolio_csv();
+    println!("Portfolio CSV:\n{}", csv_export);
+    
+    // Set price alerts
+    wallet.set_price_alerts(String::from("BTC"), 50000.0);
+    
+    // Test rebalancing
+    let mut target_allocation = HashMap::new();
+    target_allocation.insert(String::from("BTC"), 0.6);
+    target_allocation.insert(String::from("ETH"), 0.4);
+    
+    match wallet.rebalance_portfolio(target_allocation) {
+        Ok(transactions) => println!("Rebalancing transactions: {:?}", transactions),
+        Err(e) => println!("Rebalancing failed: {}", e),
+    }
+}
+```
+
+**Additional Features:**
+1. Price history tracking and volatility analysis
+2. Portfolio analytics with performance metrics
+3. Import/export functionality for transaction data
+4. Portfolio rebalancing recommendations
+5. Price alerts and notifications
+6. Advanced error handling and validation
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Features:**
+- Multi-wallet support with hierarchical deterministic (HD) keys
+- DeFi integration simulation (staking, liquidity provision)
+- Tax calculation and reporting
+- Advanced charting and technical analysis
+- Paper trading mode for strategy testing
+- Integration with external price APIs
+- Smart contract interaction simulation
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 2: Virtual Pet Tamagotchi 🐾
+
+Create a virtual pet system with hunger, happiness, and aging mechanics that change over time.
+
+### Requirements
+
+**Core Features:**
+- Pet creation with different species and personalities
+- Time-based status changes (hunger, happiness, health)
+- Interactive care actions (feed, play, sleep)
+- Pet evolution and aging system
+- Save/load pet state
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Build a basic virtual pet with essential care mechanics.
+
+```rust title="tamagotchi.rs"
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[derive(Debug, Clone)]
+enum PetSpecies {
+    Cat,
+    Dog,
+    Dragon,
+    Robot,
+}
+
+#[derive(Debug, Clone)]
+enum PetMood {
+    Happy,
+    Content,
+    Sad,
+    Angry,
+    Sleepy,
+}
+
+#[derive(Debug, Clone)]
+enum PetStage {
+    Egg,
+    Baby,
+    Child,
+    Adult,
+    Elder,
+}
+
+#[derive(Debug)]
+struct PetStats {
+    hunger: u8,        // 0-100, higher = more hungry
+    happiness: u8,     // 0-100, higher = happier
+    health: u8,        // 0-100, higher = healthier
+    energy: u8,        // 0-100, higher = more energetic
+    age_days: u32,     // Age in days
+}
+
+#[derive(Debug)]
+struct Pet {
+    name: String,
+    species: PetSpecies,
+    stats: PetStats,
+    stage: PetStage,
+    mood: PetMood,
+    last_update: u64,  // Timestamp of last status update
+    is_alive: bool,
+}
+
+impl PetStats {
+    fn new() -> Self {
+        // TODO: Create initial pet stats
+        PetStats {
+            hunger: 50,
+            happiness: 80,
+            health: 100,
+            energy: 100,
+            age_days: 0,
+        }
+    }
+    
+    fn update_over_time(&mut self, hours_passed: u32) {
+        // TODO: Update stats based on time passed
+        // Hunger increases over time
+        // Happiness decreases if hungry
+        // Health decreases if very hungry or unhappy
+        // Energy decreases during day, recovers during sleep
+    }
+    
+    fn is_critical(&self) -> bool {
+        // TODO: Check if any stat is critically low
+        false
+    }
+    
+    fn overall_condition(&self) -> String {
+        // TODO: Return overall condition based on all stats
+        String::new()
+    }
+}
+
+impl Pet {
+    fn new(name: String, species: PetSpecies) -> Self {
+        // TODO: Create new pet
+        Pet {
+            name,
+            species,
+            stats: PetStats::new(),
+            stage: PetStage::Egg,
+            mood: PetMood::Content,
+            last_update: get_current_timestamp(),
+            is_alive: true,
+        }
+    }
+    
+    fn update_status(&mut self) {
+        // TODO: Update pet status based on time passed
+        let current_time = get_current_timestamp();
+        let hours_passed = (current_time - self.last_update) / 3600;
+        
+        // Update stats
+        // Check for evolution
+        // Update mood based on stats
+        // Check if pet is still alive
+        
+        self.last_update = current_time;
+    }
+    
+    fn feed(&mut self, food_quality: u8) -> String {
+        // TODO: Feed the pet, reducing hunger
+        // Better quality food = more hunger reduction + happiness boost
+        String::new()
+    }
+    
+    fn play(&mut self, play_duration: u8) -> String {
+        // TODO: Play with pet, increasing happiness but decreasing energy
+        String::new()
+    }
+    
+    fn let_sleep(&mut self, sleep_hours: u8) -> String {
+        // TODO: Let pet sleep, recovering energy
+        String::new()
+    }
+    
+    fn give_medicine(&mut self) -> String {
+        // TODO: Give medicine if pet is sick, improving health
+        String::new()
+    }
+    
+    fn get_status(&self) -> String {
+        // TODO: Return formatted status string
+        format!(
+            "🐾 {} the {:?}\n\
+             Stage: {:?} | Mood: {:?}\n\
+             Hunger: {}/100 | Happiness: {}/100\n\
+             Health: {}/100 | Energy: {}/100\n\
+             Age: {} days | {}",
+            self.name,
+            self.species,
+            self.stage,
+            self.mood,
+            self.stats.hunger,
+            self.stats.happiness,
+            self.stats.health,
+            self.stats.energy,
+            self.stats.age_days,
+            if self.is_alive { "Alive" } else { "😢 Deceased" }
+        )
+    }
+    
+    fn check_evolution(&mut self) -> Option<String> {
+        // TODO: Check if pet should evolve to next stage
+        // Return evolution message if evolution occurred
+        None
+    }
+    
+    fn calculate_mood(&mut self) {
+        // TODO: Calculate current mood based on stats
+        // Happy: high happiness, low hunger
+        // Sad: low happiness or very hungry
+        // Sleepy: low energy
+        // Angry: high hunger + low happiness
+    }
+}
+
+fn get_current_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
+fn main() {
+    println!("=== Virtual Pet Tamagotchi ===");
+    
+    // Create a new pet
+    let mut pet = Pet::new(
+        String::from("Fluffy"),
+        PetSpecies::Cat
+    );
+    
+    println!("Welcome! You have a new pet:");
+    println!("{}", pet.get_status());
+    
+    // Simulate some time passing and care actions
+    println!("\n--- After some time ---");
+    pet.update_status();
+    
+    // Feed the pet
+    let feed_result = pet.feed(80);
+    println!("{}", feed_result);
+    
+    // Play with the pet
+    let play_result = pet.play(30);
+    println!("{}", play_result);
+    
+    // Let pet sleep
+    let sleep_result = pet.let_sleep(8);
+    println!("{}", sleep_result);
+    
+    // Check evolution
+    if let Some(evolution_msg) = pet.check_evolution() {
+        println!("{}", evolution_msg);
+    }
+    
+    println!("\n--- Current Status ---");
+    println!("{}", pet.get_status());
+}
+
+// Additional helper functions you might need:
+
+fn simulate_time_passage(hours: u32) {
+    // Simulate time passing for testing
+    println!("⏰ {} hours pass...", hours);
+}
+
+fn get_care_recommendation(pet: &Pet) -> String {
+    // Analyze pet stats and recommend care actions
+    String::from("Your pet needs attention!")
+}
+```
+
+**Your Tasks:**
+1. Implement all pet status update logic
+2. Create meaningful care action responses
+3. Build an evolution system based on age/care
+4. Add pet death conditions and prevention
+5. Make the mood system responsive to stats
+
+**Bonus Features:**
+- Add different personality types that affect stat changes
+- Create a simple CLI interface for interaction
+- Add mini-games for entertainment
+- Implement a pet breeding system
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add advanced features like personality traits and item systems.
+
+```rust title="advanced_tamagotchi.rs"
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct PersonalityTraits {
+    friendliness: u8,    // How social the pet is
+    energy_level: u8,    // Natural energy level
+    appetite: u8,        // How much/often pet gets hungry
+    intelligence: u8,    // Learning rate and trick ability
+    stubbornness: u8,    // Resistance to care/training
+}
+
+#[derive(Debug, Clone)]
+enum ItemType {
+    Food { nutrition: u8, taste: u8 },
+    Toy { fun_factor: u8, durability: u8 },
+    Medicine { effectiveness: u8 },
+    Accessory { happiness_boost: u8 },
+}
+
+#[derive(Debug, Clone)]
+struct Item {
+    name: String,
+    item_type: ItemType,
+    quantity: u32,
+}
+
+#[derive(Debug)]
+struct Inventory {
+    items: HashMap<String, Item>,
+    money: u32,
+}
+
+#[derive(Debug, Clone)]
+struct Skill {
+    name: String,
+    level: u8,
+    experience: u32,
+}
+
+// Enhanced Pet with personality and skills
+impl Pet {
+    fn new_with_personality(
+        name: String,
+        species: PetSpecies,
+        personality: PersonalityTraits,
+    ) -> Self {
+        // TODO: Create pet with personality traits affecting initial stats
+        Pet {
+            name,
+            species,
+            stats: PetStats::new(),
+            stage: PetStage::Egg,
+            mood: PetMood::Content,
+            last_update: get_current_timestamp(),
+            is_alive: true,
+        }
+    }
+    
+    fn learn_trick(&mut self, trick_name: String) -> Result<String, String> {
+        // TODO: Teach pet a new trick based on intelligence and repetition
+        Ok(String::new())
+    }
+    
+    fn use_item(&mut self, item: &Item) -> String {
+        // TODO: Use item on pet with effects based on item type
+        String::new()
+    }
+    
+    fn get_care_preferences(&self) -> Vec<String> {
+        // TODO: Return care preferences based on personality
+        vec![]
+    }
+    
+    fn calculate_happiness_multiplier(&self) -> f32 {
+        // TODO: Calculate happiness gain/loss multiplier based on personality
+        1.0
+    }
+}
+
+impl PersonalityTraits {
+    fn random() -> Self {
+        // TODO: Generate random personality traits
+        PersonalityTraits {
+            friendliness: 50,
+            energy_level: 50,
+            appetite: 50,
+            intelligence: 50,
+            stubbornness: 50,
+        }
+    }
+    
+    fn get_description(&self) -> String {
+        // TODO: Generate personality description
+        String::new()
+    }
+}
+
+impl Inventory {
+    fn new() -> Self {
+        // TODO: Create starting inventory
+        Inventory {
+            items: HashMap::new(),
+            money: 100,
+        }
+    }
+    
+    fn add_item(&mut self, item: Item) {
+        // TODO: Add item to inventory
+    }
+    
+    fn use_item(&mut self, item_name: &str) -> Option<Item> {
+        // TODO: Remove and return item if available
+        None
+    }
+    
+    fn buy_item(&mut self, item: Item, cost: u32) -> Result<(), String> {
+        // TODO: Buy item if enough money
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+struct PetCareCenter {
+    pets: Vec<Pet>,
+    inventory: Inventory,
+    care_log: Vec<String>,
+}
+
+impl PetCareCenter {
+    fn new() -> Self {
+        PetCareCenter {
+            pets: Vec::new(),
+            inventory: Inventory::new(),
+            care_log: Vec::new(),
+        }
+    }
+    
+    fn adopt_pet(&mut self, name: String, species: PetSpecies) -> usize {
+        // TODO: Create and add new pet, return pet ID
+        0
+    }
+    
+    fn care_for_pet(&mut self, pet_id: usize, action: CareAction) -> Result<String, String> {
+        // TODO: Perform care action on specified pet
+        Ok(String::new())
+    }
+    
+    fn check_all_pets(&mut self) {
+        // TODO: Update status for all pets
+    }
+    
+    fn get_daily_report(&self) -> String {
+        // TODO: Generate daily care report
+        String::new()
+    }
+}
+
+#[derive(Debug)]
+enum CareAction {
+    Feed(String),      // Item name
+    Play(String),      // Activity type
+    Train(String),     // Skill to train
+    UseItem(String),   // Item name
+    Sleep,
+}
+
+fn main() {
+    println!("=== Advanced Pet Care Center ===");
+    
+    let mut care_center = PetCareCenter::new();
+    
+    // Adopt pets with different personalities
+    let fluffy_id = care_center.adopt_pet(
+        String::from("Fluffy"),
+        PetSpecies::Cat
+    );
+    
+    let buddy_id = care_center.adopt_pet(
+        String::from("Buddy"),
+        PetSpecies::Dog
+    );
+    
+    // Add some items to inventory
+    care_center.inventory.add_item(Item {
+        name: String::from("Premium Cat Food"),
+        item_type: ItemType::Food { nutrition: 90, taste: 85 },
+        quantity: 5,
+    });
+    
+    // Care for pets
+    care_center.care_for_pet(fluffy_id, CareAction::Feed(String::from("Premium Cat Food"))).unwrap();
+    care_center.care_for_pet(buddy_id, CareAction::Play(String::from("Fetch"))).unwrap();
+    
+    // Check all pets
+    care_center.check_all_pets();
+    
+    // Generate report
+    println!("{}", care_center.get_daily_report());
+}
+```
+
+**Advanced Features:**
+1. Personality system affecting pet behavior
+2. Item system with different effects
+3. Skill learning and training mechanics
+4. Multi-pet management system
+5. Care logging and analytics
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Expert Features:**
+- Genetic system for breeding pets
+- Seasonal events and special occasions
+- Pet competitions and rankings
+- Social features (pet playdates)
+- Advanced AI behavior patterns
+- Custom pet modifications and accessories
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 3: Library Management System 📚
+
+Build a comprehensive library system with books, patrons, borrowing, and administrative features.
+
+### Requirements
+
+**Core Features:**
+- Book catalog with search and categorization
+- Patron registration and management
+- Borrowing and return system with due dates
+- Fine calculation and payment tracking
+- Reservation system for popular books
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Create a basic library system with essential functionality.
+
+```rust title="library_system.rs"
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct Book {
+    isbn: String,
+    title: String,
+    author: String,
+    genre: String,
+    publication_year: u32,
+    total_copies: u32,
+    available_copies: u32,
+}
+
+#[derive(Debug, Clone)]
+struct Patron {
+    id: u32,
+    name: String,
+    email: String,
+    phone: String,
+    borrowed_books: Vec<String>, // ISBNs of borrowed books
+    fines_owed: f64,
+    is_active: bool,
+}
+
+#[derive(Debug, Clone)]
+struct BorrowRecord {
+    patron_id: u32,
+    isbn: String,
+    borrow_date: u64,
+    due_date: u64,
+    return_date: Option<u64>,
+    fine_amount: f64,
+}
+
+#[derive(Debug)]
+struct Library {
+    name: String,
+    books: HashMap<String, Book>,      // ISBN -> Book
+    patrons: HashMap<u32, Patron>,     // ID -> Patron
+    borrow_records: Vec<BorrowRecord>,
+    next_patron_id: u32,
+}
+
+impl Book {
+    fn new(
+        isbn: String,
+        title: String,
+        author: String,
+        genre: String,
+        publication_year: u32,
+        total_copies: u32,
+    ) -> Self {
+        // TODO: Create new book with all copies available
+        Book {
+            isbn,
+            title,
+            author,
+            genre,
+            publication_year,
+            total_copies,
+            available_copies: total_copies,
+        }
+    }
+    
+    fn is_available(&self) -> bool {
+        // TODO: Check if book has available copies
+        false
+    }
+    
+    fn borrow_copy(&mut self) -> Result<(), String> {
+        // TODO: Reduce available copies by 1 if possible
+        Ok(())
+    }
+    
+    fn return_copy(&mut self) -> Result<(), String> {
+        // TODO: Increase available copies by 1 if not at max
+        Ok(())
+    }
+    
+    fn get_info(&self) -> String {
+        // TODO: Return formatted book information
+        format!(
+            "📖 {} by {}\n\
+             ISBN: {} | Genre: {} | Year: {}\n\
+             Available: {}/{} copies",
+            self.title,
+            self.author,
+            self.isbn,
+            self.genre,
+            self.publication_year,
+            self.available_copies,
+            self.total_copies
+        )
+    }
+}
+
+impl Patron {
+    fn new(id: u32, name: String, email: String, phone: String) -> Self {
+        // TODO: Create new patron
+        Patron {
+            id,
+            name,
+            email,
+            phone,
+            borrowed_books: Vec::new(),
+            fines_owed: 0.0,
+            is_active: true,
+        }
+    }
+    
+    fn can_borrow(&self) -> bool {
+        // TODO: Check if patron can borrow (active, not too many books, low fines)
+        false
+    }
+    
+    fn add_borrowed_book(&mut self, isbn: String) {
+        // TODO: Add book to borrowed list
+    }
+    
+    fn remove_borrowed_book(&mut self, isbn: &str) -> bool {
+        // TODO: Remove book from borrowed list, return true if found
+        false
+    }
+    
+    fn add_fine(&mut self, amount: f64) {
+        // TODO: Add fine amount
+    }
+    
+    fn pay_fine(&mut self, amount: f64) -> f64 {
+        // TODO: Pay fine, return amount actually paid
+        0.0
+    }
+    
+    fn get_summary(&self) -> String {
+        // TODO: Return patron summary
+        String::new()
+    }
+}
+
+impl BorrowRecord {
+    fn new(patron_id: u32, isbn: String, borrow_date: u64, loan_period_days: u32) -> Self {
+        // TODO: Create new borrow record with calculated due date
+        BorrowRecord {
+            patron_id,
+            isbn,
+            borrow_date,
+            due_date: borrow_date + (loan_period_days as u64 * 24 * 3600),
+            return_date: None,
+            fine_amount: 0.0,
+        }
+    }
+    
+    fn mark_returned(&mut self, return_date: u64, daily_fine_rate: f64) {
+        // TODO: Mark as returned and calculate fine if late
+    }
+    
+    fn is_overdue(&self, current_date: u64) -> bool {
+        // TODO: Check if book is overdue
+        false
+    }
+    
+    fn calculate_fine(&self, current_date: u64, daily_fine_rate: f64) -> f64 {
+        // TODO: Calculate fine based on days overdue
+        0.0
+    }
+}
+
+impl Library {
+    fn new(name: String) -> Self {
+        // TODO: Create new library
+        Library {
+            name,
+            books: HashMap::new(),
+            patrons: HashMap::new(),
+            borrow_records: Vec::new(),
+            next_patron_id: 1,
+        }
+    }
+    
+    fn add_book(&mut self, book: Book) {
+        // TODO: Add book to catalog
+    }
+    
+    fn register_patron(&mut self, name: String, email: String, phone: String) -> u32 {
+        // TODO: Register new patron and return their ID
+        0
+    }
+    
+    fn borrow_book(&mut self, patron_id: u32, isbn: &str) -> Result<String, String> {
+        // TODO: Process book borrowing
+        // Check patron can borrow, book is available
+        // Create borrow record, update book and patron
+        Ok(String::new())
+    }
+    
+    fn return_book(&mut self, patron_id: u32, isbn: &str) -> Result<String, String> {
+        // TODO: Process book return
+        // Find borrow record, calculate fines, update records
+        Ok(String::new())
+    }
+    
+    fn search_books(&self, query: &str) -> Vec<&Book> {
+        // TODO: Search books by title, author, or ISBN
+        vec![]
+    }
+    
+    fn get_overdue_books(&self, current_date: u64) -> Vec<&BorrowRecord> {
+        // TODO: Return list of overdue borrow records
+        vec![]
+    }
+    
+    fn generate_report(&self) -> String {
+        // TODO: Generate library statistics report
+        String::new()
+    }
+}
+
+fn get_current_timestamp() -> u64 {
+    // Simplified timestamp for testing
+    1640995200
+}
+
+fn main() {
+    println!("=== Library Management System ===");
+    
+    // Create library
+    let mut library = Library::new(String::from("City Central Library"));
+    
+    // Add some books
+    library.add_book(Book::new(
+        String::from("978-0-123456-78-9"),
+        String::from("The Rust Programming Language"),
+        String::from("Steve Klabnik"),
+        String::from("Programming"),
+        2018,
+        3,
+    ));
+    
+    library.add_book(Book::new(
+        String::from("978-1-234567-89-0"),
+        String::from("Blockchain Development"),
+        String::from("Jane Smith"),
+        String::from("Technology"),
+        2021,
+        2,
+    ));
+    
+    // Register patrons
+    let alice_id = library.register_patron(
+        String::from("Alice Johnson"),
+        String::from("alice@email.com"),
+        String::from("555-0123"),
+    );
+    
+    let bob_id = library.register_patron(
+        String::from("Bob Wilson"),
+        String::from("bob@email.com"),
+        String::from("555-0456"),
+    );
+    
+    // Borrow books
+    match library.borrow_book(alice_id, "978-0-123456-78-9") {
+        Ok(msg) => println!("✅ {}", msg),
+        Err(e) => println!("❌ {}", e),
+    }
+    
+    match library.borrow_book(bob_id, "978-1-234567-89-0") {
+        Ok(msg) => println!("✅ {}", msg),
+        Err(e) => println!("❌ {}", e),
+    }
+    
+    // Search books
+    let search_results = library.search_books("Rust");
+    println!("\nSearch results for 'Rust':");
+    for book in search_results {
+        println!("{}", book.get_info());
+    }
+    
+    // Generate report
+    println!("\n=== Library Report ===");
+    println!("{}", library.generate_report());
+}
+```
+
+**Your Tasks:**
+1. Implement all core library operations
+2. Add proper error handling for edge cases
+3. Create a fine calculation system
+4. Build search functionality
+5. Generate comprehensive reports
+
+**Bonus Features:**
+- Add book reservations
+- Implement different patron types (student, faculty, etc.)
+- Create a renewal system
+- Add book categories and recommendations
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add advanced features like reservations and digital resources.
+
+```rust title="advanced_library.rs"
+use std::collections::{HashMap, VecDeque};
+
+#[derive(Debug, Clone)]
+enum ResourceType {
+    PhysicalBook,
+    EBook,
+    AudioBook,
+    DVD,
+    Magazine,
+    Newspaper,
+}
+
+#[derive(Debug, Clone)]
+struct DigitalResource {
+    resource_type: ResourceType,
+    file_format: String,
+    file_size_mb: u32,
+    download_limit: Option<u32>,
+    streaming_available: bool,
+}
+
+#[derive(Debug, Clone)]
+struct Reservation {
+    patron_id: u32,
+    isbn: String,
+    reservation_date: u64,
+    expiry_date: u64,
+    position_in_queue: usize,
+}
+
+#[derive(Debug)]
+struct ReservationQueue {
+    isbn: String,
+    queue: VecDeque<Reservation>,
+}
+
+// Enhanced Library with reservations and digital resources
+impl Library {
+    fn reserve_book(&mut self, patron_id: u32, isbn: &str) -> Result<String, String> {
+        // TODO: Add patron to reservation queue for book
+        Ok(String::new())
+    }
+    
+    fn cancel_reservation(&mut self, patron_id: u32, isbn: &str) -> Result<String, String> {
+        // TODO: Remove patron from reservation queue
+        Ok(String::new())
+    }
+    
+    fn process_reservation_queue(&mut self, isbn: &str) {
+        // TODO: Notify next patron in queue when book becomes available
+    }
+    
+    fn add_digital_resource(&mut self, book: Book, digital_info: DigitalResource) {
+        // TODO: Add digital resource to catalog
+    }
+    
+    fn download_ebook(&mut self, patron_id: u32, isbn: &str) -> Result<String, String> {
+        // TODO: Process ebook download
+        Ok(String::new())
+    }
+    
+    fn get_patron_recommendations(&self, patron_id: u32) -> Vec<&Book> {
+        // TODO: Generate book recommendations based on borrowing history
+        vec![]
+    }
+    
+    fn generate_analytics(&self) -> LibraryAnalytics {
+        // TODO: Generate comprehensive analytics
+        LibraryAnalytics::new()
+    }
+}
+
+#[derive(Debug)]
+struct LibraryAnalytics {
+    total_books: usize,
+    total_patrons: usize,
+    books_borrowed_today: usize,
+    most_popular_books: Vec<String>,
+    busiest_patrons: Vec<u32>,
+    overdue_rate: f64,
+    average_loan_duration: f64,
+}
+
+impl LibraryAnalytics {
+    fn new() -> Self {
+        LibraryAnalytics {
+            total_books: 0,
+            total_patrons: 0,
+            books_borrowed_today: 0,
+            most_popular_books: vec![],
+            busiest_patrons: vec![],
+            overdue_rate: 0.0,
+            average_loan_duration: 0.0,
+        }
+    }
+    
+    fn display_report(&self) -> String {
+        // TODO: Format analytics report
+        String::new()
+    }
+}
+
+fn main() {
+    println!("=== Advanced Library System ===");
+    
+    // Create library with advanced features
+    let mut library = Library::new(String::from("University Library"));
+    
+    // Add physical and digital books
+    let rust_book = Book::new(
+        String::from("978-0-123456-78-9"),
+        String::from("The Rust Programming Language"),
+        String::from("Steve Klabnik"),
+        String::from("Programming"),
+        2018,
+        2, // Only 2 physical copies
+    );
+    
+    let digital_rust = DigitalResource {
+        resource_type: ResourceType::EBook,
+        file_format: String::from("PDF"),
+        file_size_mb: 15,
+        download_limit: Some(3),
+        streaming_available: true,
+    };
+    
+    library.add_book(rust_book);
+    library.add_digital_resource(
+        library.books["978-0-123456-78-9"].clone(),
+        digital_rust,
+    );
+    
+    // Register patrons
+    let alice_id = library.register_patron(
+        String::from("Alice"),
+        String::from("alice@university.edu"),
+        String::from("555-0123"),
+    );
+    
+    // Test reservation system
+    match library.reserve_book(alice_id, "978-0-123456-78-9") {
+        Ok(msg) => println!("Reservation: {}", msg),
+        Err(e) => println!("Reservation failed: {}", e),
+    }
+    
+    // Test digital resources
+    match library.download_ebook(alice_id, "978-0-123456-78-9") {
+        Ok(msg) => println!("Download: {}", msg),
+        Err(e) => println!("Download failed: {}", e),
+    }
+    
+    // Generate analytics
+    let analytics = library.generate_analytics();
+    println!("\n{}", analytics.display_report());
+}
+```
+
+**Advanced Features:**
+1. Reservation queue system
+2. Digital resource management
+3. Recommendation engine
+4. Advanced analytics and reporting
+5. Multi-format resource support
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Expert Features:**
+- Inter-library loan system
+- Automated late fee collection
+- AI-powered book recommendations
+- Mobile app integration APIs
+- Advanced inventory management
+- Staff management and permissions system
+</Tab>
+</Tabs>
+
+---
+
+## Testing Your Solutions
+
+<Callout type="info">
+**Comprehensive Testing**: Create thorough tests for your implementations:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_wallet_creation() {
+        let wallet = CryptoWallet::new(
+            String::from("Alice"),
+            String::from("1234")
+        );
+        assert_eq!(wallet.owner, "Alice");
+        assert!(wallet.is_locked);
+    }
+    
+    #[test]
+    fn test_pet_feeding() {
+        let mut pet = Pet::new(
+            String::from("Fluffy"),
+            PetSpecies::Cat
+        );
+        let initial_hunger = pet.stats.hunger;
+        pet.feed(80);
+        assert!(pet.stats.hunger < initial_hunger);
+    }
+    
+    #[test]
+    fn test_library_borrowing() {
+        let mut library = Library::new(String::from("Test Library"));
+        // Add book and patron, test borrowing
+    }
+}
+```
+
+Run with: `cargo test`
+</Callout>
+
+---
+
+## Success Criteria
+
+<Steps>
+<Step>
+### Data Structure Design
+Your structs should logically represent real-world entities with appropriate fields and relationships.
+</Step>
+
+<Step>
+### Method Implementation
+Methods should provide intuitive APIs and handle edge cases appropriately.
+</Step>
+
+<Step>
+### Error Handling
+Use Result types for operations that can fail and provide meaningful error messages.
+</Step>
+
+<Step>
+### Code Organization
+Use multiple impl blocks to organize related functionality logically.
+</Step>
+
+<Step>
+### User Experience
+Create clear, informative output and intuitive interaction patterns.
+</Step>
+</Steps>
+
+---
+
+## Common Design Patterns
+
+<Callout type="tip">
+**Builder Pattern for Complex Construction**
+```rust
+impl CryptoWallet {
+    fn builder() -> WalletBuilder {
+        WalletBuilder::new()
+    }
+}
+
+struct WalletBuilder {
+    owner: Option<String>,
+    pin: Option<String>,
+    initial_balance: u64,
+}
+
+impl WalletBuilder {
+    fn owner(mut self, owner: String) -> Self {
+        self.owner = Some(owner);
+        self
+    }
+    
+    fn pin(mut self, pin: String) -> Self {
+        self.pin = Some(pin);
+        self
+    }
+    
+    fn build(self) -> Result<CryptoWallet, String> {
+        // Validate and construct
+    }
+}
+```
+</Callout>
+
+<Callout type="tip">
+**State Pattern for Status Management**
+```rust
+enum PetState {
+    Healthy,
+    Sick { severity: u8 },
+    Sleeping { hours_left: u8 },
+    Playing { energy_drain: u8 },
+}
+
+impl Pet {
+    fn transition_state(&mut self, new_state: PetState) {
+        // Handle state transitions
+    }
+}
+```
+</Callout>
+
+---
+
+## Summary
+
+Outstanding work completing Day 3's challenges! You've practiced:
+
+- ✅ **Complex data modeling** with interconnected structs
+- ✅ **Method design** for intuitive APIs
+- ✅ **State management** with enums and status tracking
+- ✅ **Error handling** with Result types
+- ✅ **Real-world simulation** of complex systems
+
+**Skills Developed:**
+- Designing object-oriented systems in Rust
+- Creating maintainable and extensible code structures
+- Building user-friendly interfaces and interactions
+- Implementing business logic with proper separation of concerns
+- Testing complex data structures and their behaviors
+
+**Tomorrow's Preview:** Day 4 introduces enums and pattern matching - powerful tools for handling different states and variants that will make your blockchain code more robust and expressive.
+
+Ready for the next level? Continue to [Day 4: Enums and Pattern Matching](/learn/week-2/day-4-enums-pattern-matching)!

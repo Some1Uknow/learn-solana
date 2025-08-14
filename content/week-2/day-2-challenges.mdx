@@ -1,0 +1,1315 @@
+---
+title: "Day 2 Challenges: Ownership and Borrowing Practice"
+description: "Master ownership and borrowing through hands-on challenges including string analysis, array manipulation, reference chains, and memory debugging exercises."
+type: challenge
+tags: ['rust', 'ownership', 'borrowing', 'references', 'memory-management']
+module: '🦀 Rust for Solana'
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Time to put your ownership and borrowing knowledge to the test! These challenges are designed to help you internalize Rust's ownership system through practical exercises that mirror real-world blockchain development scenarios.
+
+Each challenge focuses on different aspects of ownership and will help you develop intuition for when to move, borrow, or clone data.
+
+<Mermaid 
+  chart="
+    graph TD
+      A[Day 2 Ownership Challenges] --> B[Challenge 1: String Analyzer]
+      A --> C[Challenge 2: Array Manipulator]
+      A --> D[Challenge 3: Reference Chain]
+      A --> E[Challenge 4: Memory Detective]
+      
+      B --> B1[Immutable References]
+      B --> B2[String Slices]
+      B --> B3[Pattern Matching]
+      
+      C --> C1[Mutable References]
+      C --> C2[Array Borrowing]
+      C --> C3[Safe Indexing]
+      
+      D --> D1[Multiple References]
+      D --> D2[Borrowing Rules]
+      D --> D3[Lifetime Management]
+      
+      E --> E1[Move Semantics]
+      E --> E2[Clone vs Move]
+      E --> E3[Debugging Ownership]
+      
+      F[Ownership Concepts] --> F1[Move: Transfer ownership]
+      F --> F2[Borrow: Temporary access]
+      F --> F3[Clone: Duplicate data]
+      
+      style B fill:#e1f5fe
+      style C fill:#f3e5f5
+      style D fill:#e8f5e8
+      style E fill:#fff3e0
+      style F fill:#fce4ec"
+/>
+
+<Callout type="info">
+**Challenge Focus**: Today's challenges emphasize ownership patterns you'll use constantly in Solana development - managing account data, processing transactions, and working with references efficiently.
+</Callout>
+
+---
+
+## Challenge Overview
+
+<Callout type="info">
+Today's challenges will help you practice:
+
+- Working with string slices and ownership
+- Managing references to avoid unnecessary clones
+- Understanding when values are moved vs. borrowed
+- Debugging ownership-related compiler errors
+- Implementing functions that work with borrowed data
+- Building data processing pipelines using references
+</Callout>
+
+---
+
+## Challenge 1: String Analyzer 📝
+
+Build a comprehensive string analysis tool that counts words, characters, and lines without taking ownership of the input data.
+
+### Requirements
+
+**Core Features:**
+- Analyze text without consuming ownership
+- Count different text metrics efficiently
+- Work with both String and &str inputs
+- Provide detailed breakdowns of text composition
+
+**Learning Goals:**
+- Practice borrowing instead of moving
+- Work with string slices effectively
+- Understand &str vs String distinctions
+- Implement functions that work with references
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Create basic text analysis functions that work with borrowed strings.
+
+```rust title="string_analyzer.rs"
+fn main() {
+    let text1 = String::from("Hello, World!\nThis is a test.\nHow are you?");
+    let text2 = "The quick brown fox jumps over the lazy dog.";
+    
+    println!("=== String Analyzer ===");
+    
+    // Analyze both types of strings without taking ownership
+    analyze_text(&text1);
+    analyze_text(text2);  // Should work with &str too
+    
+    // Original strings should still be usable
+    println!("\nOriginal strings still available:");
+    println!("text1: {}", text1);
+    println!("text2: {}", text2);
+}
+
+fn analyze_text(text: &str) {
+    println!("\n--- Analysis ---");
+    println!("Text: \"{}\"", text);
+    
+    let char_count = count_characters(text);
+    let word_count = count_words(text);
+    let line_count = count_lines(text);
+    let vowel_count = count_vowels(text);
+    
+    println!("Characters: {}", char_count);
+    println!("Words: {}", word_count);
+    println!("Lines: {}", line_count);
+    println!("Vowels: {}", vowel_count);
+    
+    // Find longest word without taking ownership
+    if let Some(longest) = find_longest_word(text) {
+        println!("Longest word: \"{}\" ({} chars)", longest, longest.len());
+    }
+}
+
+// TODO: Implement these functions
+// They should all work with &str and not take ownership
+
+fn count_characters(text: &str) -> usize {
+    // Count total characters (including spaces)
+    0
+}
+
+fn count_words(text: &str) -> usize {
+    // Count words (split by whitespace)
+    0
+}
+
+fn count_lines(text: &str) -> usize {
+    // Count lines (split by newlines)
+    0
+}
+
+fn count_vowels(text: &str) -> usize {
+    // Count vowels (a, e, i, o, u - case insensitive)
+    0
+}
+
+fn find_longest_word(text: &str) -> Option<&str> {
+    // Return a reference to the longest word
+    // Use string slices to avoid cloning
+    None
+}
+
+// Bonus functions to implement:
+fn word_frequency(text: &str) -> Vec<(&str, usize)> {
+    // Return word frequency pairs without owning the words
+    vec![]
+}
+
+fn extract_sentences(text: &str) -> Vec<&str> {
+    // Split text into sentences (by '.', '!', '?')
+    // Return slices, not owned strings
+    vec![]
+}
+```
+
+**Your Tasks:**
+1. Implement all the counting functions using string methods
+2. Make sure `find_longest_word` returns a slice, not an owned String
+3. Test with various inputs including edge cases
+4. Verify original strings remain usable after analysis
+
+**Hints:**
+- Use `.chars()`, `.lines()`, `.split_whitespace()` methods
+- Remember that `&str` methods often return iterators
+- Use `.len()` for character count, not byte count
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add more sophisticated analysis and error handling.
+
+```rust title="advanced_string_analyzer.rs"
+use std::collections::HashMap;
+
+#[derive(Debug)]
+struct TextAnalysis<'a> {
+    text: &'a str,
+    char_count: usize,
+    word_count: usize,
+    line_count: usize,
+    sentence_count: usize,
+    paragraph_count: usize,
+    unique_words: usize,
+    avg_word_length: f64,
+    longest_word: Option<&'a str>,
+    shortest_word: Option<&'a str>,
+    word_frequencies: HashMap<&'a str, usize>,
+}
+
+impl<'a> TextAnalysis<'a> {
+    fn new(text: &'a str) -> Self {
+        // TODO: Implement comprehensive analysis
+        // All string references should point to original text
+        TextAnalysis {
+            text,
+            char_count: 0,
+            word_count: 0,
+            line_count: 0,
+            sentence_count: 0,
+            paragraph_count: 0,
+            unique_words: 0,
+            avg_word_length: 0.0,
+            longest_word: None,
+            shortest_word: None,
+            word_frequencies: HashMap::new(),
+        }
+    }
+    
+    fn display_summary(&self) {
+        println!("=== Text Analysis Summary ===");
+        println!("Characters: {}", self.char_count);
+        println!("Words: {}", self.word_count);
+        println!("Unique words: {}", self.unique_words);
+        println!("Lines: {}", self.line_count);
+        println!("Sentences: {}", self.sentence_count);
+        println!("Paragraphs: {}", self.paragraph_count);
+        println!("Average word length: {:.2}", self.avg_word_length);
+        
+        if let Some(longest) = self.longest_word {
+            println!("Longest word: \"{}\"", longest);
+        }
+        
+        if let Some(shortest) = self.shortest_word {
+            println!("Shortest word: \"{}\"", shortest);
+        }
+    }
+    
+    fn display_word_frequencies(&self, top_n: usize) {
+        println!("\n=== Top {} Word Frequencies ===", top_n);
+        
+        // TODO: Sort and display most frequent words
+        // Remember: word_frequencies contains &str references
+        let mut freq_vec: Vec<_> = self.word_frequencies.iter().collect();
+        freq_vec.sort_by(|a, b| b.1.cmp(a.1));
+        
+        for (word, count) in freq_vec.iter().take(top_n) {
+            println!("{}: {}", word, count);
+        }
+    }
+}
+
+fn main() {
+    let text = "The quick brown fox jumps over the lazy dog. \
+                The dog was very lazy, but the fox was quick. \
+                
+                In a world of quick foxes and lazy dogs, \
+                speed matters more than laziness.";
+    
+    let analysis = TextAnalysis::new(text);
+    analysis.display_summary();
+    analysis.display_word_frequencies(5);
+    
+    // Test that original text is still accessible
+    println!("\nOriginal text still available: {}", text.len());
+    
+    // Test with multiple paragraphs
+    let multi_para = "First paragraph here.\n\nSecond paragraph.\n\n\nThird paragraph.";
+    let analysis2 = TextAnalysis::new(multi_para);
+    analysis2.display_summary();
+}
+
+// Helper functions for text processing
+fn normalize_word(word: &str) -> &str {
+    // Remove punctuation from word boundaries
+    // Return slice of original string
+    word
+}
+
+fn is_sentence_ending(c: char) -> bool {
+    matches!(c, '.' | '!' | '?')
+}
+
+fn count_paragraphs(text: &str) -> usize {
+    // Count paragraphs (separated by double newlines)
+    0
+}
+```
+
+**Additional Features:**
+1. Lifetime annotations to ensure references are valid
+2. Word frequency analysis using HashMap with &str keys
+3. Paragraph counting and sentence detection
+4. Statistical analysis (averages, distributions)
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Features:**
+- Text similarity comparison between documents
+- Reading text from files without loading into memory
+- Streaming analysis for large texts
+- Custom text processing pipelines
+- Performance optimization with zero-copy parsing
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 2: Array Manipulator 🔢
+
+Create functions that work with array and vector slices to perform mathematical operations without taking ownership.
+
+### Requirements
+
+**Core Features:**
+- Mathematical operations on slices
+- Statistical analysis functions
+- Array searching and filtering
+- Slice manipulation utilities
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Implement basic mathematical operations using slices.
+
+```rust title="array_manipulator.rs"
+fn main() {
+    let numbers = vec![1, 5, 3, 9, 2, 8, 4, 7, 6];
+    let array = [10, 20, 30, 40, 50];
+    
+    println!("=== Array Manipulator ===");
+    
+    // Test with vector
+    println!("Vector: {:?}", numbers);
+    test_operations(&numbers);
+    
+    // Test with array
+    println!("\nArray: {:?}", array);
+    test_operations(&array);
+    
+    // Original data should still be available
+    println!("\nOriginal vector: {:?}", numbers);
+    println!("Original array: {:?}", array);
+}
+
+fn test_operations(data: &[i32]) {
+    println!("Length: {}", data.len());
+    
+    if let Some(max) = find_max(data) {
+        println!("Maximum: {}", max);
+    }
+    
+    if let Some(min) = find_min(data) {
+        println!("Minimum: {}", min);
+    }
+    
+    println!("Sum: {}", calculate_sum(data));
+    println!("Average: {:.2}", calculate_average(data));
+    
+    let target = 5;
+    if let Some(index) = find_element(data, target) {
+        println!("Found {} at index {}", target, index);
+    } else {
+        println!("{} not found", target);
+    }
+    
+    println!("Even numbers: {:?}", filter_even(data));
+    println!("Numbers > 5: {:?}", filter_greater_than(data, 5));
+}
+
+// TODO: Implement these functions
+// They should all work with slices and not take ownership
+
+fn find_max(data: &[i32]) -> Option<i32> {
+    // Find maximum value in slice
+    None
+}
+
+fn find_min(data: &[i32]) -> Option<i32> {
+    // Find minimum value in slice
+    None
+}
+
+fn calculate_sum(data: &[i32]) -> i32 {
+    // Calculate sum of all elements
+    0
+}
+
+fn calculate_average(data: &[i32]) -> f64 {
+    // Calculate average (handle empty slice)
+    0.0
+}
+
+fn find_element(data: &[i32], target: i32) -> Option<usize> {
+    // Find index of target element
+    None
+}
+
+fn filter_even(data: &[i32]) -> Vec<i32> {
+    // Return vector of even numbers
+    // Note: This creates new data, but original slice is unchanged
+    vec![]
+}
+
+fn filter_greater_than(data: &[i32], threshold: i32) -> Vec<i32> {
+    // Return vector of numbers greater than threshold
+    vec![]
+}
+
+// Bonus functions:
+fn find_second_largest(data: &[i32]) -> Option<i32> {
+    // Find second largest unique value
+    None
+}
+
+fn calculate_median(data: &[i32]) -> Option<f64> {
+    // Calculate median (you'll need to sort a copy)
+    None
+}
+
+fn find_subslice(data: &[i32], pattern: &[i32]) -> Option<usize> {
+    // Find starting index of pattern in data
+    None
+}
+```
+
+**Your Tasks:**
+1. Implement all mathematical operations using iterator methods
+2. Handle edge cases (empty slices, etc.)
+3. Make sure functions work with both arrays and vectors
+4. Use appropriate return types (Option for operations that might fail)
+
+**Hints:**
+- Use `.iter()` to work with slice elements
+- Methods like `.max()`, `.min()`, `.sum()` are your friends
+- Remember to handle empty slices gracefully
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add more complex operations and performance optimizations.
+
+```rust title="advanced_array_manipulator.rs"
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
+struct StatisticalSummary {
+    count: usize,
+    sum: i64,
+    mean: f64,
+    median: f64,
+    mode: Vec<i32>,
+    std_deviation: f64,
+    min: i32,
+    max: i32,
+    range: i32,
+}
+
+fn main() {
+    let data = vec![1, 2, 2, 3, 4, 4, 4, 5, 6, 7, 8, 9, 10];
+    
+    println!("=== Advanced Array Analysis ===");
+    println!("Data: {:?}", data);
+    
+    let stats = calculate_statistics(&data);
+    display_statistics(&stats);
+    
+    // Test slice operations
+    test_slice_operations(&data);
+    
+    // Test with different data types
+    let floats = vec![1.5, 2.3, 4.7, 1.2, 8.9, 3.4];
+    test_float_operations(&floats);
+}
+
+fn calculate_statistics(data: &[i32]) -> StatisticalSummary {
+    // TODO: Calculate comprehensive statistics
+    // Should work efficiently with borrowed data
+    StatisticalSummary {
+        count: 0,
+        sum: 0,
+        mean: 0.0,
+        median: 0.0,
+        mode: vec![],
+        std_deviation: 0.0,
+        min: 0,
+        max: 0,
+        range: 0,
+    }
+}
+
+fn display_statistics(stats: &StatisticalSummary) {
+    println!("\n=== Statistical Summary ===");
+    println!("Count: {}", stats.count);
+    println!("Sum: {}", stats.sum);
+    println!("Mean: {:.2}", stats.mean);
+    println!("Median: {:.2}", stats.median);
+    println!("Mode: {:?}", stats.mode);
+    println!("Standard Deviation: {:.2}", stats.std_deviation);
+    println!("Min: {}", stats.min);
+    println!("Max: {}", stats.max);
+    println!("Range: {}", stats.range);
+}
+
+fn test_slice_operations(data: &[i32]) {
+    println!("\n=== Slice Operations ===");
+    
+    // Test various slice manipulations
+    let mid = data.len() / 2;
+    let first_half = &data[..mid];
+    let second_half = &data[mid..];
+    
+    println!("First half: {:?}", first_half);
+    println!("Second half: {:?}", second_half);
+    
+    // Find patterns
+    let pattern = &[4, 4, 4];
+    if let Some(index) = find_pattern(data, pattern) {
+        println!("Pattern {:?} found at index {}", pattern, index);
+    }
+    
+    // Window operations
+    let windows = sliding_window_max(data, 3);
+    println!("Sliding window max (size 3): {:?}", windows);
+}
+
+fn test_float_operations(data: &[f64]) {
+    println!("\n=== Float Operations ===");
+    println!("Data: {:?}", data);
+    
+    let sum = sum_floats(data);
+    let avg = average_floats(data);
+    
+    println!("Sum: {:.2}", sum);
+    println!("Average: {:.2}", avg);
+}
+
+// TODO: Implement these advanced functions
+
+fn calculate_mode(data: &[i32]) -> Vec<i32> {
+    // Find the most frequent value(s)
+    vec![]
+}
+
+fn calculate_std_deviation(data: &[i32], mean: f64) -> f64 {
+    // Calculate standard deviation
+    0.0
+}
+
+fn find_pattern(data: &[i32], pattern: &[i32]) -> Option<usize> {
+    // Find subslice pattern in data
+    None
+}
+
+fn sliding_window_max(data: &[i32], window_size: usize) -> Vec<i32> {
+    // Return max value in each sliding window
+    vec![]
+}
+
+fn sum_floats(data: &[f64]) -> f64 {
+    // Sum floating point numbers (be careful with precision)
+    0.0
+}
+
+fn average_floats(data: &[f64]) -> f64 {
+    // Calculate average of floating point numbers
+    0.0
+}
+
+// Generic function that works with any numeric type
+fn generic_max<T: PartialOrd + Copy>(data: &[T]) -> Option<T> {
+    // Find maximum of any comparable type
+    None
+}
+```
+
+**Additional Features:**
+1. Statistical calculations (mode, standard deviation)
+2. Pattern matching in slices
+3. Sliding window operations
+4. Generic functions for different number types
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Challenges:**
+- Implement efficient sorting algorithms that work with slices
+- Create custom iterators for array operations
+- Build a query system for slice data
+- Implement parallel processing for large arrays
+- Create zero-allocation algorithms using only borrowing
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 3: Reference Chain 🔗
+
+Build a system that passes references through multiple function calls to understand borrowing patterns.
+
+### Requirements
+
+**Core Features:**
+- Chain function calls using references
+- Demonstrate different borrowing patterns
+- Show how references work across function boundaries
+- Practice lifetime management
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Create a chain of functions that pass references through multiple levels.
+
+```rust title="reference_chain.rs"
+fn main() {
+    println!("=== Reference Chain Demo ===");
+    
+    let mut data = vec![1, 2, 3, 4, 5];
+    
+    println!("Original data: {:?}", data);
+    
+    // Chain of immutable references
+    let result = level_one(&data);
+    println!("Chain result: {}", result);
+    
+    // Chain of mutable references
+    level_one_mut(&mut data);
+    println!("After mutable chain: {:?}", data);
+    
+    // Original data should still be accessible
+    println!("Final data: {:?}", data);
+}
+
+// TODO: Implement this chain of functions
+// level_one -> level_two -> level_three -> level_four
+
+fn level_one(data: &Vec<i32>) -> i32 {
+    println!("Level 1: Processing {} elements", data.len());
+    level_two(data)
+}
+
+fn level_two(data: &Vec<i32>) -> i32 {
+    println!("Level 2: Finding patterns in data");
+    level_three(data)
+}
+
+fn level_three(data: &Vec<i32>) -> i32 {
+    println!("Level 3: Performing calculations");
+    level_four(data)
+}
+
+fn level_four(data: &Vec<i32>) -> i32 {
+    println!("Level 4: Final computation");
+    // TODO: Return some computed value from the data
+    // Maybe sum of all elements, or product, or some other calculation
+    0
+}
+
+// Mutable reference chain
+fn level_one_mut(data: &mut Vec<i32>) {
+    println!("Mutable Level 1: Preparing data");
+    level_two_mut(data);
+}
+
+fn level_two_mut(data: &mut Vec<i32>) {
+    println!("Mutable Level 2: Transforming data");
+    level_three_mut(data);
+}
+
+fn level_three_mut(data: &mut Vec<i32>) {
+    println!("Mutable Level 3: Applying changes");
+    level_four_mut(data);
+}
+
+fn level_four_mut(data: &mut Vec<i32>) {
+    println!("Mutable Level 4: Final modifications");
+    // TODO: Modify the data in some way
+    // Maybe double all values, or add 1 to each, or reverse
+}
+
+// Bonus: Mixed reference chain
+fn mixed_chain_start(data: &mut Vec<i32>) -> i32 {
+    // Start with mutable reference, return immutable analysis
+    mixed_chain_modify(data);
+    mixed_chain_analyze(data)
+}
+
+fn mixed_chain_modify(data: &mut Vec<i32>) {
+    // TODO: Modify the data
+}
+
+fn mixed_chain_analyze(data: &Vec<i32>) -> i32 {
+    // TODO: Analyze the data (immutable)
+    0
+}
+```
+
+**Your Tasks:**
+1. Complete the immutable reference chain
+2. Complete the mutable reference chain  
+3. Add meaningful operations at each level
+4. Ensure references are passed correctly through all levels
+5. Test that the original data remains accessible after chains
+
+**Learning Points:**
+- Understand how references work across function boundaries
+- See that borrowing doesn't transfer ownership
+- Practice both mutable and immutable reference patterns
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Add more complex reference patterns and error handling.
+
+```rust title="advanced_reference_chain.rs"
+#[derive(Debug)]
+struct ProcessingResult {
+    steps_completed: usize,
+    final_value: i32,
+    modifications_made: usize,
+}
+
+fn main() {
+    let mut blockchain_data = vec![100, 250, 75, 300, 150];
+    
+    println!("=== Advanced Reference Chain ===");
+    println!("Initial blockchain data: {:?}", blockchain_data);
+    
+    // Complex processing chain
+    match process_blockchain_data(&mut blockchain_data) {
+        Ok(result) => {
+            println!("Processing successful: {:?}", result);
+        },
+        Err(e) => {
+            println!("Processing failed: {}", e);
+        }
+    }
+    
+    println!("Final blockchain data: {:?}", blockchain_data);
+    
+    // Test reference sharing patterns
+    test_reference_sharing(&blockchain_data);
+}
+
+fn process_blockchain_data(data: &mut Vec<i32>) -> Result<ProcessingResult, String> {
+    // TODO: Implement a complex processing chain that:
+    // 1. Validates data (immutable reference)
+    // 2. Processes transactions (mutable reference)
+    // 3. Calculates metrics (immutable reference)
+    // 4. Applies final adjustments (mutable reference)
+    
+    let mut result = ProcessingResult {
+        steps_completed: 0,
+        final_value: 0,
+        modifications_made: 0,
+    };
+    
+    // Step 1: Validation
+    validate_data(data)?;
+    result.steps_completed += 1;
+    
+    // Step 2: Processing (this should modify data)
+    let mods = process_transactions(data)?;
+    result.modifications_made = mods;
+    result.steps_completed += 1;
+    
+    // Step 3: Analysis (read-only)
+    result.final_value = calculate_final_value(data)?;
+    result.steps_completed += 1;
+    
+    // Step 4: Final adjustments
+    apply_final_adjustments(data)?;
+    result.steps_completed += 1;
+    
+    Ok(result)
+}
+
+fn validate_data(data: &Vec<i32>) -> Result<(), String> {
+    // TODO: Validate that data meets requirements
+    // - Not empty
+    // - All values positive
+    // - Within reasonable ranges
+    Ok(())
+}
+
+fn process_transactions(data: &mut Vec<i32>) -> Result<usize, String> {
+    // TODO: Process and modify the transaction data
+    // Return number of modifications made
+    Ok(0)
+}
+
+fn calculate_final_value(data: &Vec<i32>) -> Result<i32, String> {
+    // TODO: Calculate some final metric from the data
+    Ok(0)
+}
+
+fn apply_final_adjustments(data: &mut Vec<i32>) -> Result<(), String> {
+    // TODO: Apply any final adjustments to the data
+    Ok(())
+}
+
+fn test_reference_sharing(data: &Vec<i32>) {
+    println!("\n=== Reference Sharing Test ===");
+    
+    // Multiple immutable references are allowed
+    let ref1 = data;
+    let ref2 = data;
+    let ref3 = data;
+    
+    // All can be used simultaneously
+    println!("Ref1 length: {}", ref1.len());
+    println!("Ref2 sum: {}", ref2.iter().sum::<i32>());
+    println!("Ref3 max: {:?}", ref3.iter().max());
+    
+    // Test function calls with multiple references
+    compare_references(ref1, ref2);
+}
+
+fn compare_references(data1: &Vec<i32>, data2: &Vec<i32>) {
+    // TODO: Compare two references to the same data
+    // This demonstrates that multiple immutable references work
+    println!("References point to same data: {}", 
+             std::ptr::eq(data1, data2));
+}
+
+// Advanced: Function that returns references
+fn find_largest_element(data: &Vec<i32>) -> Option<&i32> {
+    // TODO: Return a reference to the largest element
+    // This demonstrates returning borrowed data
+    None
+}
+
+fn find_elements_above_threshold(data: &Vec<i32>, threshold: i32) -> Vec<&i32> {
+    // TODO: Return references to elements above threshold
+    // This creates a vector of references, not owned values
+    vec![]
+}
+```
+
+**Advanced Features:**
+1. Error handling with Result types
+2. Multiple reference patterns in one function
+3. Returning references from functions
+4. Complex data validation and processing chains
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Advanced Challenges:**
+- Implement reference counting patterns
+- Create callback systems using function references
+- Build a reference-based event system
+- Implement lazy evaluation using references
+- Create complex lifetime relationships
+</Tab>
+</Tabs>
+
+---
+
+## Challenge 4: Memory Detective 🔍
+
+Debug and fix ownership-related issues in broken code to develop your troubleshooting skills.
+
+### Requirements
+
+**Core Features:**
+- Identify ownership problems in code
+- Fix compilation errors related to borrowing
+- Understand when values are moved vs borrowed
+- Practice debugging techniques
+
+<Tabs items={['Beginner', 'Intermediate', 'Advanced']}>
+<Tab value="Beginner">
+### Beginner Version
+
+Fix the ownership and borrowing errors in these code samples.
+
+```rust title="memory_detective.rs"
+// TODO: Fix all the compilation errors in this code
+// Each function has different types of ownership/borrowing issues
+
+fn main() {
+    println!("=== Memory Detective ===");
+    
+    // Problem 1: Use after move
+    problem_1();
+    
+    // Problem 2: Borrowing violations
+    problem_2();
+    
+    // Problem 3: Dangling references
+    problem_3();
+    
+    // Problem 4: Multiple mutable borrows
+    problem_4();
+}
+
+// Problem 1: Fix the use-after-move error
+fn problem_1() {
+    println!("\n--- Problem 1: Use After Move ---");
+    
+    let s1 = String::from("Hello");
+    let s2 = s1;  // s1 is moved here
+    
+    // ❌ This line causes an error - fix it!
+    println!("s1: {}", s1);
+    println!("s2: {}", s2);
+}
+
+// Problem 2: Fix the borrowing rule violation
+fn problem_2() {
+    println!("\n--- Problem 2: Borrowing Violation ---");
+    
+    let mut s = String::from("Hello");
+    
+    let r1 = &s;        // Immutable borrow
+    let r2 = &mut s;    // ❌ Mutable borrow while immutable exists
+    
+    println!("r1: {}", r1);
+    println!("r2: {}", r2);
+}
+
+// Problem 3: Fix the dangling reference
+fn problem_3() {
+    println!("\n--- Problem 3: Dangling Reference ---");
+    
+    let reference = get_reference();  // ❌ This returns a dangling reference
+    println!("Reference: {}", reference);
+}
+
+fn get_reference() -> &String {  // ❌ Missing lifetime, returns dangling reference
+    let s = String::from("Hello");
+    &s  // s is dropped when function ends
+}
+
+// Problem 4: Fix the multiple mutable borrows
+fn problem_4() {
+    println!("\n--- Problem 4: Multiple Mutable Borrows ---");
+    
+    let mut vec = vec![1, 2, 3, 4, 5];
+    
+    let first = &mut vec[0];    // First mutable borrow
+    let second = &mut vec[1];   // ❌ Second mutable borrow
+    
+    *first += 10;
+    *second += 20;
+    
+    println!("Modified: {:?}", vec);
+}
+
+// Additional problems to fix:
+
+// Problem 5: Iterator invalidation
+fn problem_5() {
+    println!("\n--- Problem 5: Iterator Invalidation ---");
+    
+    let mut vec = vec![1, 2, 3, 4, 5];
+    
+    for item in &vec {
+        if *item > 2 {
+            vec.push(*item * 2);  // ❌ Modifying while iterating
+        }
+    }
+    
+    println!("Result: {:?}", vec);
+}
+
+// Problem 6: Lifetime mismatch
+fn problem_6() {
+    println!("\n--- Problem 6: Lifetime Mismatch ---");
+    
+    let result;
+    {
+        let s = String::from("Hello");
+        result = longest(&s, "World");  // ❌ s doesn't live long enough
+    }
+    println!("Longest: {}", result);
+}
+
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+// Problem 7: Returning borrowed content
+fn problem_7() {
+    println!("\n--- Problem 7: Returning Borrowed Content ---");
+    
+    let processed = process_string("Hello, World!");
+    println!("Processed: {}", processed);
+}
+
+fn process_string(input: &str) -> &str {
+    let owned = input.to_uppercase();  // Creates String
+    &owned  // ❌ Returning reference to local variable
+}
+```
+
+**Your Tasks:**
+1. Fix each problem one by one
+2. Understand WHY each error occurs
+3. Apply the minimal fix that resolves the issue
+4. Explain what was wrong in comments
+
+**Common Solutions:**
+- Clone instead of move when you need the original
+- Separate borrowing scopes 
+- Return owned values instead of references
+- Use proper lifetime annotations
+- Restructure code to avoid conflicting borrows
+
+**Debugging Strategy:**
+1. Read the compiler error message carefully
+2. Identify what the compiler is complaining about
+3. Think about ownership: who owns what, when?
+4. Apply the minimal change to fix the issue
+</Tab>
+<Tab value="Intermediate">
+### Intermediate Version
+
+Work with more complex ownership scenarios and fix subtle bugs.
+
+```rust title="advanced_memory_detective.rs"
+use std::collections::HashMap;
+
+// TODO: Fix all ownership issues in this more complex code
+
+fn main() {
+    println!("=== Advanced Memory Detective ===");
+    
+    // Complex scenario 1: Data structure ownership
+    complex_problem_1();
+    
+    // Complex scenario 2: Closure ownership
+    complex_problem_2();
+    
+    // Complex scenario 3: Struct field borrowing
+    complex_problem_3();
+}
+
+// Problem: Complex data structure ownership
+fn complex_problem_1() {
+    println!("\n--- Complex Problem 1: Data Structure Ownership ---");
+    
+    let mut user_data = HashMap::new();
+    user_data.insert("alice", vec!["message1", "message2"]);
+    user_data.insert("bob", vec!["message3"]);
+    
+    // ❌ Multiple ownership issues here
+    let alice_messages = user_data.get("alice").unwrap();
+    let alice_first = alice_messages.get(0).unwrap();
+    
+    // Try to modify while borrowed
+    user_data.insert("charlie", vec!["message4"]);  // ❌ Error
+    
+    println!("Alice's first message: {}", alice_first);
+    println!("All users: {:?}", user_data.keys().collect::<Vec<_>>());
+}
+
+// Problem: Closure ownership
+fn complex_problem_2() {
+    println!("\n--- Complex Problem 2: Closure Ownership ---");
+    
+    let mut numbers = vec![1, 2, 3, 4, 5];
+    let multiplier = 2;
+    
+    // ❌ Closure ownership issues
+    let closure = || {
+        for num in &mut numbers {  // ❌ Borrow checker issues
+            *num *= multiplier;
+        }
+    };
+    
+    closure();
+    println!("Modified numbers: {:?}", numbers);  // ❌ May not work
+    
+    // Try to use numbers again
+    let sum: i32 = numbers.iter().sum();  // ❌ Might be moved
+    println!("Sum: {}", sum);
+}
+
+// Problem: Struct field borrowing
+#[derive(Debug)]
+struct DataProcessor {
+    data: Vec<i32>,
+    processed: Vec<i32>,
+}
+
+impl DataProcessor {
+    fn new(data: Vec<i32>) -> Self {
+        DataProcessor {
+            data,
+            processed: Vec::new(),
+        }
+    }
+    
+    // ❌ This method has borrowing issues
+    fn process(&mut self) {
+        let input = &self.data;  // Immutable borrow
+        
+        for &value in input {
+            // ❌ Mutable borrow while immutable borrow exists
+            self.processed.push(value * 2);
+        }
+    }
+    
+    // ❌ This method has lifetime issues
+    fn get_data_slice(&self) -> &[i32] {
+        let filtered: Vec<i32> = self.data.iter()
+            .filter(|&&x| x > 0)
+            .copied()
+            .collect();
+        
+        &filtered  // ❌ Returning reference to local variable
+    }
+}
+
+fn complex_problem_3() {
+    println!("\n--- Complex Problem 3: Struct Field Borrowing ---");
+    
+    let mut processor = DataProcessor::new(vec![1, -2, 3, -4, 5]);
+    
+    processor.process();  // ❌ May not compile
+    
+    let slice = processor.get_data_slice();  // ❌ May not compile
+    println!("Positive data: {:?}", slice);
+    
+    println!("Processor: {:?}", processor);
+}
+
+// Additional complex problems:
+
+// Problem: Self-referential structures
+struct SelfRef {
+    data: String,
+    reference: Option<&str>,  // ❌ This won't compile - can't reference self
+}
+
+impl SelfRef {
+    fn new(data: String) -> Self {
+        SelfRef {
+            reference: Some(&data),  // ❌ Can't reference field being constructed
+            data,
+        }
+    }
+}
+
+// Problem: Iterator and modification
+fn iterator_modification_problem() {
+    let mut vec = vec![1, 2, 3, 4, 5];
+    
+    // ❌ Trying to modify while iterating
+    vec.iter().for_each(|&x| {
+        if x % 2 == 0 {
+            vec.push(x * 2);  // ❌ Can't modify vec while iterating
+        }
+    });
+}
+
+// Problem: Nested borrowing
+fn nested_borrowing_problem() {
+    let mut outer = vec![vec![1, 2], vec![3, 4]];
+    
+    let first_vec = &mut outer[0];  // Mutable borrow of outer[0]
+    let second_vec = &outer[1];     // ❌ Can't borrow outer[1] while outer[0] is mutably borrowed
+    
+    first_vec.push(5);
+    println!("Second: {:?}", second_vec);
+}
+```
+
+**Advanced Debugging Tasks:**
+1. Understand complex borrowing scenarios
+2. Fix closure capture issues
+3. Resolve struct field borrowing conflicts
+4. Handle iterator invalidation problems
+5. Debug lifetime annotation requirements
+</Tab>
+<Tab value="Advanced">
+### Advanced Version
+
+**Expert-Level Challenges:**
+- Fix unsafe code blocks with ownership violations
+- Debug complex lifetime relationships
+- Resolve trait object ownership issues
+- Fix async/await borrowing problems
+- Handle advanced smart pointer scenarios
+</Tab>
+</Tabs>
+
+---
+
+## Testing Your Solutions
+
+<Callout type="info">
+**Verification Strategy**: For each challenge, create tests to verify your implementation:
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_string_analysis() {
+        let text = "Hello world";
+        assert_eq!(count_words(text), 2);
+        assert_eq!(count_characters(text), 11);
+    }
+    
+    #[test]
+    fn test_array_operations() {
+        let data = [1, 2, 3, 4, 5];
+        assert_eq!(find_max(&data), Some(5));
+        assert_eq!(calculate_sum(&data), 15);
+    }
+    
+    #[test]
+    fn test_reference_chain() {
+        let data = vec![1, 2, 3];
+        let result = level_one(&data);
+        // Verify result and that data is still accessible
+        assert_eq!(data.len(), 3);
+    }
+}
+```
+
+Run with: `cargo test`
+</Callout>
+
+---
+
+## Common Ownership Pitfalls
+
+<Callout type="warn">
+**Moving When You Mean to Borrow**
+```rust
+fn process_data(data: Vec<i32>) -> i32 {  // ❌ Takes ownership
+    data.iter().sum()
+}
+
+fn process_data(data: &[i32]) -> i32 {    // ✅ Borrows instead
+    data.iter().sum()
+}
+```
+</Callout>
+
+<Callout type="warn">
+**Mixing Mutable and Immutable Borrows**
+```rust
+let mut vec = vec![1, 2, 3];
+let slice = &vec[..];        // Immutable borrow
+vec.push(4);                 // ❌ Can't mutate while borrowed
+println!("{:?}", slice);
+
+// Fix: Separate the borrows
+let mut vec = vec![1, 2, 3];
+{
+    let slice = &vec[..];    // Immutable borrow in scope
+    println!("{:?}", slice);
+}                           // Borrow ends here
+vec.push(4);                // ✅ Now we can mutate
+```
+</Callout>
+
+<Callout type="warn">
+**Returning References to Local Data**
+```rust
+fn get_string() -> &str {           // ❌ Lifetime error
+    let s = String::from("hello");
+    &s  // s is dropped when function ends
+}
+
+fn get_string() -> String {         // ✅ Return owned data
+    String::from("hello")
+}
+```
+</Callout>
+
+---
+
+## Summary
+
+Excellent work mastering Rust's ownership system! Today you've practiced:
+
+- ✅ **String analysis** without taking ownership
+- ✅ **Array manipulation** using slices efficiently  
+- ✅ **Reference chains** across function boundaries
+- ✅ **Debugging ownership** issues systematically
+
+**Key Skills Developed:**
+- Choosing between borrowing, moving, and cloning
+- Working with string slices and array slices
+- Passing references through function calls
+- Debugging common ownership errors
+- Understanding lifetime requirements
+
+**Tomorrow's Preview:** Day 3 introduces structs and methods - you'll learn to create custom data types and organize functionality, building toward the kinds of structures you'll use constantly in Solana development.
+
+Ready for the next challenge? Continue to [Day 3: Data Structures](/learn/week-2/day-3-data-structures)!
