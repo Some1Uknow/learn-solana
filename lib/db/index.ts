@@ -14,10 +14,7 @@ if (!connectionString) {
 // Create the connection
 const client = postgres(connectionString, {
   max: 1,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
+  ssl: require,
 });
 
 export const db = drizzle(client, { schema });

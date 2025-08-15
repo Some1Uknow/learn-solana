@@ -1,4 +1,5 @@
-import { embed } from "ai";
+import { embed, embedMany } from "ai";
+import { generateChunks } from "../mdx/processor";
 import { openai } from "@ai-sdk/openai";
 import { db } from "../db";
 import { cosineDistance, desc, gt, sql } from "drizzle-orm";
@@ -9,25 +10,25 @@ config({ path: ".env" }); // Load environment variables from .env
 
 const embeddingModel = openai.embedding("text-embedding-ada-002");
 
-// export const generateEmbeddings = async (
-//   value: string
-// ): Promise<Array<{ embedding: number[]; content: string }>> => {
-//   const chunks = generateChunks(value);
+export const generateEmbeddings = async (
+  value: string
+): Promise<Array<{ embedding: number[]; content: string }>> => {
+  const chunks = generateChunks(value);
 
-//   if (chunks.length === 0) {
-//     return [];
-//   }
+  if (chunks.length === 0) {
+    return [];
+  }
 
-//   const { embeddings: embeddingResults } = await embedMany({
-//     model: embeddingModel,
-//     values: chunks,
-//   });
+  const { embeddings: embeddingResults } = await embedMany({
+    model: embeddingModel,
+    values: chunks,
+  });
 
-//   return embeddingResults.map((e, i) => ({
-//     content: chunks[i],
-//     embedding: e,
-//   }));
-// };
+  return embeddingResults.map((e, i) => ({
+    content: chunks[i],
+    embedding: e,
+  }));
+};
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
   if (!value || typeof value !== 'string') {
