@@ -31,7 +31,7 @@ async function ingestDocumentation() {
   
   try {
     const mdxFiles = await processMDXFiles(docsPath);
-    console.log(`Found ${mdxFiles.length} MDX files to process`);
+    console.log(`Found ${mdxFiles.length} MDX sections to process`);
     
     // Clear existing data
     console.log('Clearing existing embeddings and resources...');
@@ -39,37 +39,55 @@ async function ingestDocumentation() {
     await db.delete(resources);
     
     let totalChunks = 0;
+    const processedResources = new Map<string, string>(); // filePath -> resourceId
     
     for (const file of mdxFiles) {
-      console.log(`Processing: ${file.filePath}`);
+      console.log(`Processing: ${file.filePath} - ${file.sectionTitle || 'Main Content'}`);
       
       try {
-        // Create resource record
-        const [resource] = await db
-          .insert(resources)
-          .values({
-            content: file.content,
-            filePath: file.filePath,
-            title: file.title,
-          })
-          .returning();
+        let resourceId: string;
         
-        // Generate embeddings
+        // Check if we already created a resource for this file
+        if (processedResources.has(file.filePath)) {
+          resourceId = processedResources.get(file.filePath)!;
+        } else {
+          // Create resource record for the file
+          const [resource] = await db
+            .insert(resources)
+            .values({
+              content: file.content,
+              filePath: file.filePath,
+              title: file.pageTitle,
+            })
+            .returning();
+          
+          resourceId = resource.id;
+          processedResources.set(file.filePath, resourceId);
+        }
+        
+        // Generate embeddings for this section
         const fileEmbeddings = await generateEmbeddings(file.content);
         
         if (fileEmbeddings.length > 0) {
-          // Store embeddings
+          // Store embeddings with enhanced citation data
           await db.insert(embeddings).values(
-            fileEmbeddings.map(embedding => ({
-              resourceId: resource.id,
-              ...embedding,
+            fileEmbeddings.map((embedding, index) => ({
+              resourceId,
+              content: embedding.content,
+              embedding: embedding.embedding,
+              pageUrl: file.pageUrl,
+              pageTitle: file.pageTitle,
+              sectionTitle: file.sectionTitle || null,
+              headingId: file.headingId || null,
+              chunkIndex: file.chunkIndex || index,
+              headingLevel: file.headingLevel || null,
             }))
           );
           
           totalChunks += fileEmbeddings.length;
-          console.log(`✅ Processed ${file.filePath} with ${fileEmbeddings.length} chunks`);
+          console.log(`✅ Processed ${file.filePath}${file.sectionTitle ? ` (${file.sectionTitle})` : ''} with ${fileEmbeddings.length} chunks`);
         } else {
-          console.log(`⚠️  No chunks generated for ${file.filePath}`);
+          console.log(`⚠️  No chunks generated for ${file.filePath}${file.sectionTitle ? ` (${file.sectionTitle})` : ''}`);
         }
       } catch (error) {
         console.error(`❌ Error processing ${file.filePath}:`, error);
@@ -77,8 +95,10 @@ async function ingestDocumentation() {
     }
     
     console.log(`\n🎉 Documentation ingestion complete!`);
-    console.log(`📊 Total files processed: ${mdxFiles.length}`);
+    console.log(`📊 Total sections processed: ${mdxFiles.length}`);
+    console.log(`📊 Total files processed: ${processedResources.size}`);
     console.log(`📊 Total chunks created: ${totalChunks}`);
+    console.log(`📊 Average chunks per section: ${(totalChunks / mdxFiles.length).toFixed(1)}`);
   } catch (error) {
     console.error('❌ Error during ingestion:', error);
     process.exit(1);

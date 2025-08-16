@@ -61,6 +61,12 @@ export const findRelevantContent = async (userQuery: string) => {
         content: embeddings.content,
         similarity,
         resourceId: embeddings.resourceId,
+        pageUrl: embeddings.pageUrl,
+        pageTitle: embeddings.pageTitle,
+        sectionTitle: embeddings.sectionTitle,
+        headingId: embeddings.headingId,
+        chunkIndex: embeddings.chunkIndex,
+        headingLevel: embeddings.headingLevel,
       })
       .from(embeddings)
       .where(gt(similarity, 0.7)) 

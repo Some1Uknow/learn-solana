@@ -38,3 +38,5 @@ next-env.d.ts
 .source
 
 .open-next
+
+package-lock.json

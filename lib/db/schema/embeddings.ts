@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { index, pgTable, text, varchar, vector } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, varchar, vector } from 'drizzle-orm/pg-core';
 import { resources } from './resources';
 
 export const embeddings = pgTable(
@@ -12,6 +12,14 @@ export const embeddings = pgTable(
     ),
     content: text('content').notNull(),
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+    
+    // Enhanced citation support
+    pageUrl: text('page_url').notNull(), // /learn/week-1
+    pageTitle: text('page_title').notNull(), // "A Beginners Guide to Solana Architecture"
+    sectionTitle: text('section_title'), // "Proof of History: A Clock Before Consensus"
+    headingId: text('heading_id'), // "proof-of-history-a-clock-before-consensus"
+    chunkIndex: integer('chunk_index').notNull().default(0),
+    headingLevel: integer('heading_level').default(1), // 1-6 for h1-h6
   },
   table => ({
     embeddingIndex: index('embeddingIndex').using(

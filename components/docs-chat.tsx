@@ -27,7 +27,7 @@ export default function DocsChat() {
     }),
   });
 
-  const isLoading = status === "streaming";
+  const isLoading = status === "submitted";
 
   const startResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -302,8 +302,8 @@ export default function DocsChat() {
                 >
                   <div
                     className={`chat-message-content break-words text-sm leading-relaxed ${
-                      m.role === "user" 
-                        ? "chat-message-user text-white" 
+                      m.role === "user"
+                        ? "chat-message-user text-white"
                         : "chat-message-bot text-gray-100"
                     } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
                   >
