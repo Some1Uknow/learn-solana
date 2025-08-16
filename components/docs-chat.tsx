@@ -27,7 +27,13 @@ export default function DocsChat() {
     }),
   });
 
-  const isLoading = status === "submitted";
+  // Better loading state: show loader until we have actual content
+  const lastMessage = messages.at(-1);
+  const hasActualContent = lastMessage?.role === "assistant" && 
+    lastMessage?.parts?.some((part: any) => part.type === "text" && part.text?.length > 0);
+  
+  const isLoading = status === "submitted" || 
+    (status === "streaming" && lastMessage?.role === "assistant" && !hasActualContent);
 
   const startResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -264,7 +270,6 @@ export default function DocsChat() {
                     <button
                       key={index}
                       onClick={() => {
-                        setInput(question);
                         sendMessage({ text: question });
                       }}
                       className="text-left p-2 text-xs rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/90 transition-colors break-words"
