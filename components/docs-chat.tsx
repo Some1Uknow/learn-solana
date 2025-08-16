@@ -305,21 +305,34 @@ export default function DocsChat() {
                       : "bg-black/40 border-white/10 text-gray-100 mr-6"
                   }`}
                 >
-                  <div
-                    className={`chat-message-content break-words text-sm leading-relaxed ${
-                      m.role === "user"
-                        ? "chat-message-user text-white"
-                        : "chat-message-bot text-gray-100"
-                    } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
-                  >
-                    {renderMessageContent(m)}
-                  </div>
+                  {/* Show loading state for empty assistant messages */}
+                  {m.role === "assistant" && isLoading && (!m.parts || m.parts.length === 0 || !m.parts.some((part: any) => part.type === "text" && part.text?.length > 0)) ? (
+                    <div className="flex items-center gap-2 text-white/70">
+                      <div className="flex space-x-1 flex-shrink-0">
+                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:100ms]"></div>
+                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:200ms]"></div>
+                      </div>
+                      <span className="text-xs">Thinking...</span>
+                    </div>
+                  ) : (
+                    <div
+                      className={`chat-message-content break-words text-sm leading-relaxed ${
+                        m.role === "user"
+                          ? "chat-message-user text-white"
+                          : "chat-message-bot text-gray-100"
+                      } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
+                    >
+                      {renderMessageContent(m)}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ))}
 
-          {isLoading && (
+          {/* Only show loading if no assistant message exists yet */}
+          {isLoading && (!messages.length || messages[messages.length - 1]?.role !== "assistant") && (
             <div className="flex items-center gap-2 px-1 min-w-0">
               <div className="w-6 h-6 rounded-full bg-black/30 ring-1 ring-cyan-400/30 flex items-center justify-center flex-shrink-0">
                 <Bot size={12} className="text-cyan-300" />
