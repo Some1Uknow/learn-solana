@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Menu, X, Wallet, Github, Star, LogOut, User, Copy, ExternalLink, UserPlus, UserCheck, Shield } from "lucide-react";
 import {
   useWeb3AuthConnect,
@@ -10,7 +10,8 @@ import {
   useWeb3AuthUser,
   useWeb3Auth,
 } from "@web3auth/modal/react";
-import { getSolanaKeypair, getSolanaAddress } from "@/lib/solana-utils";
+import { SolanaWallet } from "@web3auth/solana-provider";
+import { isValidSolanaAddress } from "@/lib/solana-utils";
 
 // Navigation data
 const navigationItems = [
@@ -72,6 +73,13 @@ export function Navbar() {
   const { userInfo } = useWeb3AuthUser();
   const { provider } = useWeb3Auth();
 
+  const solanaWallet = useMemo(() => {
+    if (provider) {
+      return new SolanaWallet(provider);
+    }
+    return null;
+  }, [provider]);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -92,24 +100,17 @@ export function Navbar() {
   const getSolanaAddressFromWeb3Auth = async () => {
     console.log("🚀 Getting Solana address...", { provider: !!provider, isConnected });
     try {
-      if (!provider || !isConnected) return;
+      if (!solanaWallet || !isConnected) return;
 
-      // Get Ed25519 private key from Web3Auth
-      const ed25519PrivKey = await provider.request({
-        method: "solanaPrivateKey",
-      }) as string;
-
-      console.log("✅ Got Ed25519 key length:", ed25519PrivKey?.length);
-
-      if (ed25519PrivKey) {
-        // Generate Solana keypair and address
-        const keypair = getSolanaKeypair(ed25519PrivKey);
-        const address = getSolanaAddress(keypair);
-        console.log("🔑 Generated Solana address:", address);
-        setUserAddress(address);
-      } else {
-        console.error("❌ No Ed25519 private key received");
+      const accounts = await solanaWallet.requestAccounts();
+      if (accounts.length === 0) {
+        console.error("❌ No accounts found");
+        return;
       }
+
+      const address = accounts[0];
+      console.log("🔑 Generated Solana address:", address);
+      setUserAddress(address);
     } catch (error) {
       console.error("❌ Error getting Solana address:", error);
     }
@@ -117,11 +118,11 @@ export function Navbar() {
 
   // Get address when connected
   useEffect(() => {
-    console.log("🔍 Auth Debug:", { isConnected, provider: !!provider, userAddress });
-    if (isConnected && provider && !userAddress) {
+    console.log("🔍 Auth Debug:", { isConnected, solanaWallet: !!solanaWallet, userAddress });
+    if (isConnected && solanaWallet && !userAddress) {
       getSolanaAddressFromWeb3Auth();
     }
-  }, [isConnected, provider, userAddress]);
+  }, [isConnected, solanaWallet, userAddress]);
 
   // Close user menu when clicking outside
   useEffect(() => {

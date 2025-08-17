@@ -6,14 +6,13 @@ import {
   useWeb3AuthUser,
   useWeb3Auth,
 } from "@web3auth/modal/react";
-import { useState } from "react";
-import { IProvider } from "@web3auth/base";
-import { 
-  getSolanaKeypair, 
-  getSolanaAddress, 
-  getSolanaBalance, 
-  sendSOL, 
-  isValidSolanaAddress 
+import { useState, useMemo } from "react";
+import { SolanaWallet } from "@web3auth/solana-provider"; // NEW: Import SolanaWallet
+import {
+  getSolanaBalance,
+  createTransferTransaction, // NEW: Use helper to create tx
+  isValidSolanaAddress,
+  connection, // NEW: Use for sending
 } from "../../lib/solana-utils";
 
 function SolanaApp() {
@@ -39,9 +38,17 @@ function SolanaApp() {
   } = useWeb3AuthDisconnect();
 
   const { userInfo } = useWeb3AuthUser();
-  
+
   const { provider } = useWeb3Auth();
   // IMP END - Web3Auth Hooks
+
+  // NEW: Memoize SolanaWallet instance when provider is available
+  const solanaWallet = useMemo(() => {
+    if (provider) {
+      return new SolanaWallet(provider);
+    }
+    return null;
+  }, [provider]);
 
   function uiConsole(...args: any[]): void {
     const el = document.querySelector("#console>p");
@@ -51,55 +58,44 @@ function SolanaApp() {
     }
   }
 
-  // IMP START - Get Ed25519 Private Key and Solana Address
+  // UPDATED: Get Solana Address using SolanaWallet (no privkey export)
   const getSolanaAddressFromWeb3Auth = async () => {
     try {
-      if (!provider) {
-        uiConsole("Provider not available");
+      if (!solanaWallet) {
+        uiConsole("Solana wallet not available");
         return;
       }
 
       setLoading(true);
-      
-      // Get Ed25519 private key from Web3Auth
-      const ed25519PrivKey = await (provider as IProvider).request({
-        method: "solanaPrivateKey",
-      }) as string;
 
-      if (!ed25519PrivKey) {
-        uiConsole("Could not get Ed25519 private key");
+      const accounts = await solanaWallet.requestAccounts();
+      if (accounts.length === 0) {
+        uiConsole("No accounts found");
         return;
       }
 
-      // Generate Solana keypair and address
-      const keypair = getSolanaKeypair(ed25519PrivKey);
-      const address = getSolanaAddress(keypair);
-      
+      const address = accounts[0];
       setUserAddress(address);
       uiConsole("Solana Address:", address);
-      uiConsole("Ed25519 Private Key:", ed25519PrivKey.substring(0, 10) + "...");
-      
     } catch (error) {
       uiConsole("Error getting Solana address:", error);
     } finally {
       setLoading(false);
     }
   };
-  // IMP END - Get Ed25519 Private Key and Solana Address
 
-  // IMP START - Get Solana Balance
+  // IMP START - Get Solana Balance (unchanged)
   const getSolanaBalanceHandler = async () => {
     try {
       if (!userAddress || !isValidSolanaAddress(userAddress)) {
         uiConsole("Need valid Solana address first");
         return;
       }
-      
+
       setLoading(true);
       const balanceSOL = await getSolanaBalance(userAddress);
       setBalance(balanceSOL);
       uiConsole("Balance:", balanceSOL, "SOL");
-      
     } catch (error) {
       uiConsole("Error getting balance:", error);
     } finally {
@@ -108,11 +104,11 @@ function SolanaApp() {
   };
   // IMP END - Get Solana Balance
 
-  // IMP START - Send SOL Transaction
+  // UPDATED: Send SOL Transaction using SolanaWallet sign (no privkey export)
   const sendSOLHandler = async () => {
     try {
-      if (!recipientAddress || !amount || !provider) {
-        uiConsole("Please fill all fields and ensure provider is available");
+      if (!recipientAddress || !amount || !solanaWallet || !userAddress) {
+        uiConsole("Please fill all fields and ensure wallet is available");
         return;
       }
 
@@ -128,34 +124,39 @@ function SolanaApp() {
       }
 
       setLoading(true);
-      setTxStatus("Getting private key...");
+      setTxStatus("Creating transaction...");
 
-      // Get Ed25519 private key from Web3Auth
-      const ed25519PrivKey = await (provider as IProvider).request({
-        method: "solanaPrivateKey",
-      }) as string;
+      // Create unsigned transaction
+      const transaction = await createTransferTransaction(
+        userAddress,
+        recipientAddress,
+        amountNum
+      );
 
-      if (!ed25519PrivKey) {
-        uiConsole("Could not get private key");
-        return;
-      }
+      setTxStatus("Signing transaction...");
 
-      setTxStatus("Creating and signing transaction...");
-      
-      // Create keypair and send transaction
-      const keypair = getSolanaKeypair(ed25519PrivKey);
-      const signature = await sendSOL(keypair, recipientAddress, amountNum);
-      
+      // Sign with SolanaWallet (secure, no key export)
+      const signedTransaction = await solanaWallet.signTransaction(transaction);
+
+      setTxStatus("Sending transaction...");
+
+      // Send signed transaction
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize()
+      );
+
+      // Confirm transaction
+      await connection.confirmTransaction(signature, "confirmed");
+
       setTxStatus("Transaction completed!");
       uiConsole("Transaction signature:", signature);
-      
+
       // Refresh balance
       await getSolanaBalanceHandler();
-      
+
       // Clear form
       setRecipientAddress("");
       setAmount("");
-      
     } catch (error) {
       uiConsole("Error sending transaction:", error);
       setTxStatus("Transaction failed");
@@ -163,43 +164,48 @@ function SolanaApp() {
       setLoading(false);
     }
   };
-  // IMP END - Send SOL Transaction
 
   const loggedInView = (
     <div className="grid space-y-4">
       <h2 className="text-xl font-bold">Connected to Solana Devnet</h2>
-      
+
       <div className="flex flex-col space-y-2">
         <div className="text-sm">
-          <strong>Address:</strong> {userAddress ? (
+          <strong>Address:</strong>{" "}
+          {userAddress ? (
             <span className="font-mono text-xs break-all">{userAddress}</span>
-          ) : "Not loaded"}
+          ) : (
+            "Not loaded"
+          )}
         </div>
         <div className="text-sm">
-          <strong>Balance:</strong> {balance !== null ? `${balance.toFixed(6)} SOL` : "Not loaded"}
+          <strong>Balance:</strong>{" "}
+          {balance !== null ? `${balance.toFixed(6)} SOL` : "Not loaded"}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button 
-          onClick={() => uiConsole(userInfo)} 
+        <button
+          onClick={() => uiConsole(userInfo)}
           disabled={loading}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
         >
           Get User Info
         </button>
-        
-        <button 
-          onClick={getSolanaAddressFromWeb3Auth} 
+
+        <button
+          onClick={getSolanaAddressFromWeb3Auth}
           disabled={loading}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
         >
           {loading ? "Loading..." : "Get Solana Address"}
         </button>
-        
-        <button 
-          onClick={getSolanaBalanceHandler} 
-          disabled={loading || !userAddress || !isValidSolanaAddress(userAddress)}
+
+        <button
+          onClick={getSolanaBalanceHandler}
+          disabled={
+            loading || !userAddress || !isValidSolanaAddress(userAddress)
+          }
           className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:opacity-50"
         >
           {loading ? "Loading..." : "Get Balance"}
@@ -242,15 +248,17 @@ function SolanaApp() {
 
       {/* IMP START - Logout */}
       <div>
-        <button 
-          onClick={() => disconnect()} 
+        <button
+          onClick={() => disconnect()}
           disabled={disconnectLoading}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
         >
           {disconnectLoading ? "Disconnecting..." : "Log Out"}
         </button>
         {disconnectError && (
-          <div className="text-red-500 text-sm mt-2">{disconnectError.message}</div>
+          <div className="text-red-500 text-sm mt-2">
+            {disconnectError.message}
+          </div>
         )}
       </div>
       {/* IMP END - Logout */}
@@ -264,8 +272,8 @@ function SolanaApp() {
         <p className="text-gray-600 dark:text-gray-400">
           Connect your Web3Auth account to interact with Solana Devnet
         </p>
-        <button 
-          onClick={() => connect()} 
+        <button
+          onClick={() => connect()}
           disabled={connectLoading}
           className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
         >
@@ -273,7 +281,9 @@ function SolanaApp() {
         </button>
       </div>
       {connectError && (
-        <div className="text-red-500 text-sm text-center">{connectError.message}</div>
+        <div className="text-red-500 text-sm text-center">
+          {connectError.message}
+        </div>
       )}
     </div>
     // IMP END - Login
@@ -294,7 +304,7 @@ function SolanaApp() {
         <a
           target="_blank"
           href="https://solana.com/"
-          rel="noopener noreferrer" 
+          rel="noopener noreferrer"
           className="text-purple-500 hover:text-purple-600"
         >
           Solana
@@ -303,8 +313,11 @@ function SolanaApp() {
       </h1>
 
       {isConnected ? loggedInView : unloggedInView}
-      
-      <div id="console" className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded">
+
+      <div
+        id="console"
+        className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded"
+      >
         <h3 className="font-semibold mb-2">Console Output:</h3>
         <p className="whitespace-pre-line text-sm font-mono"></p>
       </div>
