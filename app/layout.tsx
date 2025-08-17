@@ -5,6 +5,11 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
+import { cookieToWeb3AuthState } from "@web3auth/modal";
+import Provider from "../components/web3Auth/authProvider";
+import { headers } from "next/headers";
+import EnvCheck from "@/components/debug/env-check";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -52,11 +57,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const web3authInitialState = cookieToWeb3AuthState(headersList.get("cookie"));
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
@@ -66,7 +74,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <RootProvider>{children}</RootProvider>
+          <Provider web3authInitialState={web3authInitialState}>
+            <RootProvider>{children}</RootProvider>
+            <EnvCheck />
+          </Provider>
 
           <Toaster />
         </ThemeProvider>
