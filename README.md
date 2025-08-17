@@ -120,7 +120,7 @@ npm run start
 ## Preview
 
 <div align="center">
-  <img src="public/opengraph-image.png" alt="Learn SOL Preview" width="600" />
+  <img src="app/opengraph-image.png" alt="Learn SOL Preview" width="600" />
 </div>
 
 ## Adding new content
@@ -157,12 +157,8 @@ Thanks to the community of contributors and early adopters.
 ## Links
 
 - Live demo: https://learnsol.site
-- Twitter: https://x.com/some1uknow25
+- Twitter: https://x.com/learndotsol
 
 ## License
 
 MIT License — see LICENSE file for details.
-
-## Keywords
-
-Solana, Solana development, blockchain, RAG, retrieval-augmented generation, semantic search, MDX, pgvector, Drizzle ORM, OpenAI, GPT-4, Vercel AI SDK, embeddings, developer learning, tutorials
