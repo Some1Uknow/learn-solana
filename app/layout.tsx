@@ -8,7 +8,6 @@ import { RootProvider } from "fumadocs-ui/provider";
 import { cookieToWeb3AuthState } from "@web3auth/modal";
 import Provider from "../components/web3Auth/authProvider";
 import { headers } from "next/headers";
-import EnvCheck from "@/components/debug/env-check";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -76,7 +75,7 @@ export default async function RootLayout({
         >
           <Provider web3authInitialState={web3authInitialState}>
             <RootProvider>{children}</RootProvider>
-            <EnvCheck />
+          
           </Provider>
 
           <Toaster />
