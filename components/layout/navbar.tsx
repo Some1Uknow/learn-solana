@@ -96,7 +96,7 @@ export function Navbar() {
 
       // Get Ed25519 private key from Web3Auth
       const ed25519PrivKey = await provider.request({
-        method: "ed25519PrivKey",
+        method: "solanaPrivateKey",
       }) as string;
 
       console.log("✅ Got Ed25519 key length:", ed25519PrivKey?.length);

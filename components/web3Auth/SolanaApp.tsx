@@ -63,7 +63,7 @@ function SolanaApp() {
       
       // Get Ed25519 private key from Web3Auth
       const ed25519PrivKey = await (provider as IProvider).request({
-        method: "ed25519PrivKey",
+        method: "solanaPrivateKey",
       }) as string;
 
       if (!ed25519PrivKey) {
@@ -132,7 +132,7 @@ function SolanaApp() {
 
       // Get Ed25519 private key from Web3Auth
       const ed25519PrivKey = await (provider as IProvider).request({
-        method: "ed25519PrivKey",
+        method: "solanaPrivateKey",
       }) as string;
 
       if (!ed25519PrivKey) {

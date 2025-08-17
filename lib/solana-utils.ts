@@ -6,12 +6,17 @@ import {
   Keypair,
 } from "@solana/web3.js";
 import bs58 from "bs58";
+import { SolanaWallet } from "@web3auth/solana-provider";
 
-// Solana connection for devnet
-export const connection = new Connection(
-  "https://api.devnet.solana.com",
-  "confirmed"
-);
+const solanaRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+if (!solanaRpcUrl) {
+  throw new Error(
+    "NEXT_PUBLIC_SOLANA_RPC_URL is not defined. Please add it to your .env.local file."
+  );
+}
+
+// Solana connection using the RPC URL from environment variables
+export const connection = new Connection(solanaRpcUrl, "confirmed");
 
 // Helper function to convert hex to bytes
 export function hexToByteArray(hexString: string): number[] {
