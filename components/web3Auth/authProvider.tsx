@@ -28,12 +28,13 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
     ssr: true,
     // IMP END - SSR
     uiConfig: {
+      appName: "learn.sol",
       theme: {
         primary: "#7C4DFF",
       },
       mode: "dark",
-      logoLight: "/solanaLogo.png",
-      logoDark: "/solanaLogo.png",
+      logoLight: "https://learnsol.site/opengraph-image.png",
+      logoDark: "https://learnsol.site/opengraph-image.png",
     },
   },
 };

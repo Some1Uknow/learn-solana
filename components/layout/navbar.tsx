@@ -46,9 +46,9 @@ const authButtonConfig = {
 // GitHub configuration
 const githubConfig = {
   repoName: "learn.sol-main",
-  owner: "your-username", // Replace with actual GitHub username
+  owner: "Some1Uknow",
   fullRepoName: "learn.sol-main",
-  url: "https://github.com/your-username/learn.sol-main", // Replace with actual repo URL
+  url: "https://github.com/Some1Uknow/learn.sol-main",
 };
 
 export function Navbar() {
