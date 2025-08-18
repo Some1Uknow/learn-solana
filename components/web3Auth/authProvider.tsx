@@ -27,6 +27,8 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
     web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     // IMP START - SSR
     ssr: true,
+    // Enable session management for better state persistence
+    sessionTime: 86400 * 7, // 7 days
     // IMP END - SSR
     uiConfig: {
       appName: "learn.sol",
