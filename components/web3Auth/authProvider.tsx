@@ -19,7 +19,8 @@ if (!web3AuthClientId) {
 
 const clientId = web3AuthClientId; // get from https://dashboard.web3auth.io
 
-// IMP START - Solana-specific Config (Simple approach for v10+)
+// IMP START - Simplified Web3Auth Modal Config for v10+
+// Web3Auth Modal v10+ handles blockchain configuration via dashboard
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
@@ -38,7 +39,7 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
     },
   },
 };
-// IMP END - Solana-specific Config
+// IMP END - Simplified Web3Auth Modal Config
 
 // IMP START - SSR
 export default function Provider({

@@ -11,6 +11,7 @@ import {
   useWeb3Auth,
 } from "@web3auth/modal/react";
 import { SolanaWallet } from "@web3auth/solana-provider";
+import { PublicKey } from "@solana/web3.js";
 import { isValidSolanaAddress } from "@/lib/solana-utils";
 
 // Navigation data
@@ -56,6 +57,8 @@ export function Navbar() {
   const [githubStars, setGithubStars] = useState<number | null>(null);
   const [userAddress, setUserAddress] = useState<string>("");
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [addressFetchAttempts, setAddressFetchAttempts] = useState(0);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
 
   // Web3Auth hooks
   const {
@@ -88,47 +91,250 @@ export function Navbar() {
   const handleWalletConnect = async () => {
     if (isConnected) {
       // If connected, disconnect
+      console.log("🔄 Disconnecting...");
       await disconnect();
       setUserAddress("");
+      setIsLoadingAddress(false);
+      setAddressFetchAttempts(0);
+      console.log("✅ Disconnected and cleared user state");
     } else {
       // If not connected, connect
+      console.log("🔄 Connecting...");
+      setIsLoadingAddress(false); // Reset loading state before connecting
+      setAddressFetchAttempts(0); // Reset attempts
       await connect();
     }
   };
 
-  // Get Solana address when connected
+  // Get Solana address when connected - ENHANCED WITH LOADING STATE AND RETRY
   const getSolanaAddressFromWeb3Auth = async () => {
-    console.log("🚀 Getting Solana address...", { provider: !!provider, isConnected });
+    console.log("🚀 Getting Solana address...", { 
+      provider: !!provider, 
+      isConnected, 
+      userInfo: !!userInfo, 
+      attempt: addressFetchAttempts + 1 
+    });
+    
+    setIsLoadingAddress(true);
+    setAddressFetchAttempts(prev => prev + 1);
+    
     try {
-      if (!solanaWallet || !isConnected) return;
-
-      const accounts = await solanaWallet.requestAccounts();
-      if (accounts.length === 0) {
-        console.error("❌ No accounts found");
+      if (!isConnected) {
+        console.log("❌ Not connected to Web3Auth");
         return;
       }
 
-      const address = accounts[0];
-      console.log("🔑 Generated Solana address:", address);
-      setUserAddress(address);
+      if (!userInfo) {
+        console.log("❌ User info not available - please connect first");
+        return;
+      }
+
+      console.log("🔍 Getting Solana address from Web3Auth...");
+
+      // PRIMARY METHOD: Extract from userInfo.wallets (Web3Auth v10+ approach)
+      if (userInfo && typeof userInfo === 'object') {
+        const userInfoObj = userInfo as any;
+        
+        // Log the full userInfo structure to understand it better
+        console.log("📋 Full user info structure:", JSON.stringify(userInfoObj, null, 2));
+
+        // Check for wallets in userInfo
+        if (userInfoObj.wallets && Array.isArray(userInfoObj.wallets)) {
+          console.log("👛 Found wallets in user info:", userInfoObj.wallets);
+          
+          // Look for Solana wallet (ed25519 curve)
+          const solanaWalletInfo = userInfoObj.wallets.find((w: any) => 
+            w.curve === 'ed25519' || w.type === 'web3auth_app_key'
+          );
+          
+          if (solanaWalletInfo && solanaWalletInfo.public_key) {
+            try {
+              console.log("🔑 Found Solana wallet info:", solanaWalletInfo);
+              
+              // Try to create PublicKey from the hex string
+              let publicKeyBytes;
+              if (solanaWalletInfo.public_key.startsWith('0x')) {
+                const hexString = solanaWalletInfo.public_key.slice(2);
+                publicKeyBytes = new Uint8Array(Buffer.from(hexString, 'hex'));
+              } else {
+                publicKeyBytes = new Uint8Array(Buffer.from(solanaWalletInfo.public_key, 'hex'));
+              }
+              
+              const publicKey = new PublicKey(publicKeyBytes);
+              const address = publicKey.toBase58();
+              
+              setUserAddress(address);
+              console.log("✅ SUCCESS: Solana Address derived from user info:", address);
+              setIsLoadingAddress(false);
+              return;
+              
+            } catch (conversionError) {
+              console.error("❌ Failed to convert public key from user info:", conversionError);
+            }
+          }
+        }
+      }
+
+      // If user info method fails, try provider methods
+      if (!provider) {
+        console.log("❌ No provider available");
+        return;
+      }
+
+      try {
+        // Method 1: For Web3Auth Modal v10+, get accounts using the provider
+        const accounts = await provider.request({
+          method: "requestAccounts",
+          params: {},
+        });
+
+        console.log("Provider requestAccounts result:", accounts);
+
+        if (accounts && Array.isArray(accounts) && accounts.length > 0) {
+          const address = accounts[0];
+          setUserAddress(address);
+          setIsLoadingAddress(false);
+          console.log("✅ SUCCESS: Solana Address from provider:", address);
+          return;
+        }
+
+        throw new Error("No accounts returned from provider");
+
+      } catch (requestAccountsError) {
+        console.log("❌ requestAccounts failed:", requestAccountsError);
+
+        // Method 2: Try alternative method for getting accounts
+        try {
+          const publicKey = await provider.request({
+            method: "getAccounts",
+            params: {},
+          });
+
+          console.log("Provider getAccounts result:", publicKey);
+
+          if (publicKey) {
+            let address: string;
+            if (Array.isArray(publicKey) && publicKey.length > 0) {
+              address = publicKey[0];
+            } else if (typeof publicKey === 'string') {
+              address = publicKey;
+            } else {
+              throw new Error("Unexpected public key format");
+            }
+
+            setUserAddress(address);
+            setIsLoadingAddress(false);
+            console.log("✅ SUCCESS: Solana Address from getAccounts:", address);
+            return;
+          }
+
+        } catch (getAccountsError) {
+          console.log("❌ getAccounts failed:", getAccountsError);
+
+          // Method 3: Use SolanaWallet if available
+          if (solanaWallet) {
+            try {
+              console.log("Trying SolanaWallet.requestAccounts...");
+              const walletAccounts = await solanaWallet.requestAccounts();
+              console.log("SolanaWallet accounts result:", walletAccounts);
+
+              if (walletAccounts && walletAccounts.length > 0) {
+                const address = walletAccounts[0];
+                setUserAddress(address);
+                setIsLoadingAddress(false);
+                console.log("✅ SUCCESS: Solana Address from SolanaWallet:", address);
+                return;
+              }
+
+            } catch (walletError) {
+              console.log("❌ SolanaWallet.requestAccounts failed:", walletError);
+            }
+          }
+
+          throw new Error("All methods failed to get Solana address");
+        }
+      }
+
     } catch (error) {
-      console.error("❌ Error getting Solana address:", error);
+      console.error("❌ Final error getting Solana address:", error);
+      console.log("💡 Next steps to try:");
+      console.log("1. Check Web3Auth configuration for Solana in dashboard");
+      console.log("2. Try disconnecting and reconnecting");
+      console.log("3. Check browser console for more details");
+      
+      setIsLoadingAddress(false);
+      
+      // If this was the first few attempts, try again after a short delay
+      if (addressFetchAttempts < 3) {
+        console.log(`🔄 Will retry in 2 seconds (attempt ${addressFetchAttempts + 1}/3)`);
+        setTimeout(() => {
+          if (isConnected && !userAddress) {
+            getSolanaAddressFromWeb3Auth();
+          }
+        }, 2000);
+      } else {
+        console.error("🛑 Maximum retry attempts reached. Address fetch failed.");
+      }
     }
   };
 
-  // Get address when connected
+  // Get address when connected - ENHANCED WITH LOADING STATE AND RETRY
   useEffect(() => {
-    console.log("🔍 Auth Debug:", { isConnected, solanaWallet: !!solanaWallet, userAddress });
-    if (isConnected && solanaWallet && !userAddress) {
-      getSolanaAddressFromWeb3Auth();
+    console.log("🔍 Auth Debug:", { 
+      isConnected, 
+      provider: !!provider, 
+      userInfo: !!userInfo, 
+      userAddress,
+      isLoadingAddress,
+      attempts: addressFetchAttempts
+    });
+    
+    // Reset loading and attempts when connection state changes
+    if (!isConnected) {
+      setIsLoadingAddress(false);
+      setAddressFetchAttempts(0);
+      return;
     }
-  }, [isConnected, solanaWallet, userAddress]);
+    
+    // Only try to fetch address if connected, have provider/userInfo, and don't already have an address
+    if (isConnected && (provider || userInfo) && !userAddress && !isLoadingAddress) {
+      console.log("🔄 Conditions met, fetching address...");
+      getSolanaAddressFromWeb3Auth();
+    } else {
+      console.log("⏹️ Skipping address fetch:", { 
+        isConnected, 
+        hasProviderOrUserInfo: !!(provider || userInfo), 
+        alreadyHasAddress: !!userAddress,
+        isCurrentlyLoading: isLoadingAddress
+      });
+    }
+  }, [isConnected, provider, userInfo]); // CRITICAL FIX: Removed userAddress from dependencies
+
+  // Clear address and loading states when disconnected
+  useEffect(() => {
+    if (!isConnected && (userAddress || isLoadingAddress)) {
+      console.log("🧹 Clearing user state on disconnect");
+      setUserAddress("");
+      setIsLoadingAddress(false);
+      setAddressFetchAttempts(0);
+    }
+  }, [isConnected, userAddress, isLoadingAddress]);
 
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showUserMenu) {
-        setShowUserMenu(false);
+      const target = event.target as HTMLElement;
+      
+      // Check if the click is outside the dropdown and the trigger button
+      if (showUserMenu && target) {
+        // Find the dropdown container and button
+        const dropdown = target.closest('[data-dropdown-menu]');
+        const button = target.closest('[data-dropdown-trigger]');
+        
+        // Only close if clicking outside both the dropdown and trigger button
+        if (!dropdown && !button) {
+          setShowUserMenu(false);
+        }
       }
     };
 
@@ -162,26 +368,40 @@ export function Navbar() {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
 
-  // Copy address to clipboard
+  // Debug function to log current state
+  const debugCurrentState = () => {
+    console.log("=== NAVBAR DEBUG STATE ===");
+    console.log("isConnected:", isConnected);
+    console.log("provider:", !!provider);
+    console.log("userInfo:", userInfo);
+    console.log("userAddress:", userAddress);
+    console.log("isLoadingAddress:", isLoadingAddress);
+    console.log("addressFetchAttempts:", addressFetchAttempts);
+    console.log("solanaWallet:", !!solanaWallet);
+    console.log("connectLoading:", connectLoading);
+    console.log("disconnectLoading:", disconnectLoading);
+    console.log("=========================");
+  };
   const copyAddress = async () => {
+    console.log("🔄 Copy address clicked");
     if (userAddress) {
       try {
         await navigator.clipboard.writeText(userAddress);
+        console.log("✅ Address copied to clipboard:", userAddress);
         // You could add a toast notification here
-        console.log("Address copied to clipboard");
       } catch (error) {
-        console.error("Failed to copy address:", error);
+        console.error("❌ Failed to copy address:", error);
       }
     }
   };
 
   // Open Solana Explorer
   const openExplorer = () => {
+    console.log("🔄 Open explorer clicked");
     if (userAddress) {
-      window.open(
-        `https://explorer.solana.com/address/${userAddress}?cluster=devnet`,
-        "_blank"
-      );
+      const explorerUrl = `https://explorer.solana.com/address/${userAddress}?cluster=devnet`;
+      console.log("🌐 Opening explorer:", explorerUrl);
+      window.open(explorerUrl, "_blank");
     }
   };
 
@@ -203,6 +423,7 @@ export function Navbar() {
   const renderWalletButton = (isMobile = false) => {
     const isLoading = connectLoading || disconnectLoading;
     
+    // If connected and we have a wallet address, show connected state
     if (isConnected && userAddress) {
       // Connected state
       if (isMobile) {
@@ -262,6 +483,7 @@ export function Navbar() {
           <Button
             onClick={() => setShowUserMenu(!showUserMenu)}
             disabled={isLoading}
+            data-dropdown-trigger
             className="relative overflow-hidden bg-green-500 hover:bg-green-600 text-white font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-green-500/25 flex items-center gap-2 h-10 px-4 rounded-full"
           >
             {renderUserAvatar(18)}
@@ -272,7 +494,11 @@ export function Navbar() {
 
           {/* Dropdown menu */}
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-64 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg z-50">
+            <div 
+              data-dropdown-menu
+              onClick={(e) => e.stopPropagation()}
+              className="absolute right-0 mt-2 w-64 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg z-[9999] pointer-events-auto"
+            >
               <div className="p-4 space-y-3">
                 <div className="flex items-center gap-2 pb-2 border-b border-white/10">
                   {renderUserAvatar(16)}
@@ -293,7 +519,10 @@ export function Navbar() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={copyAddress}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        copyAddress();
+                      }}
                       className="h-6 w-6 p-0 hover:bg-white/10"
                     >
                       <Copy size={12} />
@@ -305,7 +534,10 @@ export function Navbar() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={openExplorer}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openExplorer();
+                    }}
                     className="flex-1 h-8 text-xs"
                   >
                     <ExternalLink size={12} className="mr-1" />
@@ -314,7 +546,10 @@ export function Navbar() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={handleWalletConnect}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleWalletConnect();
+                    }}
                     disabled={isLoading}
                     className="flex-1 h-8 text-xs text-red-400 border-red-400/20 hover:bg-red-400/10"
                   >
@@ -328,8 +563,49 @@ export function Navbar() {
         </div>
       );
     }
+    
+    // If connected but no address yet or currently loading, show loading state
+    if (isConnected && (!userAddress || isLoadingAddress)) {
+      const loadingText = addressFetchAttempts > 0 
+        ? `Loading wallet... (${addressFetchAttempts}/3)`
+        : "Loading wallet...";
+        
+      // Show retry button if max attempts reached
+      if (addressFetchAttempts >= 3 && !isLoadingAddress) {
+        return (
+          <Button
+            onClick={() => {
+              console.log("🔄 Manual retry triggered");
+              setAddressFetchAttempts(0);
+              getSolanaAddressFromWeb3Auth();
+            }}
+            className={`relative overflow-hidden bg-orange-500 hover:bg-orange-600 text-white font-semibold flex items-center gap-2 h-10 px-6 rounded-full ${
+              isMobile ? "w-full justify-center" : ""
+            }`}
+          >
+            <span className="relative z-10">
+              Retry ({addressFetchAttempts}/3)
+            </span>
+          </Button>
+        );
+      }
+        
+      return (
+        <Button
+          disabled={true}
+          className={`relative overflow-hidden bg-yellow-500 text-black font-semibold flex items-center gap-2 h-10 px-6 rounded-full opacity-75 ${
+            isMobile ? "w-full justify-center" : ""
+          }`}
+        >
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+          <span className="relative z-10">
+            {loadingText}
+          </span>
+        </Button>
+      );
+    }
 
-    // Disconnected state
+    // Disconnected state (not connected)
     return (
       <Button
         onClick={handleWalletConnect}

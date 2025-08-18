@@ -4,6 +4,23 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Provide polyfills for browser environment
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        buffer: require.resolve('buffer'),
+      };
+      
+      // Add Buffer as a global for browser
+      config.plugins.push(
+        new config.webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+        })
+      );
+    }
+    return config;
+  },
   async rewrites() {
     return [
       {

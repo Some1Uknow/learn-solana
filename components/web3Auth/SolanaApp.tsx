@@ -7,13 +7,14 @@ import {
   useWeb3Auth,
 } from "@web3auth/modal/react";
 import { useState, useMemo } from "react";
-import { SolanaWallet } from "@web3auth/solana-provider"; // NEW: Import SolanaWallet
+import { SolanaWallet } from "@web3auth/solana-provider";
 import {
   getSolanaBalance,
-  createTransferTransaction, // NEW: Use helper to create tx
+  createTransferTransaction,
   isValidSolanaAddress,
-  connection, // NEW: Use for sending
+  connection,
 } from "../../lib/solana-utils";
+import { PublicKey } from "@solana/web3.js";
 
 function SolanaApp() {
   const [balance, setBalance] = useState<number | null>(null);
@@ -58,27 +59,145 @@ function SolanaApp() {
     }
   }
 
-  // UPDATED: Get Solana Address using SolanaWallet (no privkey export)
+  // Get Solana Address from Web3Auth Provider
   const getSolanaAddressFromWeb3Auth = async () => {
     try {
-      if (!solanaWallet) {
-        uiConsole("Solana wallet not available");
+      if (!provider) {
+        uiConsole("Provider not available - please connect first");
+        return;
+      }
+
+      if (!userInfo) {
+        uiConsole("User info not available - please connect first");
         return;
       }
 
       setLoading(true);
+      uiConsole("Getting Solana address from Web3Auth...");
 
-      const accounts = await solanaWallet.requestAccounts();
-      if (accounts.length === 0) {
-        uiConsole("No accounts found");
-        return;
+      // First, let's extract the public key from userInfo
+      if (userInfo && typeof userInfo === 'object') {
+        const userInfoObj = userInfo as any;
+        
+        // Log the full userInfo structure to understand it better
+        uiConsole("Full user info structure:", JSON.stringify(userInfoObj, null, 2));
+
+        // Check for wallets in userInfo
+        if (userInfoObj.wallets && Array.isArray(userInfoObj.wallets)) {
+          uiConsole("Found wallets in user info:", userInfoObj.wallets);
+          
+          // Look for Solana wallet (ed25519 curve)
+          const solanaWalletInfo = userInfoObj.wallets.find((w: any) => 
+            w.curve === 'ed25519' || w.type === 'web3auth_app_key'
+          );
+          
+          if (solanaWalletInfo && solanaWalletInfo.public_key) {
+            try {
+              uiConsole("Found Solana wallet info:", solanaWalletInfo);
+              
+              // Try to create PublicKey from the hex string
+              let publicKeyBytes;
+              if (solanaWalletInfo.public_key.startsWith('0x')) {
+                // Remove 0x prefix and convert hex to bytes
+                const hexString = solanaWalletInfo.public_key.slice(2);
+                publicKeyBytes = new Uint8Array(Buffer.from(hexString, 'hex'));
+              } else {
+                // Try direct hex conversion
+                publicKeyBytes = new Uint8Array(Buffer.from(solanaWalletInfo.public_key, 'hex'));
+              }
+              
+              const publicKey = new PublicKey(publicKeyBytes);
+              const address = publicKey.toBase58();
+              
+              setUserAddress(address);
+              uiConsole("✅ Solana Address derived from user info:", address);
+              return;
+              
+            } catch (conversionError) {
+              uiConsole("❌ Failed to convert public key from user info:", conversionError);
+            }
+          }
+        }
       }
 
-      const address = accounts[0];
-      setUserAddress(address);
-      uiConsole("Solana Address:", address);
+      // If user info method fails, try provider methods
+      try {
+        // Method 1: For Web3Auth Modal v10+, get accounts using the provider
+        const accounts = await provider.request({
+          method: "requestAccounts",
+          params: {},
+        });
+
+        uiConsole("Provider requestAccounts result:", accounts);
+
+        if (accounts && Array.isArray(accounts) && accounts.length > 0) {
+          const address = accounts[0];
+          setUserAddress(address);
+          uiConsole("✅ Solana Address from provider:", address);
+          return;
+        }
+
+        throw new Error("No accounts returned from provider");
+
+      } catch (requestAccountsError) {
+        uiConsole("❌ requestAccounts failed:", requestAccountsError);
+
+        // Method 2: Try alternative method for getting accounts
+        try {
+          const publicKey = await provider.request({
+            method: "getAccounts",
+            params: {},
+          });
+
+          uiConsole("Provider getAccounts result:", publicKey);
+
+          if (publicKey) {
+            let address: string;
+            if (Array.isArray(publicKey) && publicKey.length > 0) {
+              address = publicKey[0];
+            } else if (typeof publicKey === 'string') {
+              address = publicKey;
+            } else {
+              throw new Error("Unexpected public key format");
+            }
+
+            setUserAddress(address);
+            uiConsole("✅ Solana Address from getAccounts:", address);
+            return;
+          }
+
+        } catch (getAccountsError) {
+          uiConsole("❌ getAccounts failed:", getAccountsError);
+
+          // Method 3: Use SolanaWallet if available
+          if (solanaWallet) {
+            try {
+              uiConsole("Trying SolanaWallet.requestAccounts...");
+              const walletAccounts = await solanaWallet.requestAccounts();
+              uiConsole("SolanaWallet accounts result:", walletAccounts);
+
+              if (walletAccounts && walletAccounts.length > 0) {
+                const address = walletAccounts[0];
+                setUserAddress(address);
+                uiConsole("✅ Solana Address from SolanaWallet:", address);
+                return;
+              }
+
+            } catch (walletError) {
+              uiConsole("❌ SolanaWallet.requestAccounts failed:", walletError);
+            }
+          }
+
+          throw new Error("All methods failed to get Solana address");
+        }
+      }
+
     } catch (error) {
-      uiConsole("Error getting Solana address:", error);
+      uiConsole("❌ Final error getting Solana address:", error);
+      uiConsole("💡 Next steps to try:");
+      uiConsole("1. Check the 'Debug Info' button to see what data is available");
+      uiConsole("2. Ensure Web3Auth is configured for Solana in dashboard");
+      uiConsole("3. Try disconnecting and reconnecting");
     } finally {
       setLoading(false);
     }
@@ -191,6 +310,24 @@ function SolanaApp() {
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
         >
           Get User Info
+        </button>
+
+        <button
+          onClick={() => {
+            uiConsole("=== DEBUG INFO ===");
+            uiConsole("Provider available:", !!provider);
+            uiConsole("SolanaWallet available:", !!solanaWallet);
+            uiConsole("Connected:", isConnected);
+            uiConsole("User Info:", userInfo);
+            uiConsole("Provider methods:", provider ? Object.getOwnPropertyNames(provider) : "No provider");
+            if (provider) {
+              uiConsole("Provider request method:", typeof provider.request);
+            }
+          }}
+          disabled={loading}
+          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
+        >
+          Debug Info
         </button>
 
         <button
