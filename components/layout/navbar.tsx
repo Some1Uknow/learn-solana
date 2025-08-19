@@ -57,9 +57,8 @@ export function Navbar() {
   const [userAddress, setUserAddress] = useState<string>("");
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
-  // WORKAROUND for Web3Auth SSR bug: Store recovered userInfo
-  const [recoveredUserInfo, setRecoveredUserInfo] = useState<any>(null);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  const [recoveredUserInfo, setRecoveredUserInfo] = useState<any>(null);
 
   // Web3Auth hooks
   const {
@@ -86,7 +85,15 @@ export function Navbar() {
   // Handle client-side hydration
   useEffect(() => {
     setIsHydrated(true);
-  }, []);
+    
+    // Debug userInfo
+    console.log("🔍 [Hydration Debug]", {
+      isConnected,
+      userInfo,
+      userInfoType: typeof userInfo,
+      userInfoKeys: userInfo ? Object.keys(userInfo) : null
+    });
+  }, [isConnected, userInfo]);
 
   // Manual userInfo recovery for SSR bug
   useEffect(() => {
@@ -94,9 +101,10 @@ export function Navbar() {
       const recoverUserInfo = async () => {
         try {
           const manualUserInfo = await web3Auth.getUserInfo();
+          console.log("✅ [Recovery] Recovered userInfo:", manualUserInfo);
           setRecoveredUserInfo(manualUserInfo);
           
-          if (manualUserInfo && !userAddress && !isLoadingAddress) {
+          if (!userAddress && !isLoadingAddress) {
             getSolanaAddressFromWeb3Auth();
           }
         } catch (error) {
@@ -125,106 +133,48 @@ export function Navbar() {
     try {
       setIsLoadingAddress(true);
 
-      // Manual state recovery for SSR hydration issues
-      let currentUserInfo = userInfo || recoveredUserInfo;
+      // Get the current provider - try hooks first, then manual recovery
       let currentProvider = provider;
-      
-      // If hooks return null after hydration, try manual recovery
-      if (!currentUserInfo && web3Auth && isConnected) {
-        try {
-          currentUserInfo = await web3Auth.getUserInfo();
-          setRecoveredUserInfo(currentUserInfo);
-        } catch (error) {
-          // Silent fail
-        }
-      }
       
       if (!currentProvider && web3Auth && isConnected) {
         try {
           currentProvider = web3Auth.provider;
         } catch (error) {
-          // Silent fail
+          console.error("Failed to recover provider:", error);
         }
       }
 
       if (!currentProvider) {
-        setIsLoadingAddress(false);
+        console.error("No provider available for address extraction");
         return;
       }
 
-      // First, try to extract the public key from userInfo (if available)
-      if (currentUserInfo && typeof currentUserInfo === "object") {
-        const userInfoObj = currentUserInfo as any;
+      // Use getAccounts method (this is the only reliable method)
+      const accounts = await currentProvider.request({
+        method: "getAccounts",
+        params: {},
+      });
 
-        if (userInfoObj.wallets && Array.isArray(userInfoObj.wallets)) {
-          const solanaWalletInfo = userInfoObj.wallets.find(
-            (w: any) => w.curve === "ed25519" || w.type === "web3auth_app_key"
-          );
-
-          if (solanaWalletInfo && solanaWalletInfo.public_key) {
-            try {
-              let publicKeyBytes;
-              if (solanaWalletInfo.public_key.startsWith("0x")) {
-                const hexString = solanaWalletInfo.public_key.slice(2);
-                publicKeyBytes = new Uint8Array(Buffer.from(hexString, "hex"));
-              } else {
-                publicKeyBytes = new Uint8Array(
-                  Buffer.from(solanaWalletInfo.public_key, "hex")
-                );
-              }
-
-              const publicKey = new PublicKey(publicKeyBytes);
-              const address = publicKey.toBase58();
-
-              setUserAddress(address);
-              setIsLoadingAddress(false);
-              return;
-            } catch (conversionError) {
-              // Continue to next method
-            }
-          }
+      if (accounts) {
+        let address: string;
+        
+        // Handle both array and string responses
+        if (Array.isArray(accounts) && accounts.length > 0) {
+          address = accounts[0];
+        } else if (typeof accounts === "string") {
+          address = accounts;
+        } else {
+          throw new Error("Invalid response format from getAccounts");
         }
+
+        setUserAddress(address);
+        return;
       }
-
-      // Try getAccounts method
-      try {
-        const publicKey = await currentProvider.request({
-          method: "getAccounts",
-          params: {},
-        });
-
-        if (publicKey) {
-          let address: string;
-          if (Array.isArray(publicKey) && publicKey.length > 0) {
-            address = publicKey[0];
-          } else if (typeof publicKey === "string") {
-            address = publicKey;
-          } else {
-            throw new Error("Unexpected public key format");
-          }
-
-          setUserAddress(address);
-          setIsLoadingAddress(false);
-          return;
-        }
-      } catch (getAccountsError) {
-        // Try SolanaWallet method
-        if (solanaWallet) {
-          try {
-            const walletAccounts = await solanaWallet.requestAccounts();
-            if (walletAccounts && walletAccounts.length > 0) {
-              const address = walletAccounts[0];
-              setUserAddress(address);
-              setIsLoadingAddress(false);
-              return;
-            }
-          } catch (walletError) {
-            // Silent fail
-          }
-        }
-      }
+      
+      throw new Error("getAccounts returned no accounts");
+      
     } catch (error) {
-      // Silent fail - will retry automatically
+      console.error("Failed to get Solana address:", error);
     } finally {
       setIsLoadingAddress(false);
     }
@@ -241,9 +191,9 @@ export function Navbar() {
     }
     
     if (isConnected && !userAddress && !isLoadingAddress) {
-      const hasProviderOrUserInfo = !!(provider || userInfo || recoveredUserInfo);
+      const hasProvider = !!(provider);
       
-      if (hasProviderOrUserInfo) {
+      if (hasProvider) {
         getSolanaAddressFromWeb3Auth();
       } else {
         const retryTimer = setTimeout(() => {
@@ -333,7 +283,9 @@ export function Navbar() {
 
   // Render user avatar or icon
   const renderUserAvatar = (size = 18) => {
-    const currentUserInfo = recoveredUserInfo || userInfo;
+    const currentUserInfo = userInfo || recoveredUserInfo;
+    console.log("🎨 [Avatar Debug]", { userInfo, recoveredUserInfo, currentUserInfo });
+    
     if (currentUserInfo?.profileImage) {
       return (
         <img
@@ -349,7 +301,7 @@ export function Navbar() {
   // Render auth button based on connection status
   const renderWalletButton = (isMobile = false) => {
     const isLoading = connectLoading || disconnectLoading;
-    const currentUserInfo = recoveredUserInfo || userInfo;
+    const currentUserInfo = userInfo || recoveredUserInfo;
     
     // Show loading state until hydrated or while loading address
     if (!isHydrated || (isConnected && !userAddress) || isLoadingAddress) {
