@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useMemo } from "react";
 import { LogOut, Copy, ExternalLink, UserPlus, UserCheck } from "lucide-react";
 import {
@@ -31,7 +39,6 @@ interface NavbarWalletButtonProps {
 
 export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps) {
   const [userAddress, setUserAddress] = useState<string>("");
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [recoveredUserInfo, setRecoveredUserInfo] = useState<any>(null);
@@ -168,30 +175,6 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   };
 
-  // Close user menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      
-      // Check if the click is outside the dropdown and the trigger button
-      if (showUserMenu && target) {
-        // Find the dropdown container and button
-        const dropdown = target.closest('[data-dropdown-menu]');
-        const button = target.closest('[data-dropdown-trigger]');
-        
-        // Only close if clicking outside both the dropdown and trigger button
-        if (!dropdown && !button) {
-          setShowUserMenu(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUserMenu]);
-
   // Helper function to truncate address
   const truncateAddress = (address: string) => {
     if (!address) return "";
@@ -306,92 +289,68 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
         );
       }
 
-      // Desktop connected state with dropdown
+      // Desktop connected state with shadcn dropdown
       return (
-        <div className="relative">
-          <Button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            disabled={isLoading}
-            data-dropdown-trigger
-            className="relative overflow-hidden bg-green-500 hover:bg-green-600 text-white font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-green-500/25 flex items-center gap-2 h-10 px-4 rounded-full"
-          >
-            {renderUserAvatar(18)}
-            <span className="relative z-10">
-              {truncateAddress(userAddress)}
-            </span>
-          </Button>
-
-          {/* Dropdown menu */}
-          {showUserMenu && (
-            <div 
-              data-dropdown-menu
-              onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 mt-2 w-64 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg z-[9999] pointer-events-auto"
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={isLoading}
+              className="relative overflow-hidden bg-green-500 hover:bg-green-600 text-white font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-green-500/25 flex items-center gap-2 h-10 px-4 rounded-full"
             >
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-                  {renderUserAvatar(16)}
-                  <div>
-                    <div className="text-sm font-medium">
-                      {currentUserInfo?.email || currentUserInfo?.name || "Anonymous User"}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Connected via Web3Auth
-                    </div>
-                  </div>
+              {renderUserAvatar(18)}
+              <span className="relative z-10">
+                {truncateAddress(userAddress)}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64 bg-black/90 backdrop-blur-md border border-white/10" align="end">
+            <DropdownMenuLabel className="flex items-center gap-2 pb-2">
+              {renderUserAvatar(16)}
+              <div>
+                <div className="text-sm font-medium">
+                  {currentUserInfo?.email || currentUserInfo?.name || "Anonymous User"}
                 </div>
-                
-                <div>
-                  <div className="text-xs text-gray-400 mb-1">Solana Address</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded flex-1">
-                      {userAddress}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        copyAddress();
-                      }}
-                      className="h-6 w-6 p-0 hover:bg-white/10"
-                    >
-                      <Copy size={12} />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openExplorer();
-                    }}
-                    className="flex-1 h-8 text-xs"
-                  >
-                    <ExternalLink size={12} className="mr-1" />
-                    Explorer
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleWalletConnect();
-                    }}
-                    disabled={isLoading}
-                    className="flex-1 h-8 text-xs text-red-400 border-red-400/20 hover:bg-red-400/10"
-                  >
-                    <authButtonConfig.logout.icon size={12} className="mr-1" />
-                    {isLoading ? "..." : authButtonConfig.logout.text}
-                  </Button>
+                <div className="text-xs text-gray-400">
+                  Connected via Web3Auth
                 </div>
               </div>
+            </DropdownMenuLabel>
+            
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuLabel className="text-xs text-gray-400 py-1">
+              Solana Address
+            </DropdownMenuLabel>
+            
+            <div className="px-2 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded flex-1 truncate">
+                  {userAddress}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={copyAddress}
+                  className="h-6 w-6 p-0 hover:bg-white/10"
+                >
+                  <Copy size={12} />
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem onClick={openExplorer} className="cursor-pointer">
+              <ExternalLink size={16} />
+              <span>View on Explorer</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={handleWalletConnect} disabled={isLoading} className="cursor-pointer text-red-400 focus:text-red-400">
+              <authButtonConfig.logout.icon size={16} />
+              <span>{isLoading ? "Logging out..." : authButtonConfig.logout.text}</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     }
     
