@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
 import { cookieToWeb3AuthState } from "@web3auth/modal";
 import Provider from "../components/web3Auth/authProvider";
+import { RouteGuard } from "@/components/route-guard";
 import { headers } from "next/headers";
 
 const inter = Inter({
@@ -74,8 +75,9 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Provider web3authInitialState={web3authInitialState}>
-            <RootProvider>{children}</RootProvider>
-          
+            <RouteGuard>
+              <RootProvider>{children}</RootProvider>
+            </RouteGuard>
           </Provider>
 
           <Toaster />

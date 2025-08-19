@@ -77,6 +77,7 @@
     "hast-util-to-jsx-runtime": "^2.3.6",
     "highlight.js": "^11.11.1",
     "input-otp": "1.4.1",
+    "jose": "^6.0.12",
     "lucide-react": "^0.454.0",
     "mermaid": "^11.9.0",
     "motion": "^12.18.1",

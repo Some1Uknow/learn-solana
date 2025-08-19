@@ -1,32 +1,16 @@
+"use client";
+
 import React from "react";
 import ModulesGrid from "@/components/learn/modules-grid";
 import { contentsData } from '../../data/contents-data';
-// Types for the data
-interface Topic {
-  id: string;
-  title: string;
-  description: string;
-  type: string;
-}
-
-interface ModuleItem {
-  id: string;
-  title: string;
-  description: string;
-  goal: string;
-  image?: string;
-  icon?: string;
-  topics: Topic[];
-}
-
-interface ContentsData {
-  modules: ModuleItem[];
-}
+import { useWeb3AuthUser } from "@web3auth/modal/react";
 
 // Use contentsData directly in your component logic
 const modules = contentsData.modules;
 
-export default async function ModulesPage() {
+export default function ModulesPage() {
+  const { userInfo } = useWeb3AuthUser();
+
   return (
     <div className="min-h-screen w-full relative bg-black">
       {/* Prismatic Aurora Burst - Multi-layered Gradient */}
@@ -42,24 +26,41 @@ export default async function ModulesPage() {
           `,
         }}
       />
+      
       {/* Content */}
-      <main className="relative z-10 min-h-screen text-zinc-200">
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-          <header className="mb-8 sm:mb-10">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Solana Learning Path
-            </h1>
-            <p className="mt-2 max-w-2xl text-zinc-400">
-              Explore the 5-week curriculum from fundamentals to a
-              portfolio-ready capstone.
-            </p>
-          </header>
-          {/* Grid */}
+      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen p-8">
+        <div className="text-center space-y-6 mb-8">
+          <div className="text-6xl mb-4">📚</div>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Solana Learning Modules
+          </h1>
+          <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
+            Master Solana development with our structured 5-week curriculum. From blockchain basics to advanced dApp development.
+          </p>
+          
+          {userInfo && (
+            <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-500/30 rounded-lg p-4 max-w-md mx-auto">
+              <p className="text-green-200 text-sm">
+                Welcome back, {userInfo?.name || 'Developer'}! Continue your learning journey.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Modules Grid */}
+        <div className="w-full max-w-7xl">
           <ModulesGrid modules={modules} />
-        </section>
-      </main>
+        </div>
+
+        <div className="mt-12 text-center">
+          <button 
+            onClick={() => window.location.href = "/"}
+            className="px-6 py-2 border border-zinc-600 text-zinc-300 rounded-lg hover:border-zinc-500 hover:text-white"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
-
-// Defer client logic to a separate component file for cleanliness
