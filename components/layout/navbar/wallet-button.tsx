@@ -175,7 +175,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
           <div className="px-2 py-1">
             <div className="text-xs text-gray-400 mb-1">Address</div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded flex-1 truncate">
+              <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded flex-1 truncate text-gray-200">
                 {userAddress}
               </span>
               <Button size="sm" variant="ghost" onClick={copyAddress} className="h-6 w-6 p-0">
