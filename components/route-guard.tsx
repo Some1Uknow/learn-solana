@@ -1,56 +1,60 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useWeb3Auth } from '@/hooks/use-web3-auth';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useWeb3Auth } from "@/hooks/use-web3-auth";
+import { Button } from "@/components/ui/button";
+import { Wallet } from "lucide-react";
 
 const PROTECTED_ROUTES = [
-  '/games',
-  '/jobs', 
-  '/modules',
-  '/projects',
-  '/test-auth',
-  '/dashboard',
-  '/admin'
+  "/games",
+  "/jobs",
+  "/modules",
+  "/projects",
+  "/test-auth",
+  "/dashboard",
+  "/admin",
 ];
 
 const ROUTE_CONFIGS = {
-  '/games': {
+  "/games": {
     title: "🎮 Games Hub",
-    description: "Access interactive Solana games and challenges to test your skills.",
-    icon: "🎮"
+    description:
+      "Access interactive Solana games and challenges to test your skills.",
+    icon: "🎮",
   },
-  '/jobs': {
+  "/jobs": {
     title: "💼 Job Board",
-    description: "Explore exclusive Solana development opportunities and career paths.",
-    icon: "💼"
+    description:
+      "Explore exclusive Solana development opportunities and career paths.",
+    icon: "💼",
   },
-  '/modules': {
+  "/modules": {
     title: "🎓 Learning Modules",
-    description: "Access our comprehensive 5-week Solana development curriculum.",
-    icon: "🎓"
+    description:
+      "Access our comprehensive 5-week Solana development curriculum.",
+    icon: "🎓",
   },
-  '/projects': {
+  "/projects": {
     title: "🚀 Project Gallery",
     description: "Explore and contribute to innovative Solana projects.",
-    icon: "🚀"
+    icon: "🚀",
   },
-  '/test-auth': {
+  "/test-auth": {
     title: "🔐 Authentication Test",
     description: "This is a testing page that requires authentication.",
-    icon: "🔐"
+    icon: "🔐",
   },
-  '/dashboard': {
+  "/dashboard": {
     title: "📊 Your Dashboard",
     description: "View your personal dashboard with progress and stats.",
-    icon: "📊"
+    icon: "📊",
   },
-  '/admin': {
+  "/admin": {
     title: "⚙️ Admin Panel",
     description: "Administrative access for authorized users only.",
-    icon: "⚙️"
-  }
+    icon: "⚙️",
+  },
 };
 
 interface RouteGuardProps {
@@ -63,14 +67,14 @@ export function RouteGuard({ children }: RouteGuardProps) {
   const { isLoggedIn, isLoading, login } = useWeb3Auth();
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+  const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route)
   );
 
   const routeConfig = ROUTE_CONFIGS[pathname as keyof typeof ROUTE_CONFIGS] || {
     title: "🔒 Protected Area",
     description: "This page requires authentication to access.",
-    icon: "🔒"
+    icon: "🔒",
   };
 
   const handleLogin = async () => {
@@ -86,16 +90,22 @@ export function RouteGuard({ children }: RouteGuardProps) {
   };
 
   const handleGoBack = () => {
-    router.push('/');
+    router.push("/");
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto"></div>
-          <p className="text-white mt-4">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        {/* Dark background matching main page */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)]" />
+        
+        <div className="relative z-10 bg-gray-900/40 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-600 border-t-cyan-400"></div>
+            <span className="text-gray-100 text-sm font-medium">Loading...</span>
+          </div>
         </div>
       </div>
     );
@@ -106,98 +116,50 @@ export function RouteGuard({ children }: RouteGuardProps) {
     return <>{children}</>;
   }
 
-  // Show blocker screen for protected routes when user is not logged in
+  // Show the actual page content blurred in background with auth modal overlay
   return (
-    <div className="min-h-screen w-full bg-black relative overflow-hidden">
-      {/* Background Effects */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: `
-            radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.15), transparent 50%),
-            radial-gradient(ellipse 100% 60% at 30% 10%, rgba(0, 255, 255, 0.12), transparent 60%),
-            radial-gradient(ellipse 90% 70% at 50% 0%, rgba(138, 43, 226, 0.18), transparent 65%),
-            radial-gradient(ellipse 110% 50% at 80% 30%, rgba(255, 215, 0, 0.08), transparent 40%),
-            #000000
-          `,
-        }}
-      />
-      
-      {/* Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-8">
-        <div className="text-center max-w-2xl mx-auto">
-          {/* Icon */}
-          <div className="text-8xl mb-8 animate-pulse">
-            {routeConfig.icon}
-          </div>
-          
-          {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            {routeConfig.title}
-          </h1>
-          
-          {/* Description */}
-          <p className="text-xl text-zinc-300 mb-8 leading-relaxed">
-            {routeConfig.description}
-          </p>
-          
-          {/* Features Box */}
-          <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-8 mb-8 backdrop-blur-sm">
-            <h3 className="text-xl font-semibold text-white mb-4">✨ What you'll get:</h3>
-            <div className="grid md:grid-cols-2 gap-4 text-left">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <span className="text-zinc-300">Secure wallet-based access</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <span className="text-zinc-300">Personalized experience</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-zinc-300">Progress tracking</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                <span className="text-zinc-300">Community features</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="space-y-4">
+    <div className="min-h-screen w-full relative overflow-hidden">
+      {/* Blurred background content */}
+      <div className="absolute inset-0 blur-sm opacity-60 pointer-events-none overflow-hidden">
+        {children}
+      </div>
+
+      {/* Very light dark themed overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 via-slate-900/15 to-gray-900/20" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(6,182,212,0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.05),transparent_50%)]" />
+
+      {/* Centered content (no modal) */}
+      <div className="relative z-50 min-h-screen p-6 flex items-center justify-center text-center">
+        <div className="space-y-6">
+          <h1 className="text-3xl font-semibold text-white/95 drop-shadow-sm">Welcome back!</h1>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
               onClick={handleLogin}
               disabled={isConnecting}
-              size="lg"
-              className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
+              className="h-12 px-6 bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-300 hover:to-emerald-400 text-gray-900 font-medium rounded-xl border border-white/10 shadow-lg transition-all duration-200 hover:shadow-teal-400/25 hover:scale-[1.02] disabled:hover:scale-100 flex items-center gap-2"
             >
               {isConnecting ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-900/30 border-t-gray-900"></div>
                   Connecting...
-                </>
+                </div>
               ) : (
-                '🔐 Connect Wallet & Access'
+                <>
+                  <Wallet className="w-5 h-5" />
+                  Sign Up / Login
+                </>
               )}
             </Button>
-            
-            <div className="text-center">
-              <Button
-                onClick={handleGoBack}
-                variant="outline"
-                size="lg"
-                className="px-8 py-3 border-zinc-600 text-zinc-300 hover:border-zinc-500 hover:text-white bg-transparent rounded-xl"
-              >
-                ← Back to Home
-              </Button>
-            </div>
+            <Button
+              onClick={handleGoBack}
+              variant="ghost"
+              className="h-12 px-6 text-white/80 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
+            >
+              Cancel
+            </Button>
           </div>
-          
-          {/* Info Text */}
-          <p className="text-sm text-zinc-500 mt-6">
-            New to Web3? No worries! We support Google, Facebook, Discord, and more.
-          </p>
+          <p className="text-white/50 text-xs">New to Web3? We support multiple wallet providers</p>
         </div>
       </div>
     </div>
