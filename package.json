@@ -15,7 +15,10 @@
     "ingest-docs": "tsx scripts/ingest-docs.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "find:unused": "next-unused",
+    "knip": "knip",
+    "knip:production": "knip --production"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.14",
@@ -114,6 +117,8 @@
     "@types/node": "^22",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "knip": "^5.63.0",
+    "next-unused": "^0.0.6",
     "postcss": "^8",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.20.3",

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/**/{page,layout,loading,not-found,error,global-error,route,default}.{js,jsx,ts,tsx}",
+    "app/**/opengraph-image.{js,jsx,ts,tsx}",
+    "app/**/twitter-image.{js,jsx,ts,tsx}",
+    "app/**/icon.{js,jsx,ts,tsx}",
+    "app/**/apple-icon.{js,jsx,ts,tsx}",
+    "next.config.{js,mjs,ts}",
+    "middleware.{js,ts}",
+    "instrumentation.{js,ts}",
+    "mdx-components.{js,jsx,ts,tsx}",
+    "app/globals.css"
+  ],
+  "project": [
+    "**/*.{js,jsx,ts,tsx,mdx}",
+    "!node_modules/**",
+    "!.next/**",
+    "!drizzle/**"
+  ],
+  "ignore": [
+    "scripts/**",
+    "**/*.d.ts",
+    "next-env.d.ts",
+    "drizzle.config.ts"
+  ],
+  "ignoreDependencies": [
+    "@types/*",
+    "typescript",
+    "eslint*",
+    "prettier*",
+    "tailwindcss",
+    "autoprefixer",
+    "postcss"
+  ],
+  "next": {
+    "entry": [
+      "app/**/{page,layout,loading,not-found,error,global-error,route,default}.{js,jsx,ts,tsx}",
+      "pages/**/*.{js,jsx,ts,tsx}",
+      "middleware.{js,ts}",
+      "next.config.{js,mjs,ts}",
+      "instrumentation.{js,ts}"
+    ]
+  }
+}
