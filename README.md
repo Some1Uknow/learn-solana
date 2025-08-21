@@ -1,4 +1,4 @@
-# learn.sol — Solana developer curriculum
+# learn.sol - Solana developer curriculum
 
 <div align="center">
   <img src="app/icon.ico" alt="Learn SOL Logo" width="120" />
@@ -28,7 +28,7 @@ Minimal local run (optional):
 
 Start here and move top‑to‑bottom. Expect ~5–10 hours per week.
 
-### Week 1 — Foundations and first transactions
+### Week 1 - Foundations and first transactions
 
 - Devnet setup — wallets, airdrops, RPCs (`content/week-1/devnet-setup.mdx`)
 - Accounts and lamports — balances, system program (`content/week-1/accounts-lamports-exercise.mdx`)
@@ -38,7 +38,7 @@ Start here and move top‑to‑bottom. Expect ~5–10 hours per week.
 
 Outcome: You can fund wallets, read accounts, and send basic transactions to Solana devnet.
 
-### Week 2 — Rust for Solana and daily challenges
+### Week 2 - Rust for Solana and daily challenges
 
 - Rust fundamentals (day 1) — types, ownership, errors (`content/week-2/day-1-rust-fundamentals.mdx`)
 - Day 1 challenges — practice tasks (`content/week-2/day-1-challenges.mdx`)
@@ -46,14 +46,14 @@ Outcome: You can fund wallets, read accounts, and send basic transactions to Sol
 
 Outcome: You can read and write basic Rust used in Solana programs.
 
-### Weeks 3–5 — Programs, tokens, and real projects
+### Weeks 3-5 - Programs, tokens, and real projects
 
 - Advanced topics roll out here (PDAs, CPIs, tokens, testing, deployment)
 - Expect one hands‑on project per week (increasing difficulty)
 
 Outcome: You can ship a simple Solana app end‑to‑end.
 
-Note: Weeks 3–5 content is being expanded; follow along in `content/week-3`, `week-4`, `week-5`.
+Note: Weeks 3-5 content is being expanded; follow along in `content/week-3`, `week-4`, `week-5`.
 
 ## Built‑in AI helper
 
