@@ -1,164 +1,81 @@
-# learn.sol
+# learn.sol — Solana developer curriculum
 
 <div align="center">
   <img src="app/icon.ico" alt="Learn SOL Logo" width="120" />
-  
-  <p>learn.sol — a focused learning platform for Solana blockchain development with an AI-powered documentation assistant and semantic search.</p>
-
-  [![Solana Foundation](https://img.shields.io/badge/Funded%20by-Solana%20Foundation-14F195?style=for-the-badge)](https://solana.com)
-  [![CoinDCX](https://img.shields.io/badge/Funded%20by-CoinDCX-3366FF?style=for-the-badge)](https://coindcx.com)
-
 </div>
 
-## Overview
+Learn Solana by building. Short lessons. Clear tasks. Real projects.
 
-learn.sol is an educational platform to onboard developers into the Solana ecosystem with integrated AI-powered documentation assistance. Funded by the Solana Foundation and CoinDCX in collaboration with Superteam IN, the project aims to make Solana development accessible, practical, and project-focused.
+• Live site: https://learnsol.site
+• Preview image: app/opengraph-image.png
 
-## Features
+## Who this is for
 
-- Comprehensive Solana development curriculum
-- AI-powered documentation chatbot using RAG (Retrieval-Augmented Generation)
-- Semantic search over MDX documentation
-- Vector database for efficient content retrieval
-- Context-aware responses grounded in documentation
-- Interactive coding exercises and hands-on projects
-- Community-driven learning and contribution workflow
-- Achievement and rewards system
+- Developers who want a practical path into Solana
+- You know basic JS/TS. Rust experience helps but isn’t required
 
-## Tech stack
+## How to use this repo
 
-- Frontend: Next.js, React, TypeScript
-- UI: Tailwind CSS, shadcn/ui components
-- AI: Vercel AI SDK, OpenAI GPT-4
-- Database: PostgreSQL with pgvector
-- ORM: Drizzle ORM
-- Documentation: MDX with gray-matter
-- Deployment: Vercel
+- Each module is an MDX lesson in `content/week-*`
+- Open the site and follow the modules in order (or read MDX files directly)
+- Use the built‑in AI chat to ask questions about any lesson
 
-## Getting started
+Minimal local run (optional):
+- Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY`
+- If you want AI search/chat the same as prod, also set `DATABASE_URL` and run `npm run ingest-docs`
+- Start the app and open http://localhost:3000
 
-### Prerequisites
+## Curriculum overview
 
-1. OpenAI API key (from https://platform.openai.com/)
-2. PostgreSQL with pgvector (Neon recommended)
+Start here and move top‑to‑bottom. Expect ~5–10 hours per week.
 
-### Install and run (quick)
+### Week 1 — Foundations and first transactions
 
-1. Clone and install dependencies
+- Devnet setup — wallets, airdrops, RPCs (`content/week-1/devnet-setup.mdx`)
+- Accounts and lamports — balances, system program (`content/week-1/accounts-lamports-exercise.mdx`)
+- Transaction anatomy — instructions, signatures, fees (`content/week-1/transaction-anatomy.mdx`)
+- Program interaction — call on-chain programs from a client (`content/week-1/program-interaction-project.mdx`)
+- Challenge — small exploration task (`content/week-1/basic-exploration-challenge.mdx`)
 
-```bash
-git clone https://github.com/yourusername/learn.sol.git
-cd learn.sol
-npm install
-```
+Outcome: You can fund wallets, read accounts, and send basic transactions to Solana devnet.
 
-2. Configure environment
+### Week 2 — Rust for Solana and daily challenges
 
-```bash
-cp .env.example .env.local
-# then edit .env.local and set OPENAI_API_KEY and DATABASE_URL
-```
+- Rust fundamentals (day 1) — types, ownership, errors (`content/week-2/day-1-rust-fundamentals.mdx`)
+- Day 1 challenges — practice tasks (`content/week-2/day-1-challenges.mdx`)
+- Day 2 challenges — more practice (`content/week-2/day-2-challenges.mdx`)
 
-3. Database and ingestion
+Outcome: You can read and write basic Rust used in Solana programs.
 
-```bash
-npm run db:generate
-npm run db:push
-npm run ingest-docs
-npm run dev
-```
+### Weeks 3–5 — Programs, tokens, and real projects
 
-Open http://localhost:3000 to view the app and the AI chat assistant.
+- Advanced topics roll out here (PDAs, CPIs, tokens, testing, deployment)
+- Expect one hands‑on project per week (increasing difficulty)
 
-## AI-powered features
+Outcome: You can ship a simple Solana app end‑to‑end.
 
-### RAG documentation chatbot
+Note: Weeks 3–5 content is being expanded; follow along in `content/week-3`, `week-4`, `week-5`.
 
-The project implements a Retrieval-Augmented Generation pipeline:
+## Built‑in AI helper
 
-1. MDX content ingestion and metadata extraction
-2. Vector embeddings (OpenAI embeddings) for semantic matching
-3. Semantic search using vector similarity
-4. Contextualized responses from GPT-4, grounded in documentation
+- Click the chat button in the app
+- Ask anything about the current lesson or code
+- Answers are grounded in this repo’s MDX content and examples
 
-### Using the AI assistant
+## What you’ll need
 
-- Open the chat control (bottom-right in the UI)
-- Ask questions about Solana or the included examples
-- Get documentation-cited answers, code explanations and guided tutorials
-- Use semantic search to find relevant MDX content
+- Node.js and npm
+- Optional for local AI search: PostgreSQL with pgvector
 
-### Available scripts
+## Contribute
 
-```bash
-# Database management
-npm run db:generate
-npm run db:push
-npm run db:migrate
-npm run db:studio
+- Lessons live in `content/`
+- Add or improve a lesson, then run the doc ingester (`npm run ingest-docs`) to update search
 
-# AI system
-npm run ingest-docs
+## Credits
 
-# Development
-npm run dev
-npm run build
-npm run start
-```
-
-## Project structure
-
-```
-├── app/                    # Next.js app routes and API
-├── components/             # React components and UI
-├── lib/                    # Utilities, AI, DB helpers, MDX processor
-├── scripts/                # Utility scripts (ingest-docs, backup)
-├── content/                # MDX learning content
-└── drizzle.config.ts       # Drizzle ORM configuration
-```
-
-## Preview
-
-<div align="center">
-  <img src="app/opengraph-image.png" alt="Learn SOL Preview" width="600" />
-</div>
-
-## Adding new content
-
-1. Add MDX files in `content/` following the existing frontmatter format
-2. Run `npm run ingest-docs` to update embeddings and the knowledge base
-3. The chatbot and semantic search will include the new content
-
-## Contributing
-
-Contributions are welcome: bug fixes, features, docs, UI/UX and AI improvements. Please read contributing guidelines and follow the repository's contribution process.
-
-## Troubleshooting
-
-Common issues:
-
-1. Database connection errors: verify `DATABASE_URL` and pgvector
-2. Empty AI responses: run `npm run ingest-docs` to repopulate the index
-3. OpenAI API errors: check `OPENAI_API_KEY` and account usage
-4. Chat component not showing: ensure it's imported in `app/layout.tsx`
-
-## Acknowledgments
-
-Special thanks to:
-
-- [Solana Foundation](https://solana.com)
-- [CoinDCX](https://coindcx.com)
-- [Superteam IN](https://superteam.fun/in)
-- [Vercel](https://vercel.com)
-- [OpenAI](https://openai.com)
-
-Thanks to the community of contributors and early adopters.
-
-## Links
-
-- Live demo: https://learnsol.site
-- Twitter: https://x.com/learndotsol
+Funded by Solana Foundation and CoinDCX with support from Superteam IN. Built with Next.js, Tailwind, Drizzle, and an AI layer for search/chat.
 
 ## License
 
-MIT License — see LICENSE file for details.
+MIT — see LICENSE.
