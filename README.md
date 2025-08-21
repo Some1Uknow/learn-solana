@@ -6,8 +6,7 @@
 
 Learn Solana by building. Short lessons. Clear tasks. Real projects.
 
-• Live site: https://learnsol.site
-• Preview image: app/opengraph-image.png
+• Live: https://learnsol.site
 
 ## Who this is for
 
