@@ -40,3 +40,4 @@ next-env.d.ts
 .open-next
 
 package-lock.json
+knip.json
