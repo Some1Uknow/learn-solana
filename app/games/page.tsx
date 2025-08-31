@@ -27,56 +27,6 @@ const games: GameItem[] = [
     category: "ARCADE",
     difficulty: "BEGINNER",
   },
-  {
-    id: "crypto-trivia",
-    title: "Crypto Trivia",
-    description: "Answer questions about blockchain and cryptocurrency",
-    goal: "Test and expand your knowledge of crypto fundamentals",
-    icon: "�",
-    image: "/placeholder.jpg",
-    category: "QUIZ",
-    difficulty: "INTERMEDIATE",
-  },
-  {
-    id: "wallet-defender",
-    title: "Wallet Defender",
-    description: "Protect your wallet from scams and attacks",
-    goal: "Learn security best practices through interactive defense scenarios",
-    icon: "🛡️",
-    image: "/placeholder.jpg",
-    category: "SECURITY",
-    difficulty: "BEGINNER",
-  },
-  {
-    id: "defi-tycoon",
-    title: "DeFi Tycoon",
-    description: "Build your DeFi empire by staking and providing liquidity",
-    goal: "Master DeFi concepts through strategic gameplay",
-    icon: "💰",
-    image: "/placeholder.jpg",
-    category: "STRATEGY",
-    difficulty: "ADVANCED",
-  },
-  {
-    id: "nft-collector",
-    title: "NFT Collector",
-    description: "Hunt for rare NFTs and build your collection",
-    goal: "Understand NFT markets and rarity mechanics",
-    icon: "🎨",
-    image: "/placeholder.jpg",
-    category: "COLLECTION",
-    difficulty: "INTERMEDIATE",
-  },
-  {
-    id: "trading-simulator",
-    title: "Trading Simulator",
-    description: "Practice trading with virtual currency",
-    goal: "Learn trading strategies without risking real money",
-    icon: "📈",
-    image: "/placeholder.jpg",
-    category: "SIMULATION",
-    difficulty: "ADVANCED",
-  },
 ];
 
 export default function GamesPage() {
@@ -108,12 +58,15 @@ export default function GamesPage() {
         <div ref={containerRef}>
           {/* Hero */}
           <div className="mb-10">
-            <div className="text-xs tracking-[0.25em] text-zinc-400">[GAMES]</div>
+            <div className="text-xs tracking-[0.25em] text-zinc-400">
+              [GAMES]
+            </div>
             <div className="mt-3 space-y-2">
               <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                 {userInfo ? (
                   <>
-                    Hi {userInfo?.name || "Player"}, choose a game to start playing
+                    Hi {userInfo?.name || "Player"}, choose a game to start
+                    playing
                   </>
                 ) : (
                   "Choose a game to start playing"
@@ -232,18 +185,25 @@ export default function GamesPage() {
                   <div className="mt-6 flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-zinc-500">Difficulty:</span>
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
-                        active.difficulty === "BEGINNER" && "bg-green-500/10 text-green-300",
-                        active.difficulty === "INTERMEDIATE" && "bg-yellow-500/10 text-yellow-300",
-                        active.difficulty === "ADVANCED" && "bg-red-500/10 text-red-300"
-                      )}>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
+                          active.difficulty === "BEGINNER" &&
+                            "bg-green-500/10 text-green-300",
+                          active.difficulty === "INTERMEDIATE" &&
+                            "bg-yellow-500/10 text-yellow-300",
+                          active.difficulty === "ADVANCED" &&
+                            "bg-red-500/10 text-red-300"
+                        )}
+                      >
                         ● {active.difficulty}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-zinc-500">Category:</span>
-                      <span className="text-xs text-zinc-300">{active.category}</span>
+                      <span className="text-xs text-zinc-300">
+                        {active.category}
+                      </span>
                     </div>
                   </div>
 
@@ -294,12 +254,16 @@ function GameCard({
       <div className="relative z-10 flex h-full flex-col">
         {/* Top Row: badge */}
         <div className="flex items-center justify-between">
-          <span className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
-            game.difficulty === "BEGINNER" && "bg-green-500/10 text-green-300",
-            game.difficulty === "INTERMEDIATE" && "bg-yellow-500/10 text-yellow-300",
-            game.difficulty === "ADVANCED" && "bg-red-500/10 text-red-300"
-          )}>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
+              game.difficulty === "BEGINNER" &&
+                "bg-green-500/10 text-green-300",
+              game.difficulty === "INTERMEDIATE" &&
+                "bg-yellow-500/10 text-yellow-300",
+              game.difficulty === "ADVANCED" && "bg-red-500/10 text-red-300"
+            )}
+          >
             ● {game.difficulty}
           </span>
         </div>
