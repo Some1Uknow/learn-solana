@@ -72,7 +72,7 @@ class GameScene extends Phaser.Scene {
     // Load your uploaded sprite sheet
     this.load.spritesheet(
       "playerSheet",
-      "/game-assets/solana-clicker/sprite-sheet.png",
+      "/game-assets/solana-clicker/sprite-sheet-1.png",
       {
         frameWidth: 216,
         frameHeight: 296,
@@ -90,7 +90,7 @@ class GameScene extends Phaser.Scene {
     groundGraphics.generateTexture("ground", 32, 32);
     groundGraphics.destroy();
 
-     // Create player texture
+    // Create player texture
     // const playerGraphics = this.add.graphics();
     // playerGraphics.fillStyle(0xff0000);
     // playerGraphics.fillRect(0, 0, 32, 48);
@@ -145,26 +145,70 @@ class GameScene extends Phaser.Scene {
     this.player.body!.setSize(216, 296);
 
     // ✅ Animations (all on playerSheet)
+    // IDLE
     this.anims.create({
-      key: "idle",
+      key: "idle-right",
       frames: [{ key: "playerSheet", frame: 0 }],
       frameRate: 1,
     });
 
     this.anims.create({
-      key: "run",
+      key: "idle-left",
+      frames: [{ key: "playerSheet", frame: 1 }],
+      frameRate: 1,
+    });
+
+    // CELEBRATE + CROUCH
+    this.anims.create({
+      key: "celebrate",
+      frames: [{ key: "playerSheet", frame: 2 }],
+    });
+
+    this.anims.create({
+      key: "crouch",
+      frames: [{ key: "playerSheet", frame: 3 }],
+    });
+
+    // RUN
+    this.anims.create({
+      key: "run-right",
       frames: this.anims.generateFrameNumbers("playerSheet", {
-        start: 1,
-        end: 3,
+        start: 4,
+        end: 6,
       }),
       frameRate: 8,
       repeat: -1,
     });
 
     this.anims.create({
-      key: "jump",
-      frames: [{ key: "playerSheet", frame: 4 }],
-      frameRate: 1,
+      key: "run-left",
+      frames: this.anims.generateFrameNumbers("playerSheet", {
+        start: 7,
+        end: 9,
+      }),
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // JUMP / FALL
+    this.anims.create({
+      key: "jump-right",
+      frames: [{ key: "playerSheet", frame: 10 }],
+    });
+
+    this.anims.create({
+      key: "jump-left",
+      frames: [{ key: "playerSheet", frame: 10 }], // you don’t have a left crouch, reuse right crouch
+    });
+
+    this.anims.create({
+      key: "fall-right",
+      frames: [{ key: "playerSheet", frame: 12 }],
+    });
+
+    this.anims.create({
+      key: "fall-left",
+      frames: [{ key: "playerSheet", frame: 13 }],
     });
 
     this.player.play("idle");
@@ -452,23 +496,40 @@ class GameScene extends Phaser.Scene {
 
     if (this.cursors.left.isDown || wasd.A.isDown) {
       this.player.setVelocityX(-160);
-      this.player.anims.play("run", true);
-      this.player.setFlipX(true);
+      this.player.anims.play("run-left", true);
+      this.player.setData("facing", "left");
     } else if (this.cursors.right.isDown || wasd.D.isDown) {
       this.player.setVelocityX(160);
-      this.player.anims.play("run", true);
-      this.player.setFlipX(false);
+      this.player.anims.play("run-right", true);
+      this.player.setData("facing", "right");
     } else {
       this.player.setVelocityX(0);
-      this.player.anims.play("idle", true);
+      if (this.player.getData("facing") === "left") {
+        this.player.anims.play("idle-left", true);
+      } else {
+        this.player.anims.play("idle-right", true);
+      }
     }
 
     if (
       (this.cursors.up.isDown || wasd.W.isDown) &&
       this.player.body.touching.down
     ) {
+      if (this.player.getData("facing") === "left") {
+        this.player.anims.play("jump-left", true);
+      } else {
+        this.player.anims.play("jump-right", true);
+      }
       this.player.setVelocityY(-350);
-      this.player.anims.play("jump", true);
+    }
+
+    // Falling state (when in air, going down)
+    if (!this.player.body.touching.down && this.player.body.velocity.y > 0) {
+      if (this.player.getData("facing") === "left") {
+        this.player.anims.play("fall-left", true);
+      } else {
+        this.player.anims.play("fall-right", true);
+      }
     }
   }
 
