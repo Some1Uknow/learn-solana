@@ -69,7 +69,15 @@ class GameScene extends Phaser.Scene {
       "sky",
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
     );
-
+    // Load your uploaded sprite sheet
+    this.load.spritesheet(
+      "playerSheet",
+      "/game-assets/solana-clicker/sprite-sheet.png",
+      {
+        frameWidth: 216,
+        frameHeight: 296,
+      }
+    );
     // Create graphics textures instead of loading images
     this.createTextures();
   }
@@ -82,12 +90,12 @@ class GameScene extends Phaser.Scene {
     groundGraphics.generateTexture("ground", 32, 32);
     groundGraphics.destroy();
 
-    // Create player texture
-    const playerGraphics = this.add.graphics();
-    playerGraphics.fillStyle(0xff0000);
-    playerGraphics.fillRect(0, 0, 32, 48);
-    playerGraphics.generateTexture("player", 32, 48);
-    playerGraphics.destroy();
+     // Create player texture
+    // const playerGraphics = this.add.graphics();
+    // playerGraphics.fillStyle(0xff0000);
+    // playerGraphics.fillRect(0, 0, 32, 48);
+    // playerGraphics.generateTexture("player", 32, 48);
+    // playerGraphics.destroy();
 
     // Create star texture
     const starGraphics = this.add.graphics();
@@ -125,28 +133,41 @@ class GameScene extends Phaser.Scene {
     this.setupPhysics();
     this.setupInput();
   }
-
   createPlayer() {
-    // Create player sprite with proper physics body
-    this.player = this.physics.add.sprite(80, 450, "player");
+    // ✅ Use the sprite sheet as texture, not the red debug rectangle
+    this.player = this.physics.add.sprite(80, 450, "playerSheet", 0);
 
-    // Set player properties
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
+    this.player.setScale(0.3);
 
-    // Set physics body size to match sprite
-    this.player.body!.setSize(32, 48);
+    // Adjust body to your sprite size
+    this.player.body!.setSize(216, 296);
 
-    // Add white outline for visibility
-    const outline = this.add.rectangle(0, 0, 36, 52, 0x000000, 0);
-    outline.setStrokeStyle(2, 0xffffff);
-
-    // Follow player with outline
-    this.physics.world.on("worldstep", () => {
-      if (this.player && outline) {
-        outline.setPosition(this.player.x, this.player.y);
-      }
+    // ✅ Animations (all on playerSheet)
+    this.anims.create({
+      key: "idle",
+      frames: [{ key: "playerSheet", frame: 0 }],
+      frameRate: 1,
     });
+
+    this.anims.create({
+      key: "run",
+      frames: this.anims.generateFrameNumbers("playerSheet", {
+        start: 1,
+        end: 3,
+      }),
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "jump",
+      frames: [{ key: "playerSheet", frame: 4 }],
+      frameRate: 1,
+    });
+
+    this.player.play("idle");
   }
 
   setupInput() {
@@ -425,27 +446,29 @@ class GameScene extends Phaser.Scene {
       this
     );
   }
-
   update() {
     if (this.levelComplete || this.isShowingQuiz) return;
-
     const wasd = (this as any).wasd;
 
-    // Handle left/right movement
     if (this.cursors.left.isDown || wasd.A.isDown) {
-      this.player.setVelocityX(-180);
+      this.player.setVelocityX(-160);
+      this.player.anims.play("run", true);
+      this.player.setFlipX(true);
     } else if (this.cursors.right.isDown || wasd.D.isDown) {
-      this.player.setVelocityX(180);
+      this.player.setVelocityX(160);
+      this.player.anims.play("run", true);
+      this.player.setFlipX(false);
     } else {
       this.player.setVelocityX(0);
+      this.player.anims.play("idle", true);
     }
 
-    // Handle jumping
     if (
       (this.cursors.up.isDown || wasd.W.isDown) &&
-      this.player.body!.touching.down
+      this.player.body.touching.down
     ) {
-      this.player.setVelocityY(-400);
+      this.player.setVelocityY(-350);
+      this.player.anims.play("jump", true);
     }
   }
 

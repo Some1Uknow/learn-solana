@@ -1,10 +1,22 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
-import SolanaClickerGame from "@/components/games/SolanaClickerGame";
+import dynamic from "next/dynamic";
+
+const SolanaClickerGame = dynamic(
+  () => import("@/components/games/SolanaClickerGame"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-zinc-400">
+        Loading game...
+      </div>
+    ),
+  }
+);
 
 interface GameItem {
   id: string;
@@ -159,7 +171,9 @@ export default function GamesPage() {
                 <div className="relative overflow-hidden rounded-2xl bg-[#0f0f12] p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
                   {gameStarted ? (
                     <div className="h-[600px]">
-                      <SolanaClickerGame onGameComplete={() => setGameStarted(false)} />
+                      <SolanaClickerGame
+                        onGameComplete={() => setGameStarted(false)}
+                      />
                     </div>
                   ) : (
                     <>
@@ -188,12 +202,16 @@ export default function GamesPage() {
                         <h4 className="text-sm font-medium text-zinc-200">
                           Game Goal
                         </h4>
-                        <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>
+                        <p className="mt-1 text-sm text-zinc-400">
+                          {active.goal}
+                        </p>
                       </div>
 
                       <div className="mt-6 flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-zinc-500">Difficulty:</span>
+                          <span className="text-xs text-zinc-500">
+                            Difficulty:
+                          </span>
                           <span
                             className={cn(
                               "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
@@ -209,7 +227,9 @@ export default function GamesPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-zinc-500">Category:</span>
+                          <span className="text-xs text-zinc-500">
+                            Category:
+                          </span>
                           <span className="text-xs text-zinc-300">
                             {active.category}
                           </span>
