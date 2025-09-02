@@ -139,39 +139,23 @@ class GameScene extends Phaser.Scene {
 
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
-    this.player.setScale(0.3);
 
-    // Adjust body to your sprite size
-    this.player.body!.setSize(216, 296);
+    this.player.setScale(0.3);
+    this.player.body!.setSize(this.player.width, this.player.height);
+    this.player.body!.setOffset(0, 0);
 
     // ✅ Animations (all on playerSheet)
     // IDLE
     this.anims.create({
-      key: "idle-right",
+      key: "idle",
       frames: [{ key: "playerSheet", frame: 0 }],
       frameRate: 1,
+      repeat: -1,
     });
 
+    // RUN (right-facing frames 4–6)
     this.anims.create({
-      key: "idle-left",
-      frames: [{ key: "playerSheet", frame: 1 }],
-      frameRate: 1,
-    });
-
-    // CELEBRATE + CROUCH
-    this.anims.create({
-      key: "celebrate",
-      frames: [{ key: "playerSheet", frame: 2 }],
-    });
-
-    this.anims.create({
-      key: "crouch",
-      frames: [{ key: "playerSheet", frame: 3 }],
-    });
-
-    // RUN
-    this.anims.create({
-      key: "run-right",
+      key: "run",
       frames: this.anims.generateFrameNumbers("playerSheet", {
         start: 4,
         end: 6,
@@ -180,35 +164,29 @@ class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
+    // JUMP (use 13 for airborne)
     this.anims.create({
-      key: "run-left",
-      frames: this.anims.generateFrameNumbers("playerSheet", {
-        start: 7,
-        end: 9,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
-
-    // JUMP / FALL
-    this.anims.create({
-      key: "jump-right",
-      frames: [{ key: "playerSheet", frame: 10 }],
-    });
-
-    this.anims.create({
-      key: "jump-left",
-      frames: [{ key: "playerSheet", frame: 10 }], // you don’t have a left crouch, reuse right crouch
-    });
-
-    this.anims.create({
-      key: "fall-right",
-      frames: [{ key: "playerSheet", frame: 12 }],
-    });
-
-    this.anims.create({
-      key: "fall-left",
+      key: "jump",
       frames: [{ key: "playerSheet", frame: 13 }],
+      frameRate: 1,
+    });
+
+    // FALL (use 10 for falling forward)
+    this.anims.create({
+      key: "fall",
+      frames: [{ key: "playerSheet", frame: 10 }],
+      frameRate: 1,
+    });
+
+    // CELEBRATE (cycle 2–3)
+    this.anims.create({
+      key: "celebrate",
+      frames: this.anims.generateFrameNumbers("playerSheet", {
+        start: 2,
+        end: 3,
+      }),
+      frameRate: 2,
+      repeat: -1,
     });
 
     this.player.play("idle");
@@ -490,46 +468,34 @@ class GameScene extends Phaser.Scene {
       this
     );
   }
+
   update() {
     if (this.levelComplete || this.isShowingQuiz) return;
     const wasd = (this as any).wasd;
 
     if (this.cursors.left.isDown || wasd.A.isDown) {
       this.player.setVelocityX(-160);
-      this.player.anims.play("run-left", true);
-      this.player.setData("facing", "left");
+      this.player.setFlipX(true);
+      this.player.anims.play("run", true);
     } else if (this.cursors.right.isDown || wasd.D.isDown) {
       this.player.setVelocityX(160);
-      this.player.anims.play("run-right", true);
-      this.player.setData("facing", "right");
+      this.player.setFlipX(false);
+      this.player.anims.play("run", true);
     } else {
       this.player.setVelocityX(0);
-      if (this.player.getData("facing") === "left") {
-        this.player.anims.play("idle-left", true);
-      } else {
-        this.player.anims.play("idle-right", true);
-      }
+      this.player.anims.play("idle", true);
     }
 
     if (
       (this.cursors.up.isDown || wasd.W.isDown) &&
       this.player.body.touching.down
     ) {
-      if (this.player.getData("facing") === "left") {
-        this.player.anims.play("jump-left", true);
-      } else {
-        this.player.anims.play("jump-right", true);
-      }
       this.player.setVelocityY(-350);
+      this.player.anims.play("jump", true);
     }
 
-    // Falling state (when in air, going down)
     if (!this.player.body.touching.down && this.player.body.velocity.y > 0) {
-      if (this.player.getData("facing") === "left") {
-        this.player.anims.play("fall-left", true);
-      } else {
-        this.player.anims.play("fall-right", true);
-      }
+      this.player.anims.play("fall", true);
     }
   }
 
