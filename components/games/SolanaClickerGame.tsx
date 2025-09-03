@@ -108,11 +108,12 @@ class GameScene extends Phaser.Scene {
   create() {
     // Sky background with different colors per level
     const skyColors = [0x87ceeb, 0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4];
+    // ✅ Updated to use this.cameras.main.width and height for correct positioning
     this.add.rectangle(
-      400,
-      300,
-      800,
-      600,
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 2,
+      this.cameras.main.width,
+      this.cameras.main.height,
       skyColors[this.currentLevel - 1] || 0x87ceeb
     );
 
@@ -437,24 +438,29 @@ class GameScene extends Phaser.Scene {
   }
 
   createUI() {
-    this.scoreText = this.add.text(16, 16, `SOL: ${this.score}`, {
-      fontSize: "28px",
-      color: "#FFFF00",
-      stroke: "#000000",
-      strokeThickness: 3,
-    });
-
-    this.add.text(
-      16,
-      560,
-      "Use ARROW KEYS or WASD to move and jump. Collect all SOL tokens!",
-      {
-        fontSize: "16px",
-        color: "#ffffff",
+    // ✅ Use camera-relative positioning to prevent cropping on different resolutions
+    this.scoreText = this.add
+      .text(16, 16, `SOL: ${this.score}`, {
+        fontSize: "28px",
+        color: "#FFFF00",
         stroke: "#000000",
-        strokeThickness: 2,
-      }
-    );
+        strokeThickness: 3,
+      })
+      .setScrollFactor(0); // This makes the text stick to the camera
+
+    this.add
+      .text(
+        16,
+        this.cameras.main.height - 40,
+        "Use ARROW KEYS or WASD to move and jump. Collect all SOL tokens!",
+        {
+          fontSize: "16px",
+          color: "#ffffff",
+          stroke: "#000000",
+          strokeThickness: 2,
+        }
+      )
+      .setScrollFactor(0); // This makes the text stick to the camera
   }
 
   setupPhysics() {
@@ -761,18 +767,25 @@ export default function SolanaClickerGame({
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: window.innerWidth * 0.95, // 95% of screen width
-      height: window.innerHeight * 0.9,
+      // ✅ Set fixed game dimensions
+      width: 800,
+      height: 600,
       parent: gameRef.current,
       physics: {
         default: "arcade",
         arcade: {
           gravity: { x: 0, y: 300 },
-          debug: false,
+          debug: true,
         },
       },
       scene: GameScene,
       backgroundColor: "#34495e",
+      // ✅ Add the scale manager configuration
+      scale: {
+        mode: Phaser.Scale.FIT, // This mode automatically scales the canvas to fit the parent
+        autoCenter: Phaser.Scale.CENTER_BOTH, // This centers the game canvas
+        parent: gameRef.current,
+      },
     };
 
     phaserGameRef.current = new Phaser.Game(config);
