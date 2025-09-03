@@ -158,7 +158,7 @@ class GameScene extends Phaser.Scene {
       key: "run",
       frames: this.anims.generateFrameNumbers("playerSheet", {
         start: 4,
-        end: 6,
+        end: 4,
       }),
       frameRate: 8,
       repeat: -1,
