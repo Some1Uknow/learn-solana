@@ -142,8 +142,12 @@ class GameScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
 
     this.player.setScale(0.3);
-    this.player.body!.setSize(this.player.width, this.player.height);
-    this.player.body!.setOffset(0, 0);
+    // Adjust the physics body to be much smaller than the frame
+    // SetSize uses unscaled dimensions. Let's assume the character is about 80px wide in the 216px frame.
+    this.player.body!.setSize(80, 280);
+    // We need to offset the body to align it with the visual sprite inside the frame.
+    // The frame is 216px wide, character is 80px. (216-80)/2 = 68px offset.
+    this.player.body!.setOffset(68, 0);
 
     // ✅ Animations (all on playerSheet)
     // IDLE
@@ -775,7 +779,7 @@ export default function SolanaClickerGame({
         default: "arcade",
         arcade: {
           gravity: { x: 0, y: 300 },
-          debug: true,
+          debug: false,
         },
       },
       scene: GameScene,
