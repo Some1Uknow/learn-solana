@@ -9,6 +9,7 @@ import { cookieToWeb3AuthState } from "@web3auth/modal";
 import Provider from "../components/web3Auth/authProvider";
 import { RouteGuard } from "@/components/route-guard";
 import { headers } from "next/headers";
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -76,7 +77,9 @@ export default async function RootLayout({
         >
           <Provider web3authInitialState={web3authInitialState}>
             <RouteGuard>
-              <RootProvider>{children}</RootProvider>
+              <RootProvider>{children}
+                <Analytics />
+              </RootProvider>
             </RouteGuard>
           </Provider>
 

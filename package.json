@@ -63,6 +63,7 @@
     "@types/bs58": "^4.0.4",
     "@types/mdx": "^2.0.13",
     "@types/pg": "^8.15.5",
+    "@vercel/analytics": "^1.5.0",
     "@web3auth/base": "^9.7.0",
     "@web3auth/modal": "^10.2.0",
     "@web3auth/solana-provider": "^9.7.0",
