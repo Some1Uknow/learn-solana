@@ -16,6 +16,7 @@ import {
   useWeb3AuthDisconnect,
   useWeb3Auth,
 } from "@web3auth/modal/react";
+import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 
 interface NavbarWalletButtonProps {
   isMobile?: boolean;
@@ -31,6 +32,9 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const { connect, isConnected, loading: connectLoading } = useWeb3AuthConnect();
   const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
   const { provider, web3Auth } = useWeb3Auth();
+
+  // Auto register when we have address
+  useAutoRegisterUser(userAddress || undefined);
 
   const isLoading = connectLoading || disconnectLoading;
 
@@ -78,7 +82,14 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   };
 
-  const handleConnect = () => isConnected ? disconnect() : connect();
+  const handleConnect = () => {
+    try {
+      console.log('[WalletButton] click: isConnected=', isConnected, 'provider?', !!provider);
+      return isConnected ? disconnect() : connect();
+    } catch (e) {
+      console.error('[WalletButton] connect/disconnect error', e);
+    }
+  };
   
   const copyAddress = () => navigator.clipboard.writeText(userAddress);
   

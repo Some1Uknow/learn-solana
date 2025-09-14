@@ -24,7 +24,13 @@ const clientId = web3AuthClientId; // get from https://dashboard.web3auth.io
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+    // Network selection: MAINNET required for production-grade idToken validation.
+    // However switching abruptly may break existing dashboard config. We allow
+    // override via env; fallback to previous DEVNET to restore button usability
+    // and will gather diagnostics first.
+    web3AuthNetwork: (process.env.NEXT_PUBLIC_WEB3AUTH_NETWORK === 'mainnet')
+      ? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET
+      : WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     // IMP START - SSR
     ssr: true,
     // Enable session management for better state persistence
@@ -51,6 +57,17 @@ export default function Provider({
   children: React.ReactNode;
   web3authInitialState: IWeb3AuthState | undefined;
 }) {
+  if (typeof window !== 'undefined') {
+    // Lightweight one-time diagnostic to ensure provider mount & network selection
+    (window as any).__WEB3AUTH_PROVIDER_DEBUG = {
+      network: web3AuthContextConfig.web3AuthOptions.web3AuthNetwork,
+      ts: Date.now(),
+    };
+    if (!('Web3AuthProviderMounted' in window)) {
+      console.log('[Web3AuthProvider] mounted with network', web3AuthContextConfig.web3AuthOptions.web3AuthNetwork);
+      (window as any).Web3AuthProviderMounted = true;
+    }
+  }
   // IMP END - SSR
   return (
     // IMP START - Setup Web3Auth Provider for Solana
