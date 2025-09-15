@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import * as Phaser from "phaser";
 
-import { GameScene } from "./GameScene";
+import { GameScene, GAME_COMPLETE_EVENT } from "./GameScene";
 
 interface SolanaClickerGameProps {
   onGameComplete?: () => void;
@@ -43,6 +43,13 @@ export default function SolanaClickerGame({
 
     phaserGameRef.current = new Phaser.Game(config);
 
+    // Subscribe to global game events for completion
+    const onComplete = (payload: any) => {
+      if (onGameComplete) onGameComplete();
+      // Optionally store payload somewhere later (score, etc.)
+    };
+    phaserGameRef.current.events.on(GAME_COMPLETE_EVENT, onComplete);
+
     // Ensure canvas can receive focus for keyboard input
     if (phaserGameRef.current.canvas) {
       phaserGameRef.current.canvas.tabIndex = 0;
@@ -51,6 +58,7 @@ export default function SolanaClickerGame({
 
     return () => {
       if (phaserGameRef.current) {
+        phaserGameRef.current.events.off(GAME_COMPLETE_EVENT);
         phaserGameRef.current.destroy(true);
         phaserGameRef.current = null;
       }

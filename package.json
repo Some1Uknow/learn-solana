@@ -117,6 +117,7 @@
     "swr": "^2.3.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "tweetnacl": "^1.0.3",
     "vaul": "^0.9.6"
   },
   "devDependencies": {

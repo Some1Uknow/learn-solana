@@ -78,3 +78,77 @@ Funded by Solana Foundation and CoinDCX with support from Superteam IN. Built wi
 ## License
 
 MIT — see LICENSE.
+
+## Game NFT Claim Flow (User-Paid Mint)
+
+The NFT reward system supports a user-paid mint model so the platform does not spend SOL:
+
+1. Player completes a game (Phaser scene emits completion event).
+2. UI shows Claim NFT button.
+3. On click, client constructs and sends a transaction that:
+  - Creates a new mint (0 decimals, supply 1)
+  - Creates the player's ATA
+  - Mints 1 token to player (no on-chain metadata for simplest path)
+4. After confirmation, client POSTs to `/api/mint-game-nft` with `{ clientMint: true, mintAddress, gameId, walletAddress }`.
+5. Server verifies auth + uniqueness and records row (no SOL spent).
+
+Environment:
+- `NEXT_PUBLIC_SOLANA_RPC_URL` (required) e.g. `https://api.devnet.solana.com`
+- `METAPLEX_SECRET_KEY` (optional) only needed for legacy server-authority mint fallback.
+
+If `METAPLEX_SECRET_KEY` is unset and a client attempts server mint (without `clientMint`), the API will return an error instructing client-side mint usage.
+
+Security notes:
+- Server currently trusts provided `mintAddress` after base58 validation; optional enhancement: fetch mint + metadata PDA to verify existence and ownership.
+- Uniqueness enforced by `(gameId, walletAddress)` in DB prevents double-claim.
+- Metadata URI currently points to a static asset; extend to a JSON metadata file for richer attributes.
+
+Future improvements:
+- On-chain validation of submitted mint.
+- JSON metadata hosting with dynamic attributes.
+- Compressed NFT option once stable for browsers without extra dependencies.
+
+### Game Progress Auth Notes
+
+The game completion & claim APIs (`/api/games/complete`, `/api/games/progress`, `/api/mint-game-nft`) require a valid Web3Auth identity JWT. Early implementations relied on the `web3auth_token` cookie alone. Because `getIdentityToken()` can resolve slightly after initial connection/hydration, a race existed where the completion POST fired before the cookie was written, producing intermittent `401 Authentication required` errors.
+
+Mitigation implemented:
+- A hook (`useAutoRegisterUser`) aggressively fetches the identity token with retries, sets a cookie, and exposes it on `window.__WEB3AUTH_ID_TOKEN`.
+- Client API calls now attach an `Authorization: Bearer <token>` header if available; server still falls back to cookie for robustness.
+
+If you add new authenticated routes, mirror this pattern or centralize in a small `authFetch` helper to avoid similar races.
+
+## Game Progress & Claim State
+
+Persistent progress tracking is stored in the `game_progress` table and separates three concepts:
+
+1. Completion (`completedAt`): The user has finished the game at least once.
+2. Claimability (`canClaim`): The user is currently eligible to mint the reward NFT.
+3. Claim (`claimedAt`): The user minted (or recorded mint of) the NFT.
+
+### Lifecycle
+
+1. Client game emits completion → optimistic UI update + POST `/api/games/complete { gameId }`.
+2. Server upserts row (if first time) with `completedAt` (now) and `canClaim = true` (unless already claimed).
+3. User clicks Claim → client performs on-chain mint (user pays) → POST `/api/mint-game-nft`.
+4. Mint API records NFT in `minted_nfts` and sets `claimedAt` & `canClaim = false` in `game_progress`.
+5. `/api/games/progress` returns all progress rows for the authenticated wallet to hydrate UI on load.
+
+### Why explicit `canClaim`?
+
+Derived logic `(completedAt && !claimedAt)` works today, but a stored flag lets future features like cooldowns, revocation, or multi‑tier rewards without schema changes.
+
+### APIs
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/games/complete` | POST | Mark completion / (re)enable claim if unclaimed |
+| `/api/games/progress` | GET | List progress rows for current wallet |
+| `/api/mint-game-nft` | POST | Record NFT mint & finalize claim state |
+
+### Future Enhancements
+
+- Mint address -> progress join on hydration (currently only completion state is preloaded; mint address comes from `minted_nfts`).
+- On-chain PDA verification before marking `claimedAt`.
+- Multiple reward tiers per game (introduce `rewardTier` column).
+- Rate limiting claim attempts.

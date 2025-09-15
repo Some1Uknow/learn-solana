@@ -1,6 +1,9 @@
 import * as Phaser from "phaser";
 import { SOLANA_QUESTIONS, Question } from "./SolanaClickerUtils";
 
+// Event name exported so React wrapper can subscribe
+export const GAME_COMPLETE_EVENT = 'gameComplete';
+
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -809,5 +812,12 @@ export class GameScene extends Phaser.Scene {
     restartButton.on("pointerdown", () => {
       this.scene.start("GameScene", { level: 1, totalScore: 0 });
     });
+
+    // Emit completion event for external (React) listener once
+    // Guard to prevent duplicate emissions if method somehow re-entered
+    if (!(this as any)._emittedGameComplete) {
+      (this as any)._emittedGameComplete = true;
+      this.game.events.emit(GAME_COMPLETE_EVENT, { finalScore: this.score, levels: this.maxLevels });
+    }
   }
 }
