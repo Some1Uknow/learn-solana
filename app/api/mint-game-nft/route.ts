@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
     const body = await req.json().catch(() => ({}));
-    const { gameId, walletAddress: overrideWallet, mintAddress: clientMintAddress, clientMint } = body || {};
+  const { gameId, walletAddress: overrideWallet, mintAddress: clientMintAddress, clientMint } = body || {};
     if (!gameId || typeof gameId !== 'string') {
       return new Response(JSON.stringify({ error: 'gameId required'}), { status: 400 });
     }
@@ -27,11 +27,22 @@ export async function POST(req: NextRequest) {
     }
     if (!walletAddress) return new Response(JSON.stringify({ error: 'walletAddress unresolved'}), { status: 400 });
 
-    // Check existing mint
-    const existing = await db.query.mintedNfts.findFirst({ where: and(eq(mintedNfts.gameId, gameId), eq(mintedNfts.walletAddress, walletAddress)) });
-    if (existing) {
-      return new Response(JSON.stringify({ mintAddress: existing.mintAddress, alreadyMinted: true }), { status: 200 });
-    }
+    // Require eligibility to claim
+    try {
+      const progress = await db.query.gameProgress.findFirst({ where: and(eq(gameProgress.gameId, gameId), eq(gameProgress.walletAddress, walletAddress)) });
+      const canClaim = !!progress?.canClaim;
+      if (!canClaim) {
+        return new Response(JSON.stringify({ error: 'Not eligible to claim. Complete the game first.' }), { status: 403 });
+      }
+    } catch {}
+
+    // Prevent duplicate mint per game/wallet
+    try {
+      const existing = await db.query.mintedNfts.findFirst({ where: and(eq(mintedNfts.gameId, gameId), eq(mintedNfts.walletAddress, walletAddress)) });
+      if (existing) {
+        return new Response(JSON.stringify({ error: 'Already minted for this game.' }), { status: 409 });
+      }
+    } catch {}
     // If client minted, just record it after lightweight validation
     if (clientMint && clientMintAddress) {
       try {

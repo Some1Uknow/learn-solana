@@ -28,6 +28,7 @@ const nextConfig = {
       "solana.com",
       "www.anchor-lang.com",
       "cdn.jsdelivr.net",
+      "copper-gigantic-kite-657.mypinata.cloud",
     ],
     remotePatterns: [
       {
@@ -63,6 +64,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+        pathname: "**",
+      }
+      ,
+      {
+        protocol: "https",
+        hostname: "copper-gigantic-kite-657.mypinata.cloud",
         pathname: "**",
       }
     ],

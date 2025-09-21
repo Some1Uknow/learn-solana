@@ -8,6 +8,8 @@ import { cn } from "@/lib/cn";
 import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
 import { SolanaWallet } from '@web3auth/solana-provider';
 import dynamic from "next/dynamic";
+import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js';
+import { fetchManyNftMetadata } from '@/lib/solana/fetchNftMetadata';
 
 const SolanaClickerGame = dynamic(
   () => import("@/components/games/SolanaClickerGame"),
@@ -51,12 +53,16 @@ export default function GamesPage() {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<GameItem | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
-  const [completedGames, setCompletedGames] = useState<Record<string, { completed: boolean; timestamp: number; mintAddress?: string }>>({});
+  const [completedGames, setCompletedGames] = useState<Record<string, { completed: boolean; timestamp: number; mintAddress?: string; canClaim?: boolean }>>({});
   const [claimingGame, setClaimingGame] = useState<string | null>(null);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [mintStatus, setMintStatus] = useState<'idle' | 'minting' | 'success' | 'error'>('idle');
   const [mintError, setMintError] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [ownedNfts, setOwnedNfts] = useState<Array<{ gameId: string; mintAddress: string; createdAt: string }>>([]);
+  const [ownedNftMetadata, setOwnedNftMetadata] = useState<Record<string, { image?: string; name?: string; symbol?: string; error?: string }>>({});
+  const [showNftsModal, setShowNftsModal] = useState(false);
+  const [nftRefreshing, setNftRefreshing] = useState<Record<string, boolean>>({});
 
   // Auto-register user & set cookie token once wallet is known
   useAutoRegisterUser(walletAddress || undefined);
@@ -127,8 +133,9 @@ export default function GamesPage() {
               mapped[row.gameId] = {
                 completed: !!row.completedAt,
                 timestamp: row.completedAt ? new Date(row.completedAt).getTime() : Date.now(),
-                mintAddress: undefined, // mint address hydration from mintedNfts endpoint could be added later
-              };
+                mintAddress: undefined,
+                canClaim: !!row.canClaim,
+              } as any;
             }
           setCompletedGames(prev => ({ ...mapped, ...prev }));
         }
@@ -137,6 +144,57 @@ export default function GamesPage() {
       }
     })();
     return () => { ignore = true; };
+  }, [walletAddress]);
+
+  // Hydrate minted NFTs (server recorded) so claim button disappears after refresh
+  React.useEffect(() => {
+    if (!walletAddress) return;
+    let abort = false;
+    (async () => {
+      try {
+        const res = await authFetch(`/api/games/nfts?walletAddress=${walletAddress}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (abort) return;
+        if (Array.isArray(data?.nfts)) {
+          setOwnedNfts(data.nfts);
+          // Kick off metadata fetch (fire & forget)
+          const mints = data.nfts.map((n: any) => n.mintAddress);
+          if (mints.length) {
+            // Use devnet connection (same cluster) for PDA fetch
+            try {
+              const conn = new Connection('https://api.devnet.solana.com');
+              const metas = await fetchManyNftMetadata(conn, mints.slice(0, 25)); // limit batch
+              if (!abort) {
+                const mapped: Record<string, any> = {};
+                for (const meta of metas) {
+                  mapped[meta.mint] = { image: meta.image, name: meta.name, symbol: meta.symbol, error: meta.error };
+                }
+                setOwnedNftMetadata(mapped);
+              }
+            } catch (metaErr) {
+              console.warn('[games] nft metadata fetch failed', metaErr);
+            }
+          }
+          // Merge into completedGames state (avoid overriding timestamps newer than existing)
+          setCompletedGames(prev => {
+            const merged = { ...prev };
+            for (const row of data.nfts) {
+              const existing = merged[row.gameId];
+              merged[row.gameId] = {
+                completed: existing?.completed ?? true,
+                timestamp: existing?.timestamp || new Date(row.createdAt || Date.now()).getTime(),
+                mintAddress: row.mintAddress,
+              };
+            }
+            return merged;
+          });
+        }
+      } catch (e) {
+        console.warn('[games] nft hydration failed', e);
+      }
+    })();
+    return () => { abort = true; };
   }, [walletAddress]);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -199,6 +257,14 @@ export default function GamesPage() {
                   type="button"
                 >
                   All Categories
+                </button>
+                <button
+                  className="rounded-xl bg-zinc-900/60 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 disabled:opacity-50"
+                  type="button"
+                  disabled={!walletAddress}
+                  onClick={() => setShowNftsModal(true)}
+                >
+                  View NFTs ({ownedNfts.length})
                 </button>
                 <div className="flex overflow-hidden rounded-xl bg-zinc-900/60">
                   <button
@@ -561,7 +627,9 @@ export default function GamesPage() {
                                     tx.sign(payerKeypair);
                                   }
                                   try {
-                                    const missing = tx.signatures.filter(s=>!s.signature).map(s=>s.publicKey.toBase58());
+                                    const missing = tx.signatures
+                                      .filter((s: { publicKey: any; signature: Buffer | null }) => !s.signature)
+                                      .map((s: { publicKey: any }) => s.publicKey.toBase58());
                                     if (missing.length) {
                                       console.warn('[mint][sign-fallback] still missing signatures for', missing);
                                     }
@@ -616,7 +684,8 @@ export default function GamesPage() {
                             ...prev,
                             [claimingGame]: {
                               ...(prev[claimingGame] || { completed: true, timestamp: Date.now() }),
-                              mintAddress: data.mintAddress
+                              mintAddress: data.mintAddress,
+                              canClaim: false
                             }
                           }));
                           setMintStatus('success');
@@ -642,6 +711,77 @@ export default function GamesPage() {
           )}
         </div>
       </div>
+      {showNftsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowNftsModal(false)} />
+          <div className="relative w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-2xl bg-[#111113] p-6 shadow-xl flex flex-col">
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-lg font-semibold tracking-tight">Your Game NFTs</h3>
+              <button onClick={() => setShowNftsModal(false)} className="rounded-lg bg-white/5 px-3 py-2 text-sm text-zinc-300 hover:bg-white/10">Close</button>
+            </div>
+            {!walletAddress && (
+              <div className="text-sm text-zinc-400">Connect wallet to view NFTs.</div>
+            )}
+            {walletAddress && ownedNfts.length === 0 && (
+              <div className="text-sm text-zinc-400">No NFTs minted yet. Play a game and claim your first reward!</div>
+            )}
+            {walletAddress && ownedNfts.length > 0 && (
+              <div className="grid gap-4 overflow-auto pr-2 mt-1" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))' }}>
+                {ownedNfts.map(nft => (
+                  <div key={nft.mintAddress} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 flex flex-col gap-2">
+                    <div className="relative w-full h-28 rounded-md overflow-hidden bg-zinc-800/40 flex items-center justify-center text-[10px] text-zinc-500">
+                      {ownedNftMetadata[nft.mintAddress]?.image ? (
+                        
+                        <Image
+                          src={ownedNftMetadata[nft.mintAddress].image as string}
+                          alt={ownedNftMetadata[nft.mintAddress].name || 'nft'}
+                          className="object-cover w-full h-full"
+                          width={1024}
+                          height={1024}
+                          loading="lazy"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display='none'; }}
+                        />
+                      ) : ownedNftMetadata[nft.mintAddress]?.error ? (
+                        <span>Error</span>
+                      ) : (
+                        <span>Loading…</span>
+                      )}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-zinc-500 truncate">{nft.gameId}</div>
+                    <div className="text-[11px] break-all font-mono text-zinc-300">
+                      {nft.mintAddress.slice(0,8)}…{nft.mintAddress.slice(-6)}
+                    </div>
+                    <a
+                      href={`https://explorer.solana.com/address/${nft.mintAddress}?cluster=devnet`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-auto text-xs text-cyan-400 hover:underline"
+                    >Explorer →</a>
+                    <button
+                      className="mt-1 rounded-lg bg-white/5 px-2 py-1 text-[11px] text-zinc-300 hover:bg-white/10 disabled:opacity-50"
+                      disabled={!!nftRefreshing[nft.mintAddress]}
+                      onClick={async () => {
+                        setNftRefreshing(prev => ({ ...prev, [nft.mintAddress]: true }));
+                        try {
+                          const connection = new Connection('https://api.devnet.solana.com');
+                          const metas = await fetchManyNftMetadata(connection, [nft.mintAddress], { forceRefresh: true });
+                          setOwnedNftMetadata(prev => ({ ...prev, [nft.mintAddress]: { image: metas[0]?.image, name: metas[0]?.name, symbol: metas[0]?.symbol, error: metas[0]?.error } }));
+                        } catch (e) {
+                          console.warn('[games] manual refresh failed', e);
+                        } finally {
+                          setNftRefreshing(prev => ({ ...prev, [nft.mintAddress]: false }));
+                        }
+                      }}
+                    >{nftRefreshing[nft.mintAddress] ? 'Refreshing…' : 'Refresh image'}</button>
+                    {/* Removed on-chain URI debug */}
+                    {/* Removed legacy Fix metadata action */}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

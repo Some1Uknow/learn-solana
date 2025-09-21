@@ -95,7 +95,8 @@ export async function clientMintGameNft(params: { connection: Connection; wallet
     // DataV2 structure fields with defaults
     const name = `Learn.sol ${gameId} Completion`.slice(0, 32);
     const symbol = 'LEARN';
-    const uri = 'https://learnsol.site/game-nfts/solana-clicker.json';
+  // Updated to Pinata-hosted IPFS gateway JSON metadata per user decision
+  const uri = 'https://copper-gigantic-kite-657.mypinata.cloud/ipfs/bafkreicmeavqcbhkusk5viagwdjiiuyruthemxk2f5o3uohevf4oco26pa';
 
     const metaSerializer = getCreateMetadataAccountV3InstructionDataSerializer();
     const metaData = metaSerializer.serialize({
