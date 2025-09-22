@@ -6,7 +6,7 @@ import { SolanaWallet } from '@web3auth/solana-provider';
 interface Options { onRegistered?: (user: any) => void }
 
 export function useAutoRegisterUser(walletAddress: string | undefined, opts: Options = {}) {
-  const { web3Auth } = useWeb3Auth();
+  const { web3Auth, isConnected } = useWeb3Auth();
   const { userInfo } = useWeb3AuthUser();
   const attemptedRef = useRef(false);
 
@@ -151,5 +151,5 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
     }
     attemptRegistration();
     return () => { cancelled = true; };
-  }, [walletAddress, web3Auth, userInfo, opts]);
+  }, [walletAddress, isConnected, web3Auth, userInfo, opts]);
 }

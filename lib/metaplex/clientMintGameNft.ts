@@ -5,7 +5,7 @@ import {
   SystemProgram,
   Keypair,
   TransactionInstruction,
-} from "@solana/web3.js";n
+} from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,

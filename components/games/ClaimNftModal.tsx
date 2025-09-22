@@ -12,8 +12,17 @@ export interface ClaimNftModalProps {
   setCompleted: (mintAddress: string) => void;
 }
 
-export default function ClaimNftModal({ open, gameId, walletAddress, onClose, provider, setCompleted }: ClaimNftModalProps) {
-  const [mintStatus, setMintStatus] = React.useState<"idle" | "minting" | "success" | "error">("idle");
+export default function ClaimNftModal({
+  open,
+  gameId,
+  walletAddress,
+  onClose,
+  provider,
+  setCompleted,
+}: ClaimNftModalProps) {
+  const [mintStatus, setMintStatus] = React.useState<
+    "idle" | "minting" | "success" | "error"
+  >("idle");
   const [mintError, setMintError] = React.useState<string | null>(null);
 
   if (!open) return null;
@@ -27,15 +36,21 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
         }}
       />
       <div className="relative w-full max-w-md rounded-2xl bg-[#111113] p-6 shadow-xl">
-        <h3 className="text-lg font-semibold tracking-tight">Claim NFT Reward</h3>
+        <h3 className="text-lg font-semibold tracking-tight">
+          Claim NFT Reward
+        </h3>
         <p className="mt-2 text-sm text-zinc-400">
-          You completed <span className="font-medium text-zinc-200">{gameId}</span>. Mint a commemorative devnet NFT.
+          You completed{" "}
+          <span className="font-medium text-zinc-200">{gameId}</span>. Mint a
+          commemorative devnet NFT.
         </p>
         <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 text-xs text-zinc-400">
           Network: <span className="text-zinc-200">Solana Devnet</span>
         </div>
         {mintError && (
-          <div className="mt-3 rounded-lg bg-red-600/10 border border-red-600/40 p-3 text-xs text-red-300">{mintError}</div>
+          <div className="mt-3 rounded-lg bg-red-600/10 border border-red-600/40 p-3 text-xs text-red-300">
+            {mintError}
+          </div>
         )}
         <div className="mt-6 flex flex-col gap-3">
           {mintStatus === "success" ? (
@@ -56,7 +71,9 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                 setMintError(null);
                 try {
                   if (!walletAddress) {
-                    setMintError("Wallet address unavailable. Connect wallet again.");
+                    setMintError(
+                      "Wallet address unavailable. Connect wallet again."
+                    );
                     setMintStatus("error");
                     return;
                   }
@@ -65,14 +82,28 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                     import("@/lib/metaplex/clientMintGameNft"),
                     import("@solana/web3.js"),
                   ]);
-                  const solanaWallet: any = (window as any).solanaWallet || (window as any).web3authSolanaWallet;
-                  if (!solanaWallet || typeof solanaWallet.signTransaction !== "function") {
+                  let solanaWallet: any =
+                    (window as any).solanaWallet ||
+                    (window as any).web3authSolanaWallet;
+                  if (!solanaWallet && provider) {
+                    try {
+                      const mod = await import("@web3auth/solana-provider");
+                      solanaWallet = new (mod as any).SolanaWallet(provider);
+                      (window as any).web3authSolanaWallet = solanaWallet;
+                    } catch {}
+                  }
+                  if (
+                    !solanaWallet ||
+                    typeof solanaWallet.signTransaction !== "function"
+                  ) {
                     setMintError("Solana wallet signer not found (web3auth).");
                     setMintStatus("error");
                     return;
                   }
-                  const primaryRaw = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
-                  const sanitize = (u: string) => u.trim().replace(/\s+/g, "").replace(/\/+$/, "");
+                  const primaryRaw =
+                    process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
+                  const sanitize = (u: string) =>
+                    u.trim().replace(/\s+/g, "").replace(/\/+$/, "");
                   const endpoints: string[] = [];
                   if (primaryRaw) endpoints.push(sanitize(primaryRaw));
                   const apiKeyMatch = primaryRaw.match(/api-key=([^&]+)/);
@@ -82,13 +113,16 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                     if (!endpoints.includes(fast)) endpoints.push(fast);
                   }
                   const canonicalDevnet = "https://api.devnet.solana.com";
-                  if (!endpoints.includes(canonicalDevnet)) endpoints.push(canonicalDevnet);
+                  if (!endpoints.includes(canonicalDevnet))
+                    endpoints.push(canonicalDevnet);
 
                   let connection: any = null;
                   let lastErr: any = null;
                   for (const ep of endpoints) {
                     try {
-                      const testConn = new web3js.Connection(ep, { commitment: "confirmed" });
+                      const testConn = new web3js.Connection(ep, {
+                        commitment: "confirmed",
+                      });
                       await testConn.getVersion();
                       connection = testConn;
                       break;
@@ -97,32 +131,156 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                     }
                   }
                   if (!connection) {
-                    setMintError(`All RPC endpoints failed (last error: ${lastErr?.message || lastErr}). Check network / API key.`);
+                    setMintError(
+                      `All RPC endpoints failed (last error: ${
+                        lastErr?.message || lastErr
+                      }). Check network / API key.`
+                    );
                     setMintStatus("error");
                     return;
                   }
 
                   const sendAndConfirm = async (tx: any): Promise<string> => {
-                    let serialized: Uint8Array | null = null;
+                    // Prefer signAndSendTransaction for broader adapter support (WalletConnect/Phantom via Web3Auth)
                     try {
-                      const signed = await solanaWallet.signTransaction(tx);
-                      serialized = signed.serialize();
+                      if (
+                        typeof (solanaWallet as any).signAndSendTransaction ===
+                        "function"
+                      ) {
+                        // Ensure mintKeypair partial signature is already present (done upstream)
+                        const result = await (
+                          solanaWallet as any
+                        ).signAndSendTransaction(tx);
+                        const sig =
+                          typeof result === "string"
+                            ? result
+                            : result?.signature ||
+                              result?.result ||
+                              result?.txid;
+                        if (typeof sig === "string" && sig.length > 0) {
+                          // Best-effort confirmation
+                          try {
+                            await connection.confirmTransaction(
+                              sig,
+                              "confirmed"
+                            );
+                          } catch {}
+                          return sig;
+                        }
+                      }
                     } catch (e: any) {
                       const msg = e?.message || String(e);
-                      if (/method not found/i.test(msg) || /404/.test(msg)) {
+                      // Some adapters throw generic "Response has no error or result for request"; fall through to signTransaction path
+                      if (
+                        !/Response has no error or result for request/i.test(
+                          msg
+                        )
+                      ) {
+                        // For other errors, continue to alternate paths
+                      }
+                    }
+
+                    // Fallback: signTransaction then sendRawTransaction
+                    let serialized: Uint8Array | null = null;
+                    try {
+                      if (typeof solanaWallet.signTransaction === "function") {
+                        const signed = await solanaWallet.signTransaction(tx);
+                        serialized = signed.serialize();
+                      } else {
+                        throw new Error(
+                          "signTransaction not supported by wallet"
+                        );
+                      }
+                    } catch (e: any) {
+                      const msg = e?.message || String(e);
+                      // Try provider.request based signAndSend as another variant
+                      try {
+                        if (
+                          provider &&
+                          typeof (provider as any).request === "function"
+                        ) {
+                          // Prepare serialized message without requiring all signatures (payer will be added by wallet)
+                          const raw = tx.serialize({
+                            requireAllSignatures: false,
+                          });
+                          const base64 =
+                            typeof Buffer !== "undefined"
+                              ? Buffer.from(raw).toString("base64")
+                              : btoa(String.fromCharCode(...raw));
+                          const candidates = [
+                            {
+                              method: "solana_signAndSendTransaction",
+                              params: { message: base64 },
+                            },
+                            {
+                              method: "signAndSendTransaction",
+                              params: { message: base64 },
+                            },
+                            {
+                              method: "solana_sendTransaction",
+                              params: { message: base64 },
+                            },
+                          ];
+                          for (const c of candidates) {
+                            try {
+                              const res = await (provider as any).request({
+                                method: c.method,
+                                params: c.params,
+                              });
+                              const sig =
+                                typeof res === "string"
+                                  ? res
+                                  : res?.signature || res?.result || res?.txid;
+                              if (typeof sig === "string" && sig.length > 0) {
+                                try {
+                                  await connection.confirmTransaction(
+                                    sig,
+                                    "confirmed"
+                                  );
+                                } catch {}
+                                return sig;
+                              }
+                            } catch (inner) {
+                              // try next candidate
+                            }
+                          }
+                        }
+                      } catch {
+                        // ignore and continue to manual fallback
+                      }
+
+                      if (
+                        /method not found/i.test(msg) ||
+                        /404/.test(msg) ||
+                        /not supported/i.test(msg)
+                      ) {
+                        // Manual fallback: only works for embedded Web3Auth (not external wallets)
                         try {
-                          if (!provider) throw new Error("Provider unavailable for manual signing");
+                          if (!provider)
+                            throw new Error(
+                              "Provider unavailable for manual signing"
+                            );
                           let privHex: string | null = null;
                           try {
-                            privHex = await (provider as any).request({ method: "solanaPrivateKey" });
+                            privHex = await (provider as any).request({
+                              method: "solanaPrivateKey",
+                            });
                           } catch {}
                           if (!privHex) {
                             try {
-                              privHex = await (provider as any).request({ method: "private_key" });
+                              privHex = await (provider as any).request({
+                                method: "private_key",
+                              });
                             } catch {}
                           }
-                          if (!privHex || typeof privHex !== "string" || privHex.trim() === "") {
-                            throw new Error("Provider returned empty private key. Check Web3Auth Solana chain configuration.");
+                          if (
+                            !privHex ||
+                            typeof privHex !== "string" ||
+                            privHex.trim() === ""
+                          ) {
+                            throw new Error(
+                              "Provider returned empty private key. External wallets do not expose keys; try a social login or Web3Auth embedded."
+                            );
                           }
                           let seed: Buffer | null = null;
                           const raw = privHex.trim();
@@ -134,26 +292,39 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                               const { default: bs58 } = await import("bs58");
                               const b58 = bs58.decode(raw);
                               if (b58.length === 32) seed = Buffer.from(b58);
-                              else if (b58.length === 64) seed = Buffer.from(b58.slice(0, 32));
+                              else if (b58.length === 64)
+                                seed = Buffer.from(b58.slice(0, 32));
                             } catch {}
                             if (!seed) {
                               try {
                                 const b64 = Buffer.from(raw, "base64");
                                 if (b64.length === 32) seed = b64;
-                                else if (b64.length === 64) seed = b64.subarray(0, 32);
+                                else if (b64.length === 64)
+                                  seed = b64.subarray(0, 32);
                               } catch {}
                             }
                           }
                           if (!seed || seed.length !== 32) {
-                            throw new Error("Private key not valid hex/base58/base64 32-byte seed (got length " + (seed?.length ?? 0) + ")");
+                            throw new Error(
+                              "Private key not valid hex/base58/base64 32-byte seed (got length " +
+                                (seed?.length ?? 0) +
+                                ")"
+                            );
                           }
                           const nacl = await import("tweetnacl");
                           const kp = nacl.sign.keyPair.fromSeed(seed);
-                          const secretKey = new Uint8Array([...seed, ...kp.publicKey]);
+                          const secretKey = new Uint8Array([
+                            ...seed,
+                            ...kp.publicKey,
+                          ]);
                           const { Keypair } = await import("@solana/web3.js");
                           const payerKeypair = Keypair.fromSecretKey(secretKey);
-                          if (payerKeypair.publicKey.toBase58() !== walletAddress) {
-                            throw new Error("Derived key mismatch with wallet address");
+                          if (
+                            payerKeypair.publicKey.toBase58() !== walletAddress
+                          ) {
+                            throw new Error(
+                              "Derived key mismatch with wallet address"
+                            );
                           }
                           try {
                             tx.partialSign(payerKeypair);
@@ -162,14 +333,20 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
                           }
                           serialized = tx.serialize();
                         } catch (inner) {
-                          throw new Error("Signing failed (wallet + fallback). " + (inner as any).message);
+                          throw new Error(
+                            "Signing failed (wallet + fallback). " +
+                              (inner as any).message
+                          );
                         }
                       } else {
                         throw e;
                       }
                     }
                     if (!serialized) throw new Error("Transaction not signed");
-                    const sig = await connection.sendRawTransaction(serialized, { skipPreflight: false });
+                    const sig = await connection.sendRawTransaction(
+                      serialized,
+                      { skipPreflight: false }
+                    );
                     await connection.confirmTransaction(sig, "confirmed");
                     return sig;
                   };
@@ -183,7 +360,12 @@ export default function ClaimNftModal({ open, gameId, walletAddress, onClose, pr
 
                   const res = await authFetch("/api/mint-game-nft", {
                     method: "POST",
-                    body: JSON.stringify({ gameId, walletAddress, clientMint: true, mintAddress }),
+                    body: JSON.stringify({
+                      gameId,
+                      walletAddress,
+                      clientMint: true,
+                      mintAddress,
+                    }),
                   });
                   if (!res.ok) {
                     const txt = await res.text();
