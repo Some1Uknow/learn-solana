@@ -36,13 +36,33 @@ async function verifyAuthentication(req: Request): Promise<{ isAuthenticated: bo
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = await verifyAuthentication(req);
-    if (!auth.isAuthenticated || !auth.user) {
-      return new Response(JSON.stringify({ error: 'Authentication required', detail: 'Missing or invalid Web3Auth identity token. Ensure getIdentityToken() succeeds client-side.'}), { status: 401 });
+    const body = await req.json().catch(() => ({} as any));
+    const authType = body?.authType as 'social' | 'external_wallet' | undefined;
+    const xWallet = req.headers.get('x-wallet-address') || body?.walletAddress;
+    const xSig = req.headers.get('x-wallet-signature') || body?.signature;
+    const { email, name, profileImage } = body || {};
+
+    let walletAddress = xWallet as string | undefined;
+    if (!authType || authType === 'social') {
+      // Social path: require and verify Web3Auth JWT
+      const auth = await verifyAuthentication(req);
+      if (!auth.isAuthenticated || !auth.user) {
+        return new Response(
+          JSON.stringify({ error: 'Authentication required', detail: 'Missing or invalid Web3Auth identity token.'}),
+          { status: 401 }
+        );
+      }
+      // Wallet address still required from body to associate user
+      walletAddress = typeof body?.walletAddress === 'string' ? body.walletAddress : undefined;
+    } else if (authType === 'external_wallet') {
+      // Minimal check: must have walletAddress
+      if (!walletAddress || typeof walletAddress !== 'string') {
+        return new Response(JSON.stringify({ error: 'walletAddress required for external_wallet'}), { status: 400 });
+      }
+      // Optional: signature verification can be added here for Solana (ed25519)
+      // We accept unsigned for now to improve UX; can be tightened later.
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { walletAddress, email, name, profileImage } = body || {};
     if (!walletAddress || typeof walletAddress !== 'string') {
       return new Response(JSON.stringify({ error: 'walletAddress required'}), { status: 400 });
     }

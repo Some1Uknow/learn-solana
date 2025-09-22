@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef } from 'react';
 import { useWeb3Auth, useWeb3AuthUser } from '@web3auth/modal/react';
+import { SolanaWallet } from '@web3auth/solana-provider';
 
-interface Options { onRegistered?: (user: any) => void; }
+interface Options { onRegistered?: (user: any) => void }
 
 export function useAutoRegisterUser(walletAddress: string | undefined, opts: Options = {}) {
   const { web3Auth } = useWeb3Auth();
@@ -13,49 +14,107 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
     let cancelled = false;
     async function attemptRegistration(attempt = 0) {
       if (!walletAddress || attemptedRef.current || cancelled) return;
+
       let idToken: string | undefined;
+      let isExternalWallet = false;
+
       try {
-        const tokenResult: any = await web3Auth?.getIdentityToken?.();
-        idToken = typeof tokenResult === 'string' ? tokenResult : tokenResult?.token;
-        if (!idToken && (web3Auth as any)?.authenticateUser) {
-          const authRes: any = await (web3Auth as any).authenticateUser();
-          idToken = authRes?.idToken || authRes?.token || authRes;
+        const connectedAdapter = (web3Auth as any)?.connectedAdapterName as string | undefined;
+        if (connectedAdapter) {
+          isExternalWallet = ['metamask', 'phantom', 'wallet-connect-v2', 'solflare', 'slope', 'sollet']
+            .includes(connectedAdapter.toLowerCase());
         }
-        if (!idToken && userInfo) {
-          // Some SDK shapes expose idToken on userInfo directly
-          const possible = (userInfo as any).idToken || (userInfo as any).token;
-          if (typeof possible === 'string') idToken = possible;
-        }
-        if (userInfo && !(window as any).__WEB3AUTH_USERINFO_KEYS) {
-          (window as any).__WEB3AUTH_USERINFO_KEYS = Object.keys(userInfo as any);
-        }
-        if (idToken) {
-          (window as any).__WEB3AUTH_ID_TOKEN = idToken;
-          document.cookie = `web3auth_token=${idToken}; path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+        // Try to get an idToken for social logins
+        if (!isExternalWallet) {
+          const tokenResult: any = await (web3Auth as any)?.authenticateUser?.();
+          idToken = typeof tokenResult === 'string' ? tokenResult : tokenResult?.idToken || tokenResult?.token;
+          if (!idToken && userInfo) {
+            const possible = (userInfo as any).idToken || (userInfo as any).token;
+            if (typeof possible === 'string') idToken = possible;
+          }
         }
       } catch (e) {
-        console.warn('[useAutoRegisterUser] getIdentityToken failed (attempt', attempt, '):', e);
+        // ignore and continue
       }
 
+      // Fallback heuristic: if no idToken after a couple retries, treat as external
+      if (!idToken && attempt >= 2) {
+        isExternalWallet = true;
+      }
+
+      // External wallet path (no idToken)
+      if (!idToken && isExternalWallet) {
+        try {
+          const ts = Date.now();
+          const message = `learn.sol register ${walletAddress} ${ts}`;
+          let signature: string | undefined;
+          try {
+            const provider: any = (web3Auth as any)?.provider;
+            if (provider) {
+              // Prefer SolanaWallet.signMessage for Solana
+              const wallet = new SolanaWallet(provider);
+              const sigBytes = await wallet.signMessage(new TextEncoder().encode(message));
+              const { default: bs58 } = await import('bs58');
+              signature = bs58.encode(sigBytes);
+            }
+          } catch (signErr) {
+            console.warn('[useAutoRegisterUser] signMessage unavailable, proceeding without signature');
+          }
+
+          const res = await fetch('/api/user/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Wallet-Address': walletAddress,
+              ...(signature ? { 'X-Wallet-Signature': signature } : {}),
+            },
+            body: JSON.stringify({
+              walletAddress,
+              authType: 'external_wallet',
+              connectedAdapter: (web3Auth as any)?.connectedAdapterName,
+              signature: signature || null,
+              message,
+              timestamp: ts,
+              email: null,
+              name: null,
+              profileImage: null,
+            })
+          });
+          if (!res.ok) {
+            const txt = await res.text();
+            console.error('[useAutoRegisterUser] external register failed', res.status, txt);
+            if (res.status === 401 && attempt < 4) {
+              const delay = 800 * Math.pow(2, attempt);
+              setTimeout(() => attemptRegistration(attempt + 1), delay);
+            }
+            return;
+          }
+          const data = await res.json();
+          if (cancelled) return;
+          attemptedRef.current = true;
+          opts.onRegistered?.(data.user);
+          console.log('[useAutoRegisterUser] user registered (external)');
+          return;
+        } catch (err) {
+          console.error('[useAutoRegisterUser] external registration error', err);
+          if (attempt < 4) setTimeout(() => attemptRegistration(attempt + 1), 800 * Math.pow(2, attempt));
+          return;
+        }
+      }
+
+      // Social path
       if (!idToken) {
-        if (attempt < 7) {
-          const delay = 400 * Math.pow(2, attempt);
+        // keep trying a few times for social tokens
+        if (attempt < 6) {
+          const delay = 500 * Math.pow(2, attempt);
           console.log('[useAutoRegisterUser] no token yet, retrying in', delay, 'ms');
           setTimeout(() => attemptRegistration(attempt + 1), delay);
         } else {
-          console.error('[useAutoRegisterUser] Exhausted token retries; giving up registration for now. window.__WEB3AUTH_DEBUG available');
-          (window as any).__WEB3AUTH_DEBUG = {
-            web3AuthStatus: (web3Auth as any)?.status,
-            web3AuthKeys: web3Auth ? Object.keys(web3Auth) : null,
-            isConnectedMaybe: (web3Auth as any)?.connected,
-            walletAddress,
-            userInfoKeys: userInfo ? Object.keys(userInfo as any) : null,
-          };
+          console.error('[useAutoRegisterUser] token not available; stop retrying');
         }
         return;
       }
 
-      // 2. Perform registration with token
       try {
         const res = await fetch('/api/user/register', {
           method: 'POST',
@@ -65,6 +124,7 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
           },
           body: JSON.stringify({
             walletAddress,
+            authType: 'social',
             email: (userInfo as any)?.email,
             name: (userInfo as any)?.name,
             profileImage: (userInfo as any)?.profileImage,
@@ -72,8 +132,7 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
         });
         if (!res.ok) {
           const txt = await res.text();
-          console.error('[useAutoRegisterUser] register failed status', res.status, txt);
-          // If 401, maybe token not yet propagated; try again a limited number of times
+          console.error('[useAutoRegisterUser] social register failed', res.status, txt);
           if (res.status === 401 && attempt < 5) {
             const delay = 600 * Math.pow(2, attempt);
             setTimeout(() => attemptRegistration(attempt + 1), delay);
@@ -84,9 +143,9 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
         if (cancelled) return;
         attemptedRef.current = true;
         opts.onRegistered?.(data.user);
-        console.log('[useAutoRegisterUser] user registered');
+        console.log('[useAutoRegisterUser] user registered (social)');
       } catch (err) {
-        console.error('[useAutoRegisterUser] network error', err);
+        console.error('[useAutoRegisterUser] social register network error', err);
         if (attempt < 5) setTimeout(() => attemptRegistration(attempt + 1), 600 * Math.pow(2, attempt));
       }
     }

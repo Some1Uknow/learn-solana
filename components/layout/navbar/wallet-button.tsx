@@ -17,6 +17,7 @@ import {
   useWeb3Auth,
 } from "@web3auth/modal/react";
 import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
+import { SolanaWallet } from "@web3auth/solana-provider";
 
 interface NavbarWalletButtonProps {
   isMobile?: boolean;
@@ -55,12 +56,18 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
 
   const getAddress = async () => {
     try {
-      const accounts = await provider?.request({
-        method: "getAccounts",
-        params: {},
-      });
-      
-      const address = Array.isArray(accounts) ? accounts[0] : accounts;
+      if (!provider) return;
+      let address: string | undefined;
+      try {
+        // Prefer SolanaWallet API
+        const wallet = new SolanaWallet(provider as any);
+        const accounts = await wallet.requestAccounts();
+        address = Array.isArray(accounts) ? accounts[0] : accounts;
+      } catch (e) {
+        // Fallback to generic provider request
+        const accounts = await (provider as any).request?.({ method: "getAccounts", params: {} });
+        address = Array.isArray(accounts) ? accounts[0] : accounts;
+      }
       if (address) setUserAddress(address);
     } catch (error) {
       console.error("Failed to get address:", error);
@@ -103,7 +110,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   if (!isClient) return null;
 
   // Loading state
-  if (isLoading || (isConnected && !userAddress)) {
+  if (isLoading) {
     return (
       <Button disabled className={`bg-yellow-500 text-black ${isMobile ? "w-full" : ""}`}>
         <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent mr-2" />
