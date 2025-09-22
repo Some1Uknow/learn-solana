@@ -1,0 +1,216 @@
+"use client";
+
+import React from "react";
+import { authFetch } from "@/lib/auth/authFetch";
+
+export interface ClaimNftModalProps {
+  open: boolean;
+  gameId: string;
+  walletAddress: string | null;
+  onClose: () => void;
+  provider: any;
+  setCompleted: (mintAddress: string) => void;
+}
+
+export default function ClaimNftModal({ open, gameId, walletAddress, onClose, provider, setCompleted }: ClaimNftModalProps) {
+  const [mintStatus, setMintStatus] = React.useState<"idle" | "minting" | "success" | "error">("idle");
+  const [mintError, setMintError] = React.useState<string | null>(null);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={() => {
+          if (mintStatus !== "minting") onClose();
+        }}
+      />
+      <div className="relative w-full max-w-md rounded-2xl bg-[#111113] p-6 shadow-xl">
+        <h3 className="text-lg font-semibold tracking-tight">Claim NFT Reward</h3>
+        <p className="mt-2 text-sm text-zinc-400">
+          You completed <span className="font-medium text-zinc-200">{gameId}</span>. Mint a commemorative devnet NFT.
+        </p>
+        <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 text-xs text-zinc-400">
+          Network: <span className="text-zinc-200">Solana Devnet</span>
+        </div>
+        {mintError && (
+          <div className="mt-3 rounded-lg bg-red-600/10 border border-red-600/40 p-3 text-xs text-red-300">{mintError}</div>
+        )}
+        <div className="mt-6 flex flex-col gap-3">
+          {mintStatus === "success" ? (
+            <button
+              type="button"
+              className="w-full rounded-xl bg-green-600 px-4 py-3 text-sm font-medium text-white hover:bg-green-500"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          ) : (
+            <button
+              disabled={mintStatus === "minting"}
+              className="w-full rounded-xl bg-purple-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-purple-400 disabled:opacity-60 disabled:cursor-not-allowed"
+              type="button"
+              onClick={async () => {
+                setMintStatus("minting");
+                setMintError(null);
+                try {
+                  if (!walletAddress) {
+                    setMintError("Wallet address unavailable. Connect wallet again.");
+                    setMintStatus("error");
+                    return;
+                  }
+
+                  const [{ clientMintGameNft }, web3js] = await Promise.all([
+                    import("@/lib/metaplex/clientMintGameNft"),
+                    import("@solana/web3.js"),
+                  ]);
+                  const solanaWallet: any = (window as any).solanaWallet || (window as any).web3authSolanaWallet;
+                  if (!solanaWallet || typeof solanaWallet.signTransaction !== "function") {
+                    setMintError("Solana wallet signer not found (web3auth).");
+                    setMintStatus("error");
+                    return;
+                  }
+                  const primaryRaw = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "";
+                  const sanitize = (u: string) => u.trim().replace(/\s+/g, "").replace(/\/+$/, "");
+                  const endpoints: string[] = [];
+                  if (primaryRaw) endpoints.push(sanitize(primaryRaw));
+                  const apiKeyMatch = primaryRaw.match(/api-key=([^&]+)/);
+                  const key = apiKeyMatch?.[1];
+                  if (key) {
+                    const fast = "https://sender.helius-rpc.com/fast";
+                    if (!endpoints.includes(fast)) endpoints.push(fast);
+                  }
+                  const canonicalDevnet = "https://api.devnet.solana.com";
+                  if (!endpoints.includes(canonicalDevnet)) endpoints.push(canonicalDevnet);
+
+                  let connection: any = null;
+                  let lastErr: any = null;
+                  for (const ep of endpoints) {
+                    try {
+                      const testConn = new web3js.Connection(ep, { commitment: "confirmed" });
+                      await testConn.getVersion();
+                      connection = testConn;
+                      break;
+                    } catch (e) {
+                      lastErr = e;
+                    }
+                  }
+                  if (!connection) {
+                    setMintError(`All RPC endpoints failed (last error: ${lastErr?.message || lastErr}). Check network / API key.`);
+                    setMintStatus("error");
+                    return;
+                  }
+
+                  const sendAndConfirm = async (tx: any): Promise<string> => {
+                    let serialized: Uint8Array | null = null;
+                    try {
+                      const signed = await solanaWallet.signTransaction(tx);
+                      serialized = signed.serialize();
+                    } catch (e: any) {
+                      const msg = e?.message || String(e);
+                      if (/method not found/i.test(msg) || /404/.test(msg)) {
+                        try {
+                          if (!provider) throw new Error("Provider unavailable for manual signing");
+                          let privHex: string | null = null;
+                          try {
+                            privHex = await (provider as any).request({ method: "solanaPrivateKey" });
+                          } catch {}
+                          if (!privHex) {
+                            try {
+                              privHex = await (provider as any).request({ method: "private_key" });
+                            } catch {}
+                          }
+                          if (!privHex || typeof privHex !== "string" || privHex.trim() === "") {
+                            throw new Error("Provider returned empty private key. Check Web3Auth Solana chain configuration.");
+                          }
+                          let seed: Buffer | null = null;
+                          const raw = privHex.trim();
+                          if (/^(0x)?[0-9a-fA-F]{64}$/.test(raw)) {
+                            const cleanHex = raw.replace(/^0x/, "");
+                            seed = Buffer.from(cleanHex, "hex");
+                          } else {
+                            try {
+                              const { default: bs58 } = await import("bs58");
+                              const b58 = bs58.decode(raw);
+                              if (b58.length === 32) seed = Buffer.from(b58);
+                              else if (b58.length === 64) seed = Buffer.from(b58.slice(0, 32));
+                            } catch {}
+                            if (!seed) {
+                              try {
+                                const b64 = Buffer.from(raw, "base64");
+                                if (b64.length === 32) seed = b64;
+                                else if (b64.length === 64) seed = b64.subarray(0, 32);
+                              } catch {}
+                            }
+                          }
+                          if (!seed || seed.length !== 32) {
+                            throw new Error("Private key not valid hex/base58/base64 32-byte seed (got length " + (seed?.length ?? 0) + ")");
+                          }
+                          const nacl = await import("tweetnacl");
+                          const kp = nacl.sign.keyPair.fromSeed(seed);
+                          const secretKey = new Uint8Array([...seed, ...kp.publicKey]);
+                          const { Keypair } = await import("@solana/web3.js");
+                          const payerKeypair = Keypair.fromSecretKey(secretKey);
+                          if (payerKeypair.publicKey.toBase58() !== walletAddress) {
+                            throw new Error("Derived key mismatch with wallet address");
+                          }
+                          try {
+                            tx.partialSign(payerKeypair);
+                          } catch {
+                            tx.sign(payerKeypair);
+                          }
+                          serialized = tx.serialize();
+                        } catch (inner) {
+                          throw new Error("Signing failed (wallet + fallback). " + (inner as any).message);
+                        }
+                      } else {
+                        throw e;
+                      }
+                    }
+                    if (!serialized) throw new Error("Transaction not signed");
+                    const sig = await connection.sendRawTransaction(serialized, { skipPreflight: false });
+                    await connection.confirmTransaction(sig, "confirmed");
+                    return sig;
+                  };
+
+                  const { mintAddress } = await clientMintGameNft({
+                    connection,
+                    walletPublicKey: walletAddress,
+                    sendAndConfirm,
+                    gameId,
+                  });
+
+                  const res = await authFetch("/api/mint-game-nft", {
+                    method: "POST",
+                    body: JSON.stringify({ gameId, walletAddress, clientMint: true, mintAddress }),
+                  });
+                  if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(`Record failed: ${txt}`);
+                  }
+                  setCompleted(mintAddress);
+                  setMintStatus("success");
+                } catch (e: any) {
+                  setMintError(e.message || "Unknown error");
+                  setMintStatus("error");
+                }
+              }}
+            >
+              {mintStatus === "minting" ? "Minting..." : "Mint NFT"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              if (mintStatus !== "minting") onClose();
+            }}
+            className="w-full rounded-xl bg-zinc-800 px-4 py-3 text-sm font-medium text-zinc-300 hover:bg-zinc-700"
+          >
+            {mintStatus === "success" ? "Close" : "Cancel"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
