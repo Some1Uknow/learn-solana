@@ -45,27 +45,6 @@ export default function ModuleCard({
     router.push(`/learn/${module.id}`);
   };
 
-  const getCategoryFromTitle = (title: string): string => {
-    const lowerTitle = title.toLowerCase();
-    
-    // Programming Languages
-    if (lowerTitle.includes('rust') || lowerTitle.includes('solidity') || lowerTitle.includes('javascript') || lowerTitle.includes('typescript')) return 'Programming';
-    
-    // AI/ML related
-    if (lowerTitle.includes('ai') || lowerTitle.includes('artificial intelligence') || lowerTitle.includes('machine learning') || lowerTitle.includes('smart contract ai')) return 'Core AI';
-    
-    // Data & Analytics
-    if (lowerTitle.includes('data') || lowerTitle.includes('analytics') || lowerTitle.includes('analysis')) return 'Analytics';
-    
-    // Blockchain & Web3
-    if (lowerTitle.includes('blockchain') || lowerTitle.includes('solana') || lowerTitle.includes('web3') || lowerTitle.includes('defi') || lowerTitle.includes('crypto')) return 'Blockchain';
-    
-    // Development
-    if (lowerTitle.includes('development') || lowerTitle.includes('programming') || lowerTitle.includes('coding')) return 'Development';
-    
-    return 'General';
-  };
-
   const getStatusText = () => {
     if (isCompleted) return "Completed";
     if (isStarted) return "In Progress";

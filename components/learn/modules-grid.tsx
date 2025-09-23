@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 
@@ -23,42 +24,34 @@ export interface ModuleItem {
 }
 
 const DIFFICULTY = "BEGINNER";
-const ALL_TYPES = [
-  "theory",
-  "exercise",
-  "project",
-  "challenge",
-  "setup",
-  "planning",
-  "implementation",
-  "quality-assurance",
-  "deployment",
-  "documentation",
-  "optimization",
-  "showcase",
-];
 
-const getImageForWeek = (m: ModuleItem, index: number) => {
-  // Prefer explicit data.image; override for week 4 as requested
-  // if (index === 3) return '/nextjs-N.png'
+const getImageForWeek = (m: ModuleItem) => {
+  // Prefer explicit data.image; fallback to placeholder
   return m.image || "/placeholder.png";
+};
+
+// Map module icon string to a public image path to display for each course item
+const getIconForModule = (icon?: string) => {
+  const key = (icon || "").toLowerCase();
+  switch (key) {
+    case "rust":
+      return "/rust-2.png";
+    case "anchor":
+      return "/anchor.png";
+    case "fullstack":
+      return "/nextjs.png";
+    case "fundamentals":
+    case "solana":
+      return "/solanaLogo.png";
+    default:
+      return "/placeholder.png";
+  }
 };
 
 export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
   const { userInfo } = useWeb3AuthUser();
   const [query, setQuery] = useState("");
-  const [activeTypes, setActiveTypes] = useState<string[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [showSearch, setShowSearch] = useState(true);
   const [active, setActive] = useState<ModuleItem | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // Ghost Search: show/hide based on scroll
-  useEffect(() => {
-    const onScroll = () => setShowSearch(window.scrollY < 40);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -70,25 +63,15 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
           t.title.toLowerCase().includes(q) ||
           t.description.toLowerCase().includes(q)
       );
-      const typesMatch =
-        activeTypes.length === 0 ||
-        m.topics.some((t) => activeTypes.includes(t.type));
-      return (q ? inTitle || inDesc || inTopics : true) && typesMatch;
+      return q ? inTitle || inDesc || inTopics : true;
     });
-  }, [modules, query, activeTypes]);
-
-  const toggleType = (t: string) =>
-    setActiveTypes((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-    );
-  const toggleExpand = (id: string) =>
-    setExpandedId((prev) => (prev === id ? null : id));
+  }, [modules, query]);
 
   const continueItems = filtered.slice(0, 2);
   const rest = filtered.slice(2);
 
   return (
-    <div ref={containerRef}>
+    <div>
       {/* Hero */}
       <div className="mb-10">
         <div className="text-xs tracking-[0.25em] text-zinc-400">[WELCOME]</div>
@@ -153,7 +136,6 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
             <CourseCard
               key={m.id}
               m={m}
-              index={idx}
               onContinue={() => setActive(m)}
               large
             />
@@ -165,12 +147,7 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
       <section aria-labelledby="all" className="mt-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {rest.map((m, idx) => (
-            <CourseCard
-              key={m.id}
-              m={m}
-              index={idx + 2}
-              onContinue={() => setActive(m)}
-            />
+            <CourseCard key={m.id} m={m} onContinue={() => setActive(m)} />
           ))}
         </div>
       </section>
@@ -183,9 +160,10 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
             onClick={() => setActive(null)}
             className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity"
           />
-          <div className="fixed inset-0 mx-auto w-full max-w-3xl translate-y-0 p-4 sm:translate-y-4">
-            <div className="relative overflow-hidden rounded-2xl bg-[#0f0f12] p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
-              <div className="flex items-start justify-between gap-4">
+          <div className="fixed inset-0 mx-auto w-full max-w-7xl p-4">
+            <div className="relative mx-auto flex h-[90vh] flex-col overflow-hidden rounded-2xl bg-[#0f0f12] shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
+              {/* Header */}
+              <div className="flex flex-none items-start justify-between gap-4 border-b border-white/5 p-6">
                 <div>
                   <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
                     {(active.icon || "Course").toUpperCase()}
@@ -193,9 +171,7 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
                   <h3 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
                     {active.title}
                   </h3>
-                  <p className="mt-1 text-sm text-zinc-400">
-                    {active.description}
-                  </p>
+                  <p className="mt-1 text-sm text-zinc-400">{active.description}</p>
                 </div>
                 <button
                   onClick={() => setActive(null)}
@@ -206,52 +182,86 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
                 </button>
               </div>
 
-              <div className="mt-5 rounded-xl bg-white/[0.02] p-4">
-                <h4 className="text-sm font-medium text-zinc-200">
-                  Learning goal
-                </h4>
-                <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>
+              {/* Body: two-column courses grid with scroll, includes overview as first item */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {(() => {
+                    const week = active.id; // e.g., "week-1"
+                    const iconSrc = getIconForModule(active.icon);
+                    const items = [
+                      {
+                        key: `${week}-overview`,
+                        title: active.title || "Overview",
+                        description: active.goal || active.description,
+                        type: "overview",
+                        href: `/learn/${week}`,
+                      },
+                      ...active.topics.map((t) => ({
+                        key: t.id,
+                        title: t.title,
+                        description: t.description,
+                        type: t.type,
+                        href: `/learn/${week}/${t.id}`,
+                      })),
+                    ];
+                    return items.map((it, i) => (
+                      <div
+                        key={it.key}
+                        className="group flex items-start gap-3 rounded-xl bg-white/[0.02] p-4 transition hover:bg-white/[0.04]"
+                        style={{ animation: `fadeIn 280ms ease ${i * 60}ms both` }}
+                      >
+                        <div className="relative mt-0.5 h-10 w-10 shrink-0">
+                          <Image
+                            src={iconSrc}
+                            alt={active.icon || "Course"}
+                            fill
+                            sizes="40px"
+                            className="rounded-md object-contain"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h5 className="text-sm font-semibold text-zinc-100">
+                                {it.title}
+                              </h5>
+                              <p className="mt-0.5 line-clamp-2 text-[13px] leading-5 text-zinc-400">
+                                {it.description}
+                              </p>
+                            </div>
+                            <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-500 sm:inline">
+                              {it.type}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between">
+                            <span className="text-xs text-zinc-500 sm:hidden">{it.type}</span>
+                            <Link
+                              href={it.href}
+                              className="ml-auto inline-flex items-center gap-1 rounded-lg bg-cyan-500 px-3 py-1.5 text-sm font-medium text-black transition hover:bg-cyan-400"
+                            >
+                              Learn
+                              <span aria-hidden>→</span>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
               </div>
 
-              <div className="mt-6">
-                <h4 className="mb-2 text-sm font-medium text-zinc-200">
-                  Topics
-                </h4>
-                <ul className="space-y-3">
-                  {active.topics.map((t, i) => (
-                    <li
-                      key={t.id}
-                      className="rounded-xl bg-white/[0.02] p-3 text-sm text-zinc-300 transition hover:bg-white/[0.04]"
-                      style={{
-                        animation: `fadeIn 300ms ease ${i * 70}ms both`,
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="font-medium text-zinc-100">
-                          {t.title}
-                        </span>
-                        <span className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
-                          {t.type}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[13px] leading-[1.6] text-zinc-400">
-                        {t.description}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+              {/* Footer (goal display) */}
+              <div className="flex flex-none border-t border-white/5 p-6">
+                <div className="rounded-xl bg-white/[0.02] p-4">
+                  <h4 className="text-sm font-medium text-zinc-200">Learning goal</h4>
+                  <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>
+                </div>
               </div>
 
               <style jsx>{`
                 @keyframes fadeIn {
-                  from {
-                    opacity: 0;
-                    transform: translateY(4px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
+                  from { opacity: 0; transform: translateY(4px); }
+                  to { opacity: 1; transform: translateY(0); }
                 }
               `}</style>
             </div>
@@ -264,16 +274,14 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
 
 function CourseCard({
   m,
-  index,
   large,
   onContinue,
 }: {
   m: ModuleItem;
-  index: number;
   large?: boolean;
   onContinue: () => void;
 }) {
-  const img = getImageForWeek(m, index);
+  const img = getImageForWeek(m);
   // Derive category from icon or fallback
   const category = (m.icon || "").toUpperCase() || "COURSE";
   const progress = `1/${Math.max(1, m.topics.length)}`; // placeholder progress
