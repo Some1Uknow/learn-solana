@@ -2,7 +2,7 @@ import * as Phaser from "phaser";
 import { SOLANA_QUESTIONS, Question } from "./SolanaClickerUtils";
 
 // Event name exported so React wrapper can subscribe
-export const GAME_COMPLETE_EVENT = 'gameComplete';
+export const GAME_COMPLETE_EVENT = "gameComplete";
 
 export class GameScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -31,12 +31,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    // Create proper colored rectangles using Phaser's built-in graphics
-    this.load.image(
-      "sky",
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-    );
-    // Load your uploaded sprite sheet
+    // Player spritesheet (same as before)
     this.load.spritesheet(
       "playerSheet",
       "/game-assets/solana-clicker/sprite-sheet-1.png",
@@ -46,31 +41,39 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    // Tiles: treat the tilesheet as a spritesheet of 32x32 frames
-    this.load.spritesheet('tiles32', '/game-assets/solana-clicker/platform_tilesheet_32.png', {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
-
-    // Coin: 4 frames, 32x32 each (corrected from 8 to 4 frames)
-    this.load.spritesheet('solCoin', '/game-assets/solana-clicker/solana_coin_8x32x32.png', {
-     frameWidth: 257,   // real width of each frame
-  frameHeight: 292,
-    });
-
-    // Add a load error handler to debug sprite loading issues
-    this.load.on('loaderror', (fileObj: any) => {
-      console.error('Load error:', fileObj.src);
-      // Create a fallback graphic if the sprite fails to load
-      if (fileObj.key === 'solCoin') {
-        const fallbackCoin = this.add.graphics();
-        fallbackCoin.fillStyle(0xFFD700); // Gold color
-        fallbackCoin.fillCircle(16, 16, 16);
-        fallbackCoin.lineStyle(2, 0xFFA500);
-        fallbackCoin.strokeCircle(16, 16, 16);
-        fallbackCoin.generateTexture('solCoin', 32, 32);
+    // Tilesheet (your 2x5 grid, 32x32 each)
+    this.load.spritesheet(
+      "tiles32",
+      "/game-assets/solana-clicker/platform_tilesheet.png",
+      {
+        frameWidth: 204, // instead of 32
+        frameHeight: 204,
       }
-    });
+    );
+
+    // Coin sheet (your 2x2 grid, 64x64 each)
+    this.load.spritesheet(
+      "solCoin",
+      "/game-assets/solana-clicker/solana_coin.png",
+      {
+        frameWidth: 256, // instead of 64
+        frameHeight: 256,
+      }
+    );
+
+    // Goal (green portal)
+    this.load.image("goalImg", "/game-assets/solana-clicker/goal.png");
+
+    // Quiz UI panel
+    this.load.image("uiPanel", "/game-assets/solana-clicker/ui_panel.png");
+
+    // Backgrounds
+    this.load.image("bg_level1", "/game-assets/solana-clicker/bg_level1.png");
+    this.load.image("bg_level2", "/game-assets/solana-clicker/bg_level2.png");
+    this.load.image("bg_level3", "/game-assets/solana-clicker/bg_level3.png");
+    this.load.image("bg_level4", "/game-assets/solana-clicker/bg_level4.png");
+    this.load.image("bg_level5", "/game-assets/solana-clicker/bg_level5.png");
+
     // Create graphics textures instead of loading images
     this.createTextures();
   }
@@ -99,16 +102,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
-    // Sky background with different colors per level
-    const skyColors = [0x87ceeb, 0xff6b6b, 0x4ecdc4, 0x45b7d1, 0x96ceb4];
-    // ✅ Updated to use this.cameras.main.width and height for correct positioning
-    this.add.rectangle(
-      this.cameras.main.width / 2,
-      this.cameras.main.height / 2,
-      this.cameras.main.width,
-      this.cameras.main.height,
-      skyColors[this.currentLevel - 1] || 0x87ceeb
-    );
+    // Background image per level
+    const bgKey = `bg_level${this.currentLevel}`;
+    this.add
+      .image(this.cameras.main.width / 2, this.cameras.main.height / 2, bgKey)
+      .setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
     // Level indicator
     this.add
@@ -204,24 +202,36 @@ export class GameScene extends Phaser.Scene {
   // Frame map in the tilesheet (4x2 grid we made):
   // 0=platform_left, 1=platform_center, 2=platform_right, 3=platform_top,
   // 4=platform_tl, 5=platform_tr, 6=hover_pad
-  private addTile(x: number, y: number, frame: number) {
-    // origin(0,0) makes positioning easy in pixels
-    const spr = this.add.sprite(x, y, 'tiles32', frame).setOrigin(0, 0);
-    this.physics.add.existing(spr, true);    // static physics body
-    this.platforms.add(spr);                 // so collisions work
-    return spr;
+  // Add a single tile
+ private addTile(x: number, y: number, frame: number) {
+  const spr = this.add.sprite(x, y, "tiles32", frame).setOrigin(0, 0);
+
+  // make each tile render at 64x64
+  spr.setDisplaySize(64, 64);
+
+  this.physics.add.existing(spr, true);
+
+  const body = spr.body as Phaser.Physics.Arcade.StaticBody;
+  if (body) {
+    body.setSize(64, 64);
+    body.setOffset(0, 0);
   }
 
-  private placeRow(startX: number, y: number, tileCount: number) {
-    // left
-    this.addTile(startX, y, 0);
-    // centers
-    for (let i = 1; i < tileCount - 1; i++) {
-      this.addTile(startX + i * 32, y, 1);
-    }
-    // right
-    if (tileCount > 1) {
-      this.addTile(startX + (tileCount - 1) * 32, y, 2);
+  this.platforms.add(spr);
+  return spr;
+}
+
+
+  // Place a row of the SAME tile type
+  private placeRow(
+    startX: number,
+    y: number,
+    tileCount: number,
+    frame: number = 0
+  ) {
+    const TILE_SIZE = 64; // display size
+    for (let i = 0; i < tileCount; i++) {
+      this.addTile(startX + i * TILE_SIZE, y, frame);
     }
   }
 
@@ -254,18 +264,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   createLevel1() {
-    // A big ground row (roughly the same width as before)
-    this.placeRow(16, 568, 24); // y is top-left of tile (32px tall)
+    // Big ground row (all grass blocks = frame 0)
+    this.placeRow(0, 568, 13, 0);
 
-    // Floating platforms (use short rows)
-    this.placeRow(200, 480, 6);
-    this.placeRow(600, 380, 6);
-    this.placeRow(700, 280, 4);
+    // Floating platforms (shorter rows, can mix frames for variety)
+    this.placeRow(200, 480, 3, 0);
+    this.placeRow(600, 380, 3, 0);
+    this.placeRow(700, 280, 2, 0);
 
-    // Little hover pads (single stepping stones)
-    this.placePad(520, 520);
-    this.placePad(420, 440);
+    // Hover pads (maybe use stone frame = 6, or purple pad = 7)
+    this.addTile(520, 520, 6);
+    this.addTile(420, 440, 6);
 
+    // Goal
     this.createGoal(700, 250);
   }
 
@@ -361,13 +372,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   createGoal(x: number, y: number) {
-    const goal = this.add.rectangle(x, y, 60, 60, 0x00ff00);
-    goal.setStrokeStyle(4, 0xffffff);
+    const goal = this.add.image(x, y, "goalImg").setOrigin(0.5);
+    goal.setDisplaySize(60, 60);
 
     this.tweens.add({
       targets: goal,
-      scaleX: 1.1,
-      scaleY: 1.1,
+      scaleX: 0.1,
+      scaleY: 0.1,
       duration: 1000,
       yoyo: true,
       repeat: -1,
@@ -386,55 +397,63 @@ export class GameScene extends Phaser.Scene {
 
   createStars() {
     const positions = this.getStarPositions();
-    this.coins = this.physics.add.group({ allowGravity: false, immovable: true });
+    this.coins = this.physics.add.group({
+      allowGravity: false,
+      immovable: true,
+    });
 
     // Create coin spin animation with correct frame count (4 frames)
     this.anims.create({
-      key: 'coinSpin',
-      frames: this.anims.generateFrameNumbers('solCoin', { start: 0, end: 3 }),
+      key: "coinSpin",
+      frames: this.anims.generateFrameNumbers("solCoin", { start: 0, end: 3 }),
       frameRate: 8,
       repeat: -1,
-      yoyo: false
+      yoyo: false,
     });
 
     // Also create a simple fallback animation if the first one fails
     this.anims.create({
-      key: 'coinSimple',
-      frames: [{ key: 'solCoin', frame: 0 }],
+      key: "coinSimple",
+      frames: [{ key: "solCoin", frame: 0 }],
       frameRate: 1,
       repeat: -1,
     });
 
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       // Add a subtle glow effect behind the coin
-      const glow = this.add.circle(pos.x, pos.y, 18, 0xffdd00, 0.3);
+      const glow = this.add.circle(pos.x, pos.y, 26, 0xffdd00, 0.3);
       glow.setDepth(-1); // Place it behind the coin
 
       // Create the animated coin sprite
-      const c = this.coins.create(pos.x, pos.y, 'solCoin', 0) as Phaser.Physics.Arcade.Sprite;
-      c.setScale(0.12); // Make coins larger and more visible
+      const c = this.coins.create(
+        pos.x,
+        pos.y,
+        "solCoin",
+        0
+      ) as Phaser.Physics.Arcade.Sprite;
+      c.setScale(0.08); // Adjusted scale for 256x256 coin
 
       // Add a subtle pulsing effect to make coins more noticeable
       this.tweens.add({
         targets: c,
-        scale: 0.3,
+        scale: 0.2,
         duration: 800,
         yoyo: true,
         repeat: -1,
-        ease: 'Sine.easeInOut'
+        ease: "Sine.easeInOut",
       });
 
       try {
-        c.play('coinSpin');
+        c.play("coinSpin");
       } catch (err) {
-        console.error('Error playing coin animation:', err);
+        console.error("Error playing coin animation:", err);
         // Fall back to using frame 0
-        c.setTexture('solCoin', 0);
+        c.setTexture("solCoin", 0);
       }
 
       // Type safety check for body property
       if (c.body) {
-        c.body.setCircle(12, 4, 4); // Appropriate pickup circle size
+        c.body.setCircle(20, 10, 10); // Adjusted pickup circle size for scaled coin
       }
     });
   }
@@ -550,19 +569,24 @@ export class GameScene extends Phaser.Scene {
 
     if (
       (this.cursors.up.isDown || wasd.W.isDown) &&
-      this.player.body && this.player.body.touching.down
+      this.player.body &&
+      this.player.body.touching.down
     ) {
       this.player.setVelocityY(-350);
       this.player.anims.play("jump", true);
     }
 
-    if (this.player.body && !this.player.body.touching.down && this.player.body.velocity.y > 0) {
+    if (
+      this.player.body &&
+      !this.player.body.touching.down &&
+      this.player.body.velocity.y > 0
+    ) {
       this.player.anims.play("fall", true);
     }
   }
 
   collectCoin: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (
-    _player, 
+    _player,
     coinGO
   ) => {
     const coin = coinGO as Phaser.Physics.Arcade.Sprite;
@@ -582,7 +606,7 @@ export class GameScene extends Phaser.Scene {
         })
         .setOrigin(0.5);
     }
-  }
+  };
 
   reachGoal() {
     if (this.coins.countActive(true) > 0) {
@@ -630,8 +654,7 @@ export class GameScene extends Phaser.Scene {
     this.questionUI.setDepth(1001); // Higher than overlay
 
     // Question background
-    const questionBg = this.add.rectangle(0, 0, 700, 400, 0x2c3e50);
-    questionBg.setStrokeStyle(4, 0xffffff);
+    const questionBg = this.add.image(0, 0, "uiPanel").setDisplaySize(700, 400);
 
     // Question title
     const questionTitle = this.add
@@ -817,7 +840,10 @@ export class GameScene extends Phaser.Scene {
     // Guard to prevent duplicate emissions if method somehow re-entered
     if (!(this as any)._emittedGameComplete) {
       (this as any)._emittedGameComplete = true;
-      this.game.events.emit(GAME_COMPLETE_EVENT, { finalScore: this.score, levels: this.maxLevels });
+      this.game.events.emit(GAME_COMPLETE_EVENT, {
+        finalScore: this.score,
+        levels: this.maxLevels,
+      });
     }
   }
 }
