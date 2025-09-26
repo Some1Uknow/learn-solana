@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import { SOLANA_QUESTIONS, Question } from "./SolanaClickerUtils";
+import { SOLANA_QUESTIONS } from "./SolanaClickerUtils";
 
 // Event name exported so React wrapper can subscribe
 export const GAME_COMPLETE_EVENT = "gameComplete";
@@ -124,21 +124,25 @@ export class GameScene extends Phaser.Scene {
     this.createUI();
     this.setupPhysics();
     this.setupInput();
+    // Enable physics debug overlay to visualize hitboxes (helps tune sizes)
+    (this.physics.world as any).drawDebug = true;
+    (this.physics.world as any).debugGraphic = this.add
+      .graphics()
+      .setAlpha(0.75);
   }
   createPlayer() {
-    // ✅ Use the sprite sheet as texture, not the red debug rectangle
     this.player = this.physics.add.sprite(80, 450, "playerSheet", 0);
 
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
 
     this.player.setScale(0.3);
-    // Adjust the physics body to be much smaller than the frame
-    // SetSize uses unscaled dimensions. Let's assume the character is about 80px wide in the 216px frame.
-    this.player.body!.setSize(80, 280);
-    // We need to offset the body to align it with the visual sprite inside the frame.
-    // The frame is 216px wide, character is 80px. (216-80)/2 = 68px offset.
-    this.player.body!.setOffset(68, 0);
+    const body = this.player.body as Phaser.Physics.Arcade.Body;
+    if (body) {
+      body.setSize(80, 200);
+      body.setOffset(80, 100);
+      body.updateFromGameObject();
+    }
 
     // ✅ Animations (all on playerSheet)
     // IDLE
@@ -203,24 +207,29 @@ export class GameScene extends Phaser.Scene {
   // 0=platform_left, 1=platform_center, 2=platform_right, 3=platform_top,
   // 4=platform_tl, 5=platform_tr, 6=hover_pad
   // Add a single tile
- private addTile(x: number, y: number, frame: number) {
-  const spr = this.add.sprite(x, y, "tiles32", frame).setOrigin(0, 0);
+  private addTile(x: number, y: number, frame: number) {
+    const TILE_SIZE = 64; // final size we want
 
-  // make each tile render at 64x64
-  spr.setDisplaySize(64, 64);
+    const spr = this.add.sprite(x, y, "tiles32", frame).setOrigin(0, 0);
 
-  this.physics.add.existing(spr, true);
+    // Use setDisplaySize instead of scale to guarantee pixel alignment
+    spr.setDisplaySize(TILE_SIZE, TILE_SIZE);
 
-  const body = spr.body as Phaser.Physics.Arcade.StaticBody;
-  if (body) {
-    body.setSize(64, 64);
-    body.setOffset(0, 0);
+    this.physics.add.existing(spr, true);
+
+    const body = spr.body as Phaser.Physics.Arcade.StaticBody;
+    if (body) {
+      // hitbox = exactly display size
+      body.setSize(TILE_SIZE, TILE_SIZE);
+      body.setOffset(0, 0);
+
+      // Refresh body after resize
+      body.updateFromGameObject();
+    }
+
+    this.platforms.add(spr);
+    return spr;
   }
-
-  this.platforms.add(spr);
-  return spr;
-}
-
 
   // Place a row of the SAME tile type
   private placeRow(
@@ -552,6 +561,17 @@ export class GameScene extends Phaser.Scene {
 
   update() {
     if (this.levelComplete || this.isShowingQuiz) return;
+    // Draw debug bodies each frame so the overlay updates while playing
+    try {
+      const worldAny = this.physics.world as any;
+      if (worldAny.debugGraphic) {
+        worldAny.debugGraphic.clear();
+        worldAny.drawDebug = true;
+        worldAny.drawDebugBodies = true;
+      }
+    } catch (err) {
+      // ignore if debug not available
+    }
     const wasd = (this as any).wasd;
 
     if (this.cursors.left.isDown || wasd.A.isDown) {
