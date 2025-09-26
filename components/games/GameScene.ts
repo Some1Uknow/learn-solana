@@ -79,21 +79,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   createTextures() {
-    // Create ground texture
-    const groundGraphics = this.add.graphics();
-    groundGraphics.fillStyle(0x8b4513);
-    groundGraphics.fillRect(0, 0, 32, 32);
-    groundGraphics.generateTexture("ground", 32, 32);
-    groundGraphics.destroy();
-
-    // Create player texture
-    // const playerGraphics = this.add.graphics();
-    // playerGraphics.fillStyle(0xff0000);
-    // playerGraphics.fillRect(0, 0, 32, 48);
-    // playerGraphics.generateTexture("player", 32, 48);
-    // playerGraphics.destroy();
-
-    // Create star texture
+    // Legacy ground & placeholder textures removed since tilesheet now drives visuals
+    // (Leave method in case future procedural textures are needed.)
+    // Create star texture (glow behind coins)
     const starGraphics = this.add.graphics();
     starGraphics.fillStyle(0xffd700);
     starGraphics.fillCircle(16, 16, 16);
@@ -249,6 +237,28 @@ export class GameScene extends Phaser.Scene {
     this.addTile(x, y, 6);
   }
 
+  // Map each level to a primary block frame from the tilesheet
+  // Attachment order (left->right in provided image) assumed frames:
+  // 0: Grass (Level 1), 1: Wood (Level 2), 2: Water/Ice (Level 3), 3: Metal (Level 4), 4: Autumn Grass (Level 5)
+  private frameForLevel(level: number): number {
+    const mapping: Record<number, number> = {
+      1: 0,
+      2: 1,
+      3: 2,
+      4: 3,
+      5: 4,
+    };
+    return mapping[level] ?? 0;
+  }
+
+  // Convenience to center a row horizontally given tile count
+  private placeCenteredRow(y: number, tileCount: number, frame: number) {
+    const TILE_SIZE = 64;
+    const totalWidth = tileCount * TILE_SIZE;
+    const startX = 400 - totalWidth / 2; // assuming 800 width
+    this.placeRow(startX, y, tileCount, frame);
+  }
+
   createLevel() {
     this.platforms = this.physics.add.staticGroup();
     switch (this.currentLevel) {
@@ -290,93 +300,51 @@ export class GameScene extends Phaser.Scene {
   }
 
   createLevel2() {
-    this.platforms.create(400, 580, "ground").setScale(25, 1.25).refreshBody();
-    this.platforms
-      .create(150, 500, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(350, 420, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(550, 340, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(700, 260, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-
+    const f = this.frameForLevel(2);
+    // Ground
+    this.placeRow(0, 568, 13, f);
+    // Staggered rising platforms
+    this.placeRow(120, 500, 3, f);
+    this.placeRow(320, 420, 3, f);
+    this.placeRow(520, 340, 3, f);
+    this.placeRow(660, 260, 2, f);
     this.createGoal(700, 230);
   }
 
   createLevel3() {
-    this.platforms.create(400, 580, "ground").setScale(25, 1.25).refreshBody();
-    this.platforms
-      .create(120, 480, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(400, 400, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(180, 320, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(500, 240, "ground")
-      .setScale(4.5, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(700, 180, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-
+    const f = this.frameForLevel(3);
+    this.placeRow(0, 568, 13, f);
+    this.placeRow(80, 480, 3, f);
+    this.placeRow(360, 400, 3, f);
+    this.placeRow(140, 320, 3, f);
+    this.placeRow(460, 240, 3, f);
+    this.placeRow(660, 180, 2, f);
     this.createGoal(700, 150);
   }
 
   createLevel4() {
-    this.platforms.create(400, 580, "ground").setScale(25, 1.25).refreshBody();
-    this.platforms
-      .create(150, 480, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(650, 480, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-    this.platforms.create(400, 380, "ground").setScale(5, 0.625).refreshBody();
-    this.platforms
-      .create(120, 280, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(680, 280, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-    this.platforms
-      .create(400, 180, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-
+    const f = this.frameForLevel(4);
+    this.placeRow(0, 568, 13, f);
+    // Symmetric challenge layout
+    this.placeRow(100, 480, 3, f);
+    this.placeRow(600, 480, 3, f);
+    this.placeRow(300, 380, 5, f);
+    this.placeRow(80, 280, 3, f);
+    this.placeRow(620, 280, 3, f);
+    this.placeRow(300, 180, 4, f);
     this.createGoal(400, 150);
   }
 
   createLevel5() {
-    this.platforms.create(400, 580, "ground").setScale(25, 1.25).refreshBody();
-    this.platforms.create(120, 500, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms.create(320, 440, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms.create(520, 380, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms.create(680, 320, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms.create(480, 260, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms.create(280, 200, "ground").setScale(3, 0.625).refreshBody();
-    this.platforms
-      .create(480, 140, "ground")
-      .setScale(3.75, 0.625)
-      .refreshBody();
-
+    const f = this.frameForLevel(5);
+    this.placeRow(0, 568, 13, f);
+    this.placeRow(80, 500, 3, f);
+    this.placeRow(280, 440, 3, f);
+    this.placeRow(480, 380, 3, f);
+    this.placeRow(640, 320, 2, f);
+    this.placeRow(440, 260, 3, f);
+    this.placeRow(240, 200, 3, f);
+    this.placeRow(440, 140, 4, f);
     this.createGoal(480, 110);
   }
 
