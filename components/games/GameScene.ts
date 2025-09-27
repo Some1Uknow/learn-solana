@@ -54,7 +54,7 @@ export class GameScene extends Phaser.Scene {
     // Coin sheet (your 2x2 grid, 64x64 each)
     this.load.spritesheet(
       "solCoin",
-      "/game-assets/solana-clicker/solana_coin.png",
+      "/game-assets/solana-clicker/solana_coin_8x32x32.png",
       {
         frameWidth: 256, // instead of 64
         frameHeight: 256,
