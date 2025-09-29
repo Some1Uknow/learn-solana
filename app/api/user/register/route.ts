@@ -1,10 +1,13 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema/users';
 import { eq } from 'drizzle-orm';
 
 // Reusable auth verification similar to chat route
+const JWKS_URL = 'https://api-auth.web3auth.io/.well-known/jwks.json';
+const jwks = jose.createRemoteJWKSet(new URL(JWKS_URL));
+
 async function verifyAuthentication(req: Request): Promise<{ isAuthenticated: boolean; user?: any; token?: string }> {
   try {
     const authHeader = req.headers.get('authorization');
@@ -24,7 +27,6 @@ async function verifyAuthentication(req: Request): Promise<{ isAuthenticated: bo
     }
     if (!token) return { isAuthenticated: false };
 
-  const jwks = jose.createRemoteJWKSet(new URL('https://api-auth.web3auth.io/jwks'));
     const { payload } = await jose.jwtVerify(token, jwks, { algorithms: ['ES256'] });
     console.log('[register] JWT verified. Payload keys:', Object.keys(payload));
     return { isAuthenticated: true, token, user: payload };
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
     const { email, name, profileImage } = body || {};
 
     let walletAddress = xWallet as string | undefined;
+    let authToken: string | undefined;
     if (!authType || authType === 'social') {
       // Social path: require and verify Web3Auth JWT
       const auth = await verifyAuthentication(req);
@@ -52,6 +55,7 @@ export async function POST(req: NextRequest) {
           { status: 401 }
         );
       }
+      authToken = auth.token;
       // Wallet address still required from body to associate user
       walletAddress = typeof body?.walletAddress === 'string' ? body.walletAddress : undefined;
     } else if (authType === 'external_wallet') {
@@ -88,7 +92,20 @@ export async function POST(req: NextRequest) {
       saved = inserted[0];
     }
 
-    return new Response(JSON.stringify({ user: saved }), { status: 200, headers: { 'Content-Type': 'application/json' }});
+    const response = NextResponse.json({ user: saved }, { status: 200 });
+    if (authToken) {
+      response.cookies.set({
+        name: 'web3auth_token',
+        value: authToken,
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+        secure: process.env.NODE_ENV !== 'development',
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error('User register error', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error'}), { status: 500 });

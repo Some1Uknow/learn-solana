@@ -5,6 +5,25 @@ import { SolanaWallet } from '@web3auth/solana-provider';
 
 interface Options { onRegistered?: (user: any) => void }
 
+function persistWeb3AuthToken(token: string | undefined | null) {
+  if (!token || typeof window === 'undefined') return;
+  try {
+    (window as any).__WEB3AUTH_ID_TOKEN = token;
+    const parts = [
+      `web3auth_token=${token}`,
+      'Path=/',
+      'SameSite=Lax',
+      'Max-Age=604800',
+    ];
+    if (window.location?.protocol === 'https:') {
+      parts.push('Secure');
+    }
+    document.cookie = parts.join('; ');
+  } catch (err) {
+    console.warn('[useAutoRegisterUser] failed to persist token', err);
+  }
+}
+
 export function useAutoRegisterUser(walletAddress: string | undefined, opts: Options = {}) {
   const { web3Auth, isConnected } = useWeb3Auth();
   const { userInfo } = useWeb3AuthUser();
@@ -32,6 +51,7 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
             const possible = (userInfo as any).idToken || (userInfo as any).token;
             if (typeof possible === 'string') idToken = possible;
           }
+          persistWeb3AuthToken(idToken);
         }
       } catch (e) {
         // ignore and continue
@@ -116,6 +136,7 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
       }
 
       try {
+        persistWeb3AuthToken(idToken);
         const res = await fetch('/api/user/register', {
           method: 'POST',
           headers: {

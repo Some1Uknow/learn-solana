@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useChatContext } from "./chat-context";
+import { authFetch } from "@/lib/auth/authFetch";
 
 export default function DocsChat() {
   const { isOpen, setIsOpen, panelWidth, setPanelWidth } = useChatContext();
@@ -21,10 +22,32 @@ export default function DocsChat() {
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const chatTransport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        fetch: (input, init) => {
+          if (typeof input === "string") {
+            return authFetch(input, init);
+          }
+
+          const headers = new Headers(init?.headers ?? input.headers);
+          const requestInit: RequestInit = {
+            ...init,
+            headers: Object.fromEntries(headers.entries()),
+            method: init?.method ?? input.method,
+            body: init?.body ?? undefined,
+            signal: init?.signal ?? input.signal,
+          };
+
+          return authFetch(input.url, requestInit);
+        },
+      }),
+    []
+  );
+
   const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-    }),
+    transport: chatTransport,
   });
 
   // Better loading state: show loader until we have actual content
