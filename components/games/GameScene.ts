@@ -42,14 +42,13 @@ export class GameScene extends Phaser.Scene {
     );
 
     // Tilesheet (your 2x5 grid, 32x32 each)
-    this.load.spritesheet(
-      "tiles32",
-      "/game-assets/solana-clicker/platform_tilesheet.png",
-      {
-        frameWidth: 204, // instead of 32
-        frameHeight: 204,
-      }
-    );
+    // Individual tiles (replace spritesheet)
+    this.load.image("tile_grass", "/game-assets/solana-clicker/tile_grass.png");
+    this.load.image("tile_wood", "/game-assets/solana-clicker/tile_wood.png");
+    // Snow variant (some asset packs name it tile_snow)
+    this.load.image("tile_snow", "/game-assets/solana-clicker/tile_snow.png");
+    this.load.image("tile_metal", "/game-assets/solana-clicker/tile_metal.png");
+    this.load.image("tile_sand", "/game-assets/solana-clicker/tile_sand.png");
 
     // Coin sheet (your 2x2 grid, 64x64 each)
     this.load.spritesheet(
@@ -194,69 +193,44 @@ export class GameScene extends Phaser.Scene {
   // Frame map in the tilesheet (4x2 grid we made):
   // 0=platform_left, 1=platform_center, 2=platform_right, 3=platform_top,
   // 4=platform_tl, 5=platform_tr, 6=hover_pad
-  // Add a single tile
-  private addTile(x: number, y: number, frame: number) {
-    const TILE_SIZE = 64; // final size we want
+  // Add a single tile (by image key)
+  private addTile(x: number, y: number, key: string) {
+    const TILE_SIZE = 64; // final display size
 
-    const spr = this.add.sprite(x, y, "tiles32", frame).setOrigin(0, 0);
-
-    // Use setDisplaySize instead of scale to guarantee pixel alignment
+    const spr = this.add.sprite(x, y, key).setOrigin(0, 0);
     spr.setDisplaySize(TILE_SIZE, TILE_SIZE);
 
     this.physics.add.existing(spr, true);
 
     const body = spr.body as Phaser.Physics.Arcade.StaticBody;
-    if (body) {
-      // hitbox = exactly display size
-      body.setSize(TILE_SIZE, TILE_SIZE);
-      body.setOffset(0, 0);
-
-      // Refresh body after resize
-      body.updateFromGameObject();
-    }
+    body.setSize(TILE_SIZE, TILE_SIZE);
+    body.setOffset(0, 0);
+    body.updateFromGameObject();
 
     this.platforms.add(spr);
     return spr;
   }
 
   // Place a row of the SAME tile type
-  private placeRow(
-    startX: number,
-    y: number,
-    tileCount: number,
-    frame: number = 0
-  ) {
-    const TILE_SIZE = 64; // display size
+  private placeRow(startX: number, y: number, tileCount: number, key: string) {
+    const TILE_SIZE = 64;
     for (let i = 0; i < tileCount; i++) {
-      this.addTile(startX + i * TILE_SIZE, y, frame);
+      this.addTile(startX + i * TILE_SIZE, y, key);
     }
-  }
-
-  private placePad(x: number, y: number) {
-    // A single hover pad (nice floating step)
-    this.addTile(x, y, 6);
   }
 
   // Map each level to a primary block frame from the tilesheet
   // Attachment order (left->right in provided image) assumed frames:
   // 0: Grass (Level 1), 1: Wood (Level 2), 2: Water/Ice (Level 3), 3: Metal (Level 4), 4: Autumn Grass (Level 5)
-  private frameForLevel(level: number): number {
-    const mapping: Record<number, number> = {
-      1: 0,
-      2: 1,
-      3: 2,
-      4: 3,
-      5: 4,
+  private tileForLevel(level: number): string {
+    const mapping: Record<number, string> = {
+      1: "tile_grass",
+      2: "tile_wood",
+      3: "tile_snow",
+      4: "tile_metal",
+      5: "tile_sand",
     };
-    return mapping[level] ?? 0;
-  }
-
-  // Convenience to center a row horizontally given tile count
-  private placeCenteredRow(y: number, tileCount: number, frame: number) {
-    const TILE_SIZE = 64;
-    const totalWidth = tileCount * TILE_SIZE;
-    const startX = 400 - totalWidth / 2; // assuming 800 width
-    this.placeRow(startX, y, tileCount, frame);
+    return mapping[level] ?? "tile_grass";
   }
 
   createLevel() {
@@ -283,69 +257,68 @@ export class GameScene extends Phaser.Scene {
   }
 
   createLevel1() {
-    // Big ground row (all grass blocks = frame 0)
-    this.placeRow(0, 568, 13, 0);
+    const t = this.tileForLevel(1);
 
-    // Floating platforms (shorter rows, can mix frames for variety)
-    this.placeRow(200, 480, 3, 0);
-    this.placeRow(600, 380, 3, 0);
-    this.placeRow(700, 280, 2, 0);
+    // Ground row
+    this.placeRow(0, 568, 13, t);
 
-    // Hover pads (maybe use stone frame = 6, or purple pad = 7)
-    this.addTile(520, 520, 6);
-    this.addTile(420, 440, 6);
+    // Floating platforms
+    this.placeRow(200, 480, 3, t);
+    this.placeRow(600, 380, 3, t);
+    this.placeRow(700, 280, 2, t);
+
+    // Hover pads
+    this.addTile(520, 520, "tile_grass");
+    this.addTile(420, 440, "tile_grass");
 
     // Goal
     this.createGoal(700, 250);
   }
 
   createLevel2() {
-    const f = this.frameForLevel(2);
-    // Ground
-    this.placeRow(0, 568, 13, f);
-    // Staggered rising platforms
-    this.placeRow(120, 500, 3, f);
-    this.placeRow(320, 420, 3, f);
-    this.placeRow(520, 340, 3, f);
-    this.placeRow(660, 260, 2, f);
+    const t = this.tileForLevel(2);
+    this.placeRow(0, 568, 13, t);
+    this.placeRow(120, 500, 3, t);
+    this.placeRow(320, 420, 3, t);
+    this.placeRow(520, 340, 3, t);
+    this.placeRow(660, 260, 2, t);
     this.createGoal(700, 230);
   }
 
   createLevel3() {
-    const f = this.frameForLevel(3);
-    this.placeRow(0, 568, 13, f);
-    this.placeRow(80, 480, 3, f);
-    this.placeRow(360, 400, 3, f);
-    this.placeRow(140, 320, 3, f);
-    this.placeRow(460, 240, 3, f);
-    this.placeRow(660, 180, 2, f);
+    const t = this.tileForLevel(3);
+    this.placeRow(0, 568, 13, t);
+    this.placeRow(80, 480, 3, t);
+    this.placeRow(360, 400, 3, t);
+    this.placeRow(140, 320, 3, t);
+    this.placeRow(460, 240, 3, t);
+    this.placeRow(660, 180, 2, t);
     this.createGoal(700, 150);
   }
 
   createLevel4() {
-    const f = this.frameForLevel(4);
-    this.placeRow(0, 568, 13, f);
-    // Symmetric challenge layout
-    this.placeRow(100, 480, 3, f);
-    this.placeRow(600, 480, 3, f);
-    this.placeRow(300, 380, 5, f);
-    this.placeRow(80, 280, 3, f);
-    this.placeRow(620, 280, 3, f);
-    this.placeRow(300, 180, 4, f);
+    const t = this.tileForLevel(4);
+    this.placeRow(0, 568, 13, t);
+    this.placeRow(100, 480, 3, t);
+    this.placeRow(600, 480, 3, t);
+    this.placeRow(300, 380, 4, t);
+    this.placeRow(80, 280, 3, t);
+    this.placeRow(620, 280, 3, t);
+    this.placeRow(300, 180, 4, t);
     this.createGoal(400, 150);
   }
 
   createLevel5() {
-    const f = this.frameForLevel(5);
-    this.placeRow(0, 568, 13, f);
-    this.placeRow(80, 500, 3, f);
-    this.placeRow(280, 440, 3, f);
-    this.placeRow(480, 380, 3, f);
-    this.placeRow(640, 320, 2, f);
-    this.placeRow(440, 260, 3, f);
-    this.placeRow(240, 200, 3, f);
-    this.placeRow(440, 140, 4, f);
-    this.createGoal(480, 110);
+    const t = this.tileForLevel(5);
+    this.placeRow(0, 568, 13, t);
+    this.placeRow(80, 500, 3, t);
+    this.placeRow(320, 440, 2, t);
+    this.placeRow(520, 380, 2, t);
+    this.placeRow(260, 320, 2, t);
+    this.placeRow(460, 260, 2, t);
+    this.placeRow(640, 220, 2, t);
+    this.placeRow(520, 140, 3, t);
+    this.createGoal(640, 110);
   }
 
   createGoal(x: number, y: number) {
@@ -446,41 +419,40 @@ export class GameScene extends Phaser.Scene {
         ];
       case 2:
         return [
-          { x: 80, y: 530 },
-          { x: 150, y: 450 },
-          { x: 350, y: 370 },
-          { x: 550, y: 290 },
-          { x: 300, y: 530 },
+          { x: 80, y: 460 }, // above ground
+          { x: 150, y: 460 }, // above row at 500
+          { x: 350, y: 380 }, // above row at 420
+          { x: 550, y: 300 }, // above row at 340
+          { x: 300, y: 460 }, // above ground
         ];
       case 3:
         return [
-          { x: 50, y: 530 },
-          { x: 120, y: 430 },
-          { x: 400, y: 350 },
-          { x: 180, y: 270 },
-          { x: 500, y: 190 },
-          { x: 600, y: 530 },
+          { x: 50, y: 460 }, // above ground
+          { x: 120, y: 440 }, // above 480
+          { x: 400, y: 360 }, // above 400
+          { x: 180, y: 280 }, // above 320
+          { x: 500, y: 200 }, // above 240
+          { x: 600, y: 460 }, // ground coin
         ];
       case 4:
         return [
-          { x: 100, y: 530 },
-          { x: 150, y: 430 },
-          { x: 650, y: 430 },
-          { x: 400, y: 330 },
-          { x: 120, y: 230 },
-          { x: 680, y: 230 },
-          { x: 500, y: 530 },
+          { x: 100, y: 460 }, // above 480
+          { x: 650, y: 460 }, // above 480
+          { x: 400, y: 300 }, // above 380
+          { x: 120, y: 240 }, // above 280
+          { x: 680, y: 240 }, // above 280
+          { x: 500, y: 460 }, // ground
         ];
       case 5:
         return [
-          { x: 60, y: 530 },
-          { x: 120, y: 450 },
-          { x: 320, y: 390 },
-          { x: 520, y: 330 },
-          { x: 680, y: 270 },
-          { x: 480, y: 210 },
-          { x: 280, y: 150 },
-          { x: 400, y: 530 },
+          { x: 70, y: 520 }, // ground near spawn
+          { x: 160, y: 460 }, // above first ledge
+          { x: 360, y: 400 }, // above mid ledge
+          { x: 540, y: 340 }, // above higher ledge
+          { x: 280, y: 260 }, // upper left pocket
+          { x: 480, y: 200 }, // mid-upper bridge
+          { x: 660, y: 160 }, // approach to goal
+          { x: 600, y: 100 }, // just before goal
         ];
       default:
         return [
