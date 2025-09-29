@@ -24,14 +24,8 @@ const clientId = web3AuthClientId; // get from https://dashboard.web3auth.io
 const web3AuthContextConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     clientId,
-    // Network selection: MAINNET required for production-grade idToken validation.
-    // However switching abruptly may break existing dashboard config. We allow
-    // override via env; fallback to previous DEVNET to restore button usability
-    // and will gather diagnostics first.
-    web3AuthNetwork:
-      process.env.NEXT_PUBLIC_WEB3AUTH_NETWORK === "mainnet"
-        ? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET
-        : WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+    
+    web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     // IMP START - SSR
     ssr: true,
     // Enable session management for better state persistence
