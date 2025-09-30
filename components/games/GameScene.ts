@@ -111,11 +111,6 @@ export class GameScene extends Phaser.Scene {
     this.createUI();
     this.setupPhysics();
     this.setupInput();
-    // Enable physics debug overlay to visualize hitboxes (helps tune sizes)
-    (this.physics.world as any).drawDebug = true;
-    (this.physics.world as any).debugGraphic = this.add
-      .graphics()
-      .setAlpha(0.75);
   }
   createPlayer() {
     this.player = this.physics.add.sprite(80, 450, "playerSheet", 0);
@@ -501,17 +496,6 @@ export class GameScene extends Phaser.Scene {
 
   update() {
     if (this.levelComplete || this.isShowingQuiz) return;
-    // Draw debug bodies each frame so the overlay updates while playing
-    try {
-      const worldAny = this.physics.world as any;
-      if (worldAny.debugGraphic) {
-        worldAny.debugGraphic.clear();
-        worldAny.drawDebug = true;
-        worldAny.drawDebugBodies = true;
-      }
-    } catch (err) {
-      // ignore if debug not available
-    }
     const wasd = (this as any).wasd;
 
     if (this.cursors.left.isDown || wasd.A.isDown) {
