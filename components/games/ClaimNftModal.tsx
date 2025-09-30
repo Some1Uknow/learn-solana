@@ -24,6 +24,39 @@ export default function ClaimNftModal({
     "idle" | "minting" | "success" | "error"
   >("idle");
   const [mintError, setMintError] = React.useState<string | null>(null);
+  const [balance, setBalance] = React.useState<number | null>(null);
+  const [loadingBalance, setLoadingBalance] = React.useState<boolean>(false);
+
+  // Fetch devnet balance when modal opens and wallet is available
+  React.useEffect(() => {
+    let cancelled = false;
+    async function loadBalance() {
+      if (!open || !walletAddress) return;
+      try {
+        setLoadingBalance(true);
+        const web3js = await import("@solana/web3.js");
+        const endpoint =
+          (process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "").trim() ||
+          "https://api.devnet.solana.com";
+        const connection = new web3js.Connection(endpoint, {
+          commitment: "confirmed",
+        });
+        const pk = new web3js.PublicKey(walletAddress);
+        const lamports = await connection.getBalance(pk, { commitment: "confirmed" });
+        if (!cancelled) setBalance(lamports / web3js.LAMPORTS_PER_SOL);
+      } catch (e) {
+        if (!cancelled) setBalance(null);
+      } finally {
+        if (!cancelled) setLoadingBalance(false);
+      }
+    }
+    loadBalance();
+    const interval = setInterval(loadBalance, 15000); // refresh every 15s while open
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [open, walletAddress]);
 
   if (!open) return null;
 
@@ -46,6 +79,72 @@ export default function ClaimNftModal({
         </p>
         <div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3 text-xs text-zinc-400">
           Network: <span className="text-zinc-200">Solana Devnet</span>
+          {walletAddress && (
+            <>
+              <span className="mx-2 text-zinc-600">|</span>
+              Balance: {loadingBalance ? (
+                <span className="text-zinc-500">loading...</span>
+              ) : balance != null ? (
+                <span className={balance < 0.01 ? "text-amber-400" : "text-zinc-200"}>
+                  {balance.toFixed(3)} SOL
+                </span>
+              ) : (
+                <span className="text-zinc-500">n/a</span>
+              )}
+            </>
+          )}
+        </div>
+        <div className="mt-4 rounded-lg border border-amber-600/40 bg-amber-900/20 p-4 text-xs leading-relaxed text-amber-200">
+          <p className="font-medium mb-1">Before Minting: Fund Your Devnet Wallet</p>
+          <p className="mb-2 text-amber-100/90">
+            You need a small amount of devnet SOL to pay network fees (usually &lt; 0.01 SOL per mint). If your balance is low
+            {balance != null && balance < 0.01 ? (
+              <span> (currently below recommended) </span>
+            ) : (
+              <span> </span>
+            )}
+            request some free tokens using a faucet. These tokens have no real value.
+          </p>
+          <ul className="list-disc pl-4 space-y-1 text-amber-100/90">
+            <li>
+              Official Solana Faucet: {""}
+              <a
+                className="underline hover:text-amber-50"
+                href="https://faucet.solana.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                faucet.solana.com
+              </a>
+            </li>
+            <li>
+              Alternate UI Faucet: {""}
+              <a
+                className="underline hover:text-amber-50"
+                href="https://solfaucet.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                solfaucet.com
+              </a>
+            </li>
+            <li>
+              CLI (installed Solana CLI): <code className="rounded bg-black/30 px-1 py-0.5">solana airdrop 2</code>
+            </li>
+          </ul>
+          <details className="mt-2">
+            <summary className="cursor-pointer text-amber-300 hover:text-amber-200">Show Quick Tutorial</summary>
+            <ol className="mt-2 list-decimal pl-5 space-y-1 text-amber-100/80">
+              <li>Copy your wallet address (it&apos;s connected via Web3Auth).</li>
+              <li>Open one of the faucet links above in a new tab.</li>
+              <li>Paste your address and request 1–2 SOL (don&apos;t request excessive amounts).</li>
+              <li>Wait a few seconds, then come back here; the balance auto-refreshes every 15s or click Close and reopen.</li>
+              <li>Once you have &gt;= 0.01 SOL, click Mint NFT.</li>
+            </ol>
+          </details>
+          <p className="mt-2 text-amber-300/80">
+            Tip: If a faucet rate limits you, try again later or use the CLI airdrop command.
+          </p>
         </div>
         {mintError && (
           <div className="mt-3 rounded-lg bg-red-600/10 border border-red-600/40 p-3 text-xs text-red-300">
