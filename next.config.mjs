@@ -12,6 +12,9 @@ const nextConfig = {
       },
     ];
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
@@ -65,13 +68,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
         pathname: "**",
-      }
-      ,
+      },
       {
         protocol: "https",
         hostname: "copper-gigantic-kite-657.mypinata.cloud",
         pathname: "**",
-      }
+      },
     ],
   },
 };

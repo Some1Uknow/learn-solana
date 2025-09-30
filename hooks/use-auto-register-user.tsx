@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { useWeb3Auth, useWeb3AuthUser } from '@web3auth/modal/react';
 import { SolanaWallet } from '@web3auth/solana-provider';
+import { SIGN_MESSAGE_PREFIX } from '@/lib/solana/signature';
 
 interface Options { onRegistered?: (user: any) => void }
 
@@ -66,7 +67,7 @@ export function useAutoRegisterUser(walletAddress: string | undefined, opts: Opt
       if (!idToken && isExternalWallet) {
         try {
           const ts = Date.now();
-          const message = `learn.sol register ${walletAddress} ${ts}`;
+          const message = `${SIGN_MESSAGE_PREFIX}${walletAddress}`;
           let signature: string | undefined;
           try {
             const provider: any = (web3Auth as any)?.provider;
