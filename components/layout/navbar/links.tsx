@@ -8,7 +8,7 @@ const navigationItems = [
   { label: "Learn", href: "/modules" },
   { label: "Games", href: "/games" },
   { label: "Projects", href: "/projects" },
-  { label: "Jobs", href: "/jobs" },
+  { label: "Challenges", href: "/challenges" },
 ];
 
 interface NavbarLinksProps {
