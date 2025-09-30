@@ -214,6 +214,14 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  // Ensure ground spans entire game width dynamically (supports resized game)
+  private placeFullWidthGround(y: number, key: string) {
+    const TILE_SIZE = 64;
+    const width = this.scale.gameSize.width; // current game width
+    const tileCount = Math.ceil(width / TILE_SIZE); // cover entire width
+    this.placeRow(0, y, tileCount, key);
+  }
+
   // Map each level to a primary block frame from the tilesheet
   // Attachment order (left->right in provided image) assumed frames:
   // 0: Grass (Level 1), 1: Wood (Level 2), 2: Water/Ice (Level 3), 3: Metal (Level 4), 4: Autumn Grass (Level 5)
@@ -253,9 +261,8 @@ export class GameScene extends Phaser.Scene {
 
   createLevel1() {
     const t = this.tileForLevel(1);
-
-    // Ground row
-    this.placeRow(0, 568, 13, t);
+    // Ground row (full width)
+    this.placeFullWidthGround(568, t);
 
     // Floating platforms
     this.placeRow(200, 480, 3, t);
@@ -272,7 +279,7 @@ export class GameScene extends Phaser.Scene {
 
   createLevel2() {
     const t = this.tileForLevel(2);
-    this.placeRow(0, 568, 13, t);
+    this.placeFullWidthGround(568, t);
     this.placeRow(120, 500, 3, t);
     this.placeRow(320, 420, 3, t);
     this.placeRow(520, 340, 3, t);
@@ -282,7 +289,7 @@ export class GameScene extends Phaser.Scene {
 
   createLevel3() {
     const t = this.tileForLevel(3);
-    this.placeRow(0, 568, 13, t);
+    this.placeFullWidthGround(568, t);
     this.placeRow(80, 480, 3, t);
     this.placeRow(360, 400, 3, t);
     this.placeRow(140, 320, 3, t);
@@ -293,7 +300,7 @@ export class GameScene extends Phaser.Scene {
 
   createLevel4() {
     const t = this.tileForLevel(4);
-    this.placeRow(0, 568, 13, t);
+    this.placeFullWidthGround(568, t);
     this.placeRow(100, 480, 3, t);
     this.placeRow(600, 480, 3, t);
     this.placeRow(300, 380, 4, t);
@@ -305,7 +312,7 @@ export class GameScene extends Phaser.Scene {
 
   createLevel5() {
     const t = this.tileForLevel(5);
-    this.placeRow(0, 568, 13, t);
+    this.placeFullWidthGround(568, t);
     this.placeRow(80, 500, 3, t);
     this.placeRow(320, 440, 2, t);
     this.placeRow(520, 380, 2, t);
@@ -588,97 +595,69 @@ export class GameScene extends Phaser.Scene {
     }
 
     const question = SOLANA_QUESTIONS[this.quizIndex];
+    // Center of camera for responsive placement
+    const cx = this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const cy = this.cameras.main.worldView.y + this.cameras.main.height / 2;
 
-    // Create overlay first
-    const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.8);
-    overlay.setDepth(1000); // Ensure it's on top
+    // Dim overlay (slightly darker for clarity)
+    const overlay = this.add.rectangle(cx, cy, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.85);
+    overlay.setScrollFactor(0);
+    overlay.setDepth(1000);
 
-    // Create container
-    this.questionUI = this.add.container(400, 300);
-    this.questionUI.setDepth(1001); // Higher than overlay
+    // Root container
+    this.questionUI = this.add.container(cx, cy);
+    this.questionUI.setDepth(1001);
 
-    // Question background
-    const questionBg = this.add.image(0, 0, "uiPanel").setDisplaySize(700, 400);
+    // Panel background (bigger & sharper)
+    const questionBg = this.add.image(0, 0, "uiPanel").setDisplaySize(760, 460);
+    questionBg.setTint(0x333344);
 
-    // Question title
-    const questionTitle = this.add
-      .text(0, -160, `Level ${this.currentLevel} Quiz`, {
-        fontSize: "20px",
-        color: "#ffffff",
-        align: "center",
-      })
-      .setOrigin(0.5);
+    const titleStyle = { fontSize: "26px", color: "#ffffff", align: "center", fontStyle: "bold" as const };
+    const questionTitle = this.add.text(0, -180, `Level ${this.currentLevel} Quiz`, titleStyle).setOrigin(0.5);
 
-    // Question text
     const questionText = this.add
       .text(0, -120, question.question, {
-        fontSize: "20px",
+        fontSize: "22px",
         color: "#ffffff",
         align: "center",
-        wordWrap: { width: 600 },
+        wordWrap: { width: 660 },
+        lineSpacing: 6,
       })
       .setOrigin(0.5);
 
-    // Add all elements to container first
-    if (this.questionUI) {
-      this.questionUI.add([questionBg, questionTitle, questionText]);
-    }
+    this.questionUI.add([questionBg, questionTitle, questionText]);
 
-    // Answer buttons
-    const buttonColors = [0x3498db, 0xe74c3c, 0x2ecc71, 0xf39c12];
+    const buttonColors = [0x1d75bd, 0xc0392b, 0x27ae60, 0xd68910];
+    const hoverAlpha = 0.92;
 
     question.answers.forEach((answer, index) => {
-      const button = this.add.rectangle(
-        0,
-        -20 + index * 60,
-        500,
-        45,
-        buttonColors[index]
-      );
-      button.setStrokeStyle(2, 0xffffff);
-      button.setInteractive();
+      const y = -10 + index * 72;
+      const button = this.add.rectangle(0, y, 560, 56, buttonColors[index]);
+      button.setStrokeStyle(3, 0xffffff, 0.9);
+      button.setInteractive({ useHandCursor: true });
 
       const answerText = this.add
-        .text(
-          0,
-          -20 + index * 60,
-          `${String.fromCharCode(65 + index)}. ${answer}`,
-          {
-            fontSize: "18px",
-            color: "#ffffff",
-            align: "center",
-          }
-        )
+        .text(0, y, `${String.fromCharCode(65 + index)}. ${answer}`, {
+          fontSize: "20px",
+          color: "#ffffff",
+          align: "center",
+        })
         .setOrigin(0.5);
 
-      button.on("pointerover", () => {
-        button.setFillStyle(buttonColors[index], 0.8);
-      });
-
-      button.on("pointerout", () => {
-        button.setFillStyle(buttonColors[index], 1);
-      });
-
-      button.on("pointerdown", () => {
-        this.handleQuizAnswer(index === question.correct);
-      });
-
-      // Add buttons to container
-      if (this.questionUI) {
-        this.questionUI.add([button, answerText]);
-      }
+      button.on("pointerover", () => button.setAlpha(hoverAlpha));
+      button.on("pointerout", () => button.setAlpha(1));
+      button.on("pointerdown", () => this.handleQuizAnswer(index === question.correct));
+      this.questionUI!.add([button, answerText]);
     });
-
-    // Make sure overlay is behind the container
-    overlay.setDepth(1000);
-    this.questionUI.setDepth(1001);
   }
   handleQuizAnswer(isCorrect: boolean) {
     if (isCorrect) {
       this.score += 20; // Bonus for correct answer
+      this.scoreText.setText(`SOL: ${this.score}`); // reflect change
       this.continueGame();
     } else {
       this.score = Math.max(0, this.score - 10);
+      this.scoreText.setText(`SOL: ${this.score}`); // reflect deduction
       this.showIncorrectAnswer();
     }
   }
@@ -687,46 +666,45 @@ export class GameScene extends Phaser.Scene {
     if (this.questionUI) {
       this.questionUI.destroy();
     }
+    const cx = this.cameras.main.worldView.x + this.cameras.main.width / 2;
+    const cy = this.cameras.main.worldView.y + this.cameras.main.height / 2;
 
-    const overlay = this.add.rectangle(400, 300, 800, 600, 0x000000, 0.8);
+    const overlay = this.add.rectangle(cx, cy, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.85);
+    overlay.setScrollFactor(0);
+    overlay.setDepth(1000);
 
-    this.questionUI = this.add.container(400, 300);
+    this.questionUI = this.add.container(cx, cy);
+    this.questionUI.setDepth(1001);
 
-    const incorrectBg = this.add.rectangle(0, 0, 500, 200, 0xe74c3c);
-    incorrectBg.setStrokeStyle(4, 0xffffff);
+  const incorrectBg = this.add.rectangle(0, 0, 560, 260, 0xc0392b, 1);
+  incorrectBg.setStrokeStyle(5, 0xffffff, 1);
 
     const incorrectText = this.add
-      .text(0, -30, "Wrong Answer!\n-10 SOL", {
-        fontSize: "24px",
+      .text(0, -50, "Wrong Answer!\n-10 SOL", {
+        fontSize: "30px",
         color: "#ffffff",
         align: "center",
+        stroke: "#000000",
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
-    const retryButton = this.add.rectangle(0, 50, 200, 50, 0x3498db);
-    retryButton.setStrokeStyle(2, 0xffffff);
-    retryButton.setInteractive();
+    const retryButton = this.add.rectangle(0, 70, 240, 60, 0x1d75bd, 1);
+    retryButton.setStrokeStyle(3, 0xffffff, 0.9);
+    retryButton.setInteractive({ useHandCursor: true });
 
     const retryText = this.add
-      .text(0, 50, "Try Again", {
-        fontSize: "18px",
+      .text(0, 70, "Try Again", {
+        fontSize: "24px",
         color: "#ffffff",
       })
       .setOrigin(0.5);
 
-    retryButton.on("pointerdown", () => {
-      this.showQuestion();
-    });
+    retryButton.on("pointerover", () => retryButton.setAlpha(0.9));
+    retryButton.on("pointerout", () => retryButton.setAlpha(1));
+    retryButton.on("pointerdown", () => this.showQuestion());
 
-    if (this.questionUI) {
-      this.questionUI.add([
-        overlay,
-        incorrectBg,
-        incorrectText,
-        retryButton,
-        retryText,
-      ]);
-    }
+    this.questionUI.add([incorrectBg, incorrectText, retryButton, retryText]);
   }
 
   continueGame() {

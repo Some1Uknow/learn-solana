@@ -33,16 +33,18 @@ export default function ActiveGameModal({
   onMarkCompleted,
 }: ActiveGameModalProps) {
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <button
         aria-label="Close"
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
       />
-      <div className="fixed inset-0 mx-auto w-full max-w-4xl translate-y-0 p-4 sm:translate-y-4">
-        <div className="relative overflow-hidden rounded-2xl bg-[#0f0f12] p-6 shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
+      {/* Modal */}
+      <div className="relative w-full max-w-5xl">
+        <div className="relative overflow-hidden rounded-2xl bg-[#0f0f12] p-6 shadow-[0_12px_48px_rgba(0,0,0,0.55)] ring-1 ring-white/5">
           {gameStarted ? (
-            <div className="h-[600px]">
+            <div className="h-[680px]">
               <SolanaClickerGame
                 onGameComplete={() => {
                   setGameStarted(false);
@@ -94,7 +96,7 @@ export default function ActiveGameModal({
 
               <div className="mt-6 space-y-3">
                 <button
-                  className="w-full rounded-xl bg-cyan-500 px-6 py-3 text-sm font-medium text-black transition hover:bg-cyan-400"
+                  className="w-full rounded-xl bg-cyan-500 px-6 py-4 text-sm font-medium text-black transition hover:bg-cyan-400"
                   type="button"
                   onClick={() => setGameStarted(true)}
                 >
@@ -102,7 +104,7 @@ export default function ActiveGameModal({
                 </button>
                 {completed && !mintAddress && (
                   <button
-                    className="w-full rounded-xl bg-purple-500 px-6 py-3 text-sm font-medium text-white transition hover:bg-purple-400"
+                    className="w-full rounded-xl bg-purple-500 px-6 py-4 text-sm font-medium text-white transition hover:bg-purple-400"
                     type="button"
                     onClick={onClaimClick}
                   >
@@ -114,7 +116,7 @@ export default function ActiveGameModal({
                     href={`https://explorer.solana.com/address/${mintAddress}?cluster=devnet`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full rounded-xl bg-green-600 px-6 py-3 text-sm font-medium text-white text-center hover:bg-green-500"
+                    className="block w-full rounded-xl bg-green-600 px-6 py-4 text-sm font-medium text-white text-center hover:bg-green-500"
                   >
                     VIEW NFT →
                   </a>

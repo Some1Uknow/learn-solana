@@ -21,8 +21,8 @@ export default function SolanaClickerGame({
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
       // ✅ Set fixed game dimensions
-      width: 800,
-      height: 600,
+      width: 960,
+      height: 640,
       parent: gameRef.current,
       physics: {
         default: "arcade",
@@ -73,7 +73,7 @@ export default function SolanaClickerGame({
 
   if (typeof window === "undefined") {
     return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-gray-200 rounded-lg">
+      <div className="w-full h-[640px] flex items-center justify-center bg-gray-200 rounded-lg">
         <p>Loading Solana Clicker Game...</p>
       </div>
     );
