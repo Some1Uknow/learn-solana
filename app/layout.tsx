@@ -9,7 +9,8 @@ import { cookieToWeb3AuthState } from "@web3auth/modal";
 import Provider from "../components/web3Auth/authProvider";
 import { RouteGuard } from "@/components/route-guard";
 import { headers } from "next/headers";
-import { Analytics } from "@vercel/analytics/next"
+import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,10 +66,20 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers();
   const web3authInitialState = cookieToWeb3AuthState(headersList.get("cookie"));
+  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
+        {clarityId ? (
+          <Script id="clarity-script" strategy="afterInteractive">
+            {`(function(c,l,a,r,i,t,y){
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "${clarityId}");`}
+          </Script>
+        ) : null}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -77,7 +88,8 @@ export default async function RootLayout({
         >
           <Provider web3authInitialState={web3authInitialState}>
             <RouteGuard>
-              <RootProvider>{children}
+              <RootProvider>
+                {children}
                 <Analytics />
               </RootProvider>
             </RouteGuard>
