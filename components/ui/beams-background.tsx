@@ -46,7 +46,8 @@ export function BeamsBackground({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const beamsRef = useRef<Beam[]>([]);
     const animationFrameRef = useRef<number>(0);
-    const MINIMUM_BEAMS = 20;
+    // Reduced from 20 to lower CPU on some browsers (Chrome slower than Brave in user report)
+    const MINIMUM_BEAMS = 12;
 
     const opacityMap = {
         subtle: 0.7,
@@ -67,6 +68,8 @@ export function BeamsBackground({
             canvas.height = window.innerHeight * dpr;
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
+            // Reset transform before scaling (avoids cumulative scale on repeated resizes)
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(dpr, dpr);
 
             const totalBeams = MINIMUM_BEAMS * 1.5;
@@ -76,7 +79,15 @@ export function BeamsBackground({
         };
 
         updateCanvasSize();
-        window.addEventListener("resize", updateCanvasSize);
+        // Throttle resize using requestAnimationFrame to prevent layout jank
+        let resizeRaf: number | null = null;
+        const onResize = () => {
+            if (resizeRaf) cancelAnimationFrame(resizeRaf);
+            resizeRaf = requestAnimationFrame(() => {
+                updateCanvasSize();
+            });
+        };
+        window.addEventListener("resize", onResize);
 
         function resetBeam(beam: Beam, index: number, totalBeams: number) {
             if (!canvas) return beam;
@@ -138,7 +149,7 @@ export function BeamsBackground({
             if (!canvas || !ctx) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.filter = "blur(35px)";
+            // Move heavy blur to a one-time CSS layer instead of per-frame filter mutation
 
             const totalBeams = beamsRef.current.length;
             beamsRef.current.forEach((beam, index) => {
@@ -159,10 +170,11 @@ export function BeamsBackground({
         animate();
 
         return () => {
-            window.removeEventListener("resize", updateCanvasSize);
+            window.removeEventListener("resize", onResize);
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
+            if (resizeRaf) cancelAnimationFrame(resizeRaf);
         };
     }, [intensity]);
 
@@ -175,23 +187,16 @@ export function BeamsBackground({
         >
             <canvas
                 ref={canvasRef}
-                className="absolute inset-0"
-                style={{ filter: "blur(15px)" }}
+                className="absolute inset-0 will-change-transform"
+                // Keep a light blur; heavy blur handled by the gradient beams drawing itself
+                style={{ filter: "blur(8px)" }}
             />
 
             <motion.div
                 className="absolute inset-0 bg-neutral-950/5"
-                animate={{
-                    opacity: [0.05, 0.15, 0.05],
-                }}
-                transition={{
-                    duration: 10,
-                    ease: "easeInOut",
-                    repeat: Number.POSITIVE_INFINITY,
-                }}
-                style={{
-                    backdropFilter: "blur(50px)",
-                }}
+                animate={{ opacity: [0.04, 0.12, 0.04] }}
+                transition={{ duration: 12, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+                style={{ backdropFilter: "blur(30px)" }}
             />
 
             <div className="relative z-10 flex h-screen w-full items-center justify-center">

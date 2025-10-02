@@ -70,6 +70,16 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {process.env.NEXT_PUBLIC_ENABLE_REACT_SCAN && (
+          // react-scan performance analyzer (only enabled when explicitly requested)
+          <Script
+            id="react-scan"
+            src="https://unpkg.com/react-scan/dist/auto.global.js"
+            strategy="lazyOnload"
+          />
+        )}
+      </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable}`}>
         {clarityId ? (
           <Script id="clarity-script" strategy="afterInteractive">
