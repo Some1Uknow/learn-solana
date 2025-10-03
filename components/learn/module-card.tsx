@@ -34,12 +34,6 @@ export default function ModuleCard({
   const progress = 60; // e.g., 60% progress
   const isCompleted = false;
   const isStarted = true;
-  const completedTopics = 3;
-  const totalTopics = 5;
-  const estimatedHours = 2;
-  const theoryTopics = 2;
-  const exerciseTopics = 2;
-  const projectTopics = 1;
 
   const handleStartModule = () => {
     router.push(`/learn/${module.id}`);

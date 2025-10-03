@@ -222,7 +222,7 @@ export const contentsData = {
            "title": "🚀 Capstone & Portfolio",
            "description": "Package your skills into a showcase-worthy, production-grade dApp",
            "goal": "Create a professional portfolio piece demonstrating mastery of full Solana development stack",
-           "image": "https://solana.com/_next/static/media/logotype-dark.f79d530e.svg",
+           "image": "/capstone.png",
            "icon": "capstone",
            "topics": [
                {
