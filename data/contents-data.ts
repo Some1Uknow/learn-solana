@@ -231,14 +231,6 @@ export const contentsData = {
       overviewUrl: "/learn/week-4",
       topics: [
         {
-          id: "web3js-anchor-client",
-          title: "@solana/web3.js & Anchor IDL Client",
-          description:
-            "Setting up Connection, Provider, Program instances. Reading accounts, sending transactions, handling confirmations",
-          type: "theory",
-          url: "/learn/week-4/web3js-anchor-client",
-        },
-        {
           id: "wallet-integration-exercise",
           title: "Exercise: Wallet Connect Implementation",
           description:
