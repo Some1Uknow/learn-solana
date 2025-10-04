@@ -12,6 +12,7 @@ export interface Topic {
   title: string;
   description: string;
   type: string;
+  url?: string;
 }
 export interface ModuleItem {
   id: string;
@@ -20,6 +21,7 @@ export interface ModuleItem {
   goal: string;
   image?: string;
   icon?: string;
+  overviewUrl?: string;
   topics: Topic[];
 }
 
@@ -171,7 +173,9 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
                   <h3 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
                     {active.title}
                   </h3>
-                  <p className="mt-1 text-sm text-zinc-400">{active.description}</p>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {active.description}
+                  </p>
                 </div>
                 <button
                   onClick={() => setActive(null)}
@@ -194,21 +198,23 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
                         title: active.title || "Overview",
                         description: active.goal || active.description,
                         type: "overview",
-                        href: `/learn/${week}`,
+                        href: active.overviewUrl || `/learn/${week}`,
                       },
                       ...active.topics.map((t) => ({
                         key: t.id,
                         title: t.title,
                         description: t.description,
                         type: t.type,
-                        href: `/learn/${week}/${t.id}`,
+                        href: t.url || `/learn/${week}/${t.id}`,
                       })),
                     ];
                     return items.map((it, i) => (
                       <div
                         key={it.key}
                         className="group flex items-start gap-3 rounded-xl bg-white/[0.02] p-4 transition hover:bg-white/[0.04]"
-                        style={{ animation: `fadeIn 280ms ease ${i * 60}ms both` }}
+                        style={{
+                          animation: `fadeIn 280ms ease ${i * 60}ms both`,
+                        }}
                       >
                         <div className="relative mt-0.5 h-10 w-10 shrink-0">
                           <Image
@@ -234,7 +240,9 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
                             </span>
                           </div>
                           <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs text-zinc-500 sm:hidden">{it.type}</span>
+                            <span className="text-xs text-zinc-500 sm:hidden">
+                              {it.type}
+                            </span>
                             <Link
                               href={it.href}
                               className="ml-auto inline-flex items-center gap-1 rounded-lg bg-cyan-500 px-3 py-1.5 text-sm font-medium text-black transition hover:bg-cyan-400"
@@ -253,15 +261,23 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
               {/* Footer (goal display) */}
               <div className="flex flex-none border-t border-white/5 p-6">
                 <div className="rounded-xl bg-white/[0.02] p-4">
-                  <h4 className="text-sm font-medium text-zinc-200">Learning goal</h4>
+                  <h4 className="text-sm font-medium text-zinc-200">
+                    Learning goal
+                  </h4>
                   <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>
                 </div>
               </div>
 
               <style jsx>{`
                 @keyframes fadeIn {
-                  from { opacity: 0; transform: translateY(4px); }
-                  to { opacity: 1; transform: translateY(0); }
+                  from {
+                    opacity: 0;
+                    transform: translateY(4px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
                 }
               `}</style>
             </div>
