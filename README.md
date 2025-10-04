@@ -1,154 +1,228 @@
-# learn.sol - Solana developer curriculum
-
 <div align="center">
-  <img src="app/icon.ico" alt="Learn SOL Logo" width="120" />
+  <img src="app/icon.ico" alt="learn.sol logo" width="120" />
+  <h1>learn.sol — Free, Open‑Source Solana & Web3 Curriculum</h1>
+  <p><strong>Beginner‑friendly, project‑based curriculum to learn Solana, Rust, Anchor, Tokens, and Full‑Stack dApps.</strong></p>
+  <p>
+    <a href="https://learnsol.site"><img alt="Live Site" src="https://img.shields.io/badge/Live-learnsol.site-6EE7B7?logo=vercel&logoColor=black" /></a>
+    <a href="LICENSE.MD"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
+    <img alt="Stack" src="https://img.shields.io/badge/Next.js_14-black?logo=next.js&logoColor=white" />
+    <img alt="Solana" src="https://img.shields.io/badge/Solana-262626?logo=solana" />
+    <img alt="Rust" src="https://img.shields.io/badge/Rust-000000?logo=rust" />
+  </p>
 </div>
 
-Learn Solana by building. Short lessons. Clear tasks. Real projects.
+Learn Solana by building. Short lessons. Clear tasks. Real projects. Built for web2 developers moving into web3, and web3 builders leveling up on Solana.
 
-• Live: https://learnsol.site
+Top keywords: Solana tutorial, Solana course, Solana developer, Rust on Solana, Anchor framework, SPL Token, PDA, CPI, NFT, Web3Auth, Next.js dApp, Metaplex, free Solana curriculum, pgvector RAG AI chat.
 
-## Who this is for
+— Live site: https://learnsol.site
 
-- Developers who want a practical path into Solana
-- You know basic JS/TS. Rust experience helps but isn’t required
+## Why this curriculum?
 
-## How to use this repo
+- Free, open‑source, and always up‑to‑date with Solana best practices
+- Step‑by‑step modules with real code you can ship
+- Built‑in AI chat grounded in docs for instant help (RAG with pgvector)
+- Gamified learning with Phaser mini‑games and NFT rewards (Metaplex)
+- Web3‑native auth (Web3Auth) and fully Solana‑focused (no EVM deps)
 
-- Each module is an MDX lesson in `content/week-*`
-- Open the site and follow the modules in order (or read MDX files directly)
-- Use the built‑in AI chat to ask questions about any lesson
+## Curriculum overview (beginner → advanced)
 
-Minimal local run (optional):
-- Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY`
-- If you want AI search/chat the same as prod, also set `DATABASE_URL` and run `npm run ingest-docs`
-- Start the app and open http://localhost:3000
+Each week is a focused module. Follow in order or jump to what you need.
 
-## Curriculum overview
+### Week 1 — Solana Fundamentals (Available)
 
-Start here and move top‑to‑bottom. Expect ~5–10 hours per week.
+What you’ll learn:
+- Solana architecture essentials: accounts, programs, fees, and clusters
+- Using Solana CLI like a pro: keypairs, airdrops, config, RPC checks
+- Reading on‑chain data and sending safe transactions on devnet
 
-### Week 1 - Foundations and first transactions
+Lessons:
+- Devnet setup, wallets, RPCs → /learn/week-1/devnet-setup
+- Accounts & lamports exercise → /learn/week-1/accounts-lamports-exercise
+- Transaction anatomy → /learn/week-1/transaction-anatomy
+- Program interaction project → /learn/week-1/program-interaction-project
+- Exploration challenge → /learn/week-1/basic-exploration-challenge
 
-- Devnet setup — wallets, airdrops, RPCs (`content/week-1/devnet-setup.mdx`)
-- Accounts and lamports — balances, system program (`content/week-1/accounts-lamports-exercise.mdx`)
-- Transaction anatomy — instructions, signatures, fees (`content/week-1/transaction-anatomy.mdx`)
-- Program interaction — call on-chain programs from a client (`content/week-1/program-interaction-project.mdx`)
-- Challenge — small exploration task (`content/week-1/basic-exploration-challenge.mdx`)
+Outcome: Fund wallets, read accounts, reason about rent/ATAs, and send transactions on devnet.
 
-Outcome: You can fund wallets, read accounts, and send basic transactions to Solana devnet.
+### Week 2 — Rust for Solana (Available)
 
-### Week 2 - Rust for Solana and daily challenges
+What you’ll learn:
+- Modern Rust aligned to on‑chain constraints: ownership, lifetimes, enums, traits
+- Writing safe, ergonomic APIs and tests you can reuse in programs
+- Practical patterns for collections, error handling, and performance
 
-- Rust fundamentals (day 1) — types, ownership, errors (`content/week-2/day-1-rust-fundamentals.mdx`)
-- Day 1 challenges — practice tasks (`content/week-2/day-1-challenges.mdx`)
-- Day 2 challenges — more practice (`content/week-2/day-2-challenges.mdx`)
+Lessons:
+- Day 1: Rust fundamentals → /learn/week-2/day-1-rust-fundamentals
+- Day 1: Challenges → /learn/week-2/day-1-challenges
+- Day 2: Ownership system → /learn/week-2/day-2-ownership-system
+- Day 2: Challenges → /learn/week-2/day-2-challenges
+- Day 3: Data structures → /learn/week-2/day-3-data-structures
+- Day 3: Challenges → /learn/week-2/day-3-challenges
+- Mid‑course projects → /learn/week-2/mid-course-projects
+- Day 4: Enums & pattern matching → /learn/week-2/day-4-enums-pattern-matching
+- Day 4: Challenges → /learn/week-2/day-4-challenges
+- Day 5: Collections & strings → /learn/week-2/day-5-collections-strings
+- Day 5: Challenges → /learn/week-2/day-5-challenges
 
-Outcome: You can read and write basic Rust used in Solana programs.
+Outcome: Confident Rust skills mapped to Solana program development and testing.
 
-### Weeks 3-5 - Programs, tokens, and real projects
+### Week 3 — Anchor Framework (Coming by end of 2025)
 
-- Advanced topics roll out here (PDAs, CPIs, tokens, testing, deployment)
-- Expect one hands‑on project per week (increasing difficulty)
+What you’ll learn:
+- Anchor ergonomics: IDL, constraints, macros, events, and testing
+- PDAs, seed strategies, and CPI to compose with other protocols
+- Token flows with SPL: mints, ATAs, metadata, and secure authorities
 
-Outcome: You can ship a simple Solana app end‑to‑end.
+Planned lessons:
+- Anchor introduction → /learn/week-3/anchor-introduction
+- SPL Token integration → /learn/week-3/spl-token-integration
+- Token minting project → /learn/week-3/token-minting-project
+- PDA seed derivation → /learn/week-3/pda-seed-derivation
+- Escrow mechanism project → /learn/week-3/escrow-mechanism-project
+- Cross‑Program Invocations (CPI) → /learn/week-3/cpi-cross-program
+- DeFi integration challenge → /learn/week-3/defi-integration-challenge
+- Anchor ergonomics & best practices → /learn/week-3/anchor-ergonomics
 
-Note: Weeks 3-5 content is being expanded; follow along in `content/week-3`, `week-4`, `week-5`.
+Outcome: Build real Anchor programs with PDAs, CPIs, and robust token integrations.
 
-## Built‑in AI helper
+### Week 4 — Client‑Side & Full‑Stack dApps (Coming by end of 2025)
 
-- Click the chat button in the app
-- Ask anything about the current lesson or code
-- Answers are grounded in this repo’s MDX content and examples
+What you’ll learn:
+- Wallet adapters (Phantom/Solflare/Ledger), connection UX, session management
+- React data flows with account subscriptions and optimistic updates
+- Testing, CI/CD, deployment strategies, and upgrade‑safe patterns
 
-## What you’ll need
+Planned lessons:
+- Wallet integration exercise → /learn/week-4/wallet-integration-exercise
+- React integration project → /learn/week-4/react-integration-project
+- UX enhancements → /learn/week-4/ux-enhancements
+- Testing & CI/CD → /learn/week-4/testing-cicd-setup
+- Deployment strategies → /learn/week-4/deployment-strategies
+- Architecture & optimization → /learn/week-4/architecture-optimization
+- Upgrades & maintenance challenge → /learn/week-4/upgrades-maintenance-challenge
 
-- Node.js and npm
-- Optional for local AI search: PostgreSQL with pgvector
+Outcome: Ship production‑ready, wallet‑connected frontends with strong DX.
 
-## Contribute
+### Week 5 — Capstone & Portfolio (Planned)
 
-- Lessons live in `content/`
-- Add or improve a lesson, then run the doc ingester (`npm run ingest-docs`) to update search
+What you’ll build:
+- A showcase‑ready Solana application with docs, tests, analytics, and demos
+- Professional presentation materials and a solid case study write‑up
 
-## Credits
+Planned lessons:
+- Advanced features → /learn/week-5/advanced-features-implementation
+- Full‑stack integration → /learn/week-5/fullstack-integration
+- Testing & security audit → /learn/week-5/testing-security-audit
+- Deployment → /learn/week-5/deployment-production
+- Documentation polish → /learn/week-5/documentation-polish
+- Performance optimization → /learn/week-5/performance-optimization
+- Portfolio presentation → /learn/week-5/portfolio-presentation
 
-Funded by Solana Foundation and CoinDCX with support from Superteam IN. Built with Next.js, Tailwind, Drizzle, and an AI layer for search/chat.
+Outcome: A portfolio‑ready Solana application you can demo and extend.
+
+> Status note: Weeks 1–2 are available now. Weeks 3–4 are targeted by end of 2025. Week 5 follows after that milestone.
+
+## Features at a glance
+
+- MDX lessons with rich components (Fumadocs UI)
+- Documentation search & AI chat (OpenAI + pgvector RAG)
+- Web3 login with Web3Auth (Ed25519 → Solana)
+- Gamified exercises (Phaser) with NFT rewards (Metaplex)
+- Devnet‑first: all on Solana devnet RPC
+
+## Quick start
+
+Requirements:
+- Node.js 18+ and npm
+- Optional (AI search/chat): PostgreSQL + pgvector, OpenAI API Key
+
+1) Install deps
+```bash
+npm install
+```
+
+2) Environment
+
+Create `.env.local` in the project root. Use the sample below and adjust for your setup.
+
+Required:
+- OPENAI_API_KEY: for embeddings + AI chat (RAG)
+- POSTGRES_URL: PostgreSQL connection string with pgvector
+- NEXT_PUBLIC_SOLANA_RPC_URL: Solana devnet RPC endpoint
+- NEXT_PUBLIC_WEB3AUTH_CLIENT_ID: Web3Auth Client ID from your dashboard
+
+Recommended (URLs for metadata, robots, and sitemaps):
+- NEXT_PUBLIC_SITE_URL: canonical site URL (e.g., https://learnsol.site)
+- NEXT_PUBLIC_BASE_URL: base URL for robots/sitemap (e.g., https://learnsol.site)
+
+Optional (analytics / developer toggles):
+- NEXT_PUBLIC_CLARITY_ID: Microsoft Clarity site ID
+- NEXT_PUBLIC_ENABLE_REACT_SCAN: set to 1 to enable React Scan overlay in dev
+- DEBUG_LOGS: set to 1 to enable verbose debug logs in dev
+
+```bash
+# .env.local
+
+# Required
+OPENAI_API_KEY=sk-...
+POSTGRES_URL=postgresql://user:pass@host:5432/db
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_WEB3AUTH_CLIENT_ID=YOUR_WEB3AUTH_CLIENT_ID
+
+# Recommended
+NEXT_PUBLIC_SITE_URL=https://learnsol.site
+NEXT_PUBLIC_BASE_URL=https://learnsol.site
+
+# Optional
+NEXT_PUBLIC_CLARITY_ID=
+NEXT_PUBLIC_ENABLE_REACT_SCAN=
+DEBUG_LOGS=
+```
+
+3) Run dev server
+```bash
+npm run dev
+# open http://localhost:3000
+```
+
+Search index (optional, when content changes):
+```bash
+npm run ingest-docs
+```
+
+## Content authoring
+
+- Add or edit MDX in `content/week-*`
+- Control ordering and visibility via `content/week-*/meta.json` (`pages` array)
+- Rebuild embeddings after content changes with `npm run ingest-docs`
+
+## Architecture
+
+- Next.js App Router + Fumadocs MDX for content
+- Drizzle ORM + Postgres (pgvector) for embeddings
+- AI chat: user query → vector search → OpenAI → citations
+- Web3Auth for Solana keypairs (Ed25519 → @solana/web3.js)
+- Phaser mini‑games → NFT mint via Metaplex on devnet
+
+## Topics you’ll learn 
+
+Solana devnet, wallets, airdrops, RPC; accounts, lamports, rent; transactions, instructions; PDAs, seeds, bumps; CPIs; SPL Token (ATA, mint, metadata); Anchor framework (IDL, macros, constraints); Rust ownership, borrowing, lifetimes, enums, traits; Next.js wallet integration; Web3Auth; Metaplex NFTs; Drizzle ORM; pgvector RAG search; Phaser games.
+
+## Contributing
+
+Pull requests welcome! Improve lessons, fix typos, add examples, or propose new modules.
+
+Content contributions (tutorials/lessons):
+- Add or edit MDX in `content/week-*` and update the week’s `meta.json` `pages` array to include your new slug in the correct order.
+- Preview locally with `npm run dev`.
+- Open a PR and include screenshots and a short summary of the learning goals and outcomes.
+- Important: do not run embeddings ingestion on CI. After your PR is opened, ping @Some1Uknow for review. Ingestion (`npm run ingest-docs`) will be run by the maintainer after approval to update search indexes.
 
 ## License
 
-MIT — see LICENSE.
+MIT — see [LICENSE.MD](LICENSE.MD)
 
-## Game NFT Claim Flow (User-Paid Mint)
+---
 
-The NFT reward system supports a user-paid mint model so the platform does not spend SOL:
-
-1. Player completes a game (Phaser scene emits completion event).
-2. UI shows Claim NFT button.
-3. On click, client constructs and sends a transaction that:
-  - Creates a new mint (0 decimals, supply 1)
-  - Creates the player's ATA
-  - Mints 1 token to player (no on-chain metadata for simplest path)
-4. After confirmation, client POSTs to `/api/mint-game-nft` with `{ clientMint: true, mintAddress, gameId, walletAddress }`.
-5. Server verifies auth + uniqueness and records row (no SOL spent).
-
-Environment:
-- `NEXT_PUBLIC_SOLANA_RPC_URL` (required) e.g. `https://api.devnet.solana.com`
-- `METAPLEX_SECRET_KEY` (optional) only needed for legacy server-authority mint fallback.
-
-If `METAPLEX_SECRET_KEY` is unset and a client attempts server mint (without `clientMint`), the API will return an error instructing client-side mint usage.
-
-Security notes:
-- Server currently trusts provided `mintAddress` after base58 validation; optional enhancement: fetch mint + metadata PDA to verify existence and ownership.
-- Uniqueness enforced by `(gameId, walletAddress)` in DB prevents double-claim.
-- Metadata URI currently points to a static asset; extend to a JSON metadata file for richer attributes.
-
-Future improvements:
-- On-chain validation of submitted mint.
-- JSON metadata hosting with dynamic attributes.
-- Compressed NFT option once stable for browsers without extra dependencies.
-
-### Game Progress Auth Notes
-
-The game completion & claim APIs (`/api/games/complete`, `/api/games/progress`, `/api/mint-game-nft`) require a valid Web3Auth identity JWT. Early implementations relied on the `web3auth_token` cookie alone. Because `getIdentityToken()` can resolve slightly after initial connection/hydration, a race existed where the completion POST fired before the cookie was written, producing intermittent `401 Authentication required` errors.
-
-Mitigation implemented:
-- A hook (`useAutoRegisterUser`) aggressively fetches the identity token with retries, sets a cookie, and exposes it on `window.__WEB3AUTH_ID_TOKEN`.
-- Client API calls now attach an `Authorization: Bearer <token>` header if available; server still falls back to cookie for robustness.
-
-If you add new authenticated routes, mirror this pattern or centralize in a small `authFetch` helper to avoid similar races.
-
-## Game Progress & Claim State
-
-Persistent progress tracking is stored in the `game_progress` table and separates three concepts:
-
-1. Completion (`completedAt`): The user has finished the game at least once.
-2. Claimability (`canClaim`): The user is currently eligible to mint the reward NFT.
-3. Claim (`claimedAt`): The user minted (or recorded mint of) the NFT.
-
-### Lifecycle
-
-1. Client game emits completion → optimistic UI update + POST `/api/games/complete { gameId }`.
-2. Server upserts row (if first time) with `completedAt` (now) and `canClaim = true` (unless already claimed).
-3. User clicks Claim → client performs on-chain mint (user pays) → POST `/api/mint-game-nft`.
-4. Mint API records NFT in `minted_nfts` and sets `claimedAt` & `canClaim = false` in `game_progress`.
-5. `/api/games/progress` returns all progress rows for the authenticated wallet to hydrate UI on load.
-
-### Why explicit `canClaim`?
-
-Derived logic `(completedAt && !claimedAt)` works today, but a stored flag lets future features like cooldowns, revocation, or multi‑tier rewards without schema changes.
-
-### APIs
-
-| Route | Method | Description |
-|-------|--------|-------------|
-| `/api/games/complete` | POST | Mark completion / (re)enable claim if unclaimed |
-| `/api/games/progress` | GET | List progress rows for current wallet |
-| `/api/mint-game-nft` | POST | Record NFT mint & finalize claim state |
-
-### Future Enhancements
-
-- Mint address -> progress join on hydration (currently only completion state is preloaded; mint address comes from `minted_nfts`).
-- On-chain PDA verification before marking `claimedAt`.
-- Multiple reward tiers per game (introduce `rewardTier` column).
-- Rate limiting claim attempts.
+Built by the community for the community. If this helps you learn Solana faster, ⭐ star the repo and share it with other builders.
