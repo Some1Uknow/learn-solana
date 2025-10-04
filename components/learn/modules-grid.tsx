@@ -45,6 +45,8 @@ const getIconForModule = (icon?: string) => {
     case "fundamentals":
     case "solana":
       return "/solanaLogo.png";
+    case "capstone":
+      return "/capstone.png"
     default:
       return "/placeholder.png";
   }
