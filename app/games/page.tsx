@@ -24,6 +24,12 @@ const games: GameItem[] = [
     image: "/solanaLogo.png",
     category: "ARCADE",
     difficulty: "BEGINNER",
+    preGame: {
+      warning: "Desktop (PC) only for now. Mobile not supported.",
+      controls: "Arrow Keys or WASD to move and jump",
+      objective: "Collect all SOL coins and pass each level quiz to win",
+      totalLevels: 5,
+    },
   },
 ];
 

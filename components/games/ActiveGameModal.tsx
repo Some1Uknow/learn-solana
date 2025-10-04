@@ -69,6 +69,33 @@ export default function ActiveGameModal({
                 </button>
               </div>
 
+              {/* Pre-game info and warnings (per-game configurable) */}
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 p-4">
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Heads up</div>
+                  <p className="mt-1 text-sm text-amber-200">
+                    {active.preGame?.warning || "This game currently runs on PC (desktop) only."}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-white/[0.02] p-4">
+                  <h4 className="text-sm font-medium text-zinc-200">How to play</h4>
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-zinc-400">
+                    <li>
+                      Controls: {active.preGame?.controls || "Use the Arrow Keys to move your character"}
+                    </li>
+                    <li>
+                      Objective: {active.preGame?.objective || active.goal}
+                    </li>
+                    <li>
+                      Total levels: {active.preGame?.totalLevels ?? 5}
+                    </li>
+                    {active.preGame?.notes?.map((n, i) => (
+                      <li key={i}>{n}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
               <div className="mt-5 rounded-xl bg-white/[0.02] p-4">
                 <h4 className="text-sm font-medium text-zinc-200">Game Goal</h4>
                 <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>

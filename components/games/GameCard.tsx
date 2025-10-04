@@ -12,6 +12,13 @@ export interface GameItem {
   icon: string;
   category: string;
   difficulty: string;
+  preGame?: {
+    warning?: string;
+    controls?: string;
+    objective?: string;
+    totalLevels?: number;
+    notes?: string[];
+  };
 }
 
 export interface GameCardProps {
