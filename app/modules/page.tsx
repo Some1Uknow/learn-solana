@@ -1,48 +1,35 @@
-"use client";
+import type { Metadata } from "next";
+import ModulesPageClient from "./modules-page.client";
+import {
+  createCanonical,
+  defaultOpenGraphImage,
+  defaultTwitterImage,
+} from "@/lib/seo";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import ModulesGrid from "@/components/learn/modules-grid";
-import { contentsData } from "../../data/contents-data";
+const title = "Solana Modules Library";
+const description =
+  "Browse structured Solana learning modules spanning fundamentals, tooling, and on-chain program design.";
 
-// Use contentsData directly in your component logic
-const modules = contentsData.modules;
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: {
+    canonical: createCanonical("/modules"),
+  },
+  openGraph: {
+    title,
+    description,
+    url: createCanonical("/modules"),
+    images: [defaultOpenGraphImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: [defaultTwitterImage],
+  },
+};
 
 export default function ModulesPage() {
-  const router = useRouter();
-
-  return (
-    <div className="min-h-screen w-full relative bg-black">
-      {/* Prismatic Aurora Burst - Multi-layered Gradient */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: `
-            radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.15), transparent 50%),
-            radial-gradient(ellipse 100% 60% at 30% 10%, rgba(0, 255, 255, 0.12), transparent 60%),
-            radial-gradient(ellipse 90% 70% at 50% 0%, rgba(138, 43, 226, 0.18), transparent 65%),
-            radial-gradient(ellipse 110% 50% at 80% 30%, rgba(255, 215, 0, 0.08), transparent 40%),
-            #000000
-          `,
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-start min-h-screen p-8">
-        {/* Modules Grid */}
-        <div className="w-full max-w-7xl">
-          <ModulesGrid modules={modules} />
-        </div>
-
-        <div className="mt-12 text-center">
-          <button
-            onClick={() => router.push("/")}
-            className="px-6 py-2 border border-zinc-600 text-zinc-300 rounded-lg hover:border-zinc-500 hover:text-white"
-          >
-            Back to Home
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  return <ModulesPageClient />;
 }

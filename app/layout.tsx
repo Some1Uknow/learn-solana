@@ -11,6 +11,13 @@ import { RouteGuard } from "@/components/route-guard";
 import { headers } from "next/headers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import {
+  courseKeywords,
+  defaultOpenGraphImage,
+  defaultTwitterImage,
+  metadataBase,
+  siteUrl,
+} from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,8 +29,6 @@ const spaceGrotesk = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
   variable: "--font-space-grotesk",
 });
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://learnsol.site";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -51,23 +56,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase,
   title: {
     default: "Learn Solana",
     template: "%s | Learn Solana",
   },
   description:
     "Learn solana through courses, games and coding challenges at learn.sol",
-  keywords: [
-    "Solana",
-    "Solana development",
-    "Solana Course",
-    "Web3 Course",
-    "Rust smart contracts",
-    "Anchor framework",
-    "Web3 education",
-    "Solana games",
-  ],
+  keywords: courseKeywords,
   applicationName: "Learn Solana",
   authors: [{ name: "learn.sol Team" }],
   alternates: {
@@ -80,14 +76,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "learn.sol",
     locale: "en_US",
-    images: [
-      {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "learn.sol",
-      },
-    ],
+    images: [defaultOpenGraphImage],
     type: "website",
   },
   twitter: {
@@ -97,7 +86,7 @@ export const metadata: Metadata = {
     title: "Learn Solana",
     description:
       "Learn solana through courses, games and coding challenges at learn.sol",
-    images: ["/twitter-image.png"],
+    images: [defaultTwitterImage],
   },
   robots: {
     index: true,
