@@ -1,6 +1,6 @@
 <div align="center">
   <img src="app/icon.ico" alt="learn.sol logo" width="120" />
-  <h1>learn.sol — Free, Open‑Source Solana & Web3 Curriculum</h1>
+  <h1>learn.sol - Free, Open‑Source Solana & Web3 Curriculum</h1>
   <p><strong>Beginner‑friendly, project‑based curriculum to learn Solana, Rust, Anchor, Tokens, and Full‑Stack dApps.</strong></p>
   <p>
     <a href="https://learnsol.site"><img alt="Live Site" src="https://img.shields.io/badge/Live-learnsol.site-6EE7B7?logo=vercel&logoColor=black" /></a>
