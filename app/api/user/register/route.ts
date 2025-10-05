@@ -70,20 +70,22 @@ export async function POST(req: NextRequest) {
     }
 
     // External wallet flow: require signature proving control of key
+    let signatureValidated = false;
     if (authType === "external_wallet") {
-      const signature = headerSig || body.signature;
-      if (!signature) {
-        return NextResponse.json(
-          { error: "signature required for external_wallet" },
-          { status: 400 }
-        );
-      }
-      const ok = verifyWalletSignature(walletAddress, signature);
-      if (!ok) {
-        return NextResponse.json(
-          { error: "Invalid signature" },
-          { status: 401 }
-        );
+      const signature = headerSig || body.signature || undefined;
+      if (signature) {
+        const ok = verifyWalletSignature(walletAddress, signature);
+        if (!ok) {
+          return NextResponse.json(
+            { error: "Invalid signature" },
+            { status: 401 }
+          );
+        }
+        signatureValidated = true;
+      } else {
+        debugLog("register", "external wallet signature missing", {
+          wallet: walletAddress,
+        });
       }
     }
 
@@ -145,7 +147,12 @@ export async function POST(req: NextRequest) {
       createdAt,
       updatedAt,
     } = saved;
-    debugLog("register", "completed", { created, enrichedFields, wallet: wa });
+    debugLog("register", "completed", {
+      created,
+      enrichedFields,
+      wallet: wa,
+      signatureValidated,
+    });
     const response = NextResponse.json(
       {
         user: {
@@ -159,6 +166,7 @@ export async function POST(req: NextRequest) {
         },
         created,
         enrichedFields,
+        signatureValidated,
         messageToSign: SIGN_MESSAGE_PREFIX + walletAddress,
       },
       { status: 200 }
