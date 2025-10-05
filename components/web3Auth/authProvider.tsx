@@ -36,9 +36,7 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
       theme: {
         primary: "#7C4DFF",
       },
-      mode: "dark",
-      logoLight: "https://learnsol.site/opengraph-image.png",
-      logoDark: "https://learnsol.site/opengraph-image.png",
+      mode: "dark"
     },
   },
 };
