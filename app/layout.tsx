@@ -23,6 +23,24 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://learnsol.site";
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "learn.sol",
+  url: siteUrl,
+  logo: `${siteUrl}/opengraph-image.png`,
+  sameAs: ["https://x.com/learndotsol", "https://github.com/learn-solana"],
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      contactType: "support",
+      email: "raghav@learnsol.site",
+    },
+  ],
+};
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -33,14 +51,35 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-  ),
-  title: "Learn Solana",
-  description: "Learn solana through courses, games and coding challenges at learn.sol",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Learn Solana",
+    template: "%s | Learn Solana",
+  },
+  description:
+    "Learn solana through courses, games and coding challenges at learn.sol",
+  keywords: [
+    "Solana",
+    "Solana development",
+    "Solana Course",
+    "Web3 Course",
+    "Rust smart contracts",
+    "Anchor framework",
+    "Web3 education",
+    "Solana games",
+  ],
+  applicationName: "Learn Solana",
+  authors: [{ name: "learn.sol Team" }],
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     title: "Learn Solana",
-    description: "Learn solana through courses, games and coding challenges at learn.sol",
+    description:
+      "Learn solana through courses, games and coding challenges at learn.sol",
+    url: siteUrl,
+    siteName: "learn.sol",
+    locale: "en_US",
     images: [
       {
         url: "/opengraph-image.png",
@@ -53,10 +92,25 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@learndotsol",
+    creator: "@Some1UKnow25",
     title: "Learn Solana",
-    description: "Learn solana through courses, games and coding challenges at learn.sol",
+    description:
+      "Learn solana through courses, games and coding challenges at learn.sol",
     images: ["/twitter-image.png"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+    },
+  },
+  category: "technology",
 };
 
 export default async function RootLayout({
@@ -71,6 +125,13 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          id="jsonld-organization"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+        >
+          {JSON.stringify(organizationJsonLd)}
+        </Script>
         {process.env.NEXT_PUBLIC_ENABLE_REACT_SCAN && (
           // react-scan performance analyzer (only enabled when explicitly requested)
           <Script

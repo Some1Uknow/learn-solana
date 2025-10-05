@@ -7,10 +7,10 @@ import { Github, Star } from "lucide-react";
 
 // GitHub configuration
 const githubConfig = {
-  repoName: "learn.sol-main",
+  repoName: "learn-solana",
   owner: "Some1Uknow",
-  fullRepoName: "learn.sol-main",
-  url: "https://github.com/Some1Uknow/learn.sol-main",
+  fullRepoName: "learn-solana",
+  url: "https://github.com/Some1Uknow/learn-solana",
 };
 
 interface NavbarGithubProps {
