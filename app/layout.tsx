@@ -36,11 +36,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   ),
-  title: "learn.sol",
-  description: "The first AI-assisted Solana learning and building platform",
+  title: "Learn Solana",
+  description: "Learn solana through courses, games and coding challenges at learn.sol",
   openGraph: {
-    title: "learn.sol",
-    description: "The first AI-assisted Solana learning and building platform",
+    title: "Learn Solana",
+    description: "Learn solana through courses, games and coding challenges at learn.sol",
     images: [
       {
         url: "/opengraph-image.png",
@@ -53,8 +53,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "learn.sol",
-    description: "The first AI-assisted Solana learning and building platform",
+    title: "Learn Solana",
+    description: "Learn solana through courses, games and coding challenges at learn.sol",
     images: ["/twitter-image.png"],
   },
 };
