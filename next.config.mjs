@@ -74,6 +74,8 @@ const nextConfig = {
         hostname: "copper-gigantic-kite-657.mypinata.cloud",
         pathname: "**",
       },
+      { protocol: "https", hostname: "pbs.twimg.com" },
+      { protocol: "https", hostname: "abs.twimg.com" },
     ],
   },
 };

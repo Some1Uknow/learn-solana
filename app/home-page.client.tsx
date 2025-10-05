@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { BeamsBackground } from "@/components/ui/beams-background";
 import { Navbar } from "@/components/layout/navbar";
+import LearnSolanaSection from "@/components/home/learn-solana-section";
+import XPostsMarquee from "@/components/home/x-posts-marquee";
 
 export function HomePageClient() {
   return (
@@ -24,7 +26,7 @@ export function HomePageClient() {
           paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0px)",
         }}
       >
-        <div className="relative h-auto min-h-[70vh] md:h-[calc(100vh-120px)] rounded-2xl md:rounded-3xl overflow-hidden bg-[#030303]">
+        <div className="relative h-auto min-h-[70vh] mb-20 md:h-[calc(100vh-120px)] rounded-2xl md:rounded-3xl overflow-hidden bg-[#030303]">
           <div className="absolute inset-0 pointer-events-none">
             <BeamsBackground />
           </div>
@@ -51,6 +53,12 @@ export function HomePageClient() {
             </div>
           </div>
         </div>
+
+        {/* Learn Solana section */}
+        <LearnSolanaSection />
+
+        {/* X posts marquee */}
+        <XPostsMarquee />
       </div>
     </div>
   );

@@ -125,6 +125,28 @@
   @keyframes fadeIn {
     to { opacity: 1; }
   }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-50% - var(--gap))); }
+  }
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-50% - var(--gap))); }
+  }
+}
+
+.animate-marquee {
+  animation: marquee var(--duration) linear infinite;
+}
+.animate-marquee-reverse {
+  /* Use shorthand with reverse to avoid being overridden by later animation declarations */
+  animation: marquee var(--duration) linear infinite reverse;
+}
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration) linear infinite;
+}
+.animate-marquee-vertical-reverse {
+  animation: marquee-vertical var(--duration) linear infinite reverse;
 }
 
 @layer base {
