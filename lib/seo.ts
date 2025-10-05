@@ -16,8 +16,8 @@ export const defaultOpenGraphImage = {
 export const defaultTwitterImage = "/twitter-image.png";
 
 export const courseKeywords = [
-  "Solana",
-  "Solana development",
+  "Learn Solana",
+  "Learn Solana development",
   "Solana Course",
   "Web3 Course",
   "Rust smart contracts",
