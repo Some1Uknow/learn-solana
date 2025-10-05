@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import useSWR from "swr";
+
 import { Marquee } from "@/components/ui/marquee";
 import { cn } from "@/lib/cn";
 import { X_POSTS, type XPost } from "@/data/x-posts";
-import ClientTweetCard from "./client-tweet-card";
 import { TWEET_IDS } from "@/data/x-tweet-ids";
+import TweetCard, { TweetCardData, TweetCardSkeleton } from "./client-tweet-card";
 
 function PostCard({ p, className }: { p: XPost; className?: string }) {
   return (
@@ -31,7 +33,47 @@ function PostCard({ p, className }: { p: XPost; className?: string }) {
   );
 }
 
+const TWEET_API_PATH = "/api/x/tweets";
+
+type TweetsApiResponse = {
+  tweets: TweetCardData[];
+  count: number;
+  fetchedAt: string;
+};
+
+const fetchTweets = async (url: string): Promise<TweetsApiResponse> => {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "force-cache",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch tweets: ${response.status}`);
+  }
+
+  const payload: TweetsApiResponse = await response.json();
+  return payload;
+};
+
 export function XPostsMarquee() {
+  const shouldFetchTweets = Array.isArray(TWEET_IDS) && TWEET_IDS.length > 0;
+
+  const { data, error, isLoading } = useSWR<TweetsApiResponse>(
+    shouldFetchTweets ? TWEET_API_PATH : null,
+    fetchTweets,
+    {
+    revalidateOnFocus: false,
+    dedupingInterval: 1000 * 60 * 10, // 10 minutes
+    }
+  );
+
+  const tweets = data?.tweets ?? [];
+  const hasTweets = tweets.length > 0 && !error;
+  const skeletonCount = Math.max(6, TWEET_IDS.length || 0);
+
   return (
     <section className="container relative z-10 py-10 md:py-14">
       <div className="mb-6 text-center">
@@ -43,23 +85,42 @@ export function XPostsMarquee() {
         {/* If you have real tweet IDs, render them; otherwise fallback to manual posts */}
         {/* Example: const tweetIds = ["184217132223", ...]; */}
         {(() => {
-          const tweetIds: string[] = TWEET_IDS;
-          if (Array.isArray(tweetIds) && tweetIds.length > 0) {
+          if (shouldFetchTweets && isLoading) {
             return (
               <>
                 <Marquee pauseOnHover className="[--duration:80s]">
-                  {tweetIds.concat(tweetIds).map((id, i) => (
-                    <ClientTweetCard key={i} id={id} />
+                  {Array.from({ length: skeletonCount }).map((_, index) => (
+                    <TweetCardSkeleton key={`s-${index}`} />
                   ))}
                 </Marquee>
                 <Marquee reverse pauseOnHover className="mt-4 [--duration:70s]">
-                  {tweetIds.concat(tweetIds).map((id, i) => (
-                    <ClientTweetCard key={`rev-${i}`} id={id} />
+                  {Array.from({ length: skeletonCount }).map((_, index) => (
+                    <TweetCardSkeleton key={`s-rev-${index}`} />
                   ))}
                 </Marquee>
               </>
             );
           }
+
+          if (shouldFetchTweets && hasTweets) {
+            const duplicated = tweets.concat(tweets);
+
+            return (
+              <>
+                <Marquee pauseOnHover className="[--duration:80s]">
+                  {duplicated.map((tweet, i) => (
+                    <TweetCard key={`${tweet.id}-${i}`} tweet={tweet} />
+                  ))}
+                </Marquee>
+                <Marquee reverse pauseOnHover className="mt-4 [--duration:70s]">
+                  {duplicated.map((tweet, i) => (
+                    <TweetCard key={`rev-${tweet.id}-${i}`} tweet={tweet} />
+                  ))}
+                </Marquee>
+              </>
+            );
+          }
+
           return (
             <>
               <Marquee pauseOnHover className="[--duration:80s]">

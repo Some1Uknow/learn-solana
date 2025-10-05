@@ -1,12 +1,24 @@
 "use client";
 
-import * as React from "react";
 import Image from "next/image";
-import { useTweet } from "react-tweet";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { CheckCircle } from "lucide-react";
 
-function SkeletonCard() {
+export interface TweetCardData {
+  id: string;
+  text: string;
+  url: string;
+  author: {
+    name: string;
+    handle: string;
+    profileImageUrl?: string;
+    verified: boolean;
+    blueVerified: boolean;
+  };
+}
+
+export function TweetCardSkeleton() {
   return (
     <div className="mx-2 w-[320px] md:w-[350px] shrink-0 rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
@@ -25,63 +37,61 @@ function SkeletonCard() {
   );
 }
 
-function ErrorCard() {
-  return (
-    <div className="mx-2 w-[320px] md:w-[350px] shrink-0 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-zinc-400">
-      Unable to load tweet.
-    </div>
-  );
+function sanitizeTweetText(text: string) {
+  return text.replace(/^@some1uknow25\b[:\s,.-]*/i, "").trimStart();
 }
 
-export default function ClientTweetCard({ id, className }: { id: string; className?: string }) {
-  const { data, error, isLoading } = useTweet(id);
-
-  // Important: Always call hooks in the same order on every render.
-  // Compute memoized text unconditionally and guard against undefined data.
-  const cleanedText = React.useMemo(() => {
-    // Remove a leading reply handle to @Some1UKnow25 if present
-    // Example: "@Some1UKnow25 Thanks for..." -> "Thanks for..."
-    return (data?.text || "").replace(/^@some1uknow25\b[:\s,.-]*/i, "").trimStart();
-  }, [data?.text]);
-
-  if (isLoading) return <SkeletonCard />;
-  if (error || !data) return <ErrorCard />;
-
-  const user = data.user;
-  const handle = `@${user.screen_name}`;
+export default function TweetCard({ tweet, className }: { tweet: TweetCardData; className?: string }) {
+  const { author, url } = tweet;
+  const cleanedText = sanitizeTweetText(tweet.text);
+  const isVerified = author.verified || author.blueVerified;
 
   return (
-    <article
+    <Link
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
       className={cn(
         "mx-2 w-[320px] md:w-[350px] shrink-0 rounded-2xl border border-white/5 bg-white/[0.02] p-4 text-white/90 backdrop-blur-sm",
         "shadow-[0_8px_30px_rgba(0,0,0,0.15)]",
+        "block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3BA9EE]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         className
       )}
     >
-      <div className="flex items-center gap-3">
-        <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/10">
-          <Image
-            src={user.profile_image_url_https}
-            alt={user.name}
-            fill
-            sizes="40px"
-            className="object-cover"
-          />
-        </div>
-        <div className="min-w-0">
-          <div className="font-medium leading-tight text-white truncate flex items-center gap-1">
-            {user.name}
-            {(user.verified || user.is_blue_verified) && (
-              <span className="text-blue-500" aria-label="Verified">
-                <CheckCircle/>
-              </span>
+      <article className="flex flex-col">
+        <div className="flex items-center gap-3">
+          <div className="relative h-10 w-10 overflow-hidden rounded-full border border-white/10">
+            {author.profileImageUrl ? (
+              <Image
+                src={author.profileImageUrl}
+                alt={author.name || author.handle}
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-white/10" />
             )}
           </div>
-          <div className="text-xs text-zinc-400 truncate">{handle}</div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 truncate font-medium leading-tight text-white">
+              <span className="truncate" title={author.name}>{author.name}</span>
+              {isVerified && (
+                <span className="text-blue-500" aria-label="Verified on X">
+                  <CheckCircle className="h-4 w-4" />
+                </span>
+              )}
+            </div>
+            <div className="truncate text-xs text-zinc-400" title={author.handle}>
+              {author.handle}
+            </div>
+          </div>
+          <div className="ml-auto text-[#3BA9EE]" aria-hidden="true">
+            𝕏
+          </div>
         </div>
-        <div className="ml-auto text-[#3BA9EE]">𝕏</div>
-      </div>
-      <p className="mt-3 text-sm text-zinc-300 leading-6 line-clamp-6">{cleanedText}</p>
-    </article>
+        <p className="mt-3 line-clamp-6 text-sm leading-6 text-zinc-300">{cleanedText}</p>
+      </article>
+    </Link>
   );
 }
