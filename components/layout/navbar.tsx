@@ -25,9 +25,24 @@ export function Navbar() {
         <NavbarLinks />
 
         {/* CTA and GitHub (desktop) */}
-        <div className="hidden md:flex items-center gap-3 min-w-[220px] justify-end">
+        <div className="hidden md:flex items-center gap-2 min-w-[220px] justify-end">
           <NavbarGithub />
           <NavbarWalletButton />
+          <a
+            href="https://www.producthunt.com/products/learn-sol"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-opacity hover:opacity-80"
+            aria-label="View learn.sol on Product Hunt"
+          >
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1022706&theme=dark"
+              alt="learn.sol - Learn Solana Development with ease | Product Hunt"
+              width="185"
+              height="40"
+              className="h-10 w-[185px]"
+            />
+          </a>
         </div>
 
         {/* Mobile menu button */}
@@ -52,6 +67,24 @@ export function Navbar() {
               <NavbarGithub isMobile={true} />
               {/* Connect Wallet Button Mobile */}
               <NavbarWalletButton isMobile={true} />
+              {/* Product Hunt Badge Mobile */}
+              <div className="flex justify-center pt-2">
+                <a
+                  href="https://www.producthunt.com/products/learn-sol"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-opacity hover:opacity-80"
+                  aria-label="View learn.sol on Product Hunt"
+                >
+                  <img
+                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1022706&theme=dark"
+                    alt="learn.sol - Learn Solana Development with ease | Product Hunt"
+                    width="185"
+                    height="40"
+                    className="h-10 w-[185px]"
+                  />
+                </a>
+              </div>
             </div>
           </div>
         </div>
