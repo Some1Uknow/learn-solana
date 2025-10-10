@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { BeamsBackground } from "@/components/ui/beams-background";
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 import LearnSolanaSection from "@/components/home/learn-solana-section";
 import XPostsMarquee from "@/components/home/x-posts-marquee";
 
@@ -60,6 +61,9 @@ export function HomePageClient() {
         {/* X posts marquee */}
         <XPostsMarquee />
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
