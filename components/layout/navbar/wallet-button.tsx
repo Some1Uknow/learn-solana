@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
-import { LogOut, Copy, ExternalLink, UserPlus, Wallet } from "lucide-react";
+import { LogOut, Copy, ExternalLink, UserPlus, Wallet, Check } from "lucide-react";
 import {
   useWeb3AuthConnect,
   useWeb3AuthDisconnect,
@@ -28,6 +28,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const [isClient, setIsClient] = useState(false);
   const [dropdownUserInfo, setDropdownUserInfo] = useState<any>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Web3Auth hooks
   const { connect, isConnected, loading: connectLoading } = useWeb3AuthConnect();
@@ -98,7 +99,11 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   };
   
-  const copyAddress = () => navigator.clipboard.writeText(userAddress);
+  const copyAddress = () => {
+    navigator.clipboard.writeText(userAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   
   const openExplorer = () => 
     window.open(`https://explorer.solana.com/address/${userAddress}?cluster=devnet`, "_blank");
@@ -134,7 +139,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
                 {truncateAddress(userAddress)}
               </span>
               <Button size="sm" variant="ghost" onClick={copyAddress} className="h-6 w-6 p-0">
-                <Copy size={12} />
+                {copied ? <Check size={12} /> : <Copy size={12} />}
               </Button>
               <Button size="sm" variant="ghost" onClick={openExplorer} className="h-6 w-6 p-0">
                 <ExternalLink size={12} />
@@ -197,7 +202,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
                 {userAddress}
               </span>
               <Button size="sm" variant="ghost" onClick={copyAddress} className="h-6 w-6 p-0">
-                <Copy size={12} />
+                {copied ? <Check size={12} /> : <Copy size={12} />}
               </Button>
             </div>
           </div>
