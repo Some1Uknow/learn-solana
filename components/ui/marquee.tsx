@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef } from "react";
+import React, { ComponentPropsWithoutRef, memo } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -11,13 +11,13 @@ interface MarqueeProps extends ComponentPropsWithoutRef<"div"> {
   repeat?: number;
 }
 
-export function Marquee({
+function MarqueeBase({
   className,
   reverse = false,
   pauseOnHover = false,
   children,
   vertical = false,
-  repeat = 4,
+  repeat = 2,
   ...props
 }: MarqueeProps) {
   const containerAxis = vertical ? "flex-col" : "flex-row";
@@ -46,7 +46,7 @@ export function Marquee({
           <div
             key={i}
             className={cn(
-              "flex shrink-0 justify-around [gap:var(--gap)]",
+              "flex shrink-0 justify-around [gap:var(--gap)] will-change-transform",
               baseAxis,
               animationClass,
               hoverPause
@@ -58,3 +58,5 @@ export function Marquee({
     </div>
   );
 }
+
+export const Marquee = memo(MarqueeBase);

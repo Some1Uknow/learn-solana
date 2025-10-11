@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { memo } from "react";
 import { cn } from "@/lib/cn";
 import { CheckCircle } from "lucide-react";
 
@@ -18,7 +18,7 @@ export interface TweetCardData {
   };
 }
 
-export function TweetCardSkeleton() {
+export const TweetCardSkeleton = memo(function TweetCardSkeleton() {
   return (
     <div className="mx-2 w-[320px] md:w-[350px] shrink-0 rounded-2xl border border-white/5 bg-white/[0.02] p-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
@@ -35,19 +35,19 @@ export function TweetCardSkeleton() {
       </div>
     </div>
   );
-}
+});
 
 function sanitizeTweetText(text: string) {
   return text.replace(/^@some1uknow25\b[:\s,.-]*/i, "").trimStart();
 }
 
-export default function TweetCard({ tweet, className }: { tweet: TweetCardData; className?: string }) {
+function TweetCardBase({ tweet, className }: { tweet: TweetCardData; className?: string }) {
   const { author, url } = tweet;
   const cleanedText = sanitizeTweetText(tweet.text);
   const isVerified = author.verified || author.blueVerified;
 
   return (
-    <Link
+    <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
@@ -92,6 +92,11 @@ export default function TweetCard({ tweet, className }: { tweet: TweetCardData; 
         </div>
         <p className="mt-3 line-clamp-6 text-sm leading-6 text-zinc-300">{cleanedText}</p>
       </article>
-    </Link>
+    </a>
   );
 }
+
+const TweetCard = memo(TweetCardBase);
+TweetCard.displayName = "TweetCard";
+
+export default TweetCard;
