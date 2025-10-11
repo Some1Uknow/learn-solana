@@ -19,8 +19,9 @@ export function Navbar() {
     <nav className="w-full max-w-7xl mx-auto relative z-20">
       <div className="relative flex items-center justify-between px-6 md:px-10 py-3">
         {/* Left: Logo */}
-        <div className="flex-shrink-0 z-20">
+        <div className="flex-shrink-0 z-20 flex-row flex">
           <NavbarBranding />
+           <NavbarGithub />
         </div>
 
         {/* Center: Links (true centered, no overlap) */}
@@ -32,7 +33,7 @@ export function Navbar() {
 
         {/* Right: Buttons and Product Hunt */}
         <div className="hidden md:flex items-center gap-2 min-w-[220px] justify-end z-20">
-          <NavbarGithub />
+         
           <NavbarWalletButton />
           <a
             href="https://www.producthunt.com/products/learn-sol"
