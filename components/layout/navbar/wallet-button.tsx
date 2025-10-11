@@ -226,7 +226,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
       className={`bg-[#14F195] hover:bg-[#12d182] text-black ${isMobile ? "w-full" : ""}`}
     >
       <UserPlus size={18} className="mr-2" />
-      Sign Up / Login
+     Login
     </Button>
   );
 }

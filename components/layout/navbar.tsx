@@ -17,15 +17,21 @@ export function Navbar() {
 
   return (
     <nav className="w-full max-w-7xl mx-auto relative z-20">
-      <div className="flex items-center justify-between px-6 md:px-10 py-3">
-        {/* Logo */}
-        <NavbarBranding />
+      <div className="relative flex items-center justify-between px-6 md:px-10 py-3">
+        {/* Left: Logo */}
+        <div className="flex-shrink-0 z-20">
+          <NavbarBranding />
+        </div>
 
-        {/* Centered navigation (desktop) */}
-        <NavbarLinks />
+        {/* Center: Links (true centered, no overlap) */}
+        <div className="absolute inset-x-0 flex justify-center pointer-events-none">
+          <div className="hidden md:flex pointer-events-auto">
+            <NavbarLinks />
+          </div>
+        </div>
 
-        {/* CTA and GitHub (desktop) */}
-        <div className="hidden md:flex items-center gap-2 min-w-[220px] justify-end">
+        {/* Right: Buttons and Product Hunt */}
+        <div className="hidden md:flex items-center gap-2 min-w-[220px] justify-end z-20">
           <NavbarGithub />
           <NavbarWalletButton />
           <a
@@ -45,8 +51,8 @@ export function Navbar() {
           </a>
         </div>
 
-        {/* Mobile menu button */}
-        <div className="md:hidden flex items-center">
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden flex items-center z-20">
           <Button
             variant="ghost"
             className="text-white hover:bg-white/10 transition-colors duration-300 h-10 w-10 p-0 flex items-center justify-center"
@@ -56,39 +62,6 @@ export function Navbar() {
           </Button>
         </div>
       </div>
-
-      {/* Mobile Navigation Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden absolute left-0 right-0 mt-2 mx-2 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden z-30">
-          <div className="flex flex-col p-4 space-y-2">
-            <NavbarLinks isMobile={true} />
-            <div className="pt-2 border-t border-white/10 space-y-2">
-              {/* GitHub Button Mobile */}
-              <NavbarGithub isMobile={true} />
-              {/* Connect Wallet Button Mobile */}
-              <NavbarWalletButton isMobile={true} />
-              {/* Product Hunt Badge Mobile */}
-              <div className="flex justify-center pt-2">
-                <a
-                  href="https://www.producthunt.com/products/learn-sol"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity hover:opacity-80"
-                  aria-label="View learn.sol on Product Hunt"
-                >
-                  <img
-                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1022706&theme=dark"
-                    alt="learn.sol - Learn Solana Development with ease | Product Hunt"
-                    width="185"
-                    height="40"
-                    className="h-10 w-[185px]"
-                  />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }
