@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Tile = {
   id: string;
@@ -76,9 +76,9 @@ export function LearnSolanaSection() {
                 <div className="w-full h-full bg-gradient-to-br from-white/3 to-transparent mix-blend-screen" />
               </div>
 
-              <CardContent className="p-6 md:p-8 flex h-56 md:h-64 items-stretch gap-6">
+              <CardContent className="p-5 md:p-8 flex min-h-[15rem] md:min-h-[16rem] items-stretch gap-4 md:gap-6">
                 <div className="flex flex-col justify-between w-full">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div>
                       <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">{t.eyebrow}</div>
                       <h3 className="mt-2 text-xl md:text-2xl font-semibold leading-tight text-white">
@@ -88,8 +88,8 @@ export function LearnSolanaSection() {
                     </div>
 
                     <div className="shrink-0 flex items-center justify-center">
-                      <div className="relative h-16 w-16 md:h-20 md:w-20 rounded-lg bg-white/3 p-3">
-                        <Image src={t.icon} alt={t.title} width={72} height={72} className="object-contain" />
+                      <div className="relative h-12 w-12 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-lg bg-white/3 p-2 sm:p-3">
+                        <Image src={t.icon} alt={t.title} width={72} height={72} sizes="(max-width: 640px) 48px, (max-width: 768px) 64px, 80px" className="object-contain" />
                       </div>
                     </div>
                   </div>

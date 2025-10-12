@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NavbarBranding } from "./navbar/branding";
 import { NavbarLinks } from "./navbar/links";
@@ -14,6 +14,17 @@ export function Navbar() {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMenuOpen]);
 
   return (
     <nav className="w-full max-w-7xl mx-auto relative z-20">
@@ -63,6 +74,37 @@ export function Navbar() {
           </Button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60" onClick={toggleMenu} />
+          {/* Sheet */}
+          <div className="absolute top-0 left-0 right-0 bg-[#0d1117] border-b border-white/10 pt-16 pb-6 px-6">
+            {/* Close button (in case backdrop is covered) */}
+            <button
+              aria-label="Close menu"
+              onClick={toggleMenu}
+              className="absolute top-3 right-4 h-10 w-10 grid place-items-center rounded-md hover:bg-white/10 text-white"
+            >
+              <X size={22} />
+            </button>
+
+            <div className="space-y-4">
+              <nav className="flex flex-col gap-1">
+                <NavbarLinks isMobile />
+              </nav>
+              <div>
+                <NavbarWalletButton isMobile />
+              </div>
+              <div>
+                <NavbarGithub isMobile />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
