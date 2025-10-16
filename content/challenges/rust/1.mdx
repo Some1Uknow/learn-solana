@@ -1,0 +1,34 @@
+---
+title: Day 1 Factorial
+description: Implement factorial(n) with clarity, safety, and attention to edge cases.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 1: Factorial
+
+Write a function `factorial(n)` that returns $n!$ for a non-negative integer `n`.
+
+<Callout>
+Aim for clarity and safety. Consider edge cases like `n = 0`. Prefer an iterative solution for now.
+</Callout>
+
+## Requirements
+
+- Return `1` for `n = 0`.
+- Use a type large enough for small `n` (e.g., `u128`).
+- Keep allocations minimal.
+
+## Example
+
+```
+Input:  n = 3
+Output: 6
+Reason: 3! = 6
+```
+
+## Notes
+
+- Rust ownership and borrowing rules will guide the design.
+- Prefer iterators and functional transforms where clear.
+- Keep allocations minimal; think like a systems dev.

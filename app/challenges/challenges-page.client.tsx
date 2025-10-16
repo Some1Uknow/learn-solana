@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
+import Link from "next/link";
 
 const backgroundStyle = `
   radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.15), transparent 50%),
@@ -52,9 +53,12 @@ export function ChallengesPageClient() {
                   <span className="inline-flex items-center justify-center rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-200">
                     Daily Track
                   </span>
-                  <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-1 text-[10px] font-medium tracking-[0.25em] text-white">
-                    COMING SOON
-                  </span>
+                  <Link
+                    href="/challenges/rust/1"
+                    className="inline-flex items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 px-5 py-2 text-[11px] font-semibold tracking-[0.25em] text-cyan-200 transition hover:border-cyan-400/50 hover:bg-cyan-400/15"
+                  >
+                    START
+                  </Link>
                 </div>
               </div>
               <div className="flex flex-col gap-8">
@@ -85,6 +89,7 @@ export function ChallengesPageClient() {
           </footer>
         </div>
       </div>
+      {/* workspace handled in /challenges/[track]/[id] route */}
     </div>
   );
 }
