@@ -1,0 +1,36 @@
+---
+title: Day 3 Radiant Signal
+description: Decode a fixed telemetry stream by mapping numeric offsets into characters.
+---
+
+# Day 3 · Radiant Signal
+
+A Solana probe streamed back a short telemetry burst. Each byte is an offset into a custom alphabet.
+Implement `decode_signal(signal: &[u8]) -> String` that reconstructs the message. The runtime will
+feed your function a fixed signal and compare the resulting string to the expected answer.
+
+## Mapping Rules
+
+- `0..=25` map to `A..=Z` (uppercase).
+- `26` maps to a single space.
+- `27` maps to `-` (dash).
+- Any other value should panic with a clear message; the hidden tests only use the values above.
+
+## Requirements
+
+- Iterate once over the input slice.
+- Assemble the decoded string without allocating intermediate collections where possible.
+- Return the final string from `decode_signal`.
+
+## Example
+
+```rust
+let preview = decode_signal(&[11, 4, 0, 17, 13, 27, 18, 14, 11]);
+assert_eq!(preview, "LEARN-SOL");
+```
+
+Only **one** output is accepted by the judge. When you click **Run Code**, your implementation is
+wrapped in a hidden harness, executed on the official Rust Playground API, and the stdout is
+compared against the expected decoded signal. Getting the mapping wrong will produce a mismatch.
+
+Good luck, and watch those offsets!

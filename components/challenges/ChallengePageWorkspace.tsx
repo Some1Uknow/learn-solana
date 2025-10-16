@@ -2,6 +2,7 @@ import Link from "next/link";
 import { challengesSource } from "@/lib/challenges/source";
 import { getMDXComponents } from "@/mdx-components";
 import ChallengeEditorClient from "./ChallengeEditorClient";
+import type { ChallengeExecutor } from "@/lib/challenges/registry";
 
 export type ChallengeSpec = {
   title: string;
@@ -13,6 +14,7 @@ export type ChallengeSpec = {
   currentIndex?: number; // for nav
   totalCount?: number; // for nav
   track?: string; // e.g., "rust"
+  executor?: ChallengeExecutor;
 };
 
 type Props = ChallengeSpec & {
@@ -30,6 +32,7 @@ export default function ChallengePageWorkspace({
   currentIndex,
   totalCount,
   track,
+  executor,
 }: Props) {
   const backgroundStyle = `
     radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.12), transparent 50%),
@@ -45,6 +48,8 @@ export default function ChallengePageWorkspace({
     const page = challengesSource.getPage(mdxSlug);
     MDX = page?.data.body ?? null;
   }
+
+  const canExecute = Boolean(executor);
 
   return (
     <div
@@ -65,13 +70,21 @@ export default function ChallengePageWorkspace({
               { ["--duration" as any]: "12s", ["--gap" as any]: "2rem" } as any
             }
           >
-            <span className="mx-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-[#ff6b6b]/90 via-[#ff4d4f]/80 to-[#ff6b6b]/90 font-semibold text-sm drop-shadow-[0_0_16px_rgba(255,75,75,0.8)]">
-              NOTICE: Execution of code in this editor is not yet supported. The
-              execution infrastructure (WASM sandboxes) is currently under
-              development. Contributions are welcome — please open an issue or
-              submit a pull request to the project repository to help accelerate
-              completion and improve the project.
-            </span>
+            {canExecute ? (
+              <span className="mx-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-emerald-300/90 via-cyan-200/80 to-emerald-300/90 font-semibold text-sm drop-shadow-[0_0_16px_rgba(16,185,129,0.6)]">
+                NEW: Rust submissions run securely via the official Rust
+                Playground. Execution is sandboxed and verified against hidden
+                expectations.
+              </span>
+            ) : (
+              <span className="mx-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-[#ff6b6b]/90 via-[#ff4d4f]/80 to-[#ff6b6b]/90 font-semibold text-sm drop-shadow-[0_0_16px_rgba(255,75,75,0.8)]">
+                NOTICE: Execution of code in this editor is not yet supported.
+                The execution infrastructure (WASM sandboxes) is currently under
+                development. Contributions are welcome — please open an issue or
+                submit a pull request to the project repository to help
+                accelerate completion and improve the project.
+              </span>
+            )}
           </div>
         </div>
 
@@ -148,6 +161,8 @@ export default function ChallengePageWorkspace({
               track={track}
               currentIndex={currentIndex}
               totalCount={totalCount}
+              challengeId={currentIndex}
+              canExecute={canExecute}
             />
           </section>
         </div>

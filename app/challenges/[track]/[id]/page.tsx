@@ -34,6 +34,7 @@ export default function ChallengeRoute({ params }: { params: Params }) {
       currentIndex={id}
       totalCount={getTrackCount(track)}
       track={track}
+      executor={c.executor}
     />
   );
 }
