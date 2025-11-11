@@ -5,7 +5,6 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
-import { cookieToWeb3AuthState } from "@web3auth/modal";
 import Provider from "../components/web3Auth/authProvider";
 import { RouteGuard } from "@/components/route-guard";
 import { headers } from "next/headers";
@@ -18,6 +17,7 @@ import {
   metadataBase,
   siteUrl,
 } from "@/lib/seo";
+import { parseWeb3AuthStateFromCookie } from "@/lib/web3auth-cookie";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -108,7 +108,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = await headers();
-  const web3authInitialState = cookieToWeb3AuthState(headersList.get("cookie"));
+  const web3authInitialState = parseWeb3AuthStateFromCookie(
+    headersList.get("cookie"),
+  );
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (

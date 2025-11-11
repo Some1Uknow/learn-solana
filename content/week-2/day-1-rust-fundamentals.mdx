@@ -9,10 +9,12 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 
 Welcome to Day 1 of your Rust journey! Today we'll set up your development environment and explore the fundamental building blocks of Rust programming. By the end of today, you'll have written your first Rust programs and understand the basic syntax that makes Rust unique.
 
-<Mermaid 
+<MermaidWithZoom 
+  title="Rust Compilation and Safety Overview"
   chart="
     graph TD
       A[Rust Source Code] --> B[Rust Compiler rustc]

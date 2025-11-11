@@ -1,6 +1,11 @@
 import { createMDX } from "fumadocs-mdx/next";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const withMDX = createMDX();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -77,6 +82,16 @@ const nextConfig = {
       { protocol: "https", hostname: "pbs.twimg.com" },
       { protocol: "https", hostname: "abs.twimg.com" },
     ],
+  },
+  webpack(config) {
+    config.resolve ??= {};
+    config.resolve.alias ??= {};
+    config.resolve.alias["@react-native-async-storage/async-storage"] = resolve(
+      __dirname,
+      "stubs/asyncStorage.ts",
+    );
+
+    return config;
   },
 };
 

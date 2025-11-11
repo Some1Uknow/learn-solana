@@ -9,48 +9,22 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
+import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 
 Welcome to Day 3! Today we'll learn how to create custom data types using structs and add behavior to them with methods. This is where Rust programming becomes object-oriented and we start building the kinds of complex data structures you'll use constantly in Solana development.
 
 Structs are fundamental to blockchain programming - they represent accounts, transactions, program state, and more. Understanding how to design and implement structs effectively is crucial for building robust Solana programs.
 
-<MermaidWithZoom 
-  title="Rust Struct Types and Applications"
+<Mermaid
+  title="Rust Struct Types"
   chart="
-    graph TD
+    graph LR
       A[Rust Structs] --> B[Regular Structs]
       A --> C[Tuple Structs]
       A --> D[Unit Structs]
-      
-      B --> B1[Named Fields]
-      B --> B2[Field Access with .]
-      B --> B3[struct User { name, age }]
-      
-      C --> C1[Unnamed Fields]
-      C --> C2[Access with .0, .1]
-      C --> C3[struct Point(i32, i32)]
-      
-      D --> D1[No Fields]
-      D --> D2[Zero-sized Types]
-      D --> D3[struct Unit;]
-      
-      E[Methods & Functions] --> E1[Instance Methods]
-      E --> E2[Associated Functions]
-      
-      E1 --> E1A[impl MyStruct { fn method(&self) }]
-      E1 --> E1B[Access with instance.method()]
-      
-      E2 --> E2A[impl MyStruct { fn new() -> Self }]
-      E2 --> E2B[Access with MyStruct::new()]
-      
-      F[Blockchain Applications] --> F1[Account Structures]
-      F --> F2[Transaction Data]
-      F --> F3[Program State]
-      F --> F4[Instruction Parameters]
-      
-      style A fill:#e1f5fe
-      style E fill:#f3e5f5
-      style F fill:#e8f5e8"
+      B --> E[Named Fields]
+      C --> F[Indexed Fields]
+      D --> G[No Fields]"
 />
 
 <Callout type="info">
@@ -334,44 +308,15 @@ fn main() {
 Methods are functions defined within the context of a struct using `impl` blocks. They make code more organized and readable.
 
 <MermaidWithZoom 
-  title="Method Types and Usage Patterns in Rust"
+  title="Method Types in Rust"
   chart="
-    graph TD
-      A[Method Types in Rust] --> B[Instance Methods]
+    graph LR
+      A[Methods] --> B[Instance Methods]
       A --> C[Associated Functions]
-      
-      B --> B1[&self - Read Only]
-      B --> B2[&mut self - Modify Data]
-      B --> B3[self - Take Ownership]
-      
-      B1 --> B1A[fn get_balance(&self) -> u64]
-      B1 --> B1B[Cannot modify struct]
-      B1 --> B1C[Multiple references allowed]
-      
-      B2 --> B2A[fn deposit(&mut self, amount: u64)]
-      B2 --> B2B[Can modify struct fields]
-      B2 --> B2C[Exclusive access required]
-      
-      B3 --> B3A[fn close_account(self)]
-      B3 --> B3B[Consumes the struct]
-      B3 --> B3C[Cannot use after calling]
-      
-      C --> C1[No self parameter]
-      C --> C2[Called with :: syntax]
-      C --> C3[Often used as constructors]
-      
-      C --> C1A[fn new() -> Self]
-      C --> C2A[Account::new()]
-      C --> C3A[Account::default()]
-      
-      D[Usage Patterns] --> D1[account.get_balance()]
-      D --> D2[account.deposit(100)]
-      D --> D3[Account::new()]
-      
-      style B1 fill:#e8f5e8
-      style B2 fill:#e1f5fe
-      style B3 fill:#fff3e0
-      style C fill:#f3e5f5"
+      B --> D[Immutable ref]
+      B --> E[Mutable ref]
+      B --> F[Takes ownership]
+      C --> G[Constructors]"
 />
 
 ### Basic Method Implementation
