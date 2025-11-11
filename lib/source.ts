@@ -48,7 +48,6 @@ export const source = loader({
           width: 48,
           height: 48,
         });
-      // Add more cases as needed
     }
   },
 });

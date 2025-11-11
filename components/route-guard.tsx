@@ -11,6 +11,7 @@ const PROTECTED_ROUTES = [
   "/jobs",
   "/modules",
   "/projects",
+  "/challenges",
   "/test-auth",
   "/dashboard",
   "/admin",
@@ -39,6 +40,12 @@ const ROUTE_CONFIGS = {
     title: "🚀 Project Gallery",
     description: "Explore and contribute to innovative Solana projects.",
     icon: "🚀",
+  },
+  "/challenges": {
+    title: "💪 Coding Challenges",
+    description:
+      "Tackle progressive Solana and Rust coding challenges to level up your skills.",
+    icon: "💪",
   },
   "/test-auth": {
     title: "🔐 Authentication Test",

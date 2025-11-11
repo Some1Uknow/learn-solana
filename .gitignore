@@ -40,5 +40,5 @@ next-env.d.ts
 .open-next
 
 package-lock.json
-
+pnpm-lock.yaml
 knip.json
