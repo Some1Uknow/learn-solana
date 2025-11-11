@@ -4,7 +4,7 @@
   "icon": "Anchor",
   "root": true,
   "pages": [
-    "anchor-introduction",
+    "index",
     "spl-token-integration",
     "token-minting-project",
     "pda-seed-derivation",
