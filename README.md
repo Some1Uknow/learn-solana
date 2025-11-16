@@ -15,7 +15,8 @@ Learn Solana by building. Short lessons. Clear tasks. Real projects. Built for w
 
 Top keywords: Solana tutorial, Solana course, Solana developer, Rust on Solana, Anchor framework, SPL Token, PDA, CPI, NFT, Web3Auth, Next.js dApp, Metaplex, free Solana curriculum, pgvector RAG AI chat.
 
-— Live site: https://learnsol.site
+Live site: https://learnsol.site
+Demo of platform - https://youtu.be/pM1zKL5CbhA
 
 ## Why this curriculum?
 
