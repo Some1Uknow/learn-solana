@@ -454,7 +454,7 @@ fn main() {
 }`,
     executor: {
       type: "rust-playground",
-      expectedStdout: "e:1 h:1 l:2 o:1",
+      expectedStdout: "e:1 h:1 l:2 o:1 ",
       description: "Counts each character's frequency.",
     },
   },
@@ -632,7 +632,7 @@ fn main() {
 }`,
     executor: {
       type: "rust-playground",
-      expectedStdout: "4 16 36",
+      expectedStdout: "4 16 36 ",
       description: "Filters even numbers and squares them.",
     },
   },

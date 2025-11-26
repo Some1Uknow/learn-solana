@@ -9,6 +9,8 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Link from "next/link";
+import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
+import { authFetch } from "@/lib/auth/authFetch";
 
 const MIN_OUTPUT_HEIGHT = 150;
 const MIN_EDITOR_HEIGHT = 220;
@@ -37,15 +39,42 @@ export default function ChallengeEditorClient({
   challengeId?: number;
   canExecute?: boolean;
 }) {
+  const { userInfo } = useWeb3AuthUser();
+  const { provider, isConnected } = useWeb3Auth();
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [code, setCode] = useState(
     starterCode ||
       '// Write your Rust solution here\nfn main() {\n    println!("Hello, Rustacean!");\n}\n'
   );
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isSolved, setIsSolved] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const [outputHeight, setOutputHeight] = useState(INITIAL_OUTPUT_HEIGHT);
   const [isResizing, setIsResizing] = useState(false);
+
+  // Fetch wallet address from Web3Auth provider
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchAddress() {
+      if (!provider || !isConnected) {
+        setWalletAddress(null);
+        return;
+      }
+      try {
+        const accounts = await provider.request({
+          method: "getAccounts",
+          params: {},
+        });
+        const addr = Array.isArray(accounts) ? accounts[0] : accounts;
+        if (!cancelled && addr) setWalletAddress(addr);
+      } catch (e) {
+        console.error("Failed to get wallet address:", e);
+      }
+    }
+    fetchAddress();
+    return () => { cancelled = true; };
+  }, [provider, isConnected]);
 
   useEffect(() => {
     setCode(starterCode || "");
@@ -182,14 +211,35 @@ export default function ChallengeEditorClient({
         return;
       }
 
+      const passed =
+        typeof data?.passed === "boolean" ? data.passed : data?.compiler?.success ?? null;
+
       setRunResult({
         stdout: data?.stdout ?? "",
         stderr: data?.stderr ?? "",
         expectedStdout: data?.expectedStdout,
-        passed:
-          typeof data?.passed === "boolean" ? data.passed : data?.compiler?.success ?? null,
+        passed,
         message: data?.message,
       });
+
+      // Auto-save progress if passed and user is authenticated with wallet
+      if (passed === true && walletAddress && track && challengeId) {
+        setIsSolved(true);
+        try {
+          await authFetch("/api/challenges/complete", {
+            method: "POST",
+            body: JSON.stringify({
+              track,
+              challengeId,
+              code,
+              walletAddress,
+            }),
+          });
+        } catch (e) {
+          // Silently fail - the user still sees their success
+          console.error("Failed to save progress:", e);
+        }
+      }
     } catch (error) {
       setRunResult({
         stdout: "",
