@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ChallengePageWorkspace from "@/components/challenges/ChallengePageWorkspace";
-import { getChallenge, getTrackCount, toMdxSlug } from "@/lib/challenges/registry";
+import { getChallenge, getTrackCount, toMdxSlug, type TrackId } from "@/lib/challenges/registry";
 
-type Params = { track: string; id: string };
+type Params = Promise<{ track: string; id: string }>;
 
-export  function generateMetadata({ params }: { params: Params }): Metadata {
-  const track =  params.track as any;
-  const id =  Number(params.id);
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { track: trackParam, id: idParam } = await params;
+  const track = trackParam as TrackId;
+  const id = Number(idParam);
   const c = getChallenge(track, id);
   if (!c) return { title: "Challenge" };
   return {
@@ -16,9 +17,10 @@ export  function generateMetadata({ params }: { params: Params }): Metadata {
   };
 }
 
-export default function ChallengeRoute({ params }: { params: Params }) {
-  const track = params.track as any;
-  const id = Number(params.id);
+export default async function ChallengeRoute({ params }: { params: Params }) {
+  const { track: trackParam, id: idParam } = await params;
+  const track = trackParam as TrackId;
+  const id = Number(idParam);
   const c = getChallenge(track, id);
   if (!c) return notFound();
 
@@ -29,7 +31,7 @@ export default function ChallengeRoute({ params }: { params: Params }) {
       tags={c.tags}
       description={c.description}
       starterCode={c.starterCode}
-      backHref="/challenges"
+      backHref={`/challenges/${track}`}
       mdxSlug={toMdxSlug(track, id)}
       currentIndex={id}
       totalCount={getTrackCount(track)}

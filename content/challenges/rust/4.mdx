@@ -1,0 +1,62 @@
+---
+title: "Day 4: Control Flow"
+description: Learn if/else, match expressions, and loops in Rust.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 4: Control Flow
+
+Control flow determines the order of execution. Rust has powerful pattern matching!
+
+## What You'll Learn
+
+- `if`/`else` expressions
+- The `match` expression
+- Loops: `loop`, `while`, `for`
+
+## If/Else as Expressions
+
+In Rust, `if` is an expression that returns a value:
+
+```rust
+let number = if condition { 5 } else { 10 };
+```
+
+## Match Expressions
+
+`match` is Rust's powerful pattern matching:
+
+```rust
+match value {
+    1 => println!("one"),
+    2 | 3 => println!("two or three"),
+    4..=10 => println!("four to ten"),
+    _ => println!("something else"),  // catch-all
+}
+```
+
+<Callout type="info">
+`match` must be exhaustive - you must handle all possible cases!
+</Callout>
+
+## The Task: FizzBuzz
+
+Implement the classic FizzBuzz for a single number:
+- Return `"FizzBuzz"` if divisible by both 3 and 5
+- Return `"Fizz"` if divisible by 3 only
+- Return `"Buzz"` if divisible by 5 only
+- Return the number as a string otherwise
+
+## Requirements
+
+- Check divisibility with the modulo operator `%`
+- Return a `String`
+- Test case: `fizzbuzz(15)` → `"FizzBuzz"`
+
+## Hints
+
+- Use `n % 3 == 0` to check divisibility
+- Check both 3 AND 5 first!
+- Use `n.to_string()` to convert number to String
+- Use `String::from("...")` for string literals

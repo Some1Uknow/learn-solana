@@ -1,0 +1,89 @@
+---
+title: "Day 23: Derive Macros"
+description: Auto-implement common traits with #[derive] - essential for Solana!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 23: Derive Macros
+
+Derive macros automatically implement traits for your types - a huge productivity boost!
+
+## Common Derivable Traits
+
+```rust
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+struct User {
+    name: String,
+    age: u32,
+}
+```
+
+| Trait | Purpose |
+|-------|---------|
+| `Debug` | Enables `{:?}` formatting |
+| `Clone` | Enables `.clone()` method |
+| `Copy` | Implicit copying (for simple types) |
+| `PartialEq` | Enables `==` comparison |
+| `Eq` | Marker for full equality |
+| `Hash` | Enables use as HashMap key |
+| `Default` | Enables `Type::default()` |
+| `PartialOrd` | Enables `<`, `>` comparison |
+| `Ord` | Full ordering |
+
+<Callout type="warn">
+**Solana Relevance**: In Anchor, you'll frequently use:
+```rust
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct TokenAccount { ... }
+```
+</Callout>
+
+## Debug Trait
+
+```rust
+#[derive(Debug)]
+struct Point { x: i32, y: i32 }
+
+let p = Point { x: 1, y: 2 };
+println!("{:?}", p);   // Point { x: 1, y: 2 }
+println!("{:#?}", p);  // Pretty-printed
+```
+
+## Clone vs Copy
+
+```rust
+#[derive(Clone, Copy)]  // Copy requires Clone
+struct Point { x: i32, y: i32 }
+
+let p1 = Point { x: 1, y: 2 };
+let p2 = p1;  // Copy happens automatically
+// p1 is still valid!
+```
+
+<Callout type="info">
+`Copy` can only be derived for types whose fields are all `Copy`. Types with heap data (like `String`) cannot be `Copy`.
+</Callout>
+
+## The Task
+
+Add the necessary derive macros to make the code compile:
+- `Debug` for `{:?}` printing
+- `Clone` for `.clone()`
+- `PartialEq` for `==` comparison
+
+## Requirements
+
+- Print the token with `{:?}`
+- Compare two tokens with `==`
+- Clone works correctly
+
+## Hints
+
+```rust
+#[derive(Debug, Clone, PartialEq)]
+struct Token {
+    symbol: String,
+    amount: u64,
+}
+```

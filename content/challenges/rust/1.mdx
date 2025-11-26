@@ -1,34 +1,60 @@
 ---
-title: Day 1 Factorial
-description: Implement factorial(n) with clarity, safety, and attention to edge cases.
+title: "Day 1 - Hello Rust"
+description: Your first Rust program - variables, types, and printing output.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-# Day 1: Factorial
+# Day 1: Hello Rust
 
-Write a function `factorial(n)` that returns $n!$ for a non-negative integer `n`.
+Welcome to your Rust journey! Today we'll write our first Rust program and learn the fundamentals.
 
-<Callout>
-Aim for clarity and safety. Consider edge cases like `n = 0`. Prefer an iterative solution for now.
+<Callout type="info">
+Rust is a systems programming language focused on safety, speed, and concurrency. It's the language of choice for Solana programs!
 </Callout>
+
+## What You'll Learn
+
+- Declaring variables with `let`
+- Basic string types
+- The `println!` macro for output
+- String interpolation with `{}`
+
+## The Task
+
+Create a variable called `name` with the value `"Rustacean"` and print a greeting message.
+
+## Key Concepts
+
+### Variables
+
+In Rust, variables are declared with `let`:
+
+```rust
+let x = 5;           // immutable by default
+let mut y = 10;      // mutable with 'mut'
+```
+
+### The println! Macro
+
+Use `println!` to print to the console:
+
+```rust
+let name = "World";
+println!("Hello, {}!", name);  // Output: Hello, World!
+```
 
 ## Requirements
 
-- Return `1` for `n = 0`.
-- Use a type large enough for small `n` (e.g., `u128`).
-- Keep allocations minimal.
+- Create a variable `name` with the value `"Rustacean"`
+- Print exactly: `Hello, Rustacean! Welcome to Rust.`
 
-## Example
+## Hints
 
-```
-Input:  n = 3
-Output: 6
-Reason: 3! = 6
-```
+<Callout type="warn">
+Make sure your output matches exactly - including punctuation and spacing!
+</Callout>
 
-## Notes
-
-- Rust ownership and borrowing rules will guide the design.
-- Prefer iterators and functional transforms where clear.
-- Keep allocations minimal; think like a systems dev.
+- Use `let` to declare the variable
+- Use `println!` with `{}` for interpolation
+- The string must be a `&str` literal (in quotes)

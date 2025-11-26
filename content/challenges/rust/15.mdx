@@ -1,0 +1,90 @@
+---
+title: "Day 15: Generics"
+description: Write flexible, reusable code with generic type parameters.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 15: Generics
+
+Generics let you write code that works with multiple types while maintaining type safety.
+
+## Generic Functions
+
+```rust
+fn largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest = &list[0];
+    for item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+    largest
+}
+```
+
+## Generic Structs
+
+```rust
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+let integer_point = Point { x: 5, y: 10 };
+let float_point = Point { x: 1.0, y: 4.0 };
+```
+
+## Multiple Generic Types
+
+```rust
+struct Point<T, U> {
+    x: T,
+    y: U,
+}
+
+let mixed = Point { x: 5, y: 4.0 };
+```
+
+<Callout type="info">
+Generics have zero runtime cost in Rust! The compiler generates specialized code for each concrete type (monomorphization).
+</Callout>
+
+## Trait Bounds
+
+Constrain what types can be used:
+
+```rust
+fn print_debug<T: std::fmt::Debug>(item: T) {
+    println!("{:?}", item);
+}
+
+// Multiple bounds
+fn compare<T: PartialOrd + Copy>(a: T, b: T) -> T {
+    if a > b { a } else { b }
+}
+```
+
+## The Task
+
+Implement a generic `largest<T>` function that finds the largest element in a slice.
+
+## Requirements
+
+- Works with any type that implements `PartialOrd + Copy`
+- Returns the value (not a reference, since we have Copy)
+- `largest(&[34, 50, 25, 100, 65])` → `100`
+
+## Hints
+
+```rust
+fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+    let mut largest = list[0];
+    for &item in list {
+        if item > largest {
+            largest = item;
+        }
+    }
+    largest
+}
+```

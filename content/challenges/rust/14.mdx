@@ -1,0 +1,89 @@
+---
+title: "Day 14: HashMaps"
+description: Store key-value pairs with HashMap - essential for many algorithms.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 14: HashMaps
+
+`HashMap<K, V>` stores key-value pairs with O(1) average lookup time.
+
+## Creating HashMaps
+
+```rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+scores.insert("Alice", 100);
+scores.insert("Bob", 80);
+```
+
+## Accessing Values
+
+```rust
+// Returns Option<&V>
+if let Some(score) = scores.get("Alice") {
+    println!("Alice: {}", score);
+}
+
+// Or with default
+let score = scores.get("Charlie").unwrap_or(&0);
+```
+
+## The Entry API
+
+Powerful pattern for conditional insertion:
+
+```rust
+// Insert only if key doesn't exist
+scores.entry("Alice").or_insert(50);
+
+// Modify existing or insert
+let count = scores.entry("Alice").or_insert(0);
+*count += 1;
+```
+
+<Callout type="info">
+The Entry API is perfect for counting frequencies - a common interview pattern!
+</Callout>
+
+## Iterating
+
+```rust
+for (key, value) in &scores {
+    println!("{}: {}", key, value);
+}
+```
+
+## The Task
+
+Implement `char_frequency(s)` that counts character occurrences.
+
+- Only count alphabetic characters
+- Convert to lowercase
+- Return `HashMap<char, u32>`
+
+## Requirements
+
+- `"Hello"` → `{h: 1, e: 1, l: 2, o: 1}`
+- Ignore non-alphabetic characters
+
+## Hints
+
+```rust
+use std::collections::HashMap;
+
+fn char_frequency(s: &str) -> HashMap<char, u32> {
+    let mut freq = HashMap::new();
+    
+    for c in s.chars() {
+        if c.is_alphabetic() {
+            let c = c.to_ascii_lowercase();
+            *freq.entry(c).or_insert(0) += 1;
+        }
+    }
+    
+    freq
+}
+```

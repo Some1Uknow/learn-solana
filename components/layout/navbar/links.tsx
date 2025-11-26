@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const navigationItems = [
   { label: "Learn", href: "/modules" },
   { label: "Games", href: "/games" },
-  { label: "Projects", href: "/projects" },
+  { label: "Tools", href: "/tools" },
   { label: "Challenges", href: "/challenges" },
 ];
 

@@ -1,0 +1,79 @@
+---
+title: "Day 22: Smart Pointers"
+description: Explore Box, Rc, and RefCell for advanced memory management.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 22: Smart Pointers
+
+Smart pointers are data structures that act like pointers but have additional metadata and capabilities.
+
+## Box\<T\>: Heap Allocation
+
+`Box<T>` stores data on the heap instead of the stack:
+
+```rust
+let b = Box::new(5);  // 5 is stored on the heap
+println!("{}", b);    // Deref coercion: prints 5
+```
+
+### When to Use Box
+
+- When you have a type whose size can't be known at compile time
+- When you have a large amount of data to transfer ownership without copying
+- When you want to own a value that implements a trait (trait objects)
+
+## Recursive Types
+
+Without `Box`, recursive types would have infinite size:
+
+```rust
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+```
+
+<Callout type="info">
+This pattern is exactly how linked lists work! The `Box` gives us a known size (pointer size) at compile time.
+</Callout>
+
+## Other Smart Pointers
+
+| Type | Use Case |
+|------|----------|
+| `Box<T>` | Heap allocation, known size |
+| `Rc<T>` | Multiple ownership (single-threaded) |
+| `Arc<T>` | Multiple ownership (thread-safe) |
+| `RefCell<T>` | Interior mutability |
+
+## Rc\<T\>: Reference Counting
+
+```rust
+use std::rc::Rc;
+
+let a = Rc::new(5);
+let b = Rc::clone(&a);  // Both point to same data
+println!("count: {}", Rc::strong_count(&a));  // 2
+```
+
+## The Task
+
+Implement `sum_list` that recursively sums all values in a cons list.
+
+## Requirements
+
+- `Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))))` → `6`
+- Handle both `Cons` and `Nil` cases
+
+## Hints
+
+```rust
+fn sum_list(list: &List) -> i32 {
+    match list {
+        Cons(value, next) => value + sum_list(next),
+        Nil => 0,
+    }
+}
+```

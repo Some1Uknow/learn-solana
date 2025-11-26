@@ -1,0 +1,91 @@
+---
+title: "Day 12: Vectors"
+description: Master Vec<T> - Rust's growable, heap-allocated array.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 12: Vectors
+
+`Vec<T>` is Rust's dynamic array - it can grow and shrink at runtime.
+
+## Creating Vectors
+
+```rust
+let v1: Vec<i32> = Vec::new();       // Empty vector
+let v2 = vec![1, 2, 3];              // Using vec! macro
+let v3 = Vec::with_capacity(10);     // Pre-allocated
+```
+
+## Modifying Vectors
+
+```rust
+let mut v = vec![1, 2, 3];
+v.push(4);           // Add to end
+v.pop();             // Remove from end, returns Option<T>
+v.insert(0, 10);     // Insert at index
+v.remove(0);         // Remove at index
+```
+
+## Accessing Elements
+
+```rust
+let v = vec![1, 2, 3, 4, 5];
+
+// By index (panics if out of bounds)
+let third = v[2];
+
+// Safe access with get (returns Option)
+match v.get(2) {
+    Some(val) => println!("{}", val),
+    None => println!("No element"),
+}
+```
+
+## Iterating
+
+```rust
+for item in &v {
+    println!("{}", item);
+}
+
+// With mutable reference
+for item in &mut v {
+    *item += 1;
+}
+```
+
+<Callout type="info">
+Vectors are crucial for collecting iterator results with `.collect()`!
+</Callout>
+
+## The Task
+
+Implement `sum_and_max(numbers)` that returns `(sum, max)` of a slice.
+
+## Requirements
+
+- Take `&[i32]` (slice, not Vec)
+- Return `(sum, max)` as a tuple
+- Input: `[3, 1, 4, 1, 5, 9, 2, 6]`
+- Output: `(31, 9)`
+
+## Hints
+
+```rust
+fn sum_and_max(numbers: &[i32]) -> (i32, i32) {
+    let sum = numbers.iter().sum();
+    let max = *numbers.iter().max().unwrap();
+    (sum, max)
+}
+```
+
+Or manually:
+```rust
+let mut sum = 0;
+let mut max = numbers[0];
+for &n in numbers {
+    sum += n;
+    if n > max { max = n; }
+}
+```

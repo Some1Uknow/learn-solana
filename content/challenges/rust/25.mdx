@@ -1,0 +1,102 @@
+---
+title: "Day 25: Byte Serialization"
+description: Manually serialize data to bytes - the foundation for Borsh!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 25: Byte Serialization
+
+Serialization converts data structures to bytes. This is fundamental for Solana where all account data is stored as bytes!
+
+## Why This Matters for Solana
+
+<Callout type="warn">
+Solana accounts store data as raw bytes (`&[u8]`). You need to serialize (write) and deserialize (read) your data structures.
+</Callout>
+
+## Endianness
+
+Byte order matters when converting multi-byte values:
+
+```rust
+let num: u32 = 0x12345678;
+
+// Little-endian (Solana uses this)
+// [0x78, 0x56, 0x34, 0x12]
+
+// Big-endian
+// [0x12, 0x34, 0x56, 0x78]
+```
+
+## Converting Integers to Bytes
+
+```rust
+let n: u64 = 1000;
+
+// To bytes (little-endian)
+let bytes: [u8; 8] = n.to_le_bytes();
+
+// From bytes
+let restored = u64::from_le_bytes(bytes);
+```
+
+## Manual Serialization
+
+```rust
+struct Transfer {
+    amount: u64,
+    recipient: [u8; 4],
+}
+
+impl Transfer {
+    fn to_bytes(&self) -> [u8; 12] {
+        let mut bytes = [0u8; 12];
+        
+        // Copy amount (8 bytes, little-endian)
+        bytes[0..8].copy_from_slice(&self.amount.to_le_bytes());
+        
+        // Copy recipient (4 bytes)
+        bytes[8..12].copy_from_slice(&self.recipient);
+        
+        bytes
+    }
+    
+    fn from_bytes(data: &[u8; 12]) -> Self {
+        let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+        let mut recipient = [0u8; 4];
+        recipient.copy_from_slice(&data[8..12]);
+        
+        Self { amount, recipient }
+    }
+}
+```
+
+## The Task
+
+Implement `to_bytes()` and `from_bytes()` for the Transfer struct.
+
+## Requirements
+
+- Amount is serialized as little-endian u64 (8 bytes)
+- Recipient is copied directly (4 bytes)
+- Total: 12 bytes
+- Round-trip must preserve data
+
+## Hints
+
+```rust
+fn to_bytes(&self) -> [u8; 12] {
+    let mut bytes = [0u8; 12];
+    bytes[0..8].copy_from_slice(&self.amount.to_le_bytes());
+    bytes[8..12].copy_from_slice(&self.recipient);
+    bytes
+}
+
+fn from_bytes(data: &[u8; 12]) -> Self {
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let mut recipient = [0u8; 4];
+    recipient.copy_from_slice(&data[8..12]);
+    Self { amount, recipient }
+}
+```

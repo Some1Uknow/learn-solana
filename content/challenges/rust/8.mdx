@@ -1,0 +1,71 @@
+---
+title: "Day 8: Structs"
+description: Create custom data types with structs - the foundation of Rust data modeling.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 8: Structs
+
+Structs let you create custom types by grouping related data together.
+
+## Defining a Struct
+
+```rust
+struct User {
+    username: String,
+    email: String,
+    active: bool,
+    sign_in_count: u64,
+}
+```
+
+## Creating Instances
+
+```rust
+let user = User {
+    username: String::from("alice"),
+    email: String::from("alice@example.com"),
+    active: true,
+    sign_in_count: 1,
+};
+```
+
+## Field Init Shorthand
+
+When variable names match field names:
+
+```rust
+fn create_user(username: String, email: String) -> User {
+    User {
+        username,  // same as username: username
+        email,     // same as email: email
+        active: true,
+        sign_in_count: 1,
+    }
+}
+```
+
+<Callout type="info">
+In Solana, program accounts are modeled as structs with careful memory layouts!
+</Callout>
+
+## The Task
+
+1. Define a `User` struct with `name: String` and `age: u32`
+2. Implement `create_user` to create a User instance
+3. Implement `greet` to return a greeting string
+
+## Requirements
+
+- Struct must have fields `name` and `age`
+- `greet` returns: `"Hi, I'm {name} and I'm {age} years old"`
+- Test creates `User("Alice", 30)`
+
+## Hints
+
+- Use `String::from(name)` or `name.to_string()` to convert `&str` to `String`
+- Use `format!()` macro to build the greeting string:
+  ```rust
+  format!("Hi, I'm {} and I'm {} years old", user.name, user.age)
+  ```

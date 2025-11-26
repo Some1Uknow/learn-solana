@@ -1,0 +1,79 @@
+---
+title: "Day 9: Enums & Option"
+description: Master enums and Rust's null-safe Option type.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 9: Enums & Option
+
+Enums define a type by enumerating its possible values. Combined with pattern matching, they're incredibly powerful!
+
+## Defining Enums
+
+```rust
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+enum Message {
+    Quit,                       // no data
+    Move { x: i32, y: i32 },   // named fields
+    Write(String),              // single value
+    Color(u8, u8, u8),         // multiple values
+}
+```
+
+## The Option Enum
+
+Rust has no `null`! Instead, it uses `Option<T>`:
+
+```rust
+enum Option<T> {
+    Some(T),
+    None,
+}
+```
+
+<Callout type="warn">
+Unlike null in other languages, you MUST handle both cases with Option. The compiler enforces this!
+</Callout>
+
+## Pattern Matching with match
+
+```rust
+fn handle_option(opt: Option<i32>) {
+    match opt {
+        Some(value) => println!("Got: {}", value),
+        None => println!("Nothing"),
+    }
+}
+```
+
+## The Task
+
+Implement `safe_divide(a, b)` that:
+- Returns `None` if `b` is 0
+- Returns `Some(a / b)` otherwise
+
+## Requirements
+
+- Return type is `Option<i32>`
+- Handle division by zero gracefully
+- `safe_divide(10, 2)` → `Some(5)`
+- `safe_divide(10, 0)` → `None`
+
+## Hints
+
+```rust
+fn safe_divide(a: i32, b: i32) -> Option<i32> {
+    if b == 0 {
+        None
+    } else {
+        Some(a / b)
+    }
+}
+```

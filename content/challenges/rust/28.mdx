@@ -1,0 +1,107 @@
+---
+title: "Day 28: Error Enums"
+description: Create Solana-style error enums with numeric codes.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 28: Error Enums
+
+Solana programs use error enums with numeric codes for efficient error handling.
+
+## Solana Error Pattern
+
+```rust
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]  // Each variant has a u32 code
+pub enum ProgramError {
+    NotInitialized = 0,
+    AlreadyInitialized = 1,
+    InvalidAuthority = 2,
+    InsufficientFunds = 3,
+}
+```
+
+<Callout type="warn">
+In Solana, error codes are returned as u32 values in transaction logs. Having explicit codes makes debugging easier!
+</Callout>
+
+## Why Numeric Codes?
+
+1. **Efficient transmission**: Only a u32 crosses the runtime boundary
+2. **Clear logging**: Error codes appear in transaction logs
+3. **Client parsing**: SDKs can decode error codes
+4. **Versioning**: New errors get new codes
+
+## Implementing Error Methods
+
+```rust
+impl ProgramError {
+    fn code(&self) -> u32 {
+        *self as u32
+    }
+    
+    fn from_code(code: u32) -> Option<Self> {
+        match code {
+            0 => Some(Self::NotInitialized),
+            1 => Some(Self::AlreadyInitialized),
+            2 => Some(Self::InvalidAuthority),
+            3 => Some(Self::InsufficientFunds),
+            _ => None,
+        }
+    }
+}
+```
+
+## Anchor's Error Pattern
+
+```rust
+#[error_code]
+pub enum MyError {
+    #[msg("Account not initialized")]
+    NotInitialized,  // Code: 6000
+    
+    #[msg("Invalid authority")]
+    InvalidAuthority,  // Code: 6001
+}
+```
+
+## Error Conversion with From
+
+```rust
+impl From<ProgramError> for u32 {
+    fn from(e: ProgramError) -> u32 {
+        e as u32
+    }
+}
+```
+
+## The Task
+
+Implement for `ProgramError`:
+1. `code()` - returns the numeric error code
+2. `from_code(code)` - converts code back to error (if valid)
+
+## Requirements
+
+- `ProgramError::InsufficientFunds.code()` → `3`
+- `ProgramError::from_code(3)` → `Some(InsufficientFunds)`
+- `ProgramError::from_code(99)` → `None`
+
+## Hints
+
+```rust
+fn code(&self) -> u32 {
+    *self as u32
+}
+
+fn from_code(code: u32) -> Option<Self> {
+    match code {
+        0 => Some(Self::NotInitialized),
+        1 => Some(Self::AlreadyInitialized),
+        2 => Some(Self::InvalidAuthority),
+        3 => Some(Self::InsufficientFunds),
+        _ => None,
+    }
+}
+```
