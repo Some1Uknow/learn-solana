@@ -1,0 +1,91 @@
+---
+title: "Day 13: Strings"
+description: Understand String vs &str and master string manipulation.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 13: Strings
+
+Rust has two main string types, and understanding them is crucial!
+
+## String vs &str
+
+| Type | Ownership | Mutability | Location |
+|------|-----------|------------|----------|
+| `String` | Owned | Can be mutable | Heap |
+| `&str` | Borrowed | Immutable | Anywhere |
+
+```rust
+let s1: &str = "hello";           // String literal (in binary)
+let s2: String = String::from("hello");  // Owned, heap-allocated
+let s3: &str = &s2;               // Borrow String as &str
+```
+
+## String Operations
+
+```rust
+let mut s = String::from("hello");
+
+s.push(' ');              // Append char
+s.push_str("world");      // Append &str
+s += "!";                 // Concat with +=
+
+let combined = format!("{} {}", "hello", "world");
+```
+
+## Converting Between Types
+
+```rust
+// &str → String
+let owned = "hello".to_string();
+let owned = String::from("hello");
+
+// String → &str
+let borrowed: &str = &owned;
+```
+
+<Callout type="warn">
+Strings in Rust are UTF-8 encoded. Indexing by byte position can be dangerous!
+</Callout>
+
+## String Methods
+
+```rust
+let s = "hello world";
+s.len()                  // Byte length
+s.is_empty()             // Check if empty
+s.contains("world")      // Substring check
+s.split_whitespace()     // Iterator over words
+s.chars()                // Iterator over chars
+```
+
+## The Task
+
+Implement `reverse_words(s)` that reverses the order of words.
+
+- Input: `"rust is awesome"`
+- Output: `"awesome is rust"`
+
+## Requirements
+
+- Split by whitespace
+- Reverse the order
+- Join back with spaces
+
+## Hints
+
+```rust
+fn reverse_words(s: &str) -> String {
+    s.split_whitespace()
+        .rev()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+```
+
+Or:
+```rust
+let words: Vec<&str> = s.split(' ').collect();
+words.into_iter().rev().collect::<Vec<_>>().join(" ")
+```

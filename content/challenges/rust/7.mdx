@@ -1,0 +1,64 @@
+---
+title: "Day 7: Slices"
+description: Work with slices - views into contiguous sequences of data.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 7: Slices
+
+Slices are references to a contiguous sequence of elements - they don't own the data.
+
+## String Slices: `&str`
+
+```rust
+let s = String::from("hello world");
+let hello = &s[0..5];   // "hello"
+let world = &s[6..11];  // "world"
+
+// Shorthand:
+let hello = &s[..5];    // from start
+let world = &s[6..];    // to end
+let full = &s[..];      // entire string
+```
+
+<Callout type="info">
+String literals are already slices: `let s: &str = "hello";`
+</Callout>
+
+## Array Slices: `&[T]`
+
+```rust
+let arr = [1, 2, 3, 4, 5];
+let slice: &[i32] = &arr[1..4];  // [2, 3, 4]
+```
+
+## Why Slices Matter for Solana
+
+Account data in Solana is accessed as byte slices (`&[u8]`). Understanding slices is essential!
+
+## The Task
+
+Implement `first_word` that returns the first word in a string (up to the first space).
+
+## Requirements
+
+- Return a `&str` slice of the input
+- If no space found, return the entire string
+- `"hello world"` → `"hello"`
+
+## Hints
+
+```rust
+// Iterate with index
+for (i, c) in s.chars().enumerate() {
+    if c == ' ' {
+        return &s[..i];
+    }
+}
+```
+
+- Use `.chars()` to iterate over characters
+- Use `.enumerate()` to get indices
+- Use `&s[..index]` to slice from start
+- Use `&s[..]` or just `s` to return the whole string

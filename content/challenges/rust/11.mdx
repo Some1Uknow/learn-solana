@@ -1,0 +1,78 @@
+---
+title: "Day 11: Result & Error Handling"
+description: Handle errors gracefully with Result and the ? operator.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 11: Result & Error Handling
+
+Rust uses `Result<T, E>` for operations that can fail. No exceptions!
+
+## The Result Enum
+
+```rust
+enum Result<T, E> {
+    Ok(T),   // Success with value T
+    Err(E),  // Error with value E
+}
+```
+
+## Handling Results
+
+```rust
+let result: Result<i32, String> = "42".parse();
+
+match result {
+    Ok(num) => println!("Parsed: {}", num),
+    Err(e) => println!("Error: {}", e),
+}
+```
+
+## The ? Operator
+
+Propagate errors automatically:
+
+```rust
+fn read_number() -> Result<i32, String> {
+    let num = "42".parse().map_err(|_| String::from("parse error"))?;
+    Ok(num * 2)
+}
+```
+
+<Callout type="warn">
+The `?` operator can only be used in functions that return `Result` or `Option`!
+</Callout>
+
+## Common Result Methods
+
+```rust
+result.unwrap()        // Panics on Err
+result.expect("msg")   // Panics with message
+result.unwrap_or(0)    // Default value on Err
+result.is_ok()         // Returns bool
+result.is_err()        // Returns bool
+```
+
+## The Task
+
+Implement `parse_and_double(s)` that:
+1. Parses the string to an `i32`
+2. Returns `Ok(number * 2)` on success
+3. Returns `Err("Invalid number")` on failure
+
+## Requirements
+
+- `parse_and_double("21")` → `Ok(42)`
+- `parse_and_double("abc")` → `Err("Invalid number")`
+
+## Hints
+
+```rust
+fn parse_and_double(s: &str) -> Result<i32, String> {
+    match s.parse::<i32>() {
+        Ok(n) => Ok(n * 2),
+        Err(_) => Err(String::from("Invalid number")),
+    }
+}
+```

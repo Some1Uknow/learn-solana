@@ -30,7 +30,7 @@ Demo of platform - https://youtu.be/pM1zKL5CbhA
 
 Each week is a focused module. Follow in order or jump to what you need.
 
-### Week 1 — Solana Fundamentals (Available)
+### Week 1 - Solana Fundamentals (Available)
 
 What you’ll learn:
 - Solana architecture essentials: accounts, programs, fees, and clusters
@@ -46,7 +46,7 @@ Lessons:
 
 Outcome: Fund wallets, read accounts, reason about rent/ATAs, and send transactions on devnet.
 
-### Week 2 — Rust for Solana (Available)
+### Week 2 - Rust for Solana (Available)
 
 What you’ll learn:
 - Modern Rust aligned to on‑chain constraints: ownership, lifetimes, enums, traits
@@ -68,7 +68,7 @@ Lessons:
 
 Outcome: Confident Rust skills mapped to Solana program development and testing.
 
-### Week 3 — Anchor Framework (Coming by end of 2025)
+### Week 3 - Anchor Framework (Coming by end of 2025)
 
 What you’ll learn:
 - Anchor ergonomics: IDL, constraints, macros, events, and testing
@@ -87,7 +87,7 @@ Planned lessons:
 
 Outcome: Build real Anchor programs with PDAs, CPIs, and robust token integrations.
 
-### Week 4 — Client‑Side & Full‑Stack dApps (Coming by end of 2025)
+### Week 4 - Client‑Side & Full‑Stack dApps (Coming by end of 2025)
 
 What you’ll learn:
 - Wallet adapters (Phantom/Solflare/Ledger), connection UX, session management
@@ -105,7 +105,7 @@ Planned lessons:
 
 Outcome: Ship production‑ready, wallet‑connected frontends with strong DX.
 
-### Week 5 — Capstone & Portfolio (Planned)
+### Week 5 - Capstone & Portfolio (Planned)
 
 What you’ll build:
 - A showcase‑ready Solana application with docs, tests, analytics, and demos
@@ -222,7 +222,7 @@ Content contributions (tutorials/lessons):
 
 ## License
 
-MIT — see [LICENSE.MD](LICENSE.MD)
+MIT - see [LICENSE.MD](LICENSE.MD)
 
 ---
 

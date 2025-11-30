@@ -1,36 +1,59 @@
 ---
-title: Day 3 Radiant Signal
-description: Decode a fixed telemetry stream by mapping numeric offsets into characters.
+title: "Day 3: Functions"
+description: Master Rust functions - parameters, return types, and expressions.
 ---
 
-# Day 3 · Radiant Signal
+import { Callout } from "fumadocs-ui/components/callout";
 
-A Solana probe streamed back a short telemetry burst. Each byte is an offset into a custom alphabet.
-Implement `decode_signal(signal: &[u8]) -> String` that reconstructs the message. The runtime will
-feed your function a fixed signal and compare the resulting string to the expected answer.
+# Day 3: Functions
 
-## Mapping Rules
+Functions are the building blocks of Rust programs. Let's master them!
 
-- `0..=25` map to `A..=Z` (uppercase).
-- `26` maps to a single space.
-- `27` maps to `-` (dash).
-- Any other value should panic with a clear message; the hidden tests only use the values above.
+## What You'll Learn
+
+- Function syntax and parameters
+- Return types with `->`
+- Expressions vs statements
+- Implicit returns
+
+## Function Syntax
+
+```rust
+fn function_name(param1: Type1, param2: Type2) -> ReturnType {
+    // function body
+}
+```
+
+## Expressions vs Statements
+
+<Callout type="warn">
+This is crucial! In Rust:
+- **Expressions** return a value (no semicolon)
+- **Statements** perform an action (with semicolon)
+</Callout>
+
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b    // expression - no semicolon, this is returned
+}
+
+fn add_with_return(a: i32, b: i32) -> i32 {
+    return a + b;  // explicit return (less idiomatic)
+}
+```
+
+## The Task
+
+Convert Celsius to Fahrenheit using the formula: $F = C \times \frac{9}{5} + 32$
 
 ## Requirements
 
-- Iterate once over the input slice.
-- Assemble the decoded string without allocating intermediate collections where possible.
-- Return the final string from `decode_signal`.
+- Take a `f64` (floating point) parameter
+- Return the Fahrenheit value as `f64`
+- `100.0°C` should return `212.0°F`
 
-## Example
+## Hints
 
-```rust
-let preview = decode_signal(&[11, 4, 0, 17, 13, 27, 18, 14, 11]);
-assert_eq!(preview, "LEARN-SOL");
-```
-
-Only **one** output is accepted by the judge. When you click **Run Code**, your implementation is
-wrapped in a hidden harness, executed on the official Rust Playground API, and the stdout is
-compared against the expected decoded signal. Getting the mapping wrong will produce a mismatch.
-
-Good luck, and watch those offsets!
+- Be careful with integer vs float division
+- `9.0 / 5.0` for float division
+- Don't add a semicolon to your result expression!

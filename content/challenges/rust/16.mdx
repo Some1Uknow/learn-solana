@@ -1,0 +1,82 @@
+---
+title: "Day 16: Traits"
+description: Define shared behavior with traits - Rust's approach to interfaces.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 16: Traits
+
+Traits define shared behavior that types can implement - similar to interfaces in other languages.
+
+## Defining a Trait
+
+```rust
+trait Summary {
+    fn summarize(&self) -> String;
+    
+    // Default implementation
+    fn preview(&self) -> String {
+        format!("Read more: {}", self.summarize())
+    }
+}
+```
+
+## Implementing a Trait
+
+```rust
+struct Article {
+    title: String,
+    content: String,
+}
+
+impl Summary for Article {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.title, &self.content[..50])
+    }
+}
+```
+
+## Traits as Parameters
+
+```rust
+// impl Trait syntax (simpler)
+fn notify(item: &impl Summary) {
+    println!("Breaking: {}", item.summarize());
+}
+
+// Trait bound syntax (more flexible)
+fn notify<T: Summary>(item: &T) {
+    println!("Breaking: {}", item.summarize());
+}
+```
+
+<Callout type="info">
+Common traits in Rust: `Debug`, `Clone`, `Copy`, `PartialEq`, `Eq`, `PartialOrd`, `Ord`, `Hash`, `Default`
+</Callout>
+
+## The Task
+
+1. Define a `Describable` trait with a `describe(&self) -> String` method
+2. Implement it for `Dog` (return `"Dog: {name}"`)
+3. Implement it for `Cat` (return `"Cat: {name}"`)
+
+## Requirements
+
+- Both structs have a `name: String` field
+- Trait method returns a `String`
+- Test only uses `Dog { name: "Buddy" }`
+
+## Hints
+
+```rust
+trait Describable {
+    fn describe(&self) -> String;
+}
+
+impl Describable for Dog {
+    fn describe(&self) -> String {
+        format!("Dog: {}", self.name)
+    }
+}
+```

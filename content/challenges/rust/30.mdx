@@ -1,0 +1,163 @@
+---
+title: "Day 30: Capstone - State Machine"
+description: Build a complete Solana-style escrow state machine!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 30: Capstone - Solana-Style State Machine
+
+🎉 **Congratulations on making it to Day 30!** 
+
+Today we combine everything you've learned into a complete Solana-style state machine.
+
+## What You've Learned
+
+- ✅ Ownership, borrowing, lifetimes
+- ✅ Structs, enums, traits
+- ✅ Error handling with Result
+- ✅ Generics and trait bounds
+- ✅ Byte serialization
+- ✅ Account validation patterns
+- ✅ Derive macros and attributes
+
+## The Escrow Pattern
+
+Escrows are fundamental in DeFi. Here's the state machine:
+
+```
+Uninitialized → Initialized → Deposited → Completed
+                     ↓                          ↑
+                     └──────→ Cancelled ←───────┘
+```
+
+<Callout type="info">
+This pattern is used in token swaps, NFT marketplaces, governance proposals, and more!
+</Callout>
+
+## State Transitions
+
+| Current State | Action | Next State | Who Can Do It |
+|--------------|--------|------------|---------------|
+| Initialized | deposit | Deposited | Maker only |
+| Deposited | complete | Completed | Anyone (taker) |
+| Initialized/Deposited | cancel | Cancelled | Maker only |
+
+## The Implementation
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(u8)]
+enum EscrowState {
+    Uninitialized = 0,
+    Initialized = 1,
+    Deposited = 2,
+    Completed = 3,
+    Cancelled = 4,
+}
+
+#[derive(Debug)]
+enum EscrowError {
+    InvalidState,
+    InvalidAmount,
+    Unauthorized,
+}
+
+#[repr(C)]
+struct Escrow {
+    state: EscrowState,
+    maker: [u8; 32],
+    taker: [u8; 32],
+    amount: u64,
+}
+```
+
+## Implementing State Transitions
+
+Each transition should:
+1. Check current state
+2. Verify authorization
+3. Update state and data
+
+```rust
+fn deposit(&mut self, caller: &[u8; 32], amount: u64) -> Result<(), EscrowError> {
+    // 1. Check state
+    if self.state != EscrowState::Initialized {
+        return Err(EscrowError::InvalidState);
+    }
+    // 2. Check authorization
+    if *caller != self.maker {
+        return Err(EscrowError::Unauthorized);
+    }
+    // 3. Validate input
+    if amount == 0 {
+        return Err(EscrowError::InvalidAmount);
+    }
+    // 4. Update
+    self.amount = amount;
+    self.state = EscrowState::Deposited;
+    Ok(())
+}
+```
+
+## The Task
+
+Implement the escrow state machine:
+1. `deposit(caller, amount)` - maker deposits funds
+2. `complete(taker)` - someone completes the escrow
+3. `cancel(caller)` - maker cancels (if not completed)
+
+## Requirements
+
+- Each method validates state and authorization
+- Returns appropriate `EscrowError` on failure
+- Test flow: new → deposit → complete
+
+## Hints
+
+```rust
+fn deposit(&mut self, caller: &[u8; 32], amount: u64) -> Result<(), EscrowError> {
+    if self.state != EscrowState::Initialized {
+        return Err(EscrowError::InvalidState);
+    }
+    if *caller != self.maker {
+        return Err(EscrowError::Unauthorized);
+    }
+    self.amount = amount;
+    self.state = EscrowState::Deposited;
+    Ok(())
+}
+
+fn complete(&mut self, taker: [u8; 32]) -> Result<(), EscrowError> {
+    if self.state != EscrowState::Deposited {
+        return Err(EscrowError::InvalidState);
+    }
+    self.taker = taker;
+    self.state = EscrowState::Completed;
+    Ok(())
+}
+
+fn cancel(&mut self, caller: &[u8; 32]) -> Result<(), EscrowError> {
+    if self.state == EscrowState::Completed {
+        return Err(EscrowError::InvalidState);
+    }
+    if *caller != self.maker {
+        return Err(EscrowError::Unauthorized);
+    }
+    self.state = EscrowState::Cancelled;
+    Ok(())
+}
+```
+
+---
+
+## 🎓 What's Next?
+
+You're now ready for **Solana development**! Your next steps:
+
+1. **Anchor Framework** - The standard framework for Solana programs
+2. **SPL Tokens** - Token program and associated accounts
+3. **PDAs** - Program Derived Addresses
+4. **CPIs** - Cross-Program Invocations
+
+**Congratulations on completing 30 Days of Rust!** 🦀🚀

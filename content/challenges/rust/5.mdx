@@ -1,0 +1,57 @@
+---
+title: "Day 5: Ownership Basics"
+description: Understand Rust's unique ownership system - the core of memory safety.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 5: Ownership Basics
+
+Ownership is Rust's most unique feature and enables memory safety without garbage collection.
+
+<Callout type="warn">
+This concept is **crucial** for Solana development! Account data ownership and borrowing follow similar principles.
+</Callout>
+
+## The Three Rules of Ownership
+
+1. Each value has an **owner**
+2. There can only be **one owner** at a time
+3. When the owner goes out of scope, the value is **dropped**
+
+## Move Semantics
+
+When you assign a `String` to another variable, ownership **moves**:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;  // s1 is now invalid!
+// println!("{}", s1);  // ERROR: s1 was moved
+```
+
+## Clone: Deep Copy
+
+Use `.clone()` to create a deep copy:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1.clone();  // Both s1 and s2 are valid
+```
+
+## The Task
+
+The provided code has an ownership error. The `take_ownership` function takes ownership of the String, so the second call fails.
+
+Fix it so both calls work and the output is `18` (9 + 9).
+
+## Requirements
+
+- Don't change the `take_ownership` function signature
+- Make both function calls work
+- Output should be `18`
+
+## Hints
+
+- You need to clone the string before the first call
+- Or restructure to create two separate strings
+- `message.clone()` creates a copy

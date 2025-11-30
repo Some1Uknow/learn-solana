@@ -1,0 +1,93 @@
+---
+title: "Day 20: Closures"
+description: Capture your environment with closures - anonymous functions with superpowers.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 20: Closures
+
+Closures are anonymous functions that can capture values from their environment.
+
+## Closure Syntax
+
+```rust
+// Full syntax
+let add = |a: i32, b: i32| -> i32 { a + b };
+
+// Type inference (common)
+let add = |a, b| a + b;
+
+// No parameters
+let greet = || println!("Hello!");
+```
+
+## Capturing Environment
+
+```rust
+let x = 4;
+let add_x = |n| n + x;  // Captures x from environment
+println!("{}", add_x(5));  // 9
+```
+
+## Three Closure Traits
+
+| Trait | Captures | Example |
+|-------|----------|---------|
+| `Fn` | By reference (`&T`) | Read-only access |
+| `FnMut` | By mutable reference (`&mut T`) | Modify captured values |
+| `FnOnce` | By value (ownership) | Consume captured values |
+
+<Callout type="info">
+Use `move` to force ownership transfer:
+```rust
+let s = String::from("hello");
+let closure = move || println!("{}", s);
+// s is no longer valid here
+```
+</Callout>
+
+## Closures as Parameters
+
+```rust
+fn apply<F>(f: F) where F: Fn(i32) -> i32 {
+    println!("{}", f(5));
+}
+
+apply(|x| x * 2);  // 10
+```
+
+## Returning Closures
+
+```rust
+fn make_adder(n: i32) -> impl Fn(i32) -> i32 {
+    move |x| x + n
+}
+
+let add_5 = make_adder(5);
+println!("{}", add_5(10));  // 15
+```
+
+## The Task
+
+Implement `make_counter(start)` that returns a closure which:
+- Returns the current count
+- Increments the count for the next call
+
+## Requirements
+
+- `make_counter(1)` starts at 1
+- First call returns 1, second returns 2, third returns 3
+
+## Hints
+
+```rust
+fn make_counter(start: i32) -> impl FnMut() -> i32 {
+    let mut count = start;
+    move || {
+        let current = count;
+        count += 1;
+        current
+    }
+}
+```

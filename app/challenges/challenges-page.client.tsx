@@ -54,7 +54,7 @@ export function ChallengesPageClient() {
                     Daily Track
                   </span>
                   <Link
-                    href="/challenges/rust/1"
+                    href="/challenges/rust"
                     className="inline-flex items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 px-5 py-2 text-[11px] font-semibold tracking-[0.25em] text-cyan-200 transition hover:border-cyan-400/50 hover:bg-cyan-400/15"
                   >
                     START
