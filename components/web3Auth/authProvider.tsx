@@ -7,6 +7,7 @@ import {
 } from "@web3auth/modal/react";
 import { IWeb3AuthState, WEB3AUTH_NETWORK } from "@web3auth/modal";
 import React from "react";
+import { Web3AuthConnectionListener } from "./Web3AuthConnectionListener";
 // IMP END - Setup Web3Auth Provider
 
 // IMP START - Dashboard Registration
@@ -72,6 +73,8 @@ export default function Provider({
       config={web3AuthContextConfig}
       initialState={web3authInitialState}
     >
+      {/* Connection listener for event-based user registration */}
+      <Web3AuthConnectionListener />
       {children}
     </Web3AuthProvider>
     // IMP END - SSR

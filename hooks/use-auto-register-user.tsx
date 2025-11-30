@@ -4,7 +4,13 @@ import { useWeb3Auth, useWeb3AuthUser } from '@web3auth/modal/react';
 import { SolanaWallet } from '@web3auth/solana-provider';
 import { SIGN_MESSAGE_PREFIX } from '@/lib/solana/signature';
 
-interface Options { onRegistered?: (user: any) => void }
+interface Options { 
+  onRegistered?: (user: any) => void;
+  /**
+   * If true, skips registration attempt (useful when direct registration already succeeded)
+   */
+  skipIfAlreadyAttempted?: boolean;
+}
 
 function persistWeb3AuthToken(token: string | undefined | null) {
   if (!token || typeof window === 'undefined') return;
@@ -25,14 +31,39 @@ function persistWeb3AuthToken(token: string | undefined | null) {
   }
 }
 
+/**
+ * Backup hook for user registration.
+ * 
+ * This hook serves as a fallback mechanism when direct registration
+ * (via registerUserAfterLogin) fails or is not used. It relies on
+ * Web3Auth hook state updates which may have timing issues in v10+.
+ * 
+ * The primary registration should happen directly after connect() resolves
+ * in the wallet-button component using registerUserAfterLogin().
+ * 
+ * @param walletAddress - The user's wallet address
+ * @param opts - Options including onRegistered callback and skipIfAlreadyAttempted flag
+ */
 export function useAutoRegisterUser(walletAddress: string | undefined, opts: Options = {}) {
   const { web3Auth, isConnected } = useWeb3Auth();
   const { userInfo } = useWeb3AuthUser();
   const attemptedRef = useRef(false);
+  const skipFlagRef = useRef(opts.skipIfAlreadyAttempted);
+  
+  // Update skip flag ref when prop changes
+  useEffect(() => {
+    skipFlagRef.current = opts.skipIfAlreadyAttempted;
+  }, [opts.skipIfAlreadyAttempted]);
 
   useEffect(() => {
     let cancelled = false;
     async function attemptRegistration(attempt = 0) {
+      // Skip if already attempted via direct registration
+      if (skipFlagRef.current) {
+        console.log('[useAutoRegisterUser] Skipping - direct registration already attempted');
+        return;
+      }
+      
       if (!walletAddress || attemptedRef.current || cancelled) return;
 
       let idToken: string | undefined;
