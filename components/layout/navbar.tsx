@@ -30,7 +30,7 @@ export function Navbar() {
     <nav className="w-full max-w-7xl mx-auto relative z-20">
       <div className="relative flex items-center justify-between px-6 md:px-10 py-3">
         {/* Left: Logo */}
-        <div className="flex-shrink-0 z-20 flex-row flex">
+        <div className="shrink-0 z-20 flex-row flex">
           <NavbarBranding />
            <NavbarGithub />
         </div>
@@ -42,25 +42,9 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Right: Buttons and Product Hunt */}
-        <div className="hidden md:flex items-center gap-2 min-w-[220px] justify-end z-20">
-         
+        {/* Right: Buttons */}
+        <div className="hidden md:flex items-center gap-2 justify-end z-20">
           <NavbarWalletButton />
-          <a
-            href="https://www.producthunt.com/products/learn-sol"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-opacity hover:opacity-80"
-            aria-label="View learn.sol on Product Hunt"
-          >
-            <img
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1022706&theme=dark"
-              alt="learn.sol - Learn Solana Development with ease | Product Hunt"
-              width="185"
-              height="40"
-              className="h-10 w-[185px]"
-            />
-          </a>
         </div>
 
         {/* Mobile Menu Toggle */}
