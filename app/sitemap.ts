@@ -2,27 +2,33 @@ import type { MetadataRoute } from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 
-// Simple dynamic sitemap for learn.sol
-// Enumerates curriculum weeks and lesson pages under /learn/week-X/<slug>
+// Enhanced sitemap for learn.sol with priorities and change frequencies
+// Helps Google understand page importance and crawl frequency
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://learnsol.site'
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 
-// Top-level non-learn routes we want indexed
-const STATIC_PATHS: string[] = [
-  '/',
-  '/games',
-  '/challenges',
-  '/modules',
-  '/projects',
-  '/llms',
+// Static routes with SEO priorities
+const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' | 'weekly' | 'monthly' }[] = [
+  { path: '/', priority: 1.0, changeFrequency: 'weekly' },
+  { path: '/modules', priority: 0.9, changeFrequency: 'weekly' },
+  { path: '/games', priority: 0.8, changeFrequency: 'weekly' },
+  { path: '/challenges', priority: 0.8, changeFrequency: 'weekly' },
+  { path: '/tools', priority: 0.7, changeFrequency: 'monthly' },
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
 
-  // Add static paths (no volatile lastModified; omit if not meaningful)
-  for (const p of STATIC_PATHS) entries.push({ url: `${BASE_URL}${p}` })
+  // Add static routes with priorities
+  for (const route of STATIC_ROUTES) {
+    entries.push({
+      url: `${BASE_URL}${route.path}`,
+      priority: route.priority,
+      changeFrequency: route.changeFrequency,
+      lastModified: new Date(),
+    })
+  }
 
   // Add week directories and their lesson files
   try {
@@ -33,8 +39,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .sort()
 
     for (const week of weekDirs) {
-      // Week landing (index.mdx exists but route is /learn/week-X)
-      entries.push({ url: `${BASE_URL}/learn/${week}` })
+      // Week landing pages get high priority (course content)
+      entries.push({
+        url: `${BASE_URL}/learn/${week}`,
+        priority: 0.85,
+        changeFrequency: 'weekly',
+      })
       const weekPath = path.join(CONTENT_DIR, week)
       const files = fs
         .readdirSync(weekPath)
@@ -51,7 +61,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
         }
         entries.push({
           url: `${BASE_URL}/learn/${week}/${slug}`,
+          priority: 0.8,
+          changeFrequency: 'monthly',
           ...(lastModified ? { lastModified } : {}),
+        })
+      }
+    }
+
+    // Add challenge tracks if they exist
+    const challengesDir = path.join(CONTENT_DIR, 'challenges')
+    if (fs.existsSync(challengesDir)) {
+      const challengeTracks = fs.readdirSync(challengesDir).filter((f) =>
+        fs.statSync(path.join(challengesDir, f)).isDirectory()
+      )
+      for (const track of challengeTracks) {
+        entries.push({
+          url: `${BASE_URL}/challenges/${track}`,
+          priority: 0.75,
+          changeFrequency: 'weekly',
         })
       }
     }

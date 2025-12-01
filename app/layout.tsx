@@ -32,10 +32,12 @@ const spaceGrotesk = Space_Grotesk({
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "EducationalOrganization",
   name: "learn.sol",
+  alternateName: "Learn Solana",
   url: siteUrl,
   logo: `${siteUrl}/opengraph-image.png`,
+  description: "Free Solana development courses, tutorials, and coding challenges",
   sameAs: ["https://x.com/learndotsol", "https://github.com/learn-solana"],
   contactPoint: [
     {
@@ -44,6 +46,41 @@ const organizationJsonLd = {
       email: "raghav@learnsol.site",
     },
   ],
+};
+
+const courseJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Course",
+  name: "Learn Solana Development",
+  description: "Free comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps",
+  provider: {
+    "@type": "EducationalOrganization",
+    name: "learn.sol",
+    url: siteUrl,
+  },
+  educationalLevel: "Beginner to Advanced",
+  isAccessibleForFree: true,
+  inLanguage: "en",
+  coursePrerequisites: "Basic programming knowledge",
+  teaches: ["Solana Development", "Rust Programming", "Smart Contracts", "Anchor Framework", "Web3 Development"],
+  hasCourseInstance: {
+    "@type": "CourseInstance",
+    courseMode: "online",
+    courseWorkload: "PT40H",
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "learn.sol",
+  alternateName: "Learn Solana",
+  url: siteUrl,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${siteUrl}/search?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
 };
 
 export const viewport: Viewport = {
@@ -58,23 +95,23 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "Learn Solana",
-    template: "%s | Learn Solana",
+    default: "Learn Solana | Free Solana Development Course",
+    template: "%s | learn.sol",
   },
   description:
-    "Learn solana through courses, games and coding challenges at learn.sol",
+    "Learn Solana development for free. Master Solana programming, Rust, Anchor framework through interactive courses, games, and coding challenges. The best way to learn Solana.",
   keywords: courseKeywords,
-  applicationName: "Learn Solana",
+  applicationName: "learn.sol",
   authors: [{ name: "learn.sol Team" }],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "Learn Solana",
+    title: "Learn Solana | Free Solana Development Course",
     description:
-      "Learn solana through courses, games and coding challenges at learn.sol",
+      "Learn Solana development for free. Master Solana programming through interactive courses, games, and challenges.",
     url: siteUrl,
-    siteName: "learn.sol",
+    siteName: "learn.sol, Learn Solana Development",
     locale: "en_US",
     images: [defaultOpenGraphImage],
     type: "website",
@@ -83,9 +120,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@learndotsol",
     creator: "@Some1UKnow25",
-    title: "Learn Solana",
+    title: "Learn Solana | Free Development Course",
     description:
-      "Learn solana through courses, games and coding challenges at learn.sol",
+      "Learn Solana development for free through interactive courses, games, and coding challenges.",
     images: [defaultTwitterImage],
   },
   robots: {
@@ -99,7 +136,7 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
     },
   },
-  category: "technology",
+  category: "education",
 };
 
 export default async function RootLayout({
@@ -122,6 +159,20 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         >
           {JSON.stringify(organizationJsonLd)}
+        </Script>
+        <Script
+          id="jsonld-course"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+        >
+          {JSON.stringify(courseJsonLd)}
+        </Script>
+        <Script
+          id="jsonld-website"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+        >
+          {JSON.stringify(websiteJsonLd)}
         </Script>
         {process.env.NEXT_PUBLIC_ENABLE_REACT_SCAN && (
           // react-scan performance analyzer (only enabled when explicitly requested)

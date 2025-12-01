@@ -6,13 +6,27 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Solana Modules Library";
+const title = "Free Solana Course | Learn Solana Development Step-by-Step";
 const description =
-  "Browse structured Solana learning modules spanning fundamentals, tooling, and on-chain program design.";
+  "Start your Solana developer journey with our structured course. Learn Solana fundamentals, Rust programming, Anchor framework, and build real dApps from scratch.";
+
+const moduleKeywords = [
+  "solana course",
+  "solana courses",
+  "free solana course",
+  "solana development course",
+  "learn solana online",
+  "solana tutorial",
+  "solana developer course",
+  "solana programming course",
+  "anchor framework course",
+  "rust solana course",
+];
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: moduleKeywords,
   alternates: {
     canonical: createCanonical("/modules"),
   },

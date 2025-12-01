@@ -6,13 +6,24 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Solana Learning Games";
+const title = "Learn Solana Through Games | Interactive Blockchain Tutorials";
 const description =
-  "Play interactive Solana games that reward learning with NFTs and tracked progression.";
+  "Master Solana concepts through fun, interactive games. Learn blockchain, transactions, accounts, and smart contracts while playing. Earn NFTs as you progress.";
+
+const gamesKeywords = [
+  "solana games",
+  "learn solana games",
+  "blockchain learning games",
+  "interactive solana tutorial",
+  "solana education games",
+  "web3 learning games",
+  "gamified blockchain learning",
+];
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: gamesKeywords,
   alternates: {
     canonical: createCanonical("/games"),
   },
