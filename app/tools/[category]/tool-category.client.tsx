@@ -55,39 +55,34 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
               <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
                 Featured Partner
               </h2>
-              <span className="inline-flex items-center rounded-full border border-[#14F195]/30 bg-[#14F195]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#14F195]">
-                Sponsored
+              <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-amber-400">
+                Available
               </span>
             </div>
 
+            {/* Partner Slot Available Notice */}
+            <div className="rounded-2xl border border-[#14F195]/30 bg-[#14F195]/5 px-6 py-4">
+              <p className="text-sm text-[#14F195]">
+                ✨ <span className="font-semibold">This Featured Partner slot is currently open.</span>
+                <br />
+                <span className="text-zinc-300">To claim exclusivity for {category.name}, contact </span>
+                <a href="mailto:raghav@learnsol.site" className="font-medium text-[#14F195] hover:underline">raghav@learnsol.site</a>
+              </p>
+            </div>
+
             <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/2 p-8 shadow-[0_30px_80px_rgba(0,0,0,0.5)] backdrop-blur-md md:p-10">
-              <div className="absolute inset-0 bg-linear-to-br from-[#14F195]/5 via-transparent to-purple-500/5" />
+              <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 via-transparent to-purple-500/5" />
               
               <div className="relative grid gap-8 lg:grid-cols-2">
                 {/* Left: Tool Info */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
-                      {featuredTool.logo?.startsWith('http') ? (
-                        <img 
-                          src={featuredTool.logo} 
-                          alt={`${featuredTool.name} logo`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-4xl">{featuredTool.logo}</span>
-                      )}
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center border-2 border-dashed border-white/20">
+                      <span className="text-3xl text-zinc-500">?</span>
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white">{featuredTool.name}</h3>
-                      <a
-                        href={featuredTool.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-[#14F195] hover:underline"
-                      >
-                        {featuredTool.website}
-                      </a>
+                      <span className="text-sm text-zinc-400">Partner with LearnSol</span>
                     </div>
                   </div>
 
@@ -95,7 +90,7 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
 
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-                      Key Features
+                      Partnership Benefits
                     </h4>
                     <ul className="space-y-2">
                       {featuredTool.features.map((feature, idx) => (
@@ -107,31 +102,29 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
                     </ul>
                   </div>
 
-                  <a
-                    href={featuredTool.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/partner"
                     className="inline-flex items-center gap-2 rounded-xl border border-[#14F195] bg-[#14F195]/10 px-6 py-3 font-medium text-[#14F195] transition hover:bg-[#14F195]/20"
                   >
-                    Get Started with {featuredTool.name}
+                    Become a Partner
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Right: Stats */}
                 <div className="flex flex-col justify-center space-y-4">
                   <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-                    Performance Stats
+                    Slot Status
                   </h4>
                   <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
                     {featuredTool.stats.map((stat, idx) => (
                       <div
                         key={idx}
-                        className="rounded-2xl border border-white/10 bg-white/2 p-6 text-center"
+                        className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 text-center"
                       >
-                        <div className="text-3xl font-bold text-white">{stat.value}</div>
+                        <div className="text-3xl font-bold text-amber-400">{stat.value}</div>
                         <div className="mt-1 text-sm text-zinc-400">{stat.label}</div>
                       </div>
                     ))}
@@ -141,79 +134,106 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
             </div>
           </section>
 
-          {/* Projects Built With Section */}
-          {projectsBuiltWith.length > 0 && (
-            <section className="space-y-6">
-              <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                Projects Built with {featuredTool.name}
-              </h2>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {projectsBuiltWith.map((project, idx) => (
-                  <div
-                    key={idx}
-                    className="group rounded-2xl border border-white/5 bg-white/2 p-6 transition hover:-translate-y-1 hover:border-white/10"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <h3 className="text-lg font-semibold text-white">{project.name}</h3>
-                        <span className="rounded-full border border-white/10 bg-white/2 px-2.5 py-0.5 text-xs text-zinc-300">
-                          {project.category}
-                        </span>
-                      </div>
-                      <p className="text-sm text-zinc-400">{project.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* Other Tools Section */}
           {otherTools.length > 0 && (
             <section className="space-y-6">
-              <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                Other {category.name}
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                  Other {category.name}
+                </h2>
+                <Link href="/partner" className="text-xs text-[#14F195] hover:underline uppercase tracking-wider">
+                  Add your tool →
+                </Link>
+              </div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {otherTools.map((tool, idx) => (
-                  <a
-                    key={idx}
-                    href={tool.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group rounded-2xl border border-white/5 bg-white/2 p-6 transition hover:-translate-y-1 hover:border-white/10"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <h3 className="text-lg font-semibold text-white">{tool.name}</h3>
-                        <svg
-                          className="w-5 h-5 text-zinc-400 transition group-hover:translate-x-1 group-hover:text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
+                {otherTools.map((tool, idx) => {
+                  const isPlaceholder = tool.website === "#" || tool.name.startsWith("Partner Slot");
+                  
+                  if (isPlaceholder) {
+                    return (
+                      <div
+                        key={idx}
+                        className="group rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 p-6 transition hover:border-zinc-600"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-600 text-lg font-bold">
+                                {tool.name.split(" ").pop()}
+                              </div>
+                              <h3 className="text-lg font-semibold text-zinc-500">{tool.name}</h3>
+                            </div>
+                          </div>
+                          <p className="text-sm text-zinc-600">{tool.description}</p>
+                          <Link
+                            href="/partner"
+                            className="inline-flex items-center gap-1 text-xs text-[#14F195] hover:underline"
+                          >
+                            Claim this slot
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
-                      <p className="text-sm text-zinc-400">{tool.description}</p>
-                    </div>
-                  </a>
-                ))}
+                    );
+                  }
+                  
+                  return (
+                    <a
+                      key={idx}
+                      href={tool.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group rounded-2xl border border-white/10 bg-white/2 p-6 transition hover:-translate-y-1 hover:border-white/20"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            {tool.logo ? (
+                              <img 
+                                src={tool.logo} 
+                                alt={`${tool.name} logo`}
+                                className="w-10 h-10 rounded-lg object-contain bg-white/5"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-[#14F195]/10 flex items-center justify-center text-[#14F195] text-lg font-bold">
+                                {tool.name.charAt(0)}
+                              </div>
+                            )}
+                            <h3 className="text-lg font-semibold text-white">{tool.name}</h3>
+                          </div>
+                          <svg
+                            className="w-5 h-5 text-zinc-400 transition group-hover:translate-x-1 group-hover:text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-zinc-400">{tool.description}</p>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             </section>
           )}
 
           {/* CTA Section */}
           <section className="rounded-3xl border border-white/10 bg-linear-to-r from-[#14F195]/5 to-purple-500/5 p-8 text-center">
-            <h3 className="text-xl font-semibold text-white">Want to be featured here?</h3>
+            <h3 className="text-xl font-semibold text-white">Interested in a Featured Partner slot?</h3>
             <p className="mt-2 text-sm text-zinc-400">
               Reach out to showcase your tool to the Solana developer community.
             </p>
-            <button className="mt-6 rounded-xl border border-white/20 bg-white/5 px-6 py-3 font-medium text-white transition hover:bg-white/10">
-              Contact Us
-            </button>
+            <Link
+              href="/partner"
+              className="mt-6 inline-block rounded-xl border border-white/20 bg-white/5 px-6 py-3 font-medium text-white transition hover:bg-white/10"
+            >
+              Learn About Partnership
+            </Link>
           </section>
         </div>
       </div>
