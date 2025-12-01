@@ -5,7 +5,9 @@
   <p><strong>Learn Solana by building real projects. Zero fluff. Pure hands-on learning.</strong></p>
 
   <a href="https://learnsol.site"><img alt="Live Site" src="https://img.shields.io/badge/Live-learnsol.site-6EE7B7?logo=vercel&logoColor=black" /></a>
+
   <img alt="Stars" src="https://img.shields.io/github/stars/Some1Uknow/learn-solana?color=9945FF&style=flat" />
+
   <a href="LICENSE.MD"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
 
   <br/><br/>
