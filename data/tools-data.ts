@@ -38,12 +38,17 @@ const createPlaceholderFeaturedTool = (): FeaturedTool => ({
   logo: "/placeholder.jpg",
   website: "#",
   features: [
-    "Premium placement",
-    "AI Assistant recommendations",
-    "Tutorial mentions",
-    "Category exclusivity",
+    "References in all related tutorials",
+    "AI bot recommends your tool to learners",
+    "Default tool in upcoming video content",
+    "3 dedicated tutorials for your product",
+    "Much more on your demand!",
   ],
-  stats: [{ label: "Status", value: "Open" }],
+  stats: [
+    { label: "Status", value: "Open" },
+    { label: "Tutorials", value: "Exclusive" },
+    { label: "Promotion", value: "Maximum" },
+  ],
 });
 
 // Placeholder tools for "Other Providers" section

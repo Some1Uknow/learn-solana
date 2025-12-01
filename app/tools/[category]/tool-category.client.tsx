@@ -132,6 +132,33 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
                 </div>
               </div>
             </div>
+
+            {/* Dedicated Tutorials for Featured Partner */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+                Dedicated Tutorials (Featured Partner Benefit)
+              </h4>
+              <div className="grid gap-4 md:grid-cols-3">
+                {[1, 2, 3].map((num) => (
+                  <div
+                    key={num}
+                    className="rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 p-5 transition hover:border-zinc-600"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#14F195]/10 flex items-center justify-center text-[#14F195] text-sm font-bold">
+                        {num}
+                      </div>
+                      <span className="text-xs text-zinc-500 uppercase tracking-wider">Tutorial {num}</span>
+                    </div>
+                    <h5 className="text-white font-medium mb-1">Tutorial Slot {num}</h5>
+                    <p className="text-xs text-zinc-500">A dedicated tutorial created for the Featured Partner&apos;s product.</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-500 text-center">
+                Featured Partners get dedicated tutorials on this page and inside the main tutorials as well showcasing their product integration with Solana development.
+              </p>
+            </div>
           </section>
 
           {/* Other Tools Section */}

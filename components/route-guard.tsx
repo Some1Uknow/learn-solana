@@ -13,6 +13,8 @@ const PROTECTED_ROUTES = [
   "/projects",
   "/challenges",
   "/learn",
+  "/tools",
+  "/partner",
   "/test-auth",
   "/dashboard",
   "/admin",
@@ -24,12 +26,6 @@ const ROUTE_CONFIGS = {
     description:
       "Access interactive Solana games and challenges to test your skills.",
     icon: "🎮",
-  },
-  "/jobs": {
-    title: "💼 Job Board",
-    description:
-      "Explore exclusive Solana development opportunities and career paths.",
-    icon: "💼",
   },
   "/modules": {
     title: "🎓 Learning Modules",
@@ -53,6 +49,18 @@ const ROUTE_CONFIGS = {
     description:
       "Access comprehensive Solana learning materials and documentation.",
     icon: "📚",
+  },
+  "/tools": {
+    title: "🛠️ Developer Tools",
+    description:
+      "Explore essential Solana developer tools and infrastructure.",
+    icon: "🛠️",
+  },
+  "/partner": {
+    title: "🤝 Partnership",
+    description:
+      "Learn about partnership opportunities with LearnSol.",
+    icon: "🤝",
   },
   "/test-auth": {
     title: "🔐 Authentication Test",
