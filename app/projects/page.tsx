@@ -6,13 +6,25 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Build Projects on Solana";
+const title = "Build Solana Projects | Hands-On Solana Development Tutorials";
 const description =
-  "Explore hands-on Solana projects with guidance, courses, and progression tracking.";
+  "Learn Solana by building real projects. Step-by-step tutorials for dApps, NFT marketplaces, DeFi protocols, and more. The best way to learn Solana development.";
+
+const projectKeywords = [
+  "solana projects",
+  "build on solana",
+  "solana dapp tutorial",
+  "solana nft project",
+  "solana defi tutorial",
+  "solana project ideas",
+  "hands-on solana",
+  "solana portfolio projects",
+];
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: projectKeywords,
   alternates: {
     canonical: createCanonical("/projects"),
   },

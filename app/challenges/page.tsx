@@ -6,13 +6,25 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Solana Coding Challenges";
+const title = "Solana Coding Challenges | 30-Day Rust & Solana Practice";
 const description =
-  "Tackle a 30-day Solana and Rust challenge track with progressive prompts and upcoming interactive tooling.";
+  "Sharpen your Solana skills with daily coding challenges. 30-day tracks covering Rust, Anchor, and Solana smart contracts. Perfect for learning Solana programming.";
+
+const challengeKeywords = [
+  "solana coding challenges",
+  "solana practice",
+  "rust solana exercises",
+  "anchor challenges",
+  "solana programming practice",
+  "learn rust solana",
+  "solana developer exercises",
+  "blockchain coding challenges",
+];
 
 export const metadata: Metadata = {
   title,
   description,
+  keywords: challengeKeywords,
   alternates: {
     canonical: createCanonical("/challenges"),
   },
