@@ -3,18 +3,20 @@
   
   <h1><strong>LearnSol — Free, Open-Source Solana Learning Platform</strong></h1>
   <p><strong>Learn Solana by building real projects. Zero fluff. Pure hands-on learning.</strong></p>
-
+   <a href="https://youtu.be/pM1zKL5CbhA"><strong>▶ Watch the Demo</strong></a>
+   </br></br>
+  </div>
+<div align="center">
   <a href="https://learnsol.site"><img alt="Live Site" src="https://img.shields.io/badge/Live-learnsol.site-6EE7B7?logo=vercel&logoColor=black" /></a>
 
   <img alt="Stars" src="https://img.shields.io/github/stars/Some1Uknow/learn-solana?color=9945FF&style=flat" />
 
   <a href="LICENSE.MD"><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg" /></a>
-
+</div>
   <br/><br/>
   <img width="1400" height="686" alt="Banner" src="https://github.com/user-attachments/assets/794f68fe-8df7-426b-b8b1-10c20123920e" />
 
   <br/><br/>
-  <a href="https://youtu.be/pM1zKL5CbhA"><strong>▶ Watch the Demo</strong></a>
 </div>
 
 ---
