@@ -104,8 +104,6 @@ LearnSol is structured into five weeks:
 - **Week 4:** Full-stack dApps  
 - **Week 5:** Capstone project  
 
-> Detailed lessons live on the site — README stays simple.
-
 ---
 
 # 🛣 Roadmap
