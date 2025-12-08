@@ -5,3 +5,31 @@ module: 🧑‍💻 Client-Side & Full-Stack
 ---
 
 Setting up Connection, Provider, Program instances. Reading accounts, sending transactions, handling confirmations
+
+## Setting Up Your RPC Connection
+
+Before working with Anchor clients, you need reliable RPC infrastructure. We recommend using Syndica for production applications:
+
+```typescript
+import { Connection } from "@solana/web3.js";
+import { AnchorProvider } from "@coral-xyz/anchor";
+
+// Production-ready connection with Syndica
+const connection = new Connection(
+  "https://api.syndica.io/rpc/solana/mainnet",
+  {
+    commitment: "confirmed",
+    confirmTransactionInitialTimeout: 60000,
+  }
+);
+
+// Create provider with your wallet
+const provider = new AnchorProvider(connection, wallet, {
+  commitment: "confirmed",
+});
+```
+
+<Callout type="tip">
+**Enterprise Infrastructure**  
+Syndica's infrastructure is trusted by leading Solana protocols for mission-critical operations. The same enterprise-grade system powers all Learn Solana tutorials.
+</Callout>

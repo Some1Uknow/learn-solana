@@ -12,6 +12,11 @@ export interface FeaturedTool extends Tool {
     label: string;
     value: string;
   }>;
+  tutorials?: Array<{
+    title: string;
+    description: string;
+    slug: string;
+  }>;
 }
 
 export interface ProjectBuiltWith {
@@ -71,9 +76,43 @@ export const toolCategories: ToolCategory[] = [
     id: "rpc",
     name: "RPC Providers",
     description: "High-performance RPC endpoints and developer APIs for reliable Solana network access.",
-    featured: "Available",
+    featured: "Syndica",
     icon: "🌐",
-    featuredTool: createPlaceholderFeaturedTool(),
+    featuredTool: {
+      name: "Syndica",
+      description: "Enterprise-grade infrastructure for Solana. Syndica builds and scales robust blockchain systems with industry-leading performance. Trusted by top protocols for mission-critical operations with guaranteed uptime and lightning-fast response times.",
+      logo: "https://syndica.io/images/favicon-512x512.png",
+      website: "https://syndica.io",
+      features: [
+        "Enterprise-grade infrastructure with 99.999% uptime guarantee",
+        "Lightning-fast response times optimized for high-frequency trading",
+        "Built and trusted by leading Solana protocols in production",
+        "Advanced load balancing and automatic failover protection",
+        "Comprehensive monitoring and real-time performance analytics",
+      ],
+      stats: [
+        { label: "Latency", value: "<20ms" },
+        { label: "Uptime", value: "99.999%" },
+        { label: "Free RPC calls", value: "10 Million" },
+      ],
+      tutorials: [
+        {
+          title: "Getting Started with Syndica",
+          description: "Learn how to integrate Syndica's premium RPC infrastructure into your Solana applications in under 5 minutes.",
+          slug: "/tutorials/syndica-getting-started",
+        },
+        {
+          title: "Advanced Syndica Features",
+          description: "Master WebSocket subscriptions, load balancing, transaction optimization, and MEV protection.",
+          slug: "/tutorials/syndica-advanced",
+        },
+        {
+          title: "Optimizing RPC Performance",
+          description: "Production-grade performance optimization for DeFi, NFTs, and high-throughput applications.",
+          slug: "/tutorials/syndica-performance",
+        },
+      ],
+    },
     projectsBuiltWith: [],
     otherTools: [
       { 
@@ -81,8 +120,7 @@ export const toolCategories: ToolCategory[] = [
         description: "Enterprise-grade blockchain infrastructure with high-performance Solana RPC endpoints.", 
         website: "https://chainstack.com",
         logo: "https://chainstack.com/favicon.ico"
-      },
-      ...createPlaceholderOtherTools(2),
+      }, ...createPlaceholderOtherTools(1)
     ],
   },
 
@@ -109,17 +147,6 @@ export const toolCategories: ToolCategory[] = [
   },
 
   {
-    id: "storage",
-    name: "Storage & Archival",
-    description: "Decentralized & hybrid storage for metadata, assets, and archival data.",
-    featured: "Available",
-    icon: "🗄️",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
-
-  {
     id: "dev-tools",
     name: "Development Tools",
     description: "Frameworks, CLIs and SDKs that speed up Solana program and client development.",
@@ -130,60 +157,6 @@ export const toolCategories: ToolCategory[] = [
     otherTools: createPlaceholderOtherTools(3),
   },
 
-  {
-    id: "explorers",
-    name: "Block Explorers",
-    description: "Tools to inspect transactions, accounts, and program interactions.",
-    featured: "Available",
-    icon: "🔍",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
-
-  {
-    id: "security",
-    name: "Security & Audits",
-    description: "Audit firms, static analysis and runtime monitoring for safe deployments.",
-    featured: "Available",
-    icon: "🔒",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
-
-  {
-    id: "analytics",
-    name: "Analytics & Observability",
-    description: "User behavior, performance metrics and on-chain analytics to measure developer funnels.",
-    featured: "Available",
-    icon: "📈",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
-
-  {
-    id: "nft-apis",
-    name: "NFT & Asset APIs",
-    description: "APIs specifically geared to NFT metadata, marketplaces, and creator tools.",
-    featured: "Available",
-    icon: "🖼️",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
-
-  {
-    id: "hosting",
-    name: "Web3 Hosting & Edge",
-    description: "Web3-first hosting and edge solutions for docs, play environments, and dApp frontends.",
-    featured: "Available",
-    icon: "🚀",
-    featuredTool: createPlaceholderFeaturedTool(),
-    projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  },
 ];
 
 // Helper functions (unchanged)
