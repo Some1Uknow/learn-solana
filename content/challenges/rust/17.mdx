@@ -1,0 +1,85 @@
+---
+title: "Day 17: Trait Objects"
+description: Use dyn Trait for runtime polymorphism and heterogeneous collections.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 17: Trait Objects
+
+Trait objects enable dynamic dispatch - deciding which method to call at runtime.
+
+## Static vs Dynamic Dispatch
+
+```rust
+// Static dispatch (monomorphization)
+fn notify(item: &impl Summary) { ... }
+
+// Dynamic dispatch (trait object)
+fn notify(item: &dyn Summary) { ... }
+```
+
+## Creating Trait Objects
+
+```rust
+trait Draw {
+    fn draw(&self);
+}
+
+let shapes: Vec<Box<dyn Draw>> = vec![
+    Box::new(Circle { radius: 5.0 }),
+    Box::new(Rectangle { width: 10.0, height: 5.0 }),
+];
+```
+
+<Callout type="warn">
+Trait objects use `Box<dyn Trait>` because the size is unknown at compile time. The `Box` provides heap allocation with a known pointer size.
+</Callout>
+
+## When to Use Trait Objects
+
+| Use Case | Approach |
+|----------|----------|
+| Homogeneous collection | `Vec<T>` with generics |
+| Heterogeneous collection | `Vec<Box<dyn Trait>>` |
+| Plugin systems | Trait objects |
+| Maximum performance | Generics (static dispatch) |
+
+## Object Safety
+
+Not all traits can be made into trait objects. A trait is object-safe if:
+- No `Self` in method return types
+- No generic type parameters in methods
+
+## The Task
+
+1. Implement the `Speak` trait for `Cat` (return `"Meow!"`)
+2. Create a `Vec<Box<dyn Speak>>` with a Dog and Cat
+3. Iterate and print each animal's speech
+
+## Requirements
+
+- `Dog.speak()` → `"Woof!"`
+- `Cat.speak()` → `"Meow!"`
+- Output two lines: `Woof!` then `Meow!`
+
+## Hints
+
+```rust
+impl Speak for Cat {
+    fn speak(&self) -> String {
+        String::from("Meow!")
+    }
+}
+
+fn main() {
+    let animals: Vec<Box<dyn Speak>> = vec![
+        Box::new(Dog),
+        Box::new(Cat),
+    ];
+    
+    for animal in &animals {
+        println!("{}", animal.speak());
+    }
+}
+```

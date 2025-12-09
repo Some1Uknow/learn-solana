@@ -89,8 +89,20 @@ Here are some examples you can adapt.
 ```ts title="connect.ts"
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 
-const connection = new Connection(clusterApiUrl("devnet"));
+// Option 1: Using Syndica (Recommended for production)
+const connection = new Connection(
+  "https://solana-devnet.api.syndica.io/api-key/{your-key}",
+  "confirmed"
+);
+
+// Option 2: Using public devnet endpoint
+// const connection = new Connection(clusterApiUrl("devnet"));
 ```
+
+<Callout type="info">
+**Why Syndica?**  
+Syndica provides reliable RPC infrastructure with sub-50ms response times and 99.99% uptime. It's the recommended RPC provider for Learn Solana tutorials and handles production workloads efficiently.
+</Callout>
 
 ### Fetch Account Info
 

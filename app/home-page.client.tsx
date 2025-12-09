@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import LearnSolanaSection from "@/components/home/learn-solana-section";
 import XPostsMarquee from "@/components/home/x-posts-marquee";
+import SponsorSection from "@/components/home/sponsor-section";
 
 export function HomePageClient() {
   return (
@@ -35,12 +36,12 @@ export function HomePageClient() {
             <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 px-4 text-center">
               <div className="flex flex-wrap items-baseline justify-center gap-4 md:gap-8">
                 <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-white tracking-tighter leading-none">
-                  master
+                  <span className="sr-only">Learn Solana - </span>master
                 </h1>
                 <div className="flex items-center">
                   <Image
                     src="/solanaMain.png"
-                    alt="Solana Logo"
+                    alt="Solana blockchain development"
                     width={120}
                     height={120}
                     className="object-contain h-10 sm:h-14 md:h-[60px] w-auto"
@@ -48,12 +49,15 @@ export function HomePageClient() {
                   />
                 </div>
               </div>
-              <p className="text-base sm:text-lg md:text-2xl lg:text-3xl text-white/70 tracking-tighter">
+              <p className="text-base sm:text-lg md:text-2xl lg:text-3xl text-white/70 tracking-tighter italic">
                 without any hassle.
               </p>
             </div>
           </div>
         </div>
+
+        {/* Sponsor section */}
+        <SponsorSection />
 
         {/* Learn Solana section */}
         <LearnSolanaSection />

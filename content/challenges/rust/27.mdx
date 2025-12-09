@@ -1,0 +1,113 @@
+---
+title: "Day 27: The From Trait"
+description: Implement type conversions with From/Into - used everywhere in Solana!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 27: The From Trait
+
+The `From` trait enables type conversions. Implementing `From` automatically gives you `Into`!
+
+## From and Into
+
+```rust
+// Implementing From
+impl From<i32> for MyType {
+    fn from(value: i32) -> Self {
+        MyType(value)
+    }
+}
+
+// You get Into for free!
+let x: MyType = 42.into();
+let y: MyType = MyType::from(42);
+```
+
+<Callout type="info">
+**Convention**: Implement `From`, not `Into`. The blanket implementation handles `Into` automatically.
+</Callout>
+
+## Common Patterns
+
+```rust
+// String conversions
+impl From<&str> for MyString {
+    fn from(s: &str) -> Self {
+        MyString(s.to_string())
+    }
+}
+
+// Error conversions
+impl From<std::io::Error> for MyError {
+    fn from(e: std::io::Error) -> Self {
+        MyError::Io(e)
+    }
+}
+```
+
+## Solana: Lamports and SOL
+
+```rust
+// 1 SOL = 1,000,000,000 lamports
+const LAMPORTS_PER_SOL: u64 = 1_000_000_000;
+
+struct Lamports(u64);
+struct Sol(f64);
+
+impl From<Sol> for Lamports {
+    fn from(sol: Sol) -> Self {
+        Lamports((sol.0 * LAMPORTS_PER_SOL as f64) as u64)
+    }
+}
+
+impl From<Lamports> for Sol {
+    fn from(lamports: Lamports) -> Self {
+        Sol(lamports.0 as f64 / LAMPORTS_PER_SOL as f64)
+    }
+}
+```
+
+## TryFrom for Fallible Conversions
+
+```rust
+impl TryFrom<i64> for Lamports {
+    type Error = &'static str;
+    
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        if value < 0 {
+            Err("Lamports cannot be negative")
+        } else {
+            Ok(Lamports(value as u64))
+        }
+    }
+}
+```
+
+## The Task
+
+Implement `From` conversions between `Sol` and `Lamports`:
+- 1 SOL = 1,000,000,000 lamports
+- Converting Sol to Lamports multiplies by 1B
+- Converting Lamports to Sol divides by 1B
+
+## Requirements
+
+- `Sol(1.5).into()` → `Lamports(1_500_000_000)`
+- `Lamports(1_500_000_000).into()` → `Sol(1.5)`
+
+## Hints
+
+```rust
+impl From<Sol> for Lamports {
+    fn from(sol: Sol) -> Self {
+        Lamports((sol.0 * 1_000_000_000.0) as u64)
+    }
+}
+
+impl From<Lamports> for Sol {
+    fn from(lamports: Lamports) -> Self {
+        Sol(lamports.0 as f64 / 1_000_000_000.0)
+    }
+}
+```

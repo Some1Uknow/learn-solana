@@ -63,7 +63,7 @@ export default function ChallengePageWorkspace({
         style={{ height: "100dvh" }}
       >
         {/* Warning banner - top */}
-        <div className="w-full overflow-hidden">
+        {/* <div className="w-full overflow-hidden">
           <div
             className="py-2 whitespace-nowrap will-change-transform animate-marquee"
             style={
@@ -86,7 +86,7 @@ export default function ChallengePageWorkspace({
               </span>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Top bar */}
         <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 sm:px-6 shrink-0">

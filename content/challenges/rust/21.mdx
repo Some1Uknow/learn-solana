@@ -1,0 +1,107 @@
+---
+title: "Day 21: Modules"
+description: Organize code with modules, control visibility, and build clean APIs.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 21: Modules
+
+Modules help organize code into logical units with controlled visibility.
+
+## Defining Modules
+
+```rust
+mod garden {
+    pub mod vegetables {
+        pub fn plant() {
+            println!("Planting vegetables!");
+        }
+    }
+    
+    fn private_helper() {
+        // Only accessible within garden module
+    }
+}
+```
+
+## Visibility Rules
+
+| Keyword | Visibility |
+|---------|------------|
+| (none) | Private to current module |
+| `pub` | Public |
+| `pub(crate)` | Public within crate |
+| `pub(super)` | Public to parent module |
+
+<Callout type="warn">
+In Rust, everything is private by default! You must explicitly mark items as `pub` to make them accessible.
+</Callout>
+
+## Using Items
+
+```rust
+// Absolute path
+crate::garden::vegetables::plant();
+
+// Relative path
+garden::vegetables::plant();
+
+// With use statement
+use garden::vegetables::plant;
+plant();
+```
+
+## The super Keyword
+
+Access parent module:
+
+```rust
+mod parent {
+    pub fn helper() -> i32 { 42 }
+    
+    mod child {
+        pub fn use_parent() -> i32 {
+            super::helper()  // Access parent's function
+        }
+    }
+}
+```
+
+## File-Based Modules
+
+```
+src/
+├── main.rs
+├── garden.rs           // mod garden
+└── garden/
+    └── vegetables.rs   // mod garden::vegetables
+```
+
+## The Task
+
+Fix the module visibility:
+1. Make `math::add` public
+2. Make `math::advanced::multiply_and_add` public
+3. Use `super::add` in `multiply_and_add`
+
+## Requirements
+
+- `math::add(5, 3)` → `8`
+- `math::advanced::multiply_and_add(2, 3, 4)` → `10` (2*3 + 4)
+
+## Hints
+
+```rust
+mod math {
+    pub fn add(a: i32, b: i32) -> i32 {
+        a + b
+    }
+    
+    pub mod advanced {
+        pub fn multiply_and_add(a: i32, b: i32, c: i32) -> i32 {
+            super::add(a * b, c)
+        }
+    }
+}
+```

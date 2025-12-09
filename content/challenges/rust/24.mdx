@@ -1,0 +1,102 @@
+---
+title: "Day 24: Attributes"
+description: Control compilation and memory layout with attributes - crucial for Solana!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 24: Attributes
+
+Attributes are metadata applied to modules, crates, items, and expressions.
+
+## Attribute Syntax
+
+```rust
+#[attribute]           // Outer attribute (applies to next item)
+#![attribute]          // Inner attribute (applies to enclosing item)
+```
+
+## Common Attributes
+
+### Conditional Compilation
+
+```rust
+#[cfg(target_os = "linux")]
+fn linux_only() { }
+
+#[cfg(test)]
+mod tests { }
+
+#[cfg(feature = "advanced")]
+fn advanced_feature() { }
+```
+
+### Linting
+
+```rust
+#[allow(dead_code)]
+fn unused_function() { }
+
+#[warn(unused_variables)]
+fn strict_function() { }
+```
+
+## Memory Layout: #[repr]
+
+<Callout type="warn">
+**Critical for Solana!** Account data must have predictable memory layouts for serialization.
+</Callout>
+
+```rust
+#[repr(C)]  // C-compatible layout
+struct AccountData {
+    is_initialized: bool,  // 1 byte
+    bump: u8,              // 1 byte
+    authority: [u8; 32],   // 32 bytes
+    balance: u64,          // 8 bytes
+}
+```
+
+| Repr | Meaning |
+|------|---------|
+| `#[repr(C)]` | C-compatible layout (predictable) |
+| `#[repr(packed)]` | No padding between fields |
+| `#[repr(transparent)]` | Same layout as single field |
+| `#[repr(u8)]` | Enum discriminant is u8 |
+
+## Why #[repr(C)] Matters
+
+Without `#[repr(C)]`, Rust may reorder fields or add padding:
+
+```rust
+// Without repr(C) - Rust may optimize layout
+struct Bad {
+    a: bool,    // Could be anywhere
+    b: u64,     // Could be anywhere
+}
+
+// With repr(C) - Predictable order
+#[repr(C)]
+struct Good {
+    a: bool,    // Offset 0
+    b: u64,     // Offset 8 (after padding)
+}
+```
+
+## The Task
+
+Add `#[repr(C)]` to make `AccountHeader` have exactly 34 bytes:
+- `is_initialized: bool` (1 byte)
+- `account_type: u8` (1 byte)
+- `authority: [u8; 32]` (32 bytes)
+
+## Hints
+
+```rust
+#[repr(C)]
+struct AccountHeader {
+    is_initialized: bool,
+    account_type: u8,
+    authority: [u8; 32],
+}
+```

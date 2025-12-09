@@ -1,26 +1,56 @@
 ---
-title: Day 2 Fibonacci
-description: Compute the nth Fibonacci number iteratively with minimal allocations.
+title: "Day 2: Primitive Types"
+description: Explore Rust's fundamental types - integers, tuples, and basic arithmetic.
 ---
 
-# Day 2: Fibonacci
+import { Callout } from "fumadocs-ui/components/callout";
 
-Implement `fib(n)` that returns the nth Fibonacci number.
+# Day 2: Primitive Types
+
+Today we explore Rust's primitive types - the building blocks of all data in Rust.
+
+## What You'll Learn
+
+- Integer types (`i32`, `u64`, etc.)
+- Tuples and destructuring
+- Basic arithmetic operations
+- Return values from functions
+
+## Rust's Integer Types
+
+| Signed | Unsigned | Size |
+|--------|----------|------|
+| `i8` | `u8` | 8-bit |
+| `i16` | `u16` | 16-bit |
+| `i32` | `u32` | 32-bit |
+| `i64` | `u64` | 64-bit |
+| `i128` | `u128` | 128-bit |
+
+<Callout type="info">
+For Solana development, `u64` is commonly used for token amounts (lamports), and `u8` for single-byte flags.
+</Callout>
+
+## Tuples
+
+Tuples group multiple values of different types:
+
+```rust
+let point = (10, 20);           // type: (i32, i32)
+let (x, y) = point;             // destructuring
+println!("x: {}, y: {}", x, y);
+```
+
+## The Task
+
+Implement `calculate(a, b)` that returns a tuple of `(sum, product)`.
 
 ## Requirements
 
-- Use an iterative approach.
-- Avoid unnecessary allocations.
-- Choose an appropriate integer type (e.g., `u64`).
+- Take two `i32` parameters
+- Return `(a + b, a * b)` as a tuple
+- The test uses `(7, 6)` expecting `(13, 42)`
 
-## Example
+## Hints
 
-```
-Input:  n = 10
-Output: 55
-```
-
-## Notes
-
-- This is a warm-up for algorithmic thinking.
-- Later we’ll look at performance and benchmarking.
+- Return a tuple with parentheses: `(value1, value2)`
+- No semicolon on the last expression = return value

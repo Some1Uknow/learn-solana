@@ -1,0 +1,82 @@
+---
+title: "Day 10: Methods & impl"
+description: Add behavior to your types with impl blocks and methods.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 10: Methods & impl
+
+Methods are functions defined within the context of a struct (or enum/trait).
+
+## Defining Methods
+
+```rust
+struct Circle {
+    radius: f64,
+}
+
+impl Circle {
+    // Associated function (no self) - like a constructor
+    fn new(radius: f64) -> Self {
+        Circle { radius }
+    }
+    
+    // Method (takes &self)
+    fn area(&self) -> f64 {
+        std::f64::consts::PI * self.radius * self.radius
+    }
+    
+    // Method that modifies self
+    fn grow(&mut self, amount: f64) {
+        self.radius += amount;
+    }
+}
+```
+
+## The self Parameter
+
+| Syntax | Meaning |
+|--------|---------|
+| `self` | Takes ownership |
+| `&self` | Immutable borrow |
+| `&mut self` | Mutable borrow |
+
+<Callout type="info">
+`Self` (capital S) is an alias for the type being implemented. `self` (lowercase) is the instance.
+</Callout>
+
+## Calling Methods
+
+```rust
+let mut c = Circle::new(5.0);  // associated function
+let a = c.area();              // method with &self
+c.grow(2.0);                   // method with &mut self
+```
+
+## The Task
+
+Create a `Rectangle` with:
+1. `new(width, height)` - associated function
+2. `area(&self)` - returns width × height
+3. `is_square(&self)` - returns true if width == height
+
+## Requirements
+
+- `Rectangle::new(5, 5).area()` → `25`
+- `Rectangle::new(5, 5).is_square()` → `true`
+- `Rectangle::new(5, 3).is_square()` → `false`
+
+## Hints
+
+```rust
+impl Rectangle {
+    fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+    
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+```

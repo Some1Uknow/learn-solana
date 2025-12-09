@@ -76,12 +76,52 @@ export const toolCategories: ToolCategory[] = [
     id: "rpc",
     name: "RPC Providers",
     description: "High-performance RPC endpoints and developer APIs for reliable Solana network access.",
-    featured: "Available",
+    featured: "Syndica",
     icon: "🌐",
-    featuredTool: createPlaceholderFeaturedTool(),
+    featuredTool: {
+      name: "Syndica",
+      description: "Enterprise-grade infrastructure for Solana. Syndica builds and scales robust blockchain systems with industry-leading performance. Trusted by top protocols for mission-critical operations with guaranteed uptime and lightning-fast response times.",
+      logo: "https://syndica.io/images/favicon-512x512.png",
+      website: "https://syndica.io",
+      features: [
+        "Enterprise-grade infrastructure with 99.999% uptime guarantee",
+        "Lightning-fast response times optimized for high-frequency trading",
+        "Built and trusted by leading Solana protocols in production",
+        "Advanced load balancing and automatic failover protection",
+        "Comprehensive monitoring and real-time performance analytics",
+      ],
+      stats: [
+        { label: "Latency", value: "<20ms" },
+        { label: "Uptime", value: "99.999%" },
+        { label: "Free RPC calls", value: "10 Million" },
+      ],
+      tutorials: [
+        {
+          title: "Getting Started with Syndica",
+          description: "Learn how to integrate Syndica's premium RPC infrastructure into your Solana applications in under 5 minutes.",
+          slug: "/tutorials/syndica-getting-started",
+        },
+        {
+          title: "Advanced Syndica Features",
+          description: "Master WebSocket subscriptions, load balancing, transaction optimization, and MEV protection.",
+          slug: "/tutorials/syndica-advanced",
+        },
+        {
+          title: "Optimizing RPC Performance",
+          description: "Production-grade performance optimization for DeFi, NFTs, and high-throughput applications.",
+          slug: "/tutorials/syndica-performance",
+        },
+      ],
+    },
     projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
-  
+    otherTools: [
+      { 
+        name: "Chainstack", 
+        description: "Enterprise-grade blockchain infrastructure with high-performance Solana RPC endpoints.", 
+        website: "https://chainstack.com",
+        logo: "https://chainstack.com/favicon.ico"
+      }, ...createPlaceholderOtherTools(1)
+    ],
   },
 
   {

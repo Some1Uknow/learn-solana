@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { LogOut, Copy, ExternalLink, UserPlus, Wallet, Check } from "lucide-react";
 import {
   useWeb3AuthConnect,
@@ -18,6 +18,7 @@ import {
 } from "@web3auth/modal/react";
 import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 import { SolanaWallet } from "@web3auth/solana-provider";
+import { registerUserAfterLogin } from "@/lib/auth/registerUserAfterLogin";
 
 interface NavbarWalletButtonProps {
   isMobile?: boolean;
@@ -29,14 +30,19 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const [dropdownUserInfo, setDropdownUserInfo] = useState<any>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  // Track if registration was already attempted in this session
+  const registrationAttemptedRef = useRef(false);
 
   // Web3Auth hooks
   const { connect, isConnected, loading: connectLoading } = useWeb3AuthConnect();
   const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
   const { provider, web3Auth } = useWeb3Auth();
 
-  // Auto register when we have address
-  useAutoRegisterUser(userAddress || undefined);
+  // Backup: Auto register as a fallback when we have address (only if direct registration failed)
+  useAutoRegisterUser(userAddress || undefined, {
+    skipIfAlreadyAttempted: registrationAttemptedRef.current
+  });
 
   const isLoading = connectLoading || disconnectLoading;
 
@@ -90,14 +96,50 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   };
 
-  const handleConnect = () => {
+  /**
+   * Handle connect/disconnect with immediate registration on success.
+   * This solves the Web3Auth v10+ hook state timing issues by:
+   * 1. Calling connect() and waiting for the provider
+   * 2. Immediately registering the user with the returned provider
+   * 3. Not relying on hook state updates (isConnected, userInfo, etc.)
+   */
+  const handleConnect = useCallback(async () => {
     try {
       console.log('[WalletButton] click: isConnected=', isConnected, 'provider?', !!provider);
-      return isConnected ? disconnect() : connect();
+      
+      if (isConnected) {
+        // Disconnect flow
+        await disconnect();
+        registrationAttemptedRef.current = false; // Reset for next login
+        return;
+      }
+      
+      // Connect flow - get provider directly from connect()
+      const newProvider = await connect();
+      
+      if (newProvider && web3Auth) {
+        console.log('[WalletButton] Connected! Registering user immediately...');
+        registrationAttemptedRef.current = true;
+        
+        // Register user immediately after connect using the returned provider
+        // This bypasses the hook state timing issues
+        const result = await registerUserAfterLogin(
+          newProvider as any,
+          web3Auth as any,
+          (user) => {
+            console.log('[WalletButton] User registered successfully:', user?.walletAddress);
+          }
+        );
+        
+        if (!result.success) {
+          console.warn('[WalletButton] Direct registration failed, backup hook will retry:', result.error);
+          registrationAttemptedRef.current = false; // Allow backup hook to try
+        }
+      }
     } catch (e) {
       console.error('[WalletButton] connect/disconnect error', e);
     }
-  };
+  }, [isConnected, provider, web3Auth, connect, disconnect]);
   
   const copyAddress = () => {
     navigator.clipboard.writeText(userAddress);

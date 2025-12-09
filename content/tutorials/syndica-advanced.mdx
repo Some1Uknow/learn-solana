@@ -1,0 +1,666 @@
+---
+title: Advanced Syndica RPC Features
+type: tutorial
+module: 🌐 Infrastructure & Tools
+description: Master advanced Syndica features for building high-performance, production-ready Solana applications
+---
+
+Deep dive into Syndica's advanced capabilities for enterprise-grade Solana infrastructure.
+
+## What You'll Learn
+
+- WebSocket subscriptions for real-time data
+- Load balancing across multiple endpoints
+- Transaction optimization and batching
+- Advanced monitoring and debugging
+- MEV protection configuration
+
+---
+
+## Prerequisites
+
+- Completed [Getting Started with Syndica RPC](/tutorials/syndica-getting-started)
+- Understanding of async JavaScript/TypeScript
+- Familiarity with Solana transaction lifecycle
+
+---
+
+## WebSocket Subscriptions
+
+Syndica provides WebSocket endpoints for real-time blockchain updates:
+
+```typescript title="websocket-subscriptions.ts"
+import { Connection, PublicKey } from "@solana/web3.js";
+
+const connection = new Connection(
+  process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET!,
+  {
+    commitment: "confirmed",
+    wsEndpoint: "wss://your-key.solana-mainnet.syndica.io",
+  }
+);
+
+// Subscribe to account changes
+async function subscribeToAccount(accountPubkey: string) {
+  const pubkey = new PublicKey(accountPubkey);
+  
+  const subscriptionId = connection.onAccountChange(
+    pubkey,
+    (accountInfo, context) => {
+      console.log("Account updated:", {
+        slot: context.slot,
+        lamports: accountInfo.lamports,
+        owner: accountInfo.owner.toBase58(),
+      });
+    },
+    "confirmed"
+  );
+  
+  console.log(`Subscribed to account: ${accountPubkey}`);
+  console.log(`Subscription ID: ${subscriptionId}`);
+  
+  return subscriptionId;
+}
+
+// Subscribe to program accounts (e.g., all token accounts)
+async function subscribeToProgramAccounts(programId: string) {
+  const pubkey = new PublicKey(programId);
+  
+  const subscriptionId = connection.onProgramAccountChange(
+    pubkey,
+    (keyedAccountInfo, context) => {
+      console.log("Program account updated:", {
+        publicKey: keyedAccountInfo.accountId.toBase58(),
+        slot: context.slot,
+        lamports: keyedAccountInfo.accountInfo.lamports,
+      });
+    },
+    "confirmed"
+  );
+  
+  return subscriptionId;
+}
+
+// Subscribe to logs (for transaction monitoring)
+async function subscribeToLogs(address?: string) {
+  const filter = address ? { mentions: [address] } : "all";
+  
+  const subscriptionId = connection.onLogs(
+    filter,
+    (logs, context) => {
+      console.log("Logs received:", {
+        signature: logs.signature,
+        slot: context.slot,
+        err: logs.err,
+        logs: logs.logs,
+      });
+    },
+    "confirmed"
+  );
+  
+  return subscriptionId;
+}
+
+// Cleanup: Always remove subscriptions when done
+async function cleanup(subscriptionId: number) {
+  await connection.removeAccountChangeListener(subscriptionId);
+  console.log(`Unsubscribed: ${subscriptionId}`);
+}
+```
+
+<Callout type="tip">
+**Performance Best Practice**  
+WebSocket subscriptions consume fewer resources than polling. Use them for real-time updates instead of repeated `getAccountInfo` calls.
+</Callout>
+
+---
+
+## Load Balancing and Failover
+
+Implement automatic failover across multiple Syndica endpoints:
+
+```typescript title="load-balancer.ts"
+import { Connection, ConnectionConfig } from "@solana/web3.js";
+
+interface EndpointConfig {
+  url: string;
+  weight: number;  // For weighted load balancing
+  priority: number;  // For failover (lower = higher priority)
+}
+
+class LoadBalancedConnection {
+  private endpoints: EndpointConfig[];
+  private connections: Map<string, Connection>;
+  private currentIndex: number = 0;
+  private failedEndpoints: Set<string> = new Set();
+  
+  constructor(endpoints: EndpointConfig[], config?: ConnectionConfig) {
+    this.endpoints = endpoints.sort((a, b) => a.priority - b.priority);
+    this.connections = new Map();
+    
+    // Initialize all connections
+    endpoints.forEach(endpoint => {
+      this.connections.set(
+        endpoint.url,
+        new Connection(endpoint.url, config)
+      );
+    });
+  }
+  
+  private getNextEndpoint(): Connection {
+    // Filter out failed endpoints
+    const availableEndpoints = this.endpoints.filter(
+      ep => !this.failedEndpoints.has(ep.url)
+    );
+    
+    if (availableEndpoints.length === 0) {
+      // Reset if all endpoints failed
+      this.failedEndpoints.clear();
+      availableEndpoints.push(...this.endpoints);
+    }
+    
+    // Round-robin selection
+    const endpoint = availableEndpoints[this.currentIndex % availableEndpoints.length];
+    this.currentIndex++;
+    
+    return this.connections.get(endpoint.url)!;
+  }
+  
+  private markEndpointFailed(url: string) {
+    this.failedEndpoints.add(url);
+    console.warn(`Endpoint marked as failed: ${url}`);
+    
+    // Auto-recover after 30 seconds
+    setTimeout(() => {
+      this.failedEndpoints.delete(url);
+      console.log(`Endpoint recovered: ${url}`);
+    }, 30000);
+  }
+  
+  async executeWithFailover<T>(
+    operation: (connection: Connection) => Promise<T>,
+    maxRetries: number = 3
+  ): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let i = 0; i < maxRetries; i++) {
+      const connection = this.getNextEndpoint();
+      
+      try {
+        return await operation(connection);
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`Request failed, trying next endpoint...`, error);
+        
+        // Mark current endpoint as failed
+        const currentUrl = [...this.connections.entries()]
+          .find(([_, conn]) => conn === connection)?.[0];
+        if (currentUrl) {
+          this.markEndpointFailed(currentUrl);
+        }
+      }
+    }
+    
+    throw new Error(`All endpoints failed: ${lastError?.message}`);
+  }
+  
+  // Example usage methods
+  async getAccountInfo(publicKey: PublicKey) {
+    return this.executeWithFailover(
+      async (conn) => conn.getAccountInfo(publicKey)
+    );
+  }
+  
+  async sendTransaction(transaction: Transaction, signers: Signer[]) {
+    return this.executeWithFailover(
+      async (conn) => conn.sendTransaction(transaction, signers)
+    );
+  }
+}
+
+// Usage
+const loadBalancer = new LoadBalancedConnection([
+  { url: "https://primary-key.solana-mainnet.syndica.io", weight: 2, priority: 1 },
+  { url: "https://backup-key.solana-mainnet.syndica.io", weight: 1, priority: 2 },
+], {
+  commitment: "confirmed",
+  confirmTransactionInitialTimeout: 60000,
+});
+```
+
+---
+
+## Transaction Batching and Optimization
+
+Optimize multiple RPC calls with batching:
+
+```typescript title="transaction-batching.ts"
+import { Connection, PublicKey } from "@solana/web3.js";
+
+class BatchedConnection {
+  private connection: Connection;
+  private batchQueue: Array<{
+    method: string;
+    args: any[];
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+  }> = [];
+  private batchTimeout: NodeJS.Timeout | null = null;
+  private readonly BATCH_DELAY = 10; // ms
+  private readonly MAX_BATCH_SIZE = 10;
+  
+  constructor(endpoint: string) {
+    this.connection = new Connection(endpoint, "confirmed");
+  }
+  
+  private scheduleBatch() {
+    if (this.batchTimeout) return;
+    
+    this.batchTimeout = setTimeout(() => {
+      this.executeBatch();
+    }, this.BATCH_DELAY);
+  }
+  
+  private async executeBatch() {
+    const batch = this.batchQueue.splice(0, this.MAX_BATCH_SIZE);
+    this.batchTimeout = null;
+    
+    if (batch.length === 0) return;
+    
+    console.log(`Executing batch of ${batch.length} requests`);
+    
+    // Execute all requests in parallel
+    const results = await Promise.allSettled(
+      batch.map(item => 
+        this.connection._rpcRequest(item.method, item.args)
+      )
+    );
+    
+    // Resolve/reject each promise
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        batch[index].resolve(result.value);
+      } else {
+        batch[index].reject(result.reason);
+      }
+    });
+    
+    // Process next batch if queue has items
+    if (this.batchQueue.length > 0) {
+      this.scheduleBatch();
+    }
+  }
+  
+  async getMultipleAccounts(publicKeys: PublicKey[]): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.batchQueue.push({
+        method: "getMultipleAccounts",
+        args: [publicKeys.map(pk => pk.toBase58())],
+        resolve,
+        reject,
+      });
+      this.scheduleBatch();
+    });
+  }
+  
+  async getAccountInfo(publicKey: PublicKey): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.batchQueue.push({
+        method: "getAccountInfo",
+        args: [publicKey.toBase58()],
+        resolve,
+        reject,
+      });
+      this.scheduleBatch();
+    });
+  }
+}
+```
+
+---
+
+## MEV Protection
+
+Syndica includes built-in MEV protection. Here's how to leverage it:
+
+```typescript title="mev-protection.ts"
+import { 
+  Connection, 
+  Transaction, 
+  sendAndConfirmTransaction,
+  Keypair
+} from "@solana/web3.js";
+
+class MEVProtectedConnection {
+  private connection: Connection;
+  
+  constructor(endpoint: string) {
+    this.connection = new Connection(endpoint, {
+      commitment: "confirmed",
+      // Syndica's MEV protection is automatic, but you can optimize
+      confirmTransactionInitialTimeout: 60000,
+    });
+  }
+  
+  async sendTransactionWithProtection(
+    transaction: Transaction,
+    signers: Keypair[],
+    options?: {
+      skipPreflight?: boolean;
+      preflightCommitment?: Commitment;
+      maxRetries?: number;
+    }
+  ) {
+    // Syndica automatically routes transactions through MEV-protected infrastructure
+    const signature = await sendAndConfirmTransaction(
+      this.connection,
+      transaction,
+      signers,
+      {
+        skipPreflight: options?.skipPreflight ?? false,
+        preflightCommitment: options?.preflightCommitment ?? "confirmed",
+        maxRetries: options?.maxRetries ?? 3,
+      }
+    );
+    
+    console.log("Transaction sent with MEV protection:", signature);
+    return signature;
+  }
+  
+  // For time-sensitive transactions (e.g., DEX trades)
+  async sendUrgentTransaction(
+    transaction: Transaction,
+    signers: Keypair[]
+  ) {
+    // Use processed commitment for fastest inclusion
+    const signature = await this.connection.sendTransaction(
+      transaction,
+      signers,
+      {
+        skipPreflight: true, // Skip simulation for speed
+        preflightCommitment: "processed",
+        maxRetries: 0, // Don't retry, send immediately
+      }
+    );
+    
+    // Manually confirm
+    const confirmation = await this.connection.confirmTransaction(
+      signature,
+      "confirmed"
+    );
+    
+    if (confirmation.value.err) {
+      throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+    }
+    
+    return signature;
+  }
+}
+```
+
+<Callout type="info">
+**MEV Protection Explained**  
+Syndica's infrastructure prevents front-running and sandwich attacks by routing transactions through secure channels. This is especially critical for DeFi applications handling swaps and arbitrage.
+</Callout>
+
+---
+
+## Advanced Monitoring
+
+Comprehensive monitoring setup:
+
+```typescript title="advanced-monitoring.ts"
+import { Connection, PublicKey } from "@solana/web3.js";
+
+interface RPCMetrics {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  averageLatency: number;
+  p95Latency: number;
+  p99Latency: number;
+  requestsByMethod: Map<string, number>;
+  latencies: number[];
+}
+
+class MonitoredSyndicaConnection extends Connection {
+  private metrics: RPCMetrics = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    averageLatency: 0,
+    p95Latency: 0,
+    p99Latency: 0,
+    requestsByMethod: new Map(),
+    latencies: [],
+  };
+  
+  override async _rpcRequest(method: string, args: any[]) {
+    const startTime = performance.now();
+    this.metrics.totalRequests++;
+    
+    // Track method usage
+    const currentCount = this.metrics.requestsByMethod.get(method) || 0;
+    this.metrics.requestsByMethod.set(method, currentCount + 1);
+    
+    try {
+      const result = await super._rpcRequest(method, args);
+      const latency = performance.now() - startTime;
+      
+      this.metrics.successfulRequests++;
+      this.recordLatency(latency);
+      
+      // Log slow requests
+      if (latency > 1000) {
+        console.warn(`Slow RPC request: ${method} took ${latency.toFixed(2)}ms`);
+      }
+      
+      return result;
+    } catch (error) {
+      this.metrics.failedRequests++;
+      console.error(`RPC request failed: ${method}`, error);
+      throw error;
+    }
+  }
+  
+  private recordLatency(latency: number) {
+    this.metrics.latencies.push(latency);
+    
+    // Keep only last 1000 latencies
+    if (this.metrics.latencies.length > 1000) {
+      this.metrics.latencies.shift();
+    }
+    
+    // Calculate metrics
+    this.calculateLatencyMetrics();
+  }
+  
+  private calculateLatencyMetrics() {
+    const sorted = [...this.metrics.latencies].sort((a, b) => a - b);
+    const sum = sorted.reduce((acc, val) => acc + val, 0);
+    
+    this.metrics.averageLatency = sum / sorted.length;
+    this.metrics.p95Latency = sorted[Math.floor(sorted.length * 0.95)] || 0;
+    this.metrics.p99Latency = sorted[Math.floor(sorted.length * 0.99)] || 0;
+  }
+  
+  getMetrics(): RPCMetrics {
+    return { ...this.metrics };
+  }
+  
+  printMetrics() {
+    console.log("\n=== RPC Metrics ===");
+    console.log(`Total Requests: ${this.metrics.totalRequests}`);
+    console.log(`Success Rate: ${((this.metrics.successfulRequests / this.metrics.totalRequests) * 100).toFixed(2)}%`);
+    console.log(`Average Latency: ${this.metrics.averageLatency.toFixed(2)}ms`);
+    console.log(`P95 Latency: ${this.metrics.p95Latency.toFixed(2)}ms`);
+    console.log(`P99 Latency: ${this.metrics.p99Latency.toFixed(2)}ms`);
+    console.log("\nRequests by Method:");
+    
+    const sortedMethods = Array.from(this.metrics.requestsByMethod.entries())
+      .sort((a, b) => b[1] - a[1]);
+    
+    sortedMethods.forEach(([method, count]) => {
+      console.log(`  ${method}: ${count}`);
+    });
+  }
+  
+  // Export metrics for external monitoring (e.g., Datadog, Prometheus)
+  exportMetrics() {
+    return {
+      timestamp: Date.now(),
+      ...this.metrics,
+      requestsByMethod: Object.fromEntries(this.metrics.requestsByMethod),
+    };
+  }
+}
+
+// Usage with periodic reporting
+const connection = new MonitoredSyndicaConnection(
+  process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET!,
+  "confirmed"
+);
+
+// Report metrics every minute
+setInterval(() => {
+  connection.printMetrics();
+}, 60000);
+```
+
+---
+
+## Performance Benchmarking
+
+Compare Syndica performance against other providers:
+
+```typescript title="benchmark.ts"
+import { Connection, PublicKey } from "@solana/web3.js";
+
+interface BenchmarkResult {
+  provider: string;
+  averageLatency: number;
+  minLatency: number;
+  maxLatency: number;
+  successRate: number;
+}
+
+async function benchmarkProvider(
+  endpoint: string,
+  providerName: string,
+  iterations: number = 100
+): Promise<BenchmarkResult> {
+  const connection = new Connection(endpoint, "confirmed");
+  const latencies: number[] = [];
+  let successes = 0;
+  
+  // Use a well-known account for testing
+  const testAccount = new PublicKey("So11111111111111111111111111111111111111112"); // Wrapped SOL
+  
+  console.log(`Benchmarking ${providerName}...`);
+  
+  for (let i = 0; i < iterations; i++) {
+    const startTime = performance.now();
+    
+    try {
+      await connection.getAccountInfo(testAccount);
+      const latency = performance.now() - startTime;
+      latencies.push(latency);
+      successes++;
+    } catch (error) {
+      console.error(`Request ${i + 1} failed for ${providerName}`);
+    }
+    
+    // Small delay between requests
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  const averageLatency = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+  const minLatency = Math.min(...latencies);
+  const maxLatency = Math.max(...latencies);
+  const successRate = (successes / iterations) * 100;
+  
+  return {
+    provider: providerName,
+    averageLatency,
+    minLatency,
+    maxLatency,
+    successRate,
+  };
+}
+
+async function runBenchmarks() {
+  const providers = [
+    { name: "Syndica", endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET! },
+    // Add other providers for comparison
+  ];
+  
+  const results: BenchmarkResult[] = [];
+  
+  for (const provider of providers) {
+    const result = await benchmarkProvider(provider.endpoint, provider.name);
+    results.push(result);
+  }
+  
+  console.log("\n=== Benchmark Results ===");
+  results.forEach(result => {
+    console.log(`\n${result.provider}:`);
+    console.log(`  Average Latency: ${result.averageLatency.toFixed(2)}ms`);
+    console.log(`  Min Latency: ${result.minLatency.toFixed(2)}ms`);
+    console.log(`  Max Latency: ${result.maxLatency.toFixed(2)}ms`);
+    console.log(`  Success Rate: ${result.successRate.toFixed(2)}%`);
+  });
+}
+```
+
+---
+
+## Production Checklist
+
+Before deploying to production with Syndica:
+
+✅ **API Key Security**
+- Store keys in environment variables
+- Use separate keys for dev/prod
+- Rotate keys periodically
+
+✅ **Error Handling**
+- Implement retry logic
+- Add failover endpoints
+- Log errors for monitoring
+
+✅ **Performance**
+- Use appropriate commitment levels
+- Enable WebSocket for real-time data
+- Implement request batching
+
+✅ **Monitoring**
+- Track RPC metrics
+- Set up alerts for failures
+- Monitor latency trends
+
+✅ **MEV Protection**
+- Verify Syndica's MEV protection is active
+- Test with time-sensitive transactions
+- Monitor for front-running attempts
+
+---
+
+## Next Steps
+
+- Explore [Optimizing RPC Performance](/tutorials/syndica-performance) for specific use cases
+- Learn about [Syndica's Enterprise Features](https://syndica.io/docs) for scaling
+- Join the [Syndica Discord](https://discord.gg/syndica) for support
+
+---
+
+## Summary
+
+You've mastered advanced Syndica features including:
+
+✅ Real-time WebSocket subscriptions  
+✅ Load balancing and automatic failover  
+✅ Transaction batching and optimization  
+✅ MEV protection for secure transactions  
+✅ Comprehensive monitoring and benchmarking  
+
+Your application is now production-ready with enterprise-grade infrastructure!

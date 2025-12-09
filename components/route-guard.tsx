@@ -13,6 +13,8 @@ const PROTECTED_ROUTES = [
   "/projects",
   "/challenges",
   "/learn",
+  "/tools",
+  "/partner",
   "/test-auth",
   "/dashboard",
   "/admin",
@@ -24,12 +26,6 @@ const ROUTE_CONFIGS = {
     description:
       "Access interactive Solana games and challenges to test your skills.",
     icon: "🎮",
-  },
-  "/jobs": {
-    title: "💼 Job Board",
-    description:
-      "Explore exclusive Solana development opportunities and career paths.",
-    icon: "💼",
   },
   "/modules": {
     title: "🎓 Learning Modules",
@@ -53,6 +49,18 @@ const ROUTE_CONFIGS = {
     description:
       "Access comprehensive Solana learning materials and documentation.",
     icon: "📚",
+  },
+  "/tools": {
+    title: "🛠️ Developer Tools",
+    description:
+      "Explore essential Solana developer tools and infrastructure.",
+    icon: "🛠️",
+  },
+  "/partner": {
+    title: "🤝 Partnership",
+    description:
+      "Learn about partnership opportunities with LearnSol.",
+    icon: "🤝",
   },
   "/test-auth": {
     title: "🔐 Authentication Test",
@@ -112,7 +120,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
         {/* Dark background matching main page */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900" />
+        <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-slate-900 to-gray-900" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)]" />
         
         <div className="relative z-10 bg-gray-900/40 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
@@ -139,7 +147,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
       </div>
 
       {/* Very light dark themed overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 via-slate-900/15 to-gray-900/20" />
+      <div className="absolute inset-0 bg-linear-to-br from-gray-900/20 via-slate-900/15 to-gray-900/20" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(6,182,212,0.08),transparent_50%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.05),transparent_50%)]" />
 
@@ -151,7 +159,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
             <Button
               onClick={handleLogin}
               disabled={isConnecting}
-              className="h-12 px-6 bg-gradient-to-r from-teal-400 to-emerald-500 hover:from-teal-300 hover:to-emerald-400 text-gray-900 font-medium rounded-xl border border-white/10 shadow-lg transition-all duration-200 hover:shadow-teal-400/25 hover:scale-[1.02] disabled:hover:scale-100 flex items-center gap-2"
+              className="h-12 px-6 bg-linear-to-r from-teal-400 to-emerald-500 hover:from-teal-300 hover:to-emerald-400 text-gray-900 font-medium rounded-xl border border-white/10 shadow-lg transition-all duration-200 hover:shadow-teal-400/25 hover:scale-[1.02] disabled:hover:scale-100 flex items-center gap-2"
             >
               {isConnecting ? (
                 <div className="flex items-center justify-center gap-2">

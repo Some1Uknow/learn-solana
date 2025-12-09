@@ -1,0 +1,92 @@
+---
+title: "Day 19: Iterators"
+description: Master Rust's powerful iterator system for functional data processing.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 19: Iterators
+
+Iterators are one of Rust's most powerful features - zero-cost abstractions for processing sequences.
+
+## The Iterator Trait
+
+```rust
+trait Iterator {
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>;
+}
+```
+
+## Creating Iterators
+
+```rust
+let v = vec![1, 2, 3];
+
+v.iter()       // &T - immutable references
+v.iter_mut()   // &mut T - mutable references
+v.into_iter()  // T - takes ownership
+```
+
+## Iterator Adapters
+
+Adapters transform iterators (lazy - don't execute until consumed):
+
+```rust
+let v = vec![1, 2, 3, 4, 5];
+
+v.iter()
+    .filter(|&&x| x > 2)      // Keep if predicate is true
+    .map(|&x| x * 2)          // Transform each element
+    .take(2)                   // Take first n elements
+    .skip(1)                   // Skip first n elements
+```
+
+<Callout type="info">
+Iterators are lazy! Nothing happens until you call a consuming method like `collect()`, `sum()`, `for_each()`.
+</Callout>
+
+## Consuming Iterators
+
+```rust
+let v = vec![1, 2, 3, 4, 5];
+
+let sum: i32 = v.iter().sum();
+let product: i32 = v.iter().product();
+let collected: Vec<_> = v.iter().map(|x| x * 2).collect();
+let count = v.iter().count();
+let max = v.iter().max();
+```
+
+## Method Chaining
+
+```rust
+let result: Vec<i32> = (1..=10)
+    .filter(|x| x % 2 == 0)  // 2, 4, 6, 8, 10
+    .map(|x| x * x)          // 4, 16, 36, 64, 100
+    .collect();
+```
+
+## The Task
+
+Implement `process_numbers` that:
+1. Filters to keep only even numbers
+2. Squares each remaining number
+3. Collects into a Vec
+
+## Requirements
+
+- Input: `vec![1, 2, 3, 4, 5, 6]`
+- Output: `vec![4, 16, 36]` (2², 4², 6²)
+
+## Hints
+
+```rust
+fn process_numbers(numbers: Vec<i32>) -> Vec<i32> {
+    numbers
+        .into_iter()
+        .filter(|&x| x % 2 == 0)
+        .map(|x| x * x)
+        .collect()
+}
+```

@@ -1,0 +1,61 @@
+---
+title: "Day 6: References & Borrowing"
+description: Learn to borrow values with references instead of taking ownership.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 6: References & Borrowing
+
+References allow you to refer to a value without taking ownership - this is called **borrowing**.
+
+## Two Types of References
+
+| Type | Syntax | Can Modify? | How Many? |
+|------|--------|-------------|-----------|
+| Immutable | `&T` | No | Unlimited |
+| Mutable | `&mut T` | Yes | Only one |
+
+## Immutable References
+
+```rust
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}  // s goes out of scope, but doesn't drop the String
+
+let s = String::from("hello");
+let len = calculate_length(&s);  // s is still valid!
+```
+
+## Mutable References
+
+```rust
+fn add_world(s: &mut String) {
+    s.push_str(" world");
+}
+
+let mut s = String::from("hello");
+add_world(&mut s);  // s is now "hello world"
+```
+
+<Callout type="warn">
+You can have either ONE mutable reference OR any number of immutable references - never both at once!
+</Callout>
+
+## The Task
+
+Implement two functions:
+1. `add_suffix` - takes `&mut String` and appends `"_modified"`
+2. `get_length` - takes `&String` and returns the length
+
+## Requirements
+
+- `add_suffix` should modify the string in place
+- `get_length` should not take ownership
+- Final output: `rust_modified 13`
+
+## Hints
+
+- Use `s.push_str("_modified")` to append
+- Use `s.len()` to get length
+- Remember: `&mut` for mutable, `&` for immutable

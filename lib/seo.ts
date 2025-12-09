@@ -15,15 +15,43 @@ export const defaultOpenGraphImage = {
 
 export const defaultTwitterImage = "/twitter-image.png";
 
+// Primary keywords (highest search volume)
+export const primaryKeywords = [
+  "learn solana",
+  "solana course",
+  "solana tutorial",
+  "solana development course",
+  "learn solana development",
+];
+
+// Secondary keywords (medium volume, high intent)
+export const secondaryKeywords = [
+  "solana developer tutorial",
+  "solana programming",
+  "solana blockchain course",
+  "solana smart contracts",
+  "anchor framework tutorial",
+  "rust solana",
+  "solana web3 course",
+  "free solana course",
+];
+
+// Long-tail keywords (lower volume, high conversion)
+export const longTailKeywords = [
+  "how to learn solana",
+  "solana development for beginners",
+  "best solana course",
+  "solana coding challenges",
+  "solana games to learn",
+  "solana developer bootcamp",
+  "build on solana",
+];
+
+// Combined for metadata
 export const courseKeywords = [
-  "Learn Solana",
-  "Learn Solana development",
-  "Solana Course",
-  "Web3 Course",
-  "Rust smart contracts",
-  "Anchor framework",
-  "Web3 education",
-  "Solana games",
+  ...primaryKeywords,
+  ...secondaryKeywords,
+  ...longTailKeywords,
 ];
 
 export const createCanonical = (path: string) => {

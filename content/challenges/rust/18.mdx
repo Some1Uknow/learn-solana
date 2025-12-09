@@ -1,0 +1,79 @@
+---
+title: "Day 18: Lifetimes"
+description: Master lifetime annotations - Rust's way of ensuring reference validity.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 18: Lifetimes
+
+Lifetimes ensure references are valid for as long as they're used. Most are inferred, but sometimes you need explicit annotations.
+
+## The Problem
+
+```rust
+// This won't compile - which input does the return reference come from?
+fn longest(x: &str, y: &str) -> &str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+The compiler doesn't know if the returned reference comes from `x` or `y`, so it can't verify the reference will be valid.
+
+## Lifetime Annotations
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+<Callout type="info">
+Lifetime annotations don't change how long references live. They describe relationships between lifetimes so the compiler can check validity.
+</Callout>
+
+## Lifetime Syntax
+
+- `'a` - a lifetime parameter (convention: lowercase letters)
+- `&'a T` - a reference with lifetime 'a
+- `&'a mut T` - a mutable reference with lifetime 'a
+- `'static` - the entire program duration
+
+## Lifetime Elision Rules
+
+The compiler applies these rules automatically:
+1. Each input reference gets its own lifetime
+2. If there's exactly one input lifetime, it applies to all outputs
+3. If there's `&self` or `&mut self`, that lifetime applies to outputs
+
+## Struct Lifetimes
+
+```rust
+struct ImportantExcerpt<'a> {
+    part: &'a str,  // This reference must live at least as long as the struct
+}
+```
+
+## The Task
+
+Add lifetime annotations to make `longest` compile.
+
+## Requirements
+
+- Both inputs share the same lifetime
+- Output has the same lifetime as inputs
+- Return the longer of two strings
+
+## Hints
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }
+}
+```
+
+The `'a` says: "The returned reference will be valid for the shorter of the two input lifetimes."

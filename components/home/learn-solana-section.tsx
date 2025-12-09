@@ -17,52 +17,52 @@ type Tile = {
 const tiles: Tile[] = [
   {
     id: "modules",
-    title: "Master the Fundamentals",
+    title: "Free Solana Course",
     href: "/modules",
     icon: "/solanaLogo.png",
-    eyebrow: "Structured lessons",
-    blurb: "Start with core concepts, step-by-step projects, and real code you can ship. Perfect for developers who want to build for devnet today.",
+    eyebrow: "Structured learning path",
+    blurb: "Learn Solana development from scratch. Our free course covers blockchain fundamentals, Rust programming, Anchor framework, and building real dApps step-by-step.",
     tone: "green",
   },
   {
     id: "games",
-    title: "Play to Learn — Earn NFTs",
+    title: "Learn Solana with Games",
     href: "/games",
     icon: "/solanaLogo.png",
-    eyebrow: "Interactive games",
-    blurb: "Hands-on mini-games that teach web3 primitives — complete levels, claim rewards, and internalize tricky concepts by doing.",
+    eyebrow: "Interactive tutorials",
+    blurb: "Master Solana concepts through fun, interactive games. Learn transactions, accounts, and smart contracts while earning NFTs for your progress.",
     tone: "cyan",
   },
   {
-    id: "projects",
-    title: "Build Real Projects",
-    href: "/projects",
-    icon: "/capstone.png",
-    eyebrow: "Guided builds",
-    blurb: "Ship a portfolio-ready app: token mints, NFT stations, and full-stack integrations — with annotated code and deploy steps.",
+    id: "tools",
+    title: "Solana Developer Tools",
+    href: "/tools",
+    icon: "/solanaLogo.png",
+    eyebrow: "Essential dev stack",
+    blurb: "Discover the best Solana development tools. RPCs, wallets, explorers, testing frameworks - everything you need to build on Solana.",
     tone: "purple",
   },
   {
     id: "challenges",
-    title: "Daily Challenges: Push Yourself",
+    title: "Solana Coding Challenges",
     href: "/challenges",
-    icon: "/anchor.png",
-    eyebrow: "30-day tracks",
-    blurb: "Short, intense prompts that improve your Rust & Solana instincts. Come for the grind, stay for the breakthroughs.",
+    icon: "/rust-2.png",
+    eyebrow: "30-day practice tracks",
+    blurb: "Sharpen your Solana skills with daily coding challenges. Practice Rust and Anchor development with progressive difficulty challenges.",
     tone: "amber",
   },
 ];
 
 export function LearnSolanaSection() {
   return (
-    <section aria-labelledby="learn-solana" className="container relative z-10 -mt-6 md:-mt-10 pb-8 md:pb-12">
+    <section aria-labelledby="learn-solana-courses" className="container relative z-10 -mt-6 md:-mt-10 pb-8 md:pb-12">
       <div className="mb-6 md:mb-8 text-center">
-        <div className="text-xs tracking-[0.25em] text-zinc-400">[LEARN SOLANA]</div>
-        <h2 id="learn-solana" className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight">
-          Pick your path
+        <div className="text-xs tracking-[0.25em] text-zinc-400">[FREE SOLANA DEVELOPMENT COURSE]</div>
+        <h2 id="learn-solana-courses" className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight">
+          Start Learning Solana Today
         </h2>
         <p className="mt-2 max-w-2xl mx-auto text-sm text-zinc-400">
-          Choose a focused track — each tile contains a clear outcome and a tiny dare: click it and prove you can ship.
+          Choose your learning path. Master Solana development through our free course, interactive games, and daily coding challenges.
         </p>
       </div>
 
@@ -70,13 +70,13 @@ export function LearnSolanaSection() {
         {tiles.map((t) => (
           <Link key={t.id} href={t.href} className="group" aria-label={t.title}>
             <Card
-              className={`relative overflow-hidden rounded-3xl border border-white/6 bg-gradient-to-b from-white/2 to-transparent transition-transform duration-300 hover:scale-[1.02] hover:shadow-[0_30px_80px_rgba(0,0,0,0.6)]`}
+              className={`relative overflow-hidden rounded-3xl border border-white/6 bg-linear-to-b from-white/2 to-transparent transition-transform duration-300 hover:scale-[1.02] hover:shadow-[0_30px_80px_rgba(0,0,0,0.6)]`}
             >
               <div className="absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                <div className="w-full h-full bg-gradient-to-br from-white/3 to-transparent mix-blend-screen" />
+                <div className="w-full h-full bg-linear-to-br from-white/3 to-transparent mix-blend-screen" />
               </div>
 
-              <CardContent className="p-5 md:p-8 flex min-h-[15rem] md:min-h-[16rem] items-stretch gap-4 md:gap-6">
+              <CardContent className="p-5 md:p-8 flex min-h-60 md:min-h-64 items-stretch gap-4 md:gap-6">
                 <div className="flex flex-col justify-between w-full">
                   <div className="flex items-start justify-between gap-3 sm:gap-4">
                     <div>

@@ -1,0 +1,122 @@
+---
+title: "Day 29: Account Validation"
+description: Implement Solana-style account validation with discriminators.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 29: Account Validation
+
+Solana accounts need validation before use. Let's implement the patterns you'll use every day!
+
+## The Discriminator Pattern
+
+A discriminator is a unique byte (or bytes) that identifies account type:
+
+```rust
+const TOKEN_ACCOUNT_DISCRIMINATOR: u8 = 1;
+const METADATA_ACCOUNT_DISCRIMINATOR: u8 = 2;
+
+#[repr(C)]
+struct TokenAccount {
+    discriminator: u8,    // What type of account is this?
+    is_initialized: bool, // Has it been set up?
+    owner: [u8; 32],      // Who owns it?
+    balance: u64,         // The data
+}
+```
+
+<Callout type="info">
+Anchor uses 8-byte discriminators derived from the account name hash. Native programs often use 1-byte discriminators.
+</Callout>
+
+## Why Validate?
+
+1. **Type Safety**: Ensure account is the correct type
+2. **Initialization**: Prevent using uninitialized accounts
+3. **Authority**: Verify caller has permission
+4. **State**: Check account is in valid state
+
+## Validation Pattern
+
+```rust
+impl TokenAccount {
+    fn validate(&self) -> Result<(), &'static str> {
+        if self.discriminator != TOKEN_ACCOUNT_DISCRIMINATOR {
+            return Err("Invalid discriminator");
+        }
+        if !self.is_initialized {
+            return Err("Account not initialized");
+        }
+        Ok(())
+    }
+    
+    fn is_owner(&self, pubkey: &[u8; 32]) -> bool {
+        self.owner == *pubkey
+    }
+}
+```
+
+## Account Creation
+
+```rust
+impl TokenAccount {
+    fn new(owner: [u8; 32], balance: u64) -> Self {
+        Self {
+            discriminator: TOKEN_ACCOUNT_DISCRIMINATOR,
+            is_initialized: true,
+            owner,
+            balance,
+        }
+    }
+}
+```
+
+## Common Validation Checks
+
+| Check | Purpose |
+|-------|---------|
+| Discriminator | Correct account type |
+| is_initialized | Account has been set up |
+| Owner match | Caller has authority |
+| Signer | Transaction was signed by key |
+
+## The Task
+
+Implement for `TokenAccount`:
+1. `new(owner, balance)` - creates initialized account with discriminator
+2. `validate()` - checks discriminator and is_initialized
+3. `is_owner(pubkey)` - checks if pubkey matches owner
+
+## Requirements
+
+- New accounts have `discriminator = 1` and `is_initialized = true`
+- `validate()` returns `Ok(())` for valid accounts
+- `is_owner()` compares byte arrays
+
+## Hints
+
+```rust
+fn new(owner: [u8; 32], balance: u64) -> Self {
+    Self {
+        discriminator: ACCOUNT_DISCRIMINATOR,
+        is_initialized: true,
+        owner,
+        balance,
+    }
+}
+
+fn validate(&self) -> Result<(), &'static str> {
+    if self.discriminator != ACCOUNT_DISCRIMINATOR {
+        return Err("Invalid discriminator");
+    }
+    if !self.is_initialized {
+        return Err("Not initialized");
+    }
+    Ok(())
+}
+
+fn is_owner(&self, pubkey: &[u8; 32]) -> bool {
+    self.owner == *pubkey
+}
+```

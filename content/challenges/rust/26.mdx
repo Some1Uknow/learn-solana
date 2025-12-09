@@ -1,0 +1,112 @@
+---
+title: "Day 26: Working with Bytes"
+description: Build a Pubkey-like struct - essential for Solana development!
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Day 26: Working with Bytes
+
+In Solana, public keys are 32-byte arrays. Let's build a simplified `Pubkey` type!
+
+## Solana's Pubkey
+
+```rust
+// Actual Solana SDK
+pub struct Pubkey([u8; 32]);
+```
+
+<Callout type="info">
+Every account, program, and wallet in Solana is identified by a 32-byte public key. Understanding byte manipulation is essential!
+</Callout>
+
+## Fixed-Size Byte Arrays
+
+```rust
+// Creating arrays
+let zeros = [0u8; 32];           // All zeros
+let ones = [1u8; 32];            // All ones
+let mixed = [1, 2, 3, 0, 0, ...]; // Specific values
+
+// Comparing arrays
+zeros == [0u8; 32]  // true
+zeros != ones       // true
+```
+
+## Newtype Pattern
+
+Wrap a type for type safety:
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Pubkey([u8; 32]);
+
+impl Pubkey {
+    const fn new(bytes: [u8; 32]) -> Self {
+        Pubkey(bytes)
+    }
+}
+```
+
+## Common Operations
+
+```rust
+impl Pubkey {
+    // Check if all zeros
+    fn is_zero(&self) -> bool {
+        self.0 == [0u8; 32]
+    }
+    
+    // Get as slice
+    fn as_bytes(&self) -> &[u8] {
+        &self.0
+    }
+    
+    // Get first n bytes
+    fn first_bytes<const N: usize>(&self) -> [u8; N] {
+        self.0[..N].try_into().unwrap()
+    }
+}
+```
+
+## The "System Program" Pattern
+
+```rust
+impl Pubkey {
+    // Constant pubkey (like system program)
+    const SYSTEM_PROGRAM: Pubkey = Pubkey([0u8; 32]);
+    
+    fn is_system_program(&self) -> bool {
+        *self == Self::SYSTEM_PROGRAM
+    }
+}
+```
+
+## The Task
+
+Implement for `Pubkey`:
+1. `default()` - returns a pubkey with all zeros
+2. `is_zero()` - checks if all bytes are zero
+3. `as_bytes()` - returns the bytes as a slice
+
+## Requirements
+
+- `Pubkey::default().is_zero()` → `true`
+- `Pubkey::new([1u8; 32]).is_zero()` → `false`
+- `Pubkey::new([1u8; 32]).as_bytes()[0]` → `1`
+
+## Hints
+
+```rust
+fn default() -> Self {
+    Pubkey([0u8; 32])
+}
+
+fn is_zero(&self) -> bool {
+    self.0 == [0u8; 32]
+}
+
+fn as_bytes(&self) -> &[u8] {
+    &self.0
+}
+```

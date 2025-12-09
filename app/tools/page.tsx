@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import ProjectsPageClient from "./projects-page.client";
+import ToolsPageClient from "./tools-page.client";
 import {
   createCanonical,
   defaultOpenGraphImage,
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Build Projects on Solana";
+const title = "Solana Developer Tools & Infrastructure";
 const description =
-  "Explore hands-on Solana projects with guidance, courses, and progression tracking.";
+  "Essential tools and infrastructure for Solana developers. Discover RPCs, wallets, explorers, dev tools, and more to build on Solana.";
 
 export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: createCanonical("/projects"),
+    canonical: createCanonical("/tools"),
   },
   openGraph: {
     title,
     description,
-    url: createCanonical("/projects"),
+    url: createCanonical("/tools"),
     images: [defaultOpenGraphImage],
   },
   twitter: {
@@ -30,6 +30,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProjectsPage() {
-  return <ProjectsPageClient />;
+export default function ToolsPage() {
+  return <ToolsPageClient />;
 }
