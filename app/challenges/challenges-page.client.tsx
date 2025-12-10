@@ -37,6 +37,12 @@ export function ChallengesPageClient() {
       <div className="absolute inset-0" style={{ background: backgroundStyle }} />
       <div className="relative z-10 flex min-h-screen w-full justify-center px-6 py-16 md:px-10">
         <div className="flex w-full max-w-5xl flex-col gap-14">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900/60 px-4 py-2 text-sm text-zinc-300 transition hover:bg-zinc-900 w-fit"
+          >
+            ← Back to Home
+          </Link>
           <header className="space-y-8">
             <div className="space-y-4">
               <div className="text-xs tracking-[0.25em] text-zinc-500">[CHALLENGES]</div>
@@ -99,9 +105,7 @@ export function ChallengesPageClient() {
                     <li><span className="text-zinc-300">Days 29–30:</span> Consolidation, audit mindset, mini on-chain refactor.</li>
                   </ul>
                 </div>
-                <div className="flex items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-6 py-8 text-center text-xs text-zinc-500">
-                  Full interactive challenge (daily prompts, tests, progress sync) is coming soon.
-                </div>
+             
               </div>
             </div>
           </article>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 import { authFetch } from "@/lib/auth/authFetch";
 import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
@@ -217,6 +218,12 @@ export function GamesPageClient() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-zinc-100">
       <div className="mx-auto max-w-4xl px-4 py-16">
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-2 rounded-lg bg-zinc-900/60 px-4 py-2 text-sm text-zinc-300 transition hover:bg-zinc-900"
+        >
+          ← Back to Home
+        </Link>
         <div ref={containerRef}>
           <div className="mb-10">
             <div className="text-xs tracking-[0.25em] text-zinc-400">
