@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import ModulesPageClient from "./modules-page.client";
-import {
-  createCanonical,
-  defaultOpenGraphImage,
-  defaultTwitterImage,
-} from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 
 const title = "Free Solana Course | Learn Solana Development Step-by-Step";
 const description =
@@ -34,13 +30,20 @@ export const metadata: Metadata = {
     title,
     description,
     url: createCanonical("/modules"),
-    images: [defaultOpenGraphImage],
+    images: [
+      {
+        url: "/og/modules",
+        width: 1200,
+        height: 630,
+        alt: "learn.sol modules",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: [defaultTwitterImage],
+    images: ["/og/modules"],
   },
 };
 

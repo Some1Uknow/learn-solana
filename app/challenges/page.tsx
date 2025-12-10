@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import ChallengesPageClient from "./challenges-page.client";
-import {
-  createCanonical,
-  defaultOpenGraphImage,
-  defaultTwitterImage,
-} from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 
 const title = "Solana Coding Challenges | 30-Day Rust & Solana Practice";
 const description =
@@ -32,13 +28,20 @@ export const metadata: Metadata = {
     title,
     description,
     url: createCanonical("/challenges"),
-    images: [defaultOpenGraphImage],
+    images: [
+      {
+        url: "/og/challenges",
+        width: 1200,
+        height: 630,
+        alt: "learn.sol challenges",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: [defaultTwitterImage],
+    images: ["/og/challenges"],
   },
 };
 
