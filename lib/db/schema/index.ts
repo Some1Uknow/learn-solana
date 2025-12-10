@@ -4,3 +4,4 @@ export * from './users';
 export * from './mintedNfts';
 export * from './gameProgress';
 export * from './challengeProgress';
+export * from './platformStats';

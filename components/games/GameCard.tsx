@@ -28,6 +28,7 @@ export interface GameCardProps {
   onPlay: () => void;
   completed?: boolean;
   minted?: boolean;
+  canClaim?: boolean;
   onClaim?: () => void;
 }
 
@@ -38,15 +39,20 @@ export default function GameCard({
   onPlay,
   completed,
   minted,
+  canClaim,
   onClaim,
 }: GameCardProps) {
   const img = game.image || "/placeholder.jpg";
   const category = game.category;
 
+  // Show proper button state without flickering
+  const showClaimButton = completed && canClaim && !minted;
+  const showMintedBadge = minted;
+
   return (
     <article
       className={cn(
-        "relative isolate rounded-2xl bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0))] p-5 text-zinc-100 shadow-[0_8px_40px_rgba(0,0,0,0.15),_0_0_0_1px_rgba(255,255,255,0.02)] transition-transform duration-300 hover:-translate-y-1",
+        "relative isolate rounded-2xl bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0))] p-5 text-zinc-100 shadow-[0_8px_40px_rgba(0,0,0,0.15),0_0_0_1px_rgba(255,255,255,0.02)] transition-transform duration-300 hover:-translate-y-1",
         large ? "min-h-[220px]" : "min-h-[220px]"
       )}
     >
@@ -91,7 +97,7 @@ export default function GameCard({
             >
               {completed ? "PLAY" : "PLAY →"}
             </button>
-            {completed && !minted && (
+            {showClaimButton && (
               <button
                 className="rounded-xl bg-purple-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-400"
                 type="button"
@@ -100,9 +106,9 @@ export default function GameCard({
                 CLAIM NFT
               </button>
             )}
-            {minted && (
+            {showMintedBadge && (
               <span className="rounded-xl bg-green-600/20 px-3 py-2 text-xs font-medium text-green-400 border border-green-600/30">
-                MINTED
+                ✓ MINTED
               </span>
             )}
           </div>

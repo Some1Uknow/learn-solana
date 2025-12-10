@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/footer";
 import LearnSolanaSection from "@/components/home/learn-solana-section";
 import XPostsMarquee from "@/components/home/x-posts-marquee";
 import SponsorSection from "@/components/home/sponsor-section";
+import { StatsBanner } from "@/components/home/stats-banner";
 
 export function HomePageClient() {
   return (
@@ -58,6 +59,9 @@ export function HomePageClient() {
 
         {/* Sponsor section */}
         {/* <SponsorSection /> */}
+
+        {/* Stats Banner */}
+        <StatsBanner />
 
         {/* Learn Solana section */}
         <LearnSolanaSection />

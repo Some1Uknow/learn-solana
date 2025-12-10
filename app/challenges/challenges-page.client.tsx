@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import Link from "next/link";
+import React from "react";
 
 const backgroundStyle = `
   radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.15), transparent 50%),
@@ -14,6 +15,22 @@ const backgroundStyle = `
 
 export function ChallengesPageClient() {
   const { userInfo } = useWeb3AuthUser();
+  const [challengeStats, setChallengeStats] = React.useState<{
+    participants: number;
+    totalAttempted: number;
+  } | null>(null);
+
+  React.useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        setChallengeStats({
+          participants: data.rustChallengeParticipants || 0,
+          totalAttempted: data.totalRustChallengesAttempted || 0,
+        });
+      })
+      .catch((err) => console.error("Failed to fetch stats:", err));
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
@@ -29,6 +46,11 @@ export function ChallengesPageClient() {
               <p className="max-w-2xl text-sm text-zinc-400 sm:text-base">
                 Progressive daily Rust coding series—foundations → ownership depth → algorithms & concurrency → Solana program primitives. Full interactive version coming soon.
               </p>
+              {challengeStats && challengeStats.participants > 0 && (
+                <p className="text-sm text-zinc-400">
+                  <span className="font-semibold text-zinc-200">{challengeStats.participants.toLocaleString()}+</span> developers sharpening their Rust skills • <span className="font-semibold text-zinc-200">{challengeStats.totalAttempted.toLocaleString()}</span> challenges attempted
+                </p>
+              )}
             </div>
             <div className="rounded-2xl border border-white/5 bg-white/[0.02] px-6 py-4 text-xs text-zinc-400">
               Coming Soon: Interactive coding prompts, hidden tests, streak tracking & mini Solana program checkpoints.
