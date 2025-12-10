@@ -49,7 +49,7 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
             </p>
             
             {/* Syndica Recommendation - Only show for RPC category */}
-            {category.id === "rpc" && featuredTool.name === "Syndica" && (
+            {/* {category.id === "rpc" && featuredTool.name === "Syndica" && (
               <div className="mt-6 rounded-xl bg-zinc-900/40 border border-zinc-800 p-6">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
@@ -69,7 +69,7 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </header>
 
           {/* Featured Tool Section */}

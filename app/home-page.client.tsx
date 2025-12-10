@@ -57,7 +57,7 @@ export function HomePageClient() {
         </div>
 
         {/* Sponsor section */}
-        <SponsorSection />
+        {/* <SponsorSection /> */}
 
         {/* Learn Solana section */}
         <LearnSolanaSection />
