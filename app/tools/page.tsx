@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import ToolsPageClient from "./tools-page.client";
-import {
-  createCanonical,
-  defaultOpenGraphImage,
-  defaultTwitterImage,
-} from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 
 const title = "Solana Developer Tools & Infrastructure";
 const description =
@@ -20,13 +16,20 @@ export const metadata: Metadata = {
     title,
     description,
     url: createCanonical("/tools"),
-    images: [defaultOpenGraphImage],
+    images: [
+      {
+        url: "/og/tools",
+        width: 1200,
+        height: 630,
+        alt: "learn.sol tools",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: [defaultTwitterImage],
+    images: ["/og/tools"],
   },
 };
 

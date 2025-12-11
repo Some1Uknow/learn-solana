@@ -6,14 +6,13 @@ export const size = { width: 1200, height: 630 };
 
 export async function GET() {
   return generateLearnSolOgImage({
-    eyebrow: "projects",
-    title: "Ship your Solana playbook",
-    subtitle: "Blueprints, scaffolds, and battle-tested patterns to graduate from tutorials to live apps.",
+    eyebrow: "tools",
+    title: "Battle-tested\nSolana tooling",
+    subtitle:
+      "Curated RPCs, explorers, wallets, and infra picks so you can ship prod-ready Solana apps faster.",
     bullets: [
-      "Mentor-curated briefs",
-      "Devnet deployment flows",
-      "Code review support",
-      "Public launch prep",
+      "Verified RPC + indexer providers",
+      "CLI, wallet, and devtool breakdowns",
     ],
     footer: "learn.sol",
   });

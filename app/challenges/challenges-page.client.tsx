@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useWeb3AuthUser } from "@web3auth/modal/react";
 import Link from "next/link";
 import React from "react";
 
@@ -14,7 +13,6 @@ const backgroundStyle = `
 `;
 
 export function ChallengesPageClient() {
-  const { userInfo } = useWeb3AuthUser();
   const [challengeStats, setChallengeStats] = React.useState<{
     participants: number;
     totalAttempted: number;

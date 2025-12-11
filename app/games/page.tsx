@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import GamesPageClient from "./games-page.client";
-import {
-  createCanonical,
-  defaultOpenGraphImage,
-  defaultTwitterImage,
-} from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 
 const title = "Learn Solana Through Games | Interactive Blockchain Tutorials";
 const description =
@@ -31,13 +27,20 @@ export const metadata: Metadata = {
     title,
     description,
     url: createCanonical("/games"),
-    images: [defaultOpenGraphImage],
+    images: [
+      {
+        url: "/og/games",
+        width: 1200,
+        height: 630,
+        alt: "learn.sol games",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: [defaultTwitterImage],
+    images: ["/og/games"],
   },
 };
 

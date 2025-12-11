@@ -22,12 +22,12 @@ export const primaryKeywords = [
   "solana tutorial",
   "solana development course",
   "learn solana development",
+  "learn rust solana"
 ];
 
 // Secondary keywords (medium volume, high intent)
 export const secondaryKeywords = [
   "solana developer tutorial",
-  "solana programming",
   "solana blockchain course",
   "solana smart contracts",
   "anchor framework tutorial",
@@ -44,7 +44,7 @@ export const longTailKeywords = [
   "solana coding challenges",
   "solana games to learn",
   "solana developer bootcamp",
-  "build on solana",
+  "solana projects",
 ];
 
 // Combined for metadata
