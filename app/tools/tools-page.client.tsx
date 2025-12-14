@@ -42,8 +42,8 @@ export function ToolsPageClient() {
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Essential Solana Developer Tools & Infrastructure
               </h1>
-              <p className="max-w-2xl text-sm text-zinc-400 sm:text-base">
-                Discover the best tools, infrastructure, and services to build, deploy, and scale your Solana applications. Each category has a Featured Partner slot available for trusted partners.
+              <p className="max-w-2xl text-base text-zinc-300 sm:text-lg font-medium">
+                Most Solana developers discover RPCs, wallets, and infra tools while learning. This page defines the default stack they adopt.
               </p>
             </div>
 
@@ -94,6 +94,9 @@ export function ToolsPageClient() {
             >
               Learn More
             </Link>
+            <p className="mt-6 text-xs text-zinc-500">
+              Pilot partnerships available for select infra teams.
+            </p>
           </section>
         </div>
       </div>
