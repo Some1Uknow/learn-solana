@@ -26,17 +26,22 @@ export function ModulesPageClient() {
       />
 
       <div className="relative z-10 flex flex-col items-center justify-start min-h-screen p-8">
-        <div className="w-full max-w-7xl">
-          <ModulesGrid modules={modules} />
+        {/* Breadcrumb */}
+        <div className="w-full max-w-7xl mb-6">
+          <nav className="text-sm text-zinc-400">
+            <button
+              onClick={() => router.push("/")}
+              className="hover:text-zinc-200 transition-colors"
+            >
+              Home
+            </button>
+            <span className="mx-2">/</span>
+            <span className="text-zinc-200">Modules</span>
+          </nav>
         </div>
 
-        <div className="mt-12 text-center">
-          <button
-            onClick={() => router.push("/")}
-            className="px-6 py-2 border border-zinc-600 text-zinc-300 rounded-lg hover:border-zinc-500 hover:text-white"
-          >
-            Back to Home
-          </button>
+        <div className="w-full max-w-7xl">
+          <ModulesGrid modules={modules} />
         </div>
       </div>
     </div>

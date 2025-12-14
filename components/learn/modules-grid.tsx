@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 
@@ -32,30 +33,10 @@ const getImageForWeek = (m: ModuleItem) => {
   return m.image || "/placeholder.png";
 };
 
-// Map module icon string to a public image path to display for each course item
-const getIconForModule = (icon?: string) => {
-  const key = (icon || "").toLowerCase();
-  switch (key) {
-    case "rust":
-      return "/rust-2.png";
-    case "anchor":
-      return "/anchor.png";
-    case "fullstack":
-      return "/nextjs.png";
-    case "fundamentals":
-    case "solana":
-      return "/solanaLogo.png";
-    case "capstone":
-      return "/capstone.png"
-    default:
-      return "/placeholder.png";
-  }
-};
-
 export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
   const { userInfo } = useWeb3AuthUser();
+  const router = useRouter();
   const [query, setQuery] = useState("");
-  const [active, setActive] = useState<ModuleItem | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -81,14 +62,7 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
         <div className="text-xs tracking-[0.25em] text-zinc-400">[WELCOME]</div>
         <div className="mt-3 space-y-2">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {userInfo ? (
-              <>
-                Hi {userInfo?.name || "Developer"}, select a course to get
-                started
-              </>
-            ) : (
-              "Select a course to get started"
-            )}
+            {userInfo ? `Hi ${userInfo?.name || "Developer"}, select a course to get started` : "Select a course to get started"}
           </h2>
         </div>
         {/* Controls row */}
@@ -140,7 +114,7 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
             <CourseCard
               key={m.id}
               m={m}
-              onContinue={() => setActive(m)}
+              onContinue={() => router.push(`/modules/${m.id}`)}
               large
             />
           ))}
@@ -151,141 +125,10 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
       <section aria-labelledby="all" className="mt-10">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {rest.map((m, idx) => (
-            <CourseCard key={m.id} m={m} onContinue={() => setActive(m)} />
+            <CourseCard key={m.id} m={m} onContinue={() => router.push(`/modules/${m.id}`)} />
           ))}
         </div>
       </section>
-
-      {/* Immersive Modal */}
-      {active && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50">
-          <button
-            aria-label="Close"
-            onClick={() => setActive(null)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity"
-          />
-          <div className="fixed inset-0 mx-auto w-full max-w-7xl p-4">
-            <div className="relative mx-auto flex h-[90vh] flex-col overflow-hidden rounded-2xl bg-[#0f0f12] shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
-              {/* Header */}
-              <div className="flex flex-none items-start justify-between gap-4 border-b border-white/5 p-6">
-                <div>
-                  <div className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    {(active.icon || "Course").toUpperCase()}
-                  </div>
-                  <h3 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-100">
-                    {active.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-400">
-                    {active.description}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActive(null)}
-                  className="rounded-xl bg-white/5 px-3 py-2 text-sm text-zinc-300 hover:bg-white/10"
-                  aria-label="Close"
-                >
-                  Close
-                </button>
-              </div>
-
-              {/* Body: two-column courses grid with scroll, includes overview as first item */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {(() => {
-                    const week = active.id; // e.g., "week-1"
-                    const iconSrc = getIconForModule(active.icon);
-                    const items = [
-                      {
-                        key: `${week}-overview`,
-                        title: active.title || "Overview",
-                        description: active.goal || active.description,
-                        type: "overview",
-                        href: active.overviewUrl || `/learn/${week}`,
-                      },
-                      ...active.topics.map((t) => ({
-                        key: t.id,
-                        title: t.title,
-                        description: t.description,
-                        type: t.type,
-                        href: t.url || `/learn/${week}/${t.id}`,
-                      })),
-                    ];
-                    return items.map((it, i) => (
-                      <div
-                        key={it.key}
-                        className="group flex items-start gap-3 rounded-xl bg-white/[0.02] p-4 transition hover:bg-white/[0.04]"
-                        style={{
-                          animation: `fadeIn 280ms ease ${i * 60}ms both`,
-                        }}
-                      >
-                        <div className="relative mt-0.5 h-10 w-10 shrink-0">
-                          <Image
-                            src={iconSrc}
-                            alt={active.icon || "Course"}
-                            fill
-                            sizes="40px"
-                            className="rounded-md object-contain"
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <h5 className="text-sm font-semibold text-zinc-100">
-                                {it.title}
-                              </h5>
-                              <p className="mt-0.5 line-clamp-2 text-[13px] leading-5 text-zinc-400">
-                                {it.description}
-                              </p>
-                            </div>
-                            <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-500 sm:inline">
-                              {it.type}
-                            </span>
-                          </div>
-                          <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs text-zinc-500 sm:hidden">
-                              {it.type}
-                            </span>
-                            <Link
-                              href={it.href}
-                              className="ml-auto inline-flex items-center gap-1 rounded-lg bg-cyan-500 px-3 py-1.5 text-sm font-medium text-black transition hover:bg-cyan-400"
-                            >
-                              Learn
-                              <span aria-hidden>→</span>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                </div>
-              </div>
-
-              {/* Footer (goal display) */}
-              <div className="flex flex-none border-t border-white/5 p-6">
-                <div className="rounded-xl bg-white/[0.02] p-4">
-                  <h4 className="text-sm font-medium text-zinc-200">
-                    Learning goal
-                  </h4>
-                  <p className="mt-1 text-sm text-zinc-400">{active.goal}</p>
-                </div>
-              </div>
-
-              <style jsx>{`
-                @keyframes fadeIn {
-                  from {
-                    opacity: 0;
-                    transform: translateY(4px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-              `}</style>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
