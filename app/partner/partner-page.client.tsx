@@ -11,6 +11,14 @@ const partnerCategories = [
   { id: "devtools", name: "Developer Tooling", available: true },
 ];
 
+interface PlatformStats {
+  totalUsers: number;
+  totalTutorialMinutes: number;
+  totalGamePlayers: number;
+  totalRustChallengesAttempted: number;
+  rustChallengeParticipants: number;
+}
+
 // Count-up animation component
 function AnimatedCounter({ end, duration = 2, decimals = 0, suffix = "" }: { end: number; duration?: number; decimals?: number; suffix?: string }) {
   const [count, setCount] = useState(0);
@@ -67,6 +75,14 @@ function ScrollSection({ children, delay = 0 }: { children: React.ReactNode; del
 
 export function PartnerPageClient() {
   const prefersReducedMotion = useReducedMotion();
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch((err) => console.error("Failed to fetch stats:", err));
+  }, []);
 
   const fadeUp = {
     hidden: { opacity: 0, y: 12 },
@@ -189,40 +205,25 @@ export function PartnerPageClient() {
 
           {/* PLATFORM SNAPSHOT - Clean stats grid */}
           <ScrollSection>
-            <section className="space-y-8">
-              <div className="space-y-2 max-w-3xl">
-                <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight">
-                  Platform Snapshot
-                </h2>
-                
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={1250} suffix="+" />
+                  <AnimatedCounter end={stats?.totalUsers || 1250} suffix="+" />
                   <div className="text-sm text-zinc-400">Solana Learners</div>
                 </div>
                 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={5.4} decimals={1} suffix=" min" />
-                  <div className="text-sm text-zinc-400">Average time spent reading</div>
+                  <AnimatedCounter end={stats?.totalTutorialMinutes || 2700} suffix=" min" />
+                  <div className="text-sm text-zinc-400">Total Tutorial Minutes Read</div>
                 </div>
 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={1} />
-                  <div className="text-sm text-zinc-400">Exclusive Partner / Category</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={200} suffix="+" />
-                  <div className="text-sm text-zinc-400">Coding Challenges Solved</div>
+                  <AnimatedCounter end={stats?.totalRustChallengesAttempted || 200} suffix="+" />
+                  <div className="text-sm text-zinc-400">Coding Challenges Attempted</div>
                 </div>
 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={30} suffix="+" />
-                  <div className="text-sm text-zinc-400">Learners Who Like Gaming</div>
+                  <AnimatedCounter end={stats?.totalGamePlayers || 30} suffix="+" />
+                  <div className="text-sm text-zinc-400">Games Played</div>
                 </div>
               </div>
 
@@ -231,7 +232,6 @@ export function PartnerPageClient() {
                   Growing more day by day.
                 </p>
               </div>
-            </section>
           </ScrollSection>
 
           {/* WHY PARTNER */}
