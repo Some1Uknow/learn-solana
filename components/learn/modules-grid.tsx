@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 
@@ -61,14 +62,7 @@ export default function ModulesGrid({ modules }: { modules: ModuleItem[] }) {
         <div className="text-xs tracking-[0.25em] text-zinc-400">[WELCOME]</div>
         <div className="mt-3 space-y-2">
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {userInfo ? (
-              <>
-                Hi {userInfo?.name || "Developer"}, select a course to get
-                started
-              </>
-            ) : (
-              "Select a course to get started"
-            )}
+            {userInfo ? `Hi ${userInfo?.name || "Developer"}, select a course to get started` : "Select a course to get started"}
           </h2>
         </div>
         {/* Controls row */}

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { ModuleItem } from "@/components/learn/modules-grid";
 
 export default function ModuleDetailPageClient({
@@ -69,19 +70,34 @@ export default function ModuleDetailPageClient({
         </div>
 
         {/* Header Section */}
-        <div className="max-w-7xl mx-auto px-6 pt-12 pb-8">
+        <motion.div 
+          className="max-w-7xl mx-auto px-6 pt-12 pb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="flex items-center gap-2 mb-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium uppercase tracking-[0.15em] text-zinc-400 border border-zinc-700">
               ◯ 0/{courseParts.length} COMPLETED
             </span>
           </div>
-          <h1 className="text-5xl font-bold text-zinc-100 mb-4 tracking-tight">
+          <motion.h1 
+            className="text-5xl font-bold text-zinc-100 mb-4 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             {module.title}
-          </h1>
-          <p className="text-lg text-zinc-400 max-w-3xl">
+          </motion.h1>
+          <motion.p 
+            className="text-lg text-zinc-400 max-w-3xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             {module.description}
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Course Grid */}
         <div className="max-w-7xl mx-auto px-6 pb-16">
@@ -116,11 +132,13 @@ export default function ModuleDetailPageClient({
                 {/* Content */}
                 <div className="relative p-6 flex flex-col h-full min-h-[340px]">
                   {/* Icon */}
-                  <img 
-                    src={module.image || "/placeholder.png"} 
-                    alt={module.title} 
-                    className="mb-6 w-16 h-16 rounded-xl bg-cyan-500/10 border border-cyan-500/20 object-cover" 
-                  />
+                  <div className="mb-6 w-16 h-16 rounded-xl flex items-center justify-center">
+                    <img 
+                      src={module.image || "/placeholder.png"} 
+                      alt={module.title} 
+                      className="w-16 h-16 rounded-xl object-contain" 
+                    />
+                  </div>
 
                   {/* Badges */}
                   <div className="flex items-center gap-2 mb-4">
@@ -147,10 +165,7 @@ export default function ModuleDetailPageClient({
                     className="w-full flex items-center justify-between px-5 py-3 rounded-xl bg-cyan-500 text-sm font-medium text-black hover:bg-cyan-400 transition-all group/btn"
                   >
                     <span className="flex items-center gap-2">
-                      {index === 0 ? "CONTINUE LEARNING" : "START COURSE"}
-                      {index === 0 && (
-                        <span className="text-xs text-black/60">◯ 1/5</span>
-                      )}
+                      DIVE IN!
                     </span>
                     <span className="group-hover/btn:translate-x-1 transition-transform">
                       ››
