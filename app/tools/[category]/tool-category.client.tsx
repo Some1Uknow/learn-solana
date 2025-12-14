@@ -91,13 +91,34 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
 
             {/* Partner Slot Notice */}
             {featuredTool.name === "Available Slot" && (
-              <div className="rounded-2xl border border-[#14F195]/30 bg-[#14F195]/5 px-6 py-4">
-                <p className="text-sm text-[#14F195]">
+              <div className="rounded-2xl border border-[#14F195]/30 bg-[#14F195]/5 px-6 py-5">
+                <p className="text-sm text-[#14F195] mb-4">
                   ✨ <span className="font-semibold">This Featured Partner slot is currently open.</span>
                   <br />
                   <span className="text-zinc-300">To claim exclusivity for {category.name}, contact </span>
                   <a href="mailto:raghav@learnsol.site" className="font-medium text-[#14F195] hover:underline">raghav@learnsol.site</a>
                 </p>
+                <div className="border-t border-[#14F195]/20 pt-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">Featured Partner Benefits:</h4>
+                  <ul className="space-y-2 text-sm text-zinc-300">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#14F195] mt-0.5">✓</span>
+                      <span>One featured partner per category</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#14F195] mt-0.5">✓</span>
+                      <span>No competing tools referenced in tutorials</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#14F195] mt-0.5">✓</span>
+                      <span>AI assistant defaults to featured partner</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#14F195] mt-0.5">✓</span>
+                      <span>Category ownership during learning phase</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             )}
 
@@ -252,94 +273,6 @@ export function ToolCategoryClient({ category }: ToolCategoryClientProps) {
               </div>
             )}
           </section>
-
-          {/* Other Tools Section */}
-          {otherTools.length > 0 && (
-            <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  Other {category.name}
-                </h2>
-                <Link href="/partner" className="text-xs text-[#14F195] hover:underline uppercase tracking-wider">
-                  Add your tool →
-                </Link>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {otherTools.map((tool, idx) => {
-                  const isPlaceholder = tool.website === "#" || tool.name.startsWith("Partner Slot");
-                  
-                  if (isPlaceholder) {
-                    return (
-                      <div
-                        key={idx}
-                        className="group rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/30 p-6 transition hover:border-zinc-600"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-600 text-lg font-bold">
-                                {tool.name.split(" ").pop()}
-                              </div>
-                              <h3 className="text-lg font-semibold text-zinc-500">{tool.name}</h3>
-                            </div>
-                          </div>
-                          <p className="text-sm text-zinc-600">{tool.description}</p>
-                          <Link
-                            href="/partner"
-                            className="inline-flex items-center gap-1 text-xs text-[#14F195] hover:underline"
-                          >
-                            Claim this slot
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                          </Link>
-                        </div>
-                      </div>
-                    );
-                  }
-                  
-                  return (
-                    <a
-                      key={idx}
-                      href={tool.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group rounded-2xl border border-white/10 bg-white/2 p-6 transition hover:-translate-y-1 hover:border-white/20"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            {tool.logo ? (
-                              <img 
-                                src={tool.logo} 
-                                alt={`${tool.name} logo`}
-                                className="w-10 h-10 rounded-lg object-contain bg-white/5"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-lg bg-[#14F195]/10 flex items-center justify-center text-[#14F195] text-lg font-bold">
-                                {tool.name.charAt(0)}
-                              </div>
-                            )}
-                            <h3 className="text-lg font-semibold text-white">{tool.name}</h3>
-                          </div>
-                          <svg
-                            className="w-5 h-5 text-zinc-400 transition group-hover:translate-x-1 group-hover:text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </div>
-                        <p className="text-sm text-zinc-400">{tool.description}</p>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </section>
-          )}
 
           {/* CTA Section */}
           <section className="rounded-3xl border border-white/10 bg-linear-to-r from-[#14F195]/5 to-purple-500/5 p-8 text-center">
