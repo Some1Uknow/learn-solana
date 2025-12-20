@@ -49,6 +49,7 @@ export default function ChallengeEditorClient({
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isSolved, setIsSolved] = useState(false);
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const [outputHeight, setOutputHeight] = useState(INITIAL_OUTPUT_HEIGHT);
   const [isResizing, setIsResizing] = useState(false);
@@ -75,6 +76,32 @@ export default function ChallengeEditorClient({
     fetchAddress();
     return () => { cancelled = true; };
   }, [provider, isConnected]);
+
+  // Fetch existing progress to check if already solved
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchProgress() {
+      if (!walletAddress || !track || !challengeId) {
+        setProgressLoaded(true);
+        return;
+      }
+      try {
+        const res = await authFetch(`/api/challenges/progress?track=${track}&wallet=${walletAddress}`);
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          const progressMap = data.progress || {};
+          if (progressMap[challengeId]) {
+            setIsSolved(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch progress:", e);
+      }
+      if (!cancelled) setProgressLoaded(true);
+    }
+    fetchProgress();
+    return () => { cancelled = true; };
+  }, [walletAddress, track, challengeId]);
 
   useEffect(() => {
     setCode(starterCode || "");
@@ -222,8 +249,9 @@ export default function ChallengeEditorClient({
         message: data?.message,
       });
 
-      // Auto-save progress if passed and user is authenticated with wallet
-      if (passed === true && walletAddress && track && challengeId) {
+      // Auto-save progress if passed, user is authenticated, and NOT already solved
+      // This prevents duplicate API calls and incorrect attempts incrementing
+      if (passed === true && walletAddress && track && challengeId && !isSolved) {
         setIsSolved(true);
         try {
           await authFetch("/api/challenges/complete", {

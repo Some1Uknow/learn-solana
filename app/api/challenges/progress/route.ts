@@ -10,13 +10,6 @@ import {
 
 export async function GET(req: NextRequest) {
   try {
-    const verified = await verifyWeb3Auth(req);
-    if (!verified) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
-        status: 401,
-      });
-    }
-
     const { searchParams } = new URL(req.url);
     const track = searchParams.get("track");
     const overrideWallet = searchParams.get("wallet");
@@ -27,12 +20,20 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    let walletAddress = deriveWalletFromPayload(verified.payload);
-    if (
-      !walletAddress &&
-      typeof overrideWallet === "string" &&
-      isLikelyBase58Address(overrideWallet)
-    ) {
+    // Try JWT auth first (for social logins)
+    const verified = await verifyWeb3Auth(req);
+    
+    // Determine wallet address from JWT or query param
+    let walletAddress: string | null = null;
+    
+    if (verified) {
+      // JWT auth succeeded - derive wallet from token
+      walletAddress = deriveWalletFromPayload(verified.payload);
+    }
+    
+    // Fallback: Accept wallet from query param for external wallet users
+    // External wallets (Phantom, etc.) don't get Web3Auth JWTs
+    if (!walletAddress && typeof overrideWallet === "string" && isLikelyBase58Address(overrideWallet)) {
       walletAddress = overrideWallet;
     }
 
