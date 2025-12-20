@@ -10,15 +10,27 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
-    const verified = await verifyWeb3Auth(req);
-    if (!verified) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
-        status: 401,
-      });
-    }
-
-    const body = await req.json().catch(() => ({}));
+    // Clone request so we can read body even if verifyWeb3Auth consumes it
+    const clonedReq = req.clone();
+    const body = await clonedReq.json().catch(() => ({}));
     const { track, challengeId, code, walletAddress: overrideWallet } = body;
+
+    // Try JWT auth first (for social logins)
+    const verified = await verifyWeb3Auth(req);
+    
+    // Determine wallet address from JWT or request body
+    let walletAddress: string | null = null;
+    
+    if (verified) {
+      // JWT auth succeeded - derive wallet from token
+      walletAddress = deriveWalletFromPayload(verified.payload);
+    }
+    
+    // Fallback: Accept wallet from request body for external wallet users
+    // External wallets (Phantom, etc.) don't get Web3Auth JWTs
+    if (!walletAddress && typeof overrideWallet === "string" && isLikelyBase58Address(overrideWallet)) {
+      walletAddress = overrideWallet;
+    }
 
     if (!track || typeof track !== "string") {
       return new Response(JSON.stringify({ error: "track required" }), {
@@ -30,15 +42,6 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: "challengeId required" }), {
         status: 400,
       });
-    }
-
-    let walletAddress = deriveWalletFromPayload(verified.payload);
-    if (
-      !walletAddress &&
-      typeof overrideWallet === "string" &&
-      isLikelyBase58Address(overrideWallet)
-    ) {
-      walletAddress = overrideWallet;
     }
 
     if (!walletAddress) {
