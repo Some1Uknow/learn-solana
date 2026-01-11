@@ -2,9 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { useWeb3Auth } from "@web3auth/modal/react";
 import { authFetch } from "@/lib/auth/authFetch";
 import { Progress } from "@/components/ui/progress";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { NumberTicker } from "@/components/ui/number-ticker";
+import { AnimatedShinyText } from "@/components/ui/animated-shiny-text";
 import type { ChallengeEntry } from "@/lib/challenges/registry";
 
 type ProgressMap = Record<number, { completedAt: string; attempts: number }>;
@@ -118,131 +122,193 @@ export default function TrackChallengesClient({
     fetchProgress();
   }, [walletAddress, track, isConnected]);
 
-  const backgroundStyle = `
-    radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.12), transparent 50%),
-    radial-gradient(ellipse 100% 60% at 30% 10%, rgba(0, 255, 255, 0.10), transparent 60%),
-    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(138, 43, 226, 0.14), transparent 65%),
-    radial-gradient(ellipse 110% 50% at 80% 30%, rgba(255, 215, 0, 0.06), transparent 40%),
-    #000000
-  `;
-
   const getDifficultyColor = (difficulty?: string) => {
     switch (difficulty) {
       case "Easy":
-        return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+        return "border-[#14f195]/30 bg-[#14f195]/10 text-[#14f195]";
       case "Medium":
         return "border-amber-500/30 bg-amber-500/10 text-amber-300";
       case "Hard":
-        return "border-red-500/30 bg-red-500/10 text-red-300";
+        return "border-[#9945ff]/30 bg-[#9945ff]/10 text-[#9945ff]";
       default:
         return "border-zinc-500/30 bg-zinc-500/10 text-zinc-300";
     }
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-black">
-      <div className="absolute inset-0" style={{ background: backgroundStyle }} />
-      <div className="relative z-10 flex min-h-screen w-full justify-center px-6 py-16 md:px-10">
+    <div className="relative min-h-screen w-full overflow-hidden">
+      {/* Fixed gradient background - Progress/Journey theme */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(circle 450px at 10% 20%, rgba(20, 241, 149, 0.14), transparent),
+            radial-gradient(circle 400px at 90% 15%, rgba(153, 69, 255, 0.16), transparent),
+            radial-gradient(circle 350px at 75% 70%, rgba(20, 241, 149, 0.1), transparent),
+            radial-gradient(circle 300px at 25% 85%, rgba(153, 69, 255, 0.08), transparent),
+            radial-gradient(ellipse 80% 40% at 50% 50%, rgba(99, 102, 241, 0.04), transparent),
+            #000000
+          `,
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen w-full justify-center px-6 py-16 md:px-10 text-white">
         <div className="flex w-full max-w-5xl flex-col gap-10">
           {/* Back navigation */}
-          <Link
-            href="/challenges"
-            className="group inline-flex w-fit items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="transition group-hover:-translate-x-1"
+          <BlurFade delay={0} duration={0.4}>
+            <Link
+              href="/challenges"
+              className="group inline-flex w-fit items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
             >
-              <path
-                d="M10 6l-6 6 6 6M4 12h16"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Back to Challenges
-          </Link>
+              <motion.svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="transition"
+                whileHover={{ x: -4 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <path
+                  d="M10 6l-6 6 6 6M4 12h16"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+              Back to Challenges
+            </Link>
+          </BlurFade>
 
           {/* Header */}
           <header className="space-y-4">
-            <div className="text-xs tracking-[0.25em] text-zinc-500">
-              [{track.toUpperCase()} CHALLENGES]
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              {trackName}
-            </h1>
-            <p className="max-w-2xl text-sm text-zinc-400 sm:text-base">
-              {trackDescription}
-            </p>
+            <BlurFade delay={0.1} duration={0.5}>
+              <div className="text-xs tracking-[0.25em] text-[#14f195]/70 font-medium">
+                [{track.toUpperCase()} CHALLENGES]
+              </div>
+            </BlurFade>
+            <BlurFade delay={0.2} duration={0.5}>
+              <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                <AnimatedShinyText className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                  {trackName}
+                </AnimatedShinyText>
+              </h1>
+            </BlurFade>
+            <BlurFade delay={0.3} duration={0.5}>
+              <p className="max-w-2xl text-sm text-zinc-400 sm:text-base">
+                {trackDescription}
+              </p>
+            </BlurFade>
 
             {/* Progress Bar */}
-            {isConnected && (
-              <div className="max-w-md space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">Your Progress</span>
-                  <span className="font-mono text-emerald-400">
-                    {completedCount}/{challenges.length} ({progressPercentage}%)
-                  </span>
-                </div>
-                <Progress 
-                  value={progressPercentage} 
-                  className="h-2 bg-white/5"
-                />
-                {completedCount === challenges.length && challenges.length > 0 && (
-                  <p className="text-xs text-emerald-400">
-                    🎉 All challenges completed!
-                  </p>
-                )}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {isConnected && (
+                <BlurFade delay={0.4} duration={0.5}>
+                  <motion.div 
+                    className="max-w-md space-y-2 pt-2"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-400">Your Progress</span>
+                      <span className="font-mono text-[#14f195]">
+                        {completedCount}/{challenges.length} (<NumberTicker value={progressPercentage} decimalPlaces={2} />%)
+                      </span>
+                    </div>
+                    <Progress 
+                      value={progressPercentage} 
+                      className="h-2 bg-white/5"
+                    />
+                    {completedCount === challenges.length && challenges.length > 0 && (
+                      <motion.p 
+                        className="text-xs text-[#14f195]"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      >
+                        🎉 All challenges completed!
+                      </motion.p>
+                    )}
+                  </motion.div>
+                </BlurFade>
+              )}
+            </AnimatePresence>
 
-            <div className="flex items-center gap-4 text-xs text-zinc-500">
-              <span>{challenges.length} challenges</span>
-              <span>•</span>
-              <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500/50" /> Easy
-                <span className="ml-2 h-2 w-2 rounded-full bg-amber-500/50" /> Medium
-                <span className="ml-2 h-2 w-2 rounded-full bg-red-500/50" /> Hard
-              </span>
-            </div>
+            <BlurFade delay={0.5} duration={0.5}>
+              <div className="flex items-center gap-4 text-xs text-zinc-500">
+                <span>{challenges.length} challenges</span>
+                <span>•</span>
+                <span className="flex items-center gap-2">
+                  <motion.span 
+                    className="h-2 w-2 rounded-full bg-[#14f195]/50"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                  /> Easy
+                  <motion.span 
+                    className="ml-2 h-2 w-2 rounded-full bg-amber-500/50"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1, delay: 0.3 }}
+                  /> Medium
+                  <motion.span 
+                    className="ml-2 h-2 w-2 rounded-full bg-[#9945ff]/50"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1, delay: 0.6 }}
+                  /> Hard
+                </span>
+              </div>
+            </BlurFade>
           </header>
 
           {/* Challenge Grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {challenges.map((challenge) => {
+            {challenges.map((challenge, index) => {
               const isCompleted = Boolean(progress[challenge.id]);
 
               return (
-                <Link
-                  key={challenge.id}
-                  href={`/challenges/${track}/${challenge.id}`}
-                  className={`group relative overflow-hidden rounded-2xl border p-6 transition hover:border-white/10 hover:bg-white/[0.04] ${
-                    isCompleted
-                      ? "border-emerald-500/20 bg-emerald-500/[0.03]"
-                      : "border-white/5 bg-white/[0.02]"
-                  }`}
-                >
+                <BlurFade key={challenge.id} delay={0.6 + index * 0.05} duration={0.4} inView inViewMargin="-100px">
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Link
+                      href={`/challenges/${track}/${challenge.id}`}
+                      className={`group relative overflow-hidden rounded-2xl border p-6 transition block hover:border-[#14f195]/30 hover:bg-white/[0.04] ${
+                        isCompleted
+                          ? "border-[#14f195]/20 bg-[#14f195]/[0.03]"
+                          : "border-white/5 bg-white/[0.02]"
+                      }`}
+                    >
                   {/* Completed checkmark overlay */}
-                  {isCompleted && (
-                    <div className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                  <AnimatePresence>
+                    {isCompleted && (
+                      <motion.div 
+                        className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#14f195]/20 text-[#14f195]"
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 180 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
                       >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </div>
-                  )}
+                        <motion.svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 0.3, delay: 0.2 }}
+                        >
+                          <motion.polyline points="20 6 9 17 4 12" />
+                        </motion.svg>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Hover gradient */}
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
@@ -253,7 +319,7 @@ export default function TrackChallengesClient({
                       <span
                         className={`text-2xl font-bold transition ${
                           isCompleted
-                            ? "text-emerald-500/60 group-hover:text-emerald-500/80"
+                            ? "text-[#14f195]/60 group-hover:text-[#14f195]/80"
                             : "text-zinc-600 group-hover:text-zinc-500"
                         }`}
                       >
@@ -274,8 +340,8 @@ export default function TrackChallengesClient({
                     <h3
                       className={`text-base font-medium transition line-clamp-2 ${
                         isCompleted
-                          ? "text-emerald-200 group-hover:text-emerald-100"
-                          : "text-white group-hover:text-cyan-200"
+                          ? "text-[#14f195]/90 group-hover:text-[#14f195]"
+                          : "text-white group-hover:text-[#14f195]/80"
                       }`}
                     >
                       {challenge.title}
@@ -310,17 +376,24 @@ export default function TrackChallengesClient({
                       <span
                         className={`flex items-center gap-1.5 text-xs transition ${
                           isCompleted
-                            ? "text-emerald-400 group-hover:text-emerald-300"
-                            : "text-zinc-500 group-hover:text-cyan-300"
+                            ? "text-[#14f195] group-hover:text-[#14f195]/80"
+                            : "text-zinc-500 group-hover:text-[#14f195]"
                         }`}
                       >
                         {isCompleted ? "Review" : "Start"}
-                        <svg
+                        <motion.svg
                           width="14"
                           height="14"
                           viewBox="0 0 24 24"
                           fill="none"
-                          className="transition group-hover:translate-x-0.5"
+                          className="transition"
+                          animate={{ x: [0, 4, 0] }}
+                          transition={{ 
+                            duration: 1.5, 
+                            repeat: Infinity, 
+                            repeatDelay: 0.5,
+                            ease: "easeInOut" 
+                          }}
                         >
                           <path
                             d="M14 6l6 6-6 6M20 12H4"
@@ -329,19 +402,23 @@ export default function TrackChallengesClient({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
-                        </svg>
+                        </motion.svg>
                       </span>
                     </div>
                   </div>
-                </Link>
+                    </Link>
+                  </motion.div>
+                </BlurFade>
               );
             })}
           </div>
 
           {/* Footer */}
-          <footer className="pb-8 pt-4 text-center text-xs text-zinc-500">
-            Keep coding to unlock more achievements!
-          </footer>
+          <BlurFade delay={0.8} duration={0.5}>
+            <footer className="pb-8 pt-4 text-center text-xs text-zinc-500">
+              Keep coding to unlock more achievements!
+            </footer>
+          </BlurFade>
         </div>
       </div>
     </div>

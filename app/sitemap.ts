@@ -15,7 +15,11 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
   { path: '/games', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/challenges', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/tools', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/partner', priority: 0.5, changeFrequency: 'monthly' },
 ]
+
+// Tool categories for sitemap
+const TOOL_CATEGORIES = ['rpc', 'indexing', 'wallets', 'dev-tools']
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
@@ -27,6 +31,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: route.priority,
       changeFrequency: route.changeFrequency,
       lastModified: new Date(),
+    })
+  }
+
+  // Add tool category pages
+  for (const category of TOOL_CATEGORIES) {
+    entries.push({
+      url: `${BASE_URL}/tools/${category}`,
+      priority: 0.6,
+      changeFrequency: 'monthly',
     })
   }
 
@@ -68,18 +81,57 @@ export default function sitemap(): MetadataRoute.Sitemap {
       }
     }
 
-    // Add challenge tracks if they exist
+    // Add tutorials if they exist
+    const tutorialsDir = path.join(CONTENT_DIR, 'tutorials')
+    if (fs.existsSync(tutorialsDir)) {
+      const tutorialFiles = fs
+        .readdirSync(tutorialsDir)
+        .filter((f) => /\.mdx?$/.test(f))
+      for (const file of tutorialFiles) {
+        const slug = file.replace(/\.mdx?$/, '')
+        const filePath = path.join(tutorialsDir, file)
+        let lastModified: Date | undefined
+        try {
+          const stat = fs.statSync(filePath)
+          lastModified = stat.mtime
+        } catch {
+          // ignore per-file errors
+        }
+        entries.push({
+          url: `${BASE_URL}/tutorials/${slug}`,
+          priority: 0.7,
+          changeFrequency: 'monthly',
+          ...(lastModified ? { lastModified } : {}),
+        })
+      }
+    }
+
+    // Add challenge tracks and individual challenges
     const challengesDir = path.join(CONTENT_DIR, 'challenges')
     if (fs.existsSync(challengesDir)) {
       const challengeTracks = fs.readdirSync(challengesDir).filter((f) =>
         fs.statSync(path.join(challengesDir, f)).isDirectory()
       )
       for (const track of challengeTracks) {
+        // Track landing page
         entries.push({
           url: `${BASE_URL}/challenges/${track}`,
           priority: 0.75,
           changeFrequency: 'weekly',
         })
+
+        // Individual challenges within track
+        const trackDir = path.join(challengesDir, track)
+        const challengeFiles = fs
+          .readdirSync(trackDir)
+          .filter((f) => /\.mdx?$/.test(f))
+        for (let i = 0; i < challengeFiles.length; i++) {
+          entries.push({
+            url: `${BASE_URL}/challenges/${track}/${i + 1}`,
+            priority: 0.65,
+            changeFrequency: 'monthly',
+          })
+        }
       }
     }
   } catch {
@@ -88,3 +140,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return entries
 }
+

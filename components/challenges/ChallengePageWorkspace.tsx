@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { challengesSource } from "@/lib/challenges/source";
 import { getMDXComponents } from "@/mdx-components";
+import { BlurFade } from "@/components/ui/blur-fade";
 import ChallengeEditorClient from "./ChallengeEditorClient";
 import type { ChallengeExecutor } from "@/lib/challenges/registry";
 
@@ -89,82 +90,88 @@ export default function ChallengePageWorkspace({
         </div> */}
 
         {/* Top bar */}
-        <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 sm:px-6 shrink-0">
-          <div className="flex items-center gap-3">
-            <Link
-              href={backHref}
-              className="group rounded-md border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="transition group-hover:scale-110"
+        <BlurFade delay={0.1} inView>
+          <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 sm:px-6 shrink-0">
+            <div className="flex items-center gap-3">
+              <Link
+                href={backHref}
+                className="group rounded-md border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
               >
-                <path
-                  d="M10 6l-6 6 6 6M4 12h16"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-            <div className="flex flex-col">
-              <div className="text-sm font-medium text-white">{title}</div>
-              <div className="mt-0.5 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                  {difficulty}
-                </span>
-                {tags.slice(0, 3).map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5"
-                  >
-                    {t}
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="transition group-hover:scale-110"
+                >
+                  <path
+                    d="M10 6l-6 6 6 6M4 12h16"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+              <div className="flex flex-col">
+                <div className="text-sm font-medium text-white">{title}</div>
+                <div className="mt-0.5 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+                    {difficulty}
                   </span>
-                ))}
-                {tags.length > 3 && <span>+{tags.length - 3}</span>}
+                  {tags.slice(0, 3).map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                  {tags.length > 3 && <span>+{tags.length - 3}</span>}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </BlurFade>
 
         {/* Content area */}
         <div className="relative min-h-0 grid h-full flex-1 grid-rows-1 overflow-hidden sm:grid-cols-2 sm:gap-0">
           {/* Problem panel */}
-          <section className="relative flex h-full min-h-0 flex-col border-b border-white/10 sm:border-b-0 sm:border-r sm:border-white/10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_50%_at_0%_0%,rgba(255,255,255,0.04),transparent_55%)]" />
-            <div className="relative flex-1 overflow-y-auto p-5 sm:p-8">
-              {MDX ? (
-                <div className="prose prose-invert prose-zinc max-w-none">
-                  <MDX components={getMDXComponents()} />
-                </div>
-              ) : (
-                <div className="prose prose-invert prose-zinc max-w-none text-zinc-300">
-                  <h2 className="mb-3 text-lg font-semibold text-white sm:text-xl">
-                    {title}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-zinc-300">
-                    {description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+          <BlurFade delay={0.2} inView>
+            <section className="relative flex h-full min-h-0 flex-col border-b border-white/10 sm:border-b-0 sm:border-r sm:border-white/10">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_50%_at_0%_0%,rgba(255,255,255,0.04),transparent_55%)]" />
+              <div className="relative flex-1 overflow-y-auto p-5 sm:p-8">
+                {MDX ? (
+                  <div className="prose prose-invert prose-zinc max-w-none">
+                    <MDX components={getMDXComponents()} />
+                  </div>
+                ) : (
+                  <div className="prose prose-invert prose-zinc max-w-none text-zinc-300">
+                    <h2 className="mb-3 text-lg font-semibold text-white sm:text-xl">
+                      {title}
+                    </h2>
+                    <p className="text-sm leading-relaxed text-zinc-300">
+                      {description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </BlurFade>
 
           {/* Code panel */}
-          <section className="relative flex h-full min-h-0 flex-col">
-            <ChallengeEditorClient
-              starterCode={starterCode}
-              track={track}
-              currentIndex={currentIndex}
-              totalCount={totalCount}
-              challengeId={currentIndex}
-              canExecute={canExecute}
-            />
-          </section>
+          <BlurFade delay={0.3} inView>
+            <section className="relative flex h-full min-h-0 flex-col">
+              <ChallengeEditorClient
+                starterCode={starterCode}
+                track={track}
+                currentIndex={currentIndex}
+                totalCount={totalCount}
+                challengeId={currentIndex}
+                canExecute={canExecute}
+              />
+            </section>
+          </BlurFade>
         </div>
       </div>
     </div>

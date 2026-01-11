@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ChallengePageWorkspace from "@/components/challenges/ChallengePageWorkspace";
 import { getChallenge, getTrackCount, toMdxSlug, type TrackId } from "@/lib/challenges/registry";
+import { createCanonical, defaultOpenGraphImage, defaultTwitterImage } from "@/lib/seo";
 
 type Params = Promise<{ track: string; id: string }>;
 
@@ -11,9 +12,29 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const id = Number(idParam);
   const c = getChallenge(track, id);
   if (!c) return { title: "Challenge" };
+
+  const title = `${c.title} · ${c.track.toUpperCase()} Challenge`;
+  const canonical = createCanonical(`/challenges/${track}/${id}`);
+
   return {
-    title: `${c.title} · ${c.track.toUpperCase()} Challenge`,
+    title,
     description: c.description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title,
+      description: c.description,
+      url: canonical,
+      siteName: "learn.sol",
+      images: [defaultOpenGraphImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: c.description,
+      images: [defaultTwitterImage],
+    },
   };
 }
 

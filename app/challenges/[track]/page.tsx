@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { challenges, type TrackId } from "@/lib/challenges/registry";
 import TrackChallengesClient from "./track-challenges.client";
+import { createCanonical, defaultOpenGraphImage, defaultTwitterImage } from "@/lib/seo";
 
 type Params = Promise<{ track: string }>;
 
@@ -29,9 +30,28 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const track = trackParam as TrackId;
   const meta = trackMeta[track];
   if (!meta) return { title: "Challenges" };
+
+  const canonical = createCanonical(`/challenges/${track}`);
+
   return {
     title: `${meta.name} - All Challenges`,
     description: meta.description,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: `${meta.name} - Solana Coding Challenges`,
+      description: meta.description,
+      url: canonical,
+      siteName: "learn.sol",
+      images: [defaultOpenGraphImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${meta.name} - Solana Coding Challenges`,
+      description: meta.description,
+      images: [defaultTwitterImage],
+    },
   };
 }
 

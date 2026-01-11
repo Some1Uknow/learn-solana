@@ -89,20 +89,19 @@ Here are some examples you can adapt.
 ```ts title="connect.ts"
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 
-// Option 1: Using Syndica (Recommended for production)
-const connection = new Connection(
-  "https://solana-devnet.api.syndica.io/api-key/{your-key}",
-  "confirmed"
-);
+// Using public devnet endpoint
+const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-// Option 2: Using public devnet endpoint
-// const connection = new Connection(clusterApiUrl("devnet"));
+// Alternative: Use a premium RPC provider for production
+// const connection = new Connection("https://your-rpc-endpoint.com", "confirmed");
 ```
 
+{/* TEMPORARILY DISABLED - GetBlock sponsorship paused
 <Callout type="info">
-**Why Syndica?**  
-Syndica provides reliable RPC infrastructure with sub-50ms response times and 99.99% uptime. It's the recommended RPC provider for Learn Solana tutorials and handles production workloads efficiently.
+**Why GetBlock?**  
+GetBlock is a leading Blockchain-as-a-Service platform providing instant API access to 100+ blockchain protocols with 99.9%+ uptime. It's the recommended RPC provider for Learn Solana tutorials, trusted by 100,000+ developers worldwide.
 </Callout>
+*/}
 
 ### Fetch Account Info
 

@@ -76,11 +76,13 @@ const websiteJsonLd = {
   name: "learn.sol",
   alternateName: "Learn Solana",
   url: siteUrl,
-  potentialAction: {
-    "@type": "SearchAction",
-    target: `${siteUrl}/search?q={search_term_string}`,
-    "query-input": "required name=search_term_string",
-  },
+  // NOTE: SearchAction commented out - fumadocs uses a different search mechanism
+  // Uncomment when a /search page is implemented
+  // potentialAction: {
+  //   "@type": "SearchAction",
+  //   target: `${siteUrl}/search?q={search_term_string}`,
+  //   "query-input": "required name=search_term_string",
+  // },
 };
 
 export const viewport: Viewport = {

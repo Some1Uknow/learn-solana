@@ -52,23 +52,24 @@ export default function GameCard({
   return (
     <article
       className={cn(
-        "relative isolate rounded-2xl bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0))] p-5 text-zinc-100 shadow-[0_8px_40px_rgba(0,0,0,0.15),0_0_0_1px_rgba(255,255,255,0.02)] transition-transform duration-300 hover:-translate-y-1",
+        "group relative isolate rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent p-5 text-zinc-100 transition-all duration-300 hover:-translate-y-1 hover:border-[#14f195]/30 hover:shadow-[0_0_30px_rgba(20,241,149,0.1)]",
         large ? "min-h-[220px]" : "min-h-[220px]"
       )}
     >
-      <div className="absolute inset-0 rounded-2xl bg-zinc-950/60" />
+      <div className="absolute inset-0 rounded-2xl bg-black/40 backdrop-blur-sm" />
       <div className="relative z-10 flex h-full flex-col">
         {/* Top Row: badge */}
         <div className="flex items-center justify-between">
           <span
             className={cn(
-              "inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
-              game.difficulty === "BEGINNER" && "bg-green-500/10 text-green-300",
-              game.difficulty === "INTERMEDIATE" && "bg-yellow-500/10 text-yellow-300",
-              game.difficulty === "ADVANCED" && "bg-red-500/10 text-red-300"
+              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.2em]",
+              game.difficulty === "BEGINNER" && "bg-[#14f195]/10 text-[#14f195]",
+              game.difficulty === "INTERMEDIATE" && "bg-yellow-500/10 text-yellow-400",
+              game.difficulty === "ADVANCED" && "bg-[#9945ff]/10 text-[#9945ff]"
             )}
           >
-            ● {game.difficulty}
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            {game.difficulty}
           </span>
         </div>
 
@@ -78,20 +79,20 @@ export default function GameCard({
             <Image src={img} alt="game" fill sizes="80px" className="rounded-xl object-contain" />
           </div>
           <div className="min-w-0">
-            <div className="text-xs uppercase tracking-[0.2em] text-zinc-400">{category}</div>
-            <h4 className="mt-1 text-xl font-semibold tracking-tight">{game.title}</h4>
+            <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">{category}</div>
+            <h4 className="mt-1 text-xl font-semibold tracking-tight text-white">{game.title}</h4>
           </div>
         </div>
 
         {/* Bottom Row */}
         <div className="mt-auto flex items-center justify-between pt-6">
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
+          <div className="flex items-center gap-2 text-sm text-zinc-500">
             <span>{game.icon}</span>
             <span>Play Now</span>
           </div>
           <div className="flex gap-2">
             <button
-              className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-cyan-400"
+              className="rounded-xl bg-[#14f195] px-4 py-2 text-sm font-medium text-black transition hover:bg-[#14f195]/90 hover:shadow-[0_0_20px_rgba(20,241,149,0.3)]"
               type="button"
               onClick={onPlay}
             >
@@ -99,7 +100,7 @@ export default function GameCard({
             </button>
             {showClaimButton && (
               <button
-                className="rounded-xl bg-purple-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-400"
+                className="rounded-xl bg-[#9945ff] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#9945ff]/90 hover:shadow-[0_0_20px_rgba(153,69,255,0.3)]"
                 type="button"
                 onClick={onClaim}
               >
@@ -107,26 +108,13 @@ export default function GameCard({
               </button>
             )}
             {showMintedBadge && (
-              <span className="rounded-xl bg-green-600/20 px-3 py-2 text-xs font-medium text-green-400 border border-green-600/30">
+              <span className="rounded-xl bg-[#14f195]/10 px-3 py-2 text-xs font-medium text-[#14f195] border border-[#14f195]/30">
                 ✓ MINTED
               </span>
             )}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(4px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </article>
   );
 }

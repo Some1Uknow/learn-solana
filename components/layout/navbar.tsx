@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { NavbarBranding } from "./navbar/branding";
 import { NavbarLinks } from "./navbar/links";
 import { NavbarGithub } from "./navbar/github";
@@ -10,6 +11,11 @@ import { NavbarWalletButton } from "./navbar/wallet-button";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    setHasAnimated(true);
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -27,25 +33,55 @@ export function Navbar() {
   }, [isMenuOpen]);
 
   return (
-    <nav className="w-full max-w-7xl mx-auto relative z-20">
-      <div className="relative flex items-center justify-between px-6 md:px-10 py-3">
+    <motion.nav
+      initial={{ y: -100, opacity: 0, filter: "blur(10px)" }}
+      animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+      transition={{
+        type: "spring",
+        stiffness: 100,
+        damping: 20,
+        duration: 0.8,
+      }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-6xl z-50"
+    >
+      <motion.div
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+        className="relative flex items-center justify-between px-6 md:px-8 py-3 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-lg shadow-black/20"
+      >
         {/* Left: Logo */}
-        <div className="shrink-0 z-20 flex-row flex">
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+          className="shrink-0 z-20 flex-row flex"
+        >
           <NavbarBranding />
            <NavbarGithub />
-        </div>
+        </motion.div>
 
         {/* Center: Links (true centered, no overlap) */}
         <div className="absolute inset-x-0 flex justify-center pointer-events-none">
-          <div className="hidden md:flex pointer-events-auto">
+          <motion.div
+            initial={{ y: -10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+            className="hidden md:flex pointer-events-auto"
+          >
             <NavbarLinks />
-          </div>
+          </motion.div>
         </div>
 
         {/* Right: Buttons */}
-        <div className="hidden md:flex items-center gap-2 justify-end z-20">
+        <motion.div
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
+          className="hidden md:flex items-center gap-2 justify-end z-20"
+        >
           <NavbarWalletButton />
-        </div>
+        </motion.div>
 
         {/* Mobile Menu Toggle */}
         <div className="md:hidden flex items-center z-20">
@@ -57,15 +93,34 @@ export function Navbar() {
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60" onClick={toggleMenu} />
-          {/* Sheet */}
-          <div className="absolute top-0 left-0 right-0 bg-[#0d1117] border-b border-white/10 pt-16 pb-6 px-6">
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 md:hidden"
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60"
+              onClick={toggleMenu}
+            />
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: -100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -100, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute top-0 left-0 right-0 bg-[#0d1117] border-b border-white/10 pt-16 pb-6 px-6"
+            >
             {/* Close button (in case backdrop is covered) */}
             <button
               aria-label="Close menu"
@@ -86,9 +141,10 @@ export function Navbar() {
                 <NavbarGithub isMobile />
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </nav>
+      </AnimatePresence>
+    </motion.nav>
   );
 }

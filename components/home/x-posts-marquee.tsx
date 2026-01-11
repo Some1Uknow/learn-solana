@@ -4,6 +4,7 @@ import Image from "next/image";
 import useSWR from "swr";
 
 import { Marquee } from "@/components/ui/marquee";
+import { BlurFade } from "@/components/ui/blur-fade";
 import { cn } from "@/lib/cn";
 import { X_POSTS, type XPost } from "@/data/x-posts";
 import { TWEET_IDS } from "@/data/x-tweet-ids";
@@ -76,12 +77,15 @@ export function XPostsMarquee() {
 
   return (
     <section className="container relative z-10 py-10 md:py-14">
-      <div className="mb-6 text-center">
-        <div className="text-xs tracking-[0.25em] text-zinc-400">[WHAT BUILDERS SAY]</div>
-        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight">Best in the Community</h2>
-      </div>
+      <BlurFade delay={0.1} inView>
+        <div className="mb-6 text-center">
+          <div className="text-xs tracking-[0.25em] text-zinc-400">[WHAT BUILDERS SAY]</div>
+          <h2 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight">Best in the Community</h2>
+        </div>
+      </BlurFade>
 
-      <div className="[--gap:1.25rem]">
+      <BlurFade delay={0.2} inView>
+        <div className="[--gap:1.25rem]">
         {/* If you have real tweet IDs, render them; otherwise fallback to manual posts */}
         {/* Example: const tweetIds = ["184217132223", ...]; */}
         {(() => {
@@ -136,7 +140,8 @@ export function XPostsMarquee() {
             </>
           );
         })()}
-      </div>
+        </div>
+      </BlurFade>
     </section>
   );
 }

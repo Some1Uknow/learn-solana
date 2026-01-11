@@ -2,6 +2,9 @@
 
 import React, { useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { Navbar } from "@/components/layout/navbar";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { NumberTicker } from "@/components/ui/number-ticker";
 import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 import { authFetch } from "@/lib/auth/authFetch";
 import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
@@ -14,6 +17,7 @@ import ClaimNftModal from "@/components/games/ClaimNftModal";
 import NftsModal from "@/components/games/NftsModal";
 import { GAME_REGISTRY, type GameDefinition } from "@/lib/games/registry";
 import type { UserGameStates, NftMetadata, MintedNft, UserStateResponse } from "@/lib/games/types";
+import { Search, Trophy } from "lucide-react";
 
 export function GamesPageClient() {
   const { userInfo } = useWeb3AuthUser();
@@ -216,80 +220,105 @@ export function GamesPageClient() {
   const restGames = filteredGames.slice(2);
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-zinc-100">
-      <div className="mx-auto max-w-4xl px-4 py-16">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 rounded-lg bg-zinc-900/60 px-4 py-2 text-sm text-zinc-300 transition hover:bg-zinc-900"
-        >
-          ← Back to Home
-        </Link>
-        <div ref={containerRef}>
-          <div className="mb-10">
-            <div className="text-xs tracking-[0.25em] text-zinc-400">
-              [GAMES]
-            </div>
-            <div className="mt-3 space-y-2">
-              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+    <div className="min-h-screen w-full relative text-white">
+      {/* Fixed gradient background - Playful/Interactive theme */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `
+            radial-gradient(circle 450px at 75% 10%, rgba(236, 72, 153, 0.14), transparent),
+            radial-gradient(circle 400px at 20% 35%, rgba(153, 69, 255, 0.16), transparent),
+            radial-gradient(circle 350px at 90% 70%, rgba(45, 212, 191, 0.12), transparent),
+            radial-gradient(circle 300px at 10% 80%, rgba(20, 241, 149, 0.08), transparent),
+            radial-gradient(ellipse 60% 30% at 50% 100%, rgba(153, 69, 255, 0.06), transparent),
+            #000000
+          `,
+        }}
+      />
+
+      <Navbar />
+
+      <div className="pt-28 pb-16 px-4 sm:px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Breadcrumb */}
+          <BlurFade delay={0.05} inView>
+            <nav className="text-sm text-zinc-400 mb-8">
+              <Link href="/" className="hover:text-[#14f195] transition-colors">
+                Home
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-white">Games</span>
+            </nav>
+          </BlurFade>
+
+          {/* Header */}
+          <BlurFade delay={0.1} inView>
+            <div ref={containerRef} className="mb-10">
+              <div className="text-xs tracking-[0.25em] text-[#14f195] uppercase font-medium">
+                [INTERACTIVE GAMES]
+              </div>
+              <h1 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 {userInfo ? (
-                  <>
-                    Hi {userInfo?.name || "Player"}, choose a game to start
-                    playing
-                  </>
+                  <>Welcome back, {userInfo?.name || "Player"}</>
                 ) : (
-                  "Choose a game to start playing"
+                  "Learn Solana Through Games"
                 )}
-              </h2>
+              </h1>
+              <p className="mt-4 text-lg text-zinc-400 max-w-2xl">
+                Master blockchain concepts through interactive games. Complete challenges and earn NFT achievements.
+              </p>
+              
+              {/* Stats */}
               {totalPlayers !== null && totalPlayers > 0 && (
-                <p className="text-sm text-zinc-400">
-                  Join <span className="font-semibold text-zinc-200">{totalPlayers.toLocaleString()}+</span> developers mastering Solana through games
-                </p>
+                <div className="mt-6 flex items-center gap-2">
+                  <span className="text-2xl font-bold text-[#14f195]">
+                    <NumberTicker value={totalPlayers} />
+                  </span>
+                  <span className="text-sm text-zinc-400">developers playing</span>
+                </div>
               )}
             </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <label className="relative block w-full sm:max-w-xl">
-                <span className="sr-only">Search</span>
-                <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
-                  🔎
-                </div>
+          </BlurFade>
+
+          {/* Controls */}
+          <BlurFade delay={0.15} inView>
+            <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <label className="relative block w-full sm:max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by name, category, or tags..."
-                  className="w-full rounded-xl bg-zinc-900/60 pl-9 pr-3 py-3 text-sm text-zinc-100 outline-none transition focus:bg-zinc-900"
+                  placeholder="Search games..."
+                  className="w-full rounded-xl bg-white/5 border border-white/10 pl-12 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-[#14f195]/50 focus:bg-white/[0.08]"
                 />
               </label>
-              <div className="flex items-center gap-3">
-                <button
-                  className="rounded-xl bg-zinc-900/60 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900"
-                  type="button"
-                >
-                  All Categories
-                </button>
-                <button
-                  className="rounded-xl bg-zinc-900/60 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-900 disabled:opacity-50"
-                  type="button"
-                  disabled={!walletAddress}
-                  onClick={() => setShowNftsModal(true)}
-                >
-                  View NFTs ({ownedNfts.length})
-                </button>
-              </div>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white transition hover:bg-white/10 disabled:opacity-50"
+                type="button"
+                disabled={!walletAddress}
+                onClick={() => setShowNftsModal(true)}
+              >
+                <Trophy className="w-4 h-4" />
+                My NFTs ({ownedNfts.length})
+              </button>
             </div>
-          </div>
+          </BlurFade>
 
           {isLoadingStates && walletAddress && (
-            <div className="mb-6 text-center text-sm text-zinc-500">
-              Loading your progress...
-            </div>
+            <BlurFade delay={0.2} inView>
+              <div className="mb-6 text-center text-sm text-zinc-500">
+                Loading your progress...
+              </div>
+            </BlurFade>
           )}
 
           {continueGames.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-xs uppercase tracking-[0.25em] text-zinc-500">
-                Featured
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <BlurFade delay={0.25} inView>
+              <div className="space-y-4">
+                <h3 className="text-xs uppercase tracking-[0.25em] text-[#14f195]/70 font-medium">
+                  Featured
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
                 {continueGames.map((game, idx) => {
                   const state = gameStates[game.id];
                   return (
@@ -306,16 +335,18 @@ export function GamesPageClient() {
                     />
                   );
                 })}
+                </div>
               </div>
-            </div>
+            </BlurFade>
           )}
 
           {restGames.length > 0 && (
-            <div className="mt-10 space-y-4">
-              <h3 className="text-xs uppercase tracking-[0.25em] text-zinc-500">
-                All Games
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <BlurFade delay={0.3} inView>
+              <div className="mt-10 space-y-4">
+                <h3 className="text-xs uppercase tracking-[0.25em] text-[#14f195]/70 font-medium">
+                  All Games
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
                 {restGames.map((game, idx) => {
                   const state = gameStates[game.id];
                   return (
@@ -331,8 +362,9 @@ export function GamesPageClient() {
                     />
                   );
                 })}
+                </div>
               </div>
-            </div>
+            </BlurFade>
           )}
         </div>
       </div>
@@ -399,7 +431,7 @@ export function GamesPageClient() {
           setOwnedNftMetadata={setNftMetadata}
         />
       )}
-    </main>
+    </div>
   );
 }
 

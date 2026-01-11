@@ -5,7 +5,7 @@ export const contentsData = {
   modules: [
     {
       id: "week-1",
-      title: "🧱 Solana Fundamentals",
+      title: "Solana Fundamentals",
       description:
         "Understand how Solana works under the hood and interact via CLI",
       goal: "Master Solana's core architecture and command-line interactions",
@@ -57,7 +57,7 @@ export const contentsData = {
     },
     {
       id: "week-2",
-      title: "🦀 Rust for Solana",
+      title: "Rust for Solana",
       description:
         "Learn Rust deeply enough to write secure, optimized smart contracts",
       goal: "Master Rust programming with focus on blockchain security and optimization",
@@ -146,7 +146,7 @@ export const contentsData = {
     },
     {
       id: "week-3",
-      title: "⚓ Anchor Framework",
+      title: "Anchor Framework",
       description:
         "Build real apps using Anchor (Solana's Rust-based smart contract framework)",
       goal: "Master Anchor for ergonomic and powerful smart contract development",
@@ -222,7 +222,7 @@ export const contentsData = {
     },
     {
       id: "week-4",
-      title: "🧑‍💻 Client-Side & Full-Stack",
+      title: "Client-Side & Full-Stack",
       description:
         "Integrate smart contracts with React, wallets, and full dApp flows",
       goal: "Build production-ready frontend applications with seamless blockchain integration",
@@ -290,7 +290,7 @@ export const contentsData = {
     },
     {
       id: "week-5",
-      title: "🚀 Capstone & Portfolio",
+      title: "Capstone & Portfolio",
       description:
         "Package your skills into a showcase-worthy, production-grade dApp",
       goal: "Create a professional portfolio piece demonstrating mastery of full Solana development stack",

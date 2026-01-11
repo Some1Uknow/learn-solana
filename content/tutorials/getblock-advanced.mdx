@@ -1,11 +1,11 @@
 ---
-title: Advanced Syndica RPC Features
+title: Advanced GetBlock RPC Features
 type: tutorial
 module: 🌐 Infrastructure & Tools
-description: Master advanced Syndica features for building high-performance, production-ready Solana applications
+description: Master advanced GetBlock features for building high-performance, production-ready Solana applications
 ---
 
-Deep dive into Syndica's advanced capabilities for enterprise-grade Solana infrastructure.
+Deep dive into GetBlock's advanced capabilities for professional Solana infrastructure.
 
 ## What You'll Learn
 
@@ -19,7 +19,7 @@ Deep dive into Syndica's advanced capabilities for enterprise-grade Solana infra
 
 ## Prerequisites
 
-- Completed [Getting Started with Syndica RPC](/tutorials/syndica-getting-started)
+- Completed [Getting Started with GetBlock RPC](/tutorials/getblock-getting-started)
 - Understanding of async JavaScript/TypeScript
 - Familiarity with Solana transaction lifecycle
 
@@ -27,7 +27,7 @@ Deep dive into Syndica's advanced capabilities for enterprise-grade Solana infra
 
 ## WebSocket Subscriptions
 
-Syndica provides WebSocket endpoints for real-time blockchain updates:
+GetBlock provides WebSocket endpoints for real-time blockchain updates:
 
 ```typescript title="websocket-subscriptions.ts"
 import { Connection, PublicKey } from "@solana/web3.js";
@@ -36,7 +36,7 @@ const connection = new Connection(
   process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET!,
   {
     commitment: "confirmed",
-    wsEndpoint: "wss://your-key.solana-mainnet.syndica.io",
+    wsEndpoint: "wss://go.getblock.io/{your-access-token}/",
   }
 );
 
@@ -117,7 +117,7 @@ WebSocket subscriptions consume fewer resources than polling. Use them for real-
 
 ## Load Balancing and Failover
 
-Implement automatic failover across multiple Syndica endpoints:
+Implement automatic failover across multiple GetBlock endpoints:
 
 ```typescript title="load-balancer.ts"
 import { Connection, ConnectionConfig } from "@solana/web3.js";
@@ -220,8 +220,8 @@ class LoadBalancedConnection {
 
 // Usage
 const loadBalancer = new LoadBalancedConnection([
-  { url: "https://primary-key.solana-mainnet.syndica.io", weight: 2, priority: 1 },
-  { url: "https://backup-key.solana-mainnet.syndica.io", weight: 1, priority: 2 },
+  { url: "https://go.getblock.io/{primary-token}/", weight: 2, priority: 1 },
+  { url: "https://go.getblock.io/{backup-token}/", weight: 1, priority: 2 },
 ], {
   commitment: "confirmed",
   confirmTransactionInitialTimeout: 60000,
@@ -321,7 +321,7 @@ class BatchedConnection {
 
 ## MEV Protection
 
-Syndica includes built-in MEV protection. Here's how to leverage it:
+GetBlock provides reliable infrastructure for secure transaction routing. Here's how to leverage it:
 
 ```typescript title="mev-protection.ts"
 import { 
@@ -337,7 +337,7 @@ class MEVProtectedConnection {
   constructor(endpoint: string) {
     this.connection = new Connection(endpoint, {
       commitment: "confirmed",
-      // Syndica's MEV protection is automatic, but you can optimize
+      // GetBlock's reliable infrastructure ensures secure transaction routing
       confirmTransactionInitialTimeout: 60000,
     });
   }
@@ -351,7 +351,7 @@ class MEVProtectedConnection {
       maxRetries?: number;
     }
   ) {
-    // Syndica automatically routes transactions through MEV-protected infrastructure
+    // GetBlock routes transactions through reliable infrastructure
     const signature = await sendAndConfirmTransaction(
       this.connection,
       transaction,
@@ -400,7 +400,7 @@ class MEVProtectedConnection {
 
 <Callout type="info">
 **MEV Protection Explained**  
-Syndica's infrastructure prevents front-running and sandwich attacks by routing transactions through secure channels. This is especially critical for DeFi applications handling swaps and arbitrage.
+GetBlock's infrastructure provides reliable transaction routing through secure channels. This is especially critical for DeFi applications handling swaps and arbitrage.
 </Callout>
 
 ---
@@ -423,7 +423,7 @@ interface RPCMetrics {
   latencies: number[];
 }
 
-class MonitoredSyndicaConnection extends Connection {
+class MonitoredGetBlockConnection extends Connection {
   private metrics: RPCMetrics = {
     totalRequests: 0,
     successfulRequests: 0,
@@ -516,7 +516,7 @@ class MonitoredSyndicaConnection extends Connection {
 }
 
 // Usage with periodic reporting
-const connection = new MonitoredSyndicaConnection(
+const connection = new MonitoredGetBlockConnection(
   process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET!,
   "confirmed"
 );
@@ -531,7 +531,7 @@ setInterval(() => {
 
 ## Performance Benchmarking
 
-Compare Syndica performance against other providers:
+Compare GetBlock performance against other providers:
 
 ```typescript title="benchmark.ts"
 import { Connection, PublicKey } from "@solana/web3.js";
@@ -590,7 +590,7 @@ async function benchmarkProvider(
 
 async function runBenchmarks() {
   const providers = [
-    { name: "Syndica", endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET! },
+    { name: "GetBlock", endpoint: process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET! },
     // Add other providers for comparison
   ];
   
@@ -616,7 +616,7 @@ async function runBenchmarks() {
 
 ## Production Checklist
 
-Before deploying to production with Syndica:
+Before deploying to production with GetBlock:
 
 ✅ **API Key Security**
 - Store keys in environment variables
@@ -639,7 +639,7 @@ Before deploying to production with Syndica:
 - Monitor latency trends
 
 ✅ **MEV Protection**
-- Verify Syndica's MEV protection is active
+- Verify GetBlock's reliable infrastructure is configured
 - Test with time-sensitive transactions
 - Monitor for front-running attempts
 
@@ -647,15 +647,15 @@ Before deploying to production with Syndica:
 
 ## Next Steps
 
-- Explore [Optimizing RPC Performance](/tutorials/syndica-performance) for specific use cases
-- Learn about [Syndica's Enterprise Features](https://syndica.io/docs) for scaling
-- Join the [Syndica Discord](https://discord.gg/syndica) for support
+- Explore [Optimizing RPC Performance](/tutorials/getblock-performance) for specific use cases
+- Learn about [GetBlock's Enterprise Features](https://getblock.io) for scaling
+- Join the [GetBlock Documentation](https://getblock.io/docs/) for support
 
 ---
 
 ## Summary
 
-You've mastered advanced Syndica features including:
+You've mastered advanced GetBlock features including:
 
 ✅ Real-time WebSocket subscriptions  
 ✅ Load balancing and automatic failover  

@@ -2,41 +2,25 @@ import type { MetadataRoute } from 'next'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://learnsol.site'
 
-
-const AI_AGENTS = [
-  'GPTBot',            // OpenAI
-  'ChatGPT-User',
-  'ChatGPT',
-  'Google-Extended',   // Google data training opt-out
-  'CCBot',             // Common Crawl
-  'Claude-Web',        // Anthropic web scraper UA (may change)
-  'anthropic-ai',
-  'Bytespider',        // ByteDance
-  'facebookexternalhit', // Meta (often for previews; decide if you want to allow)
-  'Meta-ExternalAgent',
-  'PerplexityBot',
-  'Amazonbot',
-  'YouBot',            // You.com
-  'ImagesiftBot',
-  'Diffbot',
-  'DataForSeoBot',
-  'KagiAPI',
-]
-
+/**
+ * Optimizes robots.txt for SEO:
+ * 1. Allows all user agents (including AI bots) to discover and index content.
+ * 2. Disallows technical paths that shouldn't be indexed (API, Internal Next.js paths).
+ * 3. Points to the correct sitemap URL.
+ */
 export default function robots(): MetadataRoute.Robots {
   return {
-    // Allow mainstream search engines & general indexing
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/'],
+        disallow: [
+          '/api/',
+          '/_next/',
+          '/static/',
+          '/icon.ico',
+        ],
       },
-      // Specific disallows for AI / LLM oriented crawlers
-      ...AI_AGENTS.map((agent) => ({
-        userAgent: agent,
-        disallow: '/',
-      })),
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
   }

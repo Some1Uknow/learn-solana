@@ -6,9 +6,20 @@ const title = "Solana Developer Tools & Infrastructure";
 const description =
   "Essential tools and infrastructure for Solana developers. Discover RPCs, wallets, explorers, dev tools, and more to build on Solana.";
 
+const toolsKeywords = [
+  "solana developer tools",
+  "solana rpc providers",
+  "solana wallets",
+  "solana infrastructure",
+  "solana dev tools",
+  "blockchain developer tools",
+  "web3 development tools",
+];
+
 export const metadata: Metadata = {
   title,
   description,
+  keywords: toolsKeywords,
   alternates: {
     canonical: createCanonical("/tools"),
   },

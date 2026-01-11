@@ -1,16 +1,16 @@
 ---
-title: Getting Started with Syndica RPC
+title: Getting Started with GetBlock RPC
 type: tutorial
 module: 🌐 Infrastructure & Tools
-description: Learn how to integrate Syndica's enterprise-grade RPC infrastructure into your Solana applications
+description: Learn how to integrate GetBlock's Blockchain-as-a-Service RPC infrastructure into your Solana applications
 ---
 
-Complete guide to setting up Syndica RPC for reliable, high-performance Solana network access. Syndica builds and scales robust blockchain systems trusted by leading protocols.
+Complete guide to setting up GetBlock RPC for reliable, high-performance Solana network access. GetBlock is a leading Blockchain-as-a-Service platform providing instant API access to 100+ blockchain protocols.
 
 ## What You'll Learn
 
 By the end of this tutorial, you'll be able to:
-- Set up Syndica RPC endpoints for mainnet, devnet, and testnet
+- Set up GetBlock RPC endpoints for mainnet, devnet, and testnet
 - Configure connection parameters for optimal performance
 - Handle rate limiting and authentication
 - Monitor your RPC usage and performance metrics
@@ -21,28 +21,28 @@ By the end of this tutorial, you'll be able to:
 
 - Node.js 16+ installed
 - Basic understanding of Solana and `@solana/web3.js`
-- A Syndica account (sign up at [syndica.io](https://syndica.io))
+- A GetBlock account (sign up at [getblock.io](https://getblock.io))
 
 ---
 
-## Why Choose Syndica?
+## Why Choose GetBlock?
 
-Syndica builds and scales blockchain systems for Solana with enterprise-grade infrastructure:
+GetBlock is a leading Blockchain-as-a-Service platform providing instant access to blockchain nodes:
 
-- **Enterprise-Grade**: Robust infrastructure trusted by leading Solana protocols
-- **Highly Reliable**: Guaranteed uptime with automatic failover
-- **Battle-Tested**: Powers mission-critical applications in production
+- **Multi-Chain Support**: Access to 100+ blockchain protocols including Solana, Ethereum, Bitcoin
+- **Highly Reliable**: 99.9%+ uptime guarantee serving 100,000+ active users
+- **Multiple API Formats**: JSON-RPC, REST, WebSocket, and GraphQL support
 - **Developer Friendly**: Easy integration with comprehensive documentation
-- **Scalable**: Handle high-throughput workloads without degradation
+- **Scalable**: Processes 50+ billion API requests monthly
 
 ---
 
 ## Step 1: Get Your API Key
 
-1. Sign up at [syndica.io](https://syndica.io)
+1. Sign up at [getblock.io](https://getblock.io)
 2. Navigate to your dashboard
-3. Create a new API key for your project
-4. Copy your endpoint URLs (they'll look like: `https://solana-devnet.api.syndica.io/api-key/{your-key}`)
+3. Select Solana from the list of blockchains
+4. Copy your endpoint URLs (they'll look like: `https://go.getblock.io/{your-access-token}/`)
 
 <Callout type="tip">
 **Pro Tip**: Create separate API keys for development and production environments to better track usage and maintain security.
@@ -52,7 +52,7 @@ Syndica builds and scales blockchain systems for Solana with enterprise-grade in
 
 ## Step 2: Basic Connection Setup
 
-Here's how to connect to Solana using Syndica:
+Here's how to connect to Solana using GetBlock:
 
 ```typescript title="connection.ts"
 import { Connection, ConnectionConfig } from "@solana/web3.js";
@@ -67,9 +67,9 @@ const config: ConnectionConfig = {
   },
 };
 
-// Create connection with Syndica endpoint
+// Create connection with GetBlock endpoint
 const connection = new Connection(
-  "https://solana-devnet.api.syndica.io/api-key/{your-key}",
+  "https://go.getblock.io/{your-access-token}/",
   config
 );
 
@@ -79,7 +79,7 @@ async function testConnection() {
     const version = await connection.getVersion();
     const slot = await connection.getSlot();
     
-    console.log("✅ Connected to Solana via Syndica");
+    console.log("✅ Connected to Solana via GetBlock");
     console.log(`Version: ${JSON.stringify(version)}`);
     console.log(`Current Slot: ${slot}`);
   } catch (error) {
@@ -97,10 +97,10 @@ testConnection();
 Store your API keys securely using environment variables:
 
 ```bash title=".env.local"
-# Syndica RPC Endpoints
-NEXT_PUBLIC_SOLANA_RPC_MAINNET=https://your-key.solana-mainnet.syndica.io
-NEXT_PUBLIC_SOLANA_RPC_DEVNET=https://your-key.solana-devnet.syndica.io
-NEXT_PUBLIC_SOLANA_RPC_TESTNET=https://your-key.solana-testnet.syndica.io
+# GetBlock RPC Endpoints
+NEXT_PUBLIC_SOLANA_RPC_MAINNET=https://go.getblock.io/{your-mainnet-token}/
+NEXT_PUBLIC_SOLANA_RPC_DEVNET=https://go.getblock.io/{your-devnet-token}/
+NEXT_PUBLIC_SOLANA_RPC_TESTNET=https://go.getblock.io/{your-testnet-token}/
 ```
 
 Then create a connection helper:
@@ -161,7 +161,7 @@ const connection = new Connection(
     },
     
     // WebSocket endpoint (optional, for subscriptions)
-    wsEndpoint: "wss://your-key.solana-mainnet.syndica.io",
+    wsEndpoint: "wss://go.getblock.io/{your-access-token}/",
   }
 );
 ```
@@ -268,12 +268,12 @@ class MonitoredConnection extends Connection {
 
 <Callout type="warn">
 **Rate Limiting**  
-If you hit rate limits, Syndica automatically retries with exponential backoff. For high-volume applications, contact Syndica support for increased limits.
+GetBlock offers flexible pricing tiers with different rate limits. The free plan includes 50K CU monthly. For high-volume applications, upgrade to higher tiers or contact GetBlock support for enterprise solutions.
 </Callout>
 
 <Callout type="warn">
 **Connection Timeouts**  
-If you experience timeouts, increase `confirmTransactionInitialTimeout` or check your network connectivity. Syndica's infrastructure is optimized to minimize timeouts.
+If you experience timeouts, increase `confirmTransactionInitialTimeout` or check your network connectivity. GetBlock's infrastructure is optimized for reliable, high-performance access.
 </Callout>
 
 <Callout type="warn">
@@ -285,23 +285,23 @@ Using `processed` commitment can return data that gets rolled back. For producti
 
 ## Next Steps
 
-Now that you've integrated Syndica RPC, explore:
+Now that you've integrated GetBlock RPC, explore:
 
 - **Advanced Configuration**: Learn about WebSocket subscriptions and event listeners
 - **Load Balancing**: Set up multiple endpoints for high availability
 - **Performance Tuning**: Optimize for your specific use case (DeFi, NFTs, gaming)
 
-Check out the [Advanced Syndica Features](/tutorials/syndica-advanced) tutorial to level up your infrastructure.
+Check out the [Advanced GetBlock Features](/tutorials/getblock-advanced) tutorial to level up your infrastructure.
 
 ---
 
 ## Summary
 
-You've successfully integrated Syndica's premium RPC infrastructure! Key takeaways:
+You've successfully integrated GetBlock's premium RPC infrastructure! Key takeaways:
 
-✅ Configured Syndica RPC endpoints for all networks  
+✅ Configured GetBlock RPC endpoints for all networks  
 ✅ Implemented environment-based configuration  
 ✅ Added performance optimizations and error handling  
 ✅ Set up monitoring and analytics  
 
-Your application is now running on enterprise-grade infrastructure with sub-50ms response times and 99.99% uptime.
+Your application is now running on reliable Blockchain-as-a-Service infrastructure trusted by 100,000+ developers with 99.9%+ uptime.

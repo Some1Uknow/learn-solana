@@ -76,64 +76,57 @@ export const toolCategories: ToolCategory[] = [
     id: "rpc",
     name: "RPC Providers",
     description: "High-performance RPC endpoints and developer APIs for reliable Solana network access.",
+    // TEMPORARILY CHANGED - GetBlock sponsorship paused
     featured: "Available",
     icon: "🌐",
     featuredTool: createPlaceholderFeaturedTool(),
+    /* ORIGINAL GetBlock featuredTool - uncomment when sponsor returns:
+    featuredTool: {
+      name: "GetBlock",
+      description: "Blockchain-as-a-Service (BaaS) platform providing instant API access to 100+ blockchain protocols. Launched in 2019, GetBlock has grown to serve 100,000+ active users and processes over 50 billion API requests monthly with guaranteed 99.9%+ uptime.",
+      logo: "/sponsor/getblock-square.png",
+      website: "https://getblock.io",
+      features: [
+        "Access to 100+ blockchain networks including Solana, Ethereum, Bitcoin, and Layer 2 solutions",
+        "Multiple API formats: JSON-RPC, REST, WebSocket, and GraphQL",
+        "Both shared and dedicated nodes with fully customized, high-performance solutions",
+        "Advanced monitoring and statistics dashboards for tracking method usage",
+        "Enterprise-grade infrastructure with 99.9%+ uptime guarantee",
+      ],
+      stats: [
+        { label: "Uptime", value: "99.9%+" },
+        { label: "Networks", value: "100+" },
+        { label: "Monthly Requests", value: "50B+" },
+      ],
+      tutorials: [
+        {
+          title: "Getting Started with GetBlock",
+          description: "Learn how to integrate GetBlock's premium RPC infrastructure into your Solana applications in under 5 minutes.",
+          slug: "/tutorials/getblock-getting-started",
+        },
+        {
+          title: "Advanced GetBlock Features",
+          description: "Master WebSocket subscriptions, load balancing, transaction optimization, and multi-chain development.",
+          slug: "/tutorials/getblock-advanced",
+        },
+        {
+          title: "Optimizing RPC Performance",
+          description: "Production-grade performance optimization for DeFi, NFTs, and high-throughput applications.",
+          slug: "/tutorials/getblock-performance",
+        },
+      ],
+    },
+    */
     projectsBuiltWith: [],
-    otherTools: createPlaceholderOtherTools(3),
+    otherTools: [
+      {
+        name: "Chainstack",
+        description: "Enterprise-grade blockchain infrastructure with high-performance Solana RPC endpoints.",
+        website: "https://chainstack.com",
+        logo: "https://chainstack.com/favicon.ico"
+      }, ...createPlaceholderOtherTools(1)
+    ],
   },
-
-  // {
-  //   id: "rpc",
-  //   name: "RPC Providers",
-  //   description: "High-performance RPC endpoints and developer APIs for reliable Solana network access.",
-  //   featured: "Syndica",
-  //   icon: "🌐",
-  //   featuredTool: {
-  //     name: "Syndica",
-  //     description: "Enterprise-grade infrastructure for Solana. Syndica builds and scales robust blockchain systems with industry-leading performance. Trusted by top protocols for mission-critical operations with guaranteed uptime and lightning-fast response times.",
-  //     logo: "https://syndica.io/images/favicon-512x512.png",
-  //     website: "https://syndica.io",
-  //     features: [
-  //       "Enterprise-grade infrastructure with 99.999% uptime guarantee",
-  //       "Lightning-fast response times optimized for high-frequency trading",
-  //       "Built and trusted by leading Solana protocols in production",
-  //       "Advanced load balancing and automatic failover protection",
-  //       "Comprehensive monitoring and real-time performance analytics",
-  //     ],
-  //     stats: [
-  //       { label: "Latency", value: "<20ms" },
-  //       { label: "Uptime", value: "99.999%" },
-  //       { label: "Free RPC calls", value: "10 Million" },
-  //     ],
-  //     tutorials: [
-  //       {
-  //         title: "Getting Started with Syndica",
-  //         description: "Learn how to integrate Syndica's premium RPC infrastructure into your Solana applications in under 5 minutes.",
-  //         slug: "/tutorials/syndica-getting-started",
-  //       },
-  //       {
-  //         title: "Advanced Syndica Features",
-  //         description: "Master WebSocket subscriptions, load balancing, transaction optimization, and MEV protection.",
-  //         slug: "/tutorials/syndica-advanced",
-  //       },
-  //       {
-  //         title: "Optimizing RPC Performance",
-  //         description: "Production-grade performance optimization for DeFi, NFTs, and high-throughput applications.",
-  //         slug: "/tutorials/syndica-performance",
-  //       },
-  //     ],
-  //   },
-  //   projectsBuiltWith: [],
-  //   otherTools: [
-  //     { 
-  //       name: "Chainstack", 
-  //       description: "Enterprise-grade blockchain infrastructure with high-performance Solana RPC endpoints.", 
-  //       website: "https://chainstack.com",
-  //       logo: "https://chainstack.com/favicon.ico"
-  //     }, ...createPlaceholderOtherTools(1)
-  //   ],
-  // },
 
   {
     id: "indexing",

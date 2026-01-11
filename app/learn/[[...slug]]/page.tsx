@@ -1,7 +1,9 @@
-import { source } from "@/lib/source";
+import { source, getPageImage } from "@/lib/source";
 import { DocsBody, DocsPage, DocsTitle, DocsDescription } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/mdx-components";
+import { createCanonical, siteUrl } from "@/lib/seo";
+import type { Metadata } from "next";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -31,13 +33,47 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
-}) {
+}): Promise<Metadata> {
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const slugPath = params.slug?.join('/') ?? '';
+  const canonical = createCanonical(`/learn${slugPath ? `/${slugPath}` : ''}`);
+  const ogImage = getPageImage(page);
+
+  // Extract keywords from frontmatter if available
+  const keywords = (page.data as unknown as Record<string, unknown>).keywords as string[] | undefined;
+
   return {
     title: page.data.title,
     description: page.data.description,
+    keywords,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      url: canonical,
+      siteName: "learn.sol",
+      locale: "en_US",
+      type: "article",
+      images: [
+        {
+          url: `${siteUrl}${ogImage.url}`,
+          width: 1200,
+          height: 630,
+          alt: page.data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description: page.data.description,
+      images: [`${siteUrl}${ogImage.url}`],
+    },
   };
 }
+
