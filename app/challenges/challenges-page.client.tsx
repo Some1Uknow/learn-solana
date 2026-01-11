@@ -8,8 +8,13 @@ import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Code, Trophy, Zap, Target, ArrowRight } from "lucide-react";
+import { LoginRequiredModal } from "@/components/ui/login-required-modal";
+import { useLoginGate } from "@/hooks/use-login-gate";
+import { useRouter } from "next/navigation";
 
 export function ChallengesPageClient() {
+  const router = useRouter();
+  const { requireLogin, showModal, setShowModal } = useLoginGate();
   const [challengeStats, setChallengeStats] = React.useState<{
     participants: number;
     totalAttempted: number;
@@ -93,10 +98,10 @@ export function ChallengesPageClient() {
                 30 Days of Rust Coding
               </h1>
               <p className="mt-4 text-lg text-zinc-400 max-w-2xl">
-                Progressive daily Rust coding series—from foundations to Solana program primitives. 
+                Progressive daily Rust coding series—from foundations to Solana program primitives.
                 Build muscle memory for blockchain development.
               </p>
-              
+
               {/* Stats */}
               {challengeStats && challengeStats.participants > 0 && (
                 <div className="mt-6 flex flex-wrap gap-6">
@@ -133,7 +138,7 @@ export function ChallengesPageClient() {
                     />
                   </div>
                 </div>
-                
+
                 {/* Right: Content */}
                 <div className="p-8 md:p-10">
                   <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -144,24 +149,24 @@ export function ChallengesPageClient() {
                       Active
                     </span>
                   </div>
-                  
+
                   <h2 className="text-2xl md:text-3xl font-bold mb-4">
                     From Basics to Solana-Grade Problem Solving
                   </h2>
-                  
+
                   <p className="text-zinc-400 mb-6">
-                    Master Rust programming through daily challenges designed specifically for 
-                    aspiring Solana developers. Each day builds on the last, preparing you for 
+                    Master Rust programming through daily challenges designed specifically for
+                    aspiring Solana developers. Each day builds on the last, preparing you for
                     real blockchain development.
                   </p>
-                  
-                  <Link
-                    href="/challenges/rust"
+
+                  <button
+                    onClick={() => requireLogin(() => router.push("/challenges/rust"))}
                     className="inline-flex items-center gap-2 rounded-xl bg-[#14f195] px-6 py-3 font-semibold text-black transition hover:bg-[#14f195]/90"
                   >
                     Start Challenge
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -205,7 +210,15 @@ export function ChallengesPageClient() {
           </BlurFade>
         </div>
       </div>
-    </div>
+
+
+      <LoginRequiredModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        title="Start Your Journey"
+        description="Connect your wallet to track your progress and earn achievements in the 30 Days of Rust challenge."
+      />
+    </div >
   );
 }
 

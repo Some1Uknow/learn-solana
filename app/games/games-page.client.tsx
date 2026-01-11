@@ -15,6 +15,8 @@ import GameCard from "@/components/games/GameCard";
 import ActiveGameModal from "@/components/games/ActiveGameModal";
 import ClaimNftModal from "@/components/games/ClaimNftModal";
 import NftsModal from "@/components/games/NftsModal";
+import { LoginRequiredModal } from "@/components/ui/login-required-modal";
+import { useLoginGate } from "@/hooks/use-login-gate";
 import { GAME_REGISTRY, type GameDefinition } from "@/lib/games/registry";
 import type { UserGameStates, NftMetadata, MintedNft, UserStateResponse } from "@/lib/games/types";
 import { Search, Trophy } from "lucide-react";
@@ -22,7 +24,8 @@ import { Search, Trophy } from "lucide-react";
 export function GamesPageClient() {
   const { userInfo } = useWeb3AuthUser();
   const { provider, isConnected } = useWeb3Auth();
-  
+  const { requireLogin, showModal, setShowModal } = useLoginGate();
+
   // UI State
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<GameDefinition | null>(null);
@@ -30,21 +33,21 @@ export function GamesPageClient() {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showNftsModal, setShowNftsModal] = useState(false);
   const [totalPlayers, setTotalPlayers] = useState<number | null>(null);
-  
+
   // Game State - single source of truth
   const [gameStates, setGameStates] = useState<UserGameStates>({});
   const [isLoadingStates, setIsLoadingStates] = useState(false);
-  
+
   // NFT State
   const [ownedNfts, setOwnedNfts] = useState<MintedNft[]>([]);
   const [nftMetadata, setNftMetadata] = useState<Record<string, NftMetadata>>({});
   const [nftRefreshing, setNftRefreshing] = useState<Record<string, boolean>>({});
-  
+
   // Claim State
   const [claimingGame, setClaimingGame] = useState<string | null>(null);
   const [mintStatus, setMintStatus] = useState<"idle" | "minting" | "success" | "error">("idle");
   const [mintError, setMintError] = useState<string | null>(null);
-  
+
   // Wallet
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
@@ -90,7 +93,7 @@ export function GamesPageClient() {
   // Single unified API call to fetch all game states + NFTs
   React.useEffect(() => {
     if (!walletAddress) return;
-    
+
     let cancelled = false;
     setIsLoadingStates(true);
 
@@ -100,7 +103,7 @@ export function GamesPageClient() {
           `/api/games/user-state?walletAddress=${walletAddress}`,
           { method: "GET" }
         );
-        
+
         if (!res.ok) {
           console.warn("[games] user-state fetch failed", res.status);
           setIsLoadingStates(false);
@@ -108,7 +111,7 @@ export function GamesPageClient() {
         }
 
         const data: UserStateResponse = await res.json();
-        
+
         if (cancelled) return;
 
         // Set game states - single atomic update
@@ -125,7 +128,7 @@ export function GamesPageClient() {
               conn,
               mintAddresses.slice(0, 25)
             );
-            
+
             if (!cancelled) {
               const mapped: Record<string, NftMetadata> = {};
               for (const meta of metas) {
@@ -166,7 +169,7 @@ export function GamesPageClient() {
           return null;
         }
         const data = await res.json();
-        
+
         // Update local state immediately
         if (data.progress) {
           setGameStates((prev) => ({
@@ -181,7 +184,7 @@ export function GamesPageClient() {
             },
           }));
         }
-        
+
         return data;
       } catch (e) {
         console.warn("[games] completion API error", e);
@@ -205,8 +208,10 @@ export function GamesPageClient() {
   }, [query]);
 
   const handleGameAction = (game: GameDefinition) => {
-    setActive(game);
-    setGameStarted(false);
+    requireLogin(() => {
+      setActive(game);
+      setGameStarted(false);
+    });
   };
 
   const handleClaim = (gameId: string) => {
@@ -267,7 +272,7 @@ export function GamesPageClient() {
               <p className="mt-4 text-lg text-zinc-400 max-w-2xl">
                 Master blockchain concepts through interactive games. Complete challenges and earn NFT achievements.
               </p>
-              
+
               {/* Stats */}
               {totalPlayers !== null && totalPlayers > 0 && (
                 <div className="mt-6 flex items-center gap-2">
@@ -319,22 +324,22 @@ export function GamesPageClient() {
                   Featured
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
-                {continueGames.map((game, idx) => {
-                  const state = gameStates[game.id];
-                  return (
-                    <GameCard
-                      key={game.id}
-                      game={game}
-                      index={idx}
-                      large
-                      onPlay={() => handleGameAction(game)}
-                      completed={state?.completed || false}
-                      minted={state?.nftMinted || false}
-                      canClaim={state?.canClaim || false}
-                      onClaim={() => handleClaim(game.id)}
-                    />
-                  );
-                })}
+                  {continueGames.map((game, idx) => {
+                    const state = gameStates[game.id];
+                    return (
+                      <GameCard
+                        key={game.id}
+                        game={game}
+                        index={idx}
+                        large
+                        onPlay={() => handleGameAction(game)}
+                        completed={state?.completed || false}
+                        minted={state?.nftMinted || false}
+                        canClaim={state?.canClaim || false}
+                        onClaim={() => handleClaim(game.id)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </BlurFade>
@@ -347,21 +352,21 @@ export function GamesPageClient() {
                   All Games
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
-                {restGames.map((game, idx) => {
-                  const state = gameStates[game.id];
-                  return (
-                    <GameCard
-                      key={game.id}
-                      game={game}
-                      index={idx}
-                      onPlay={() => handleGameAction(game)}
-                      completed={state?.completed || false}
-                      minted={state?.nftMinted || false}
-                      canClaim={state?.canClaim || false}
-                      onClaim={() => handleClaim(game.id)}
-                    />
-                  );
-                })}
+                  {restGames.map((game, idx) => {
+                    const state = gameStates[game.id];
+                    return (
+                      <GameCard
+                        key={game.id}
+                        game={game}
+                        index={idx}
+                        onPlay={() => handleGameAction(game)}
+                        completed={state?.completed || false}
+                        minted={state?.nftMinted || false}
+                        canClaim={state?.canClaim || false}
+                        onClaim={() => handleClaim(game.id)}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </BlurFade>
@@ -431,6 +436,13 @@ export function GamesPageClient() {
           setOwnedNftMetadata={setNftMetadata}
         />
       )}
+
+      <LoginRequiredModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        title="Play to Earn"
+        description="Connect your wallet to play games, track progress, and earn NFT achievements."
+      />
     </div>
   );
 }

@@ -15,8 +15,11 @@ import {
 import ReactMarkdown from "react-markdown";
 import { useChatContext } from "./chat-context";
 import { authFetch } from "@/lib/auth/authFetch";
+import { LoginRequiredModal } from "@/components/ui/login-required-modal";
+import { useLoginGate } from "@/hooks/use-login-gate";
 
 export default function DocsChat() {
+  const { requireLogin, showModal, setShowModal } = useLoginGate();
   const { isOpen, setIsOpen, panelWidth, setPanelWidth } = useChatContext();
   const [input, setInput] = useState("");
   const [isResizing, setIsResizing] = useState(false);
@@ -31,16 +34,16 @@ export default function DocsChat() {
             return authFetch(input, init);
           }
 
-          const headers = new Headers(init?.headers ?? input.headers);
+          const headers = new Headers(init?.headers ?? (input as Request).headers);
           const requestInit: RequestInit = {
             ...init,
             headers: Object.fromEntries(headers.entries()),
-            method: init?.method ?? input.method,
+            method: init?.method ?? (input as Request).method,
             body: init?.body ?? undefined,
-            signal: init?.signal ?? input.signal,
+            signal: init?.signal ?? (input as Request).signal,
           };
 
-          return authFetch(input.url, requestInit);
+          return authFetch((input as Request).url || input.toString(), requestInit);
         },
       }),
     []
@@ -52,10 +55,10 @@ export default function DocsChat() {
 
   // Better loading state: show loader until we have actual content
   const lastMessage = messages.at(-1);
-  const hasActualContent = lastMessage?.role === "assistant" && 
+  const hasActualContent = lastMessage?.role === "assistant" &&
     lastMessage?.parts?.some((part: any) => part.type === "text" && part.text?.length > 0);
-  
-  const isLoading = status === "submitted" || 
+
+  const isLoading = status === "submitted" ||
     (status === "streaming" && lastMessage?.role === "assistant" && !hasActualContent);
 
   const startResizing = useCallback((e: React.MouseEvent) => {
@@ -118,8 +121,11 @@ export default function DocsChat() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    sendMessage({ text: input });
-    setInput("");
+
+    requireLogin(() => {
+      sendMessage({ text: input });
+      setInput("");
+    });
   };
 
   const renderMessageContent = (message: any) => {
@@ -211,15 +217,13 @@ export default function DocsChat() {
       {/* Slide-out Chat Panel */}
       <div
         ref={panelRef}
-        className={`fixed top-0 right-0 h-full bg-[#07090c]/80 dark:bg-[#07090c]/80 backdrop-blur-xl shadow-2xl z-40 transition-transform duration-300 ease-out border-l border-white/10 flex flex-col overflow-hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full bg-[#07090c]/80 dark:bg-[#07090c]/80 backdrop-blur-xl shadow-2xl z-40 transition-transform duration-300 ease-out border-l border-white/10 flex flex-col overflow-hidden ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         style={{
-          width: `${
-            typeof window !== "undefined"
-              ? Math.min(panelWidth, window.innerWidth * 0.9)
-              : panelWidth
-          }px`,
+          width: `${typeof window !== "undefined"
+            ? Math.min(panelWidth, window.innerWidth * 0.9)
+            : panelWidth
+            }px`,
           maxWidth: "90vw",
           minWidth: "320px",
         }}
@@ -293,7 +297,9 @@ export default function DocsChat() {
                     <button
                       key={index}
                       onClick={() => {
-                        sendMessage({ text: question });
+                        requireLogin(() => {
+                          sendMessage({ text: question });
+                        });
                       }}
                       className="text-left p-2 text-xs rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/90 transition-colors break-words"
                     >
@@ -308,25 +314,22 @@ export default function DocsChat() {
           {messages.map((m: any) => (
             <div key={m.id} className="space-y-2 min-w-0">
               <div
-                className={`flex items-start gap-2 min-w-0 ${
-                  m.role === "user" ? "flex-row-reverse" : ""
-                }`}
+                className={`flex items-start gap-2 min-w-0 ${m.role === "user" ? "flex-row-reverse" : ""
+                  }`}
               >
                 <div
-                  className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ring-1 ${
-                    m.role === "user"
-                      ? "bg-white/10 text-white ring-white/10"
-                      : "bg-black/30 text-cyan-300 ring-cyan-400/30"
-                  }`}
+                  className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ring-1 ${m.role === "user"
+                    ? "bg-white/10 text-white ring-white/10"
+                    : "bg-black/30 text-cyan-300 ring-cyan-400/30"
+                    }`}
                 >
                   {m.role === "user" ? <User size={12} /> : <Bot size={12} />}
                 </div>
                 <div
-                  className={`flex-1 min-w-0 rounded-xl p-3 shadow-lg border backdrop-blur-md ${
-                    m.role === "user"
-                      ? "bg-white/[0.06] border-white/10 text-white ml-6"
-                      : "bg-black/40 border-white/10 text-gray-100 mr-6"
-                  }`}
+                  className={`flex-1 min-w-0 rounded-xl p-3 shadow-lg border backdrop-blur-md ${m.role === "user"
+                    ? "bg-white/[0.06] border-white/10 text-white ml-6"
+                    : "bg-black/40 border-white/10 text-gray-100 mr-6"
+                    }`}
                 >
                   {/* Show loading state for empty assistant messages */}
                   {m.role === "assistant" && isLoading && (!m.parts || m.parts.length === 0 || !m.parts.some((part: any) => part.type === "text" && part.text?.length > 0)) ? (
@@ -340,11 +343,10 @@ export default function DocsChat() {
                     </div>
                   ) : (
                     <div
-                      className={`chat-message-content break-words text-sm leading-relaxed ${
-                        m.role === "user"
-                          ? "chat-message-user text-white"
-                          : "chat-message-bot text-gray-100"
-                      } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
+                      className={`chat-message-content break-words text-sm leading-relaxed ${m.role === "user"
+                        ? "chat-message-user text-white"
+                        : "chat-message-bot text-gray-100"
+                        } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
                     >
                       {renderMessageContent(m)}
                     </div>
@@ -411,6 +413,14 @@ export default function DocsChat() {
           </form>
         </div>
       </div>
+
+
+      <LoginRequiredModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        title="Solana Assistant"
+        description="Connect your wallet to chat with the AI assistant and get personalized help."
+      />
     </>
   );
 }
