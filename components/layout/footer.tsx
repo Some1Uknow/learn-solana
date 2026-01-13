@@ -41,7 +41,7 @@ export function Footer() {
 
           {/* Backed by Solana Foundation */}
           <div className="flex items-center gap-3 text-sm text-white/60">
-            <span>Backed by</span>
+            <span>Supported by</span>
             <Image
               src="/solanaFndn.png"
               alt="Solana Foundation"
