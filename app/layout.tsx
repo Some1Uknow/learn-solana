@@ -198,7 +198,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         {process.env.NODE_ENV === "production" && (
           <Script
             src="https://analytics.ahrefs.com/analytics.js"
-            data-key={process.env.NEXT_PUBLIC_AHREFS_KEY}
+            data-key="jirAR70ve59bhS08RdDhqw"
             strategy="afterInteractive"
           />
         )}
