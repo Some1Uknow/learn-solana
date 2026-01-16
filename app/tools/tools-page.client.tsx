@@ -6,6 +6,7 @@ import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { toolCategories } from "@/data/tools-data";
 import { Wrench, ArrowRight } from "lucide-react";
+import { BreadcrumbSchema } from "@/components/seo";
 
 const categoryCards = toolCategories.map((cat) => ({
   id: cat.id,
@@ -16,9 +17,18 @@ const categoryCards = toolCategories.map((cat) => ({
   href: `/tools/${cat.id}`,
 }));
 
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Tools", url: "/tools" },
+];
+
 export function ToolsPageClient() {
   return (
     <div className="min-h-screen w-full relative text-white">
+      {/* Structured Data for SEO */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       {/* Fixed gradient background - Technical/Utility theme */}
       <div
         className="fixed inset-0 -z-10"
@@ -39,7 +49,7 @@ export function ToolsPageClient() {
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <BlurFade delay={0.05} inView>
-            <nav className="text-sm text-zinc-400 mb-8">
+            <nav className="text-sm text-zinc-400 mb-8" aria-label="Breadcrumb">
               <Link href="/" className="hover:text-[#14f195] transition-colors">
                 Home
               </Link>

@@ -168,7 +168,7 @@ function CourseCard({
           <div className="relative h-20 w-20 shrink-0">
             <Image
               src={img}
-              alt="course"
+              alt={`${m.title} course thumbnail`}
               fill
               sizes="80px"
               className="rounded-xl object-contain"

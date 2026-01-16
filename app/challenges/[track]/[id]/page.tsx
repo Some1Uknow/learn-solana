@@ -16,9 +16,24 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const title = `${c.title} · ${c.track.toUpperCase()} Challenge`;
   const canonical = createCanonical(`/challenges/${track}/${id}`);
 
+  // Generate keywords from challenge tags and track
+  const trackKeywords = track === "rust" 
+    ? ["rust programming", "rust exercises", "learn rust"]
+    : ["anchor framework", "solana smart contracts", "anchor tutorial"];
+  
+  const tagKeywords = c.tags.map((tag: string) => tag.toLowerCase());
+  const keywords = [
+    ...tagKeywords,
+    ...trackKeywords,
+    "coding challenge",
+    "solana development",
+    c.difficulty.toLowerCase(),
+  ];
+
   return {
     title,
     description: c.description,
+    keywords,
     alternates: {
       canonical,
     },

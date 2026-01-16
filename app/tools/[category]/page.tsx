@@ -20,6 +20,42 @@ export async function generateStaticParams() {
   }));
 }
 
+// Category-specific keywords for SEO
+const categoryKeywordsMap: Record<string, string[]> = {
+  rpc: [
+    "solana rpc",
+    "solana rpc providers",
+    "solana node",
+    "solana api",
+    "blockchain rpc",
+    "solana infrastructure",
+  ],
+  indexing: [
+    "solana indexing",
+    "solana data",
+    "blockchain indexer",
+    "solana analytics",
+    "solana explorer",
+    "on-chain data",
+  ],
+  wallets: [
+    "solana wallets",
+    "phantom wallet",
+    "solflare",
+    "solana wallet adapter",
+    "web3 wallet",
+    "crypto wallet",
+  ],
+  "dev-tools": [
+    "solana developer tools",
+    "solana sdk",
+    "anchor cli",
+    "solana playground",
+    "solana testing",
+    "blockchain development",
+  ],
+};
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { category: categoryId } = await params;
   const category = getToolCategory(categoryId);
@@ -30,12 +66,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = `${category.name} - Solana Tools`;
+  const title = `${category.name} - Solana Developer Tools`;
   const description = category.description;
+  
+  // Get category-specific keywords or use defaults
+  const keywords = categoryKeywordsMap[categoryId] || [
+    "solana tools",
+    "solana development",
+    "blockchain tools",
+    "web3 infrastructure",
+  ];
 
   return {
     title,
     description,
+    keywords,
     alternates: {
       canonical: createCanonical(`/tools/${categoryId}`),
     },

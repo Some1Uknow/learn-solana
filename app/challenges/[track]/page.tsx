@@ -11,17 +11,38 @@ const trackMeta: Record<
   {
     name: string;
     description: string;
+    keywords: string[];
   }
 > = {
   rust: {
     name: "30 Days of Rust",
     description:
-      "Progressive daily Rust coding series—foundations → ownership depth → algorithms & concurrency → Solana program primitives.",
+      "Master Rust programming with 30 daily coding challenges. Learn ownership, borrowing, lifetimes, and Solana program primitives through hands-on practice.",
+    keywords: [
+      "rust coding challenges",
+      "learn rust",
+      "rust programming exercises",
+      "rust for solana",
+      "rust ownership",
+      "rust borrowing",
+      "30 days of rust",
+      "rust practice problems",
+    ],
   },
   anchor: {
     name: "Anchor Deep Dive",
     description:
-      "Master the Anchor framework for building secure and efficient Solana programs.",
+      "Master the Anchor framework for building secure Solana programs. Learn PDAs, CPIs, account validation, and smart contract patterns through practical challenges.",
+    keywords: [
+      "anchor framework tutorial",
+      "anchor solana",
+      "solana smart contracts",
+      "anchor pda",
+      "anchor cpi",
+      "solana program development",
+      "anchor challenges",
+      "learn anchor",
+    ],
   },
 };
 
@@ -36,6 +57,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: `${meta.name} - All Challenges`,
     description: meta.description,
+    keywords: meta.keywords,
     alternates: {
       canonical,
     },

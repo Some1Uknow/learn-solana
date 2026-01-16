@@ -10,8 +10,15 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { contentsData } from "../../data/contents-data";
 import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { BookOpen, Search } from "lucide-react";
+import { BreadcrumbSchema } from "@/components/seo";
 
 const modules = contentsData.modules;
+
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Modules", url: "/modules" },
+];
 
 export function ModulesPageClient() {
   const router = useRouter();
@@ -34,6 +41,9 @@ export function ModulesPageClient() {
 
   return (
     <div className="min-h-screen w-full relative text-white">
+      {/* Structured Data for SEO */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       {/* Fixed gradient background - Learning/Knowledge theme */}
       <div
         className="fixed inset-0 -z-10"
@@ -54,7 +64,7 @@ export function ModulesPageClient() {
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <BlurFade delay={0.05} inView>
-            <nav className="text-sm text-zinc-400 mb-8">
+            <nav className="text-sm text-zinc-400 mb-8" aria-label="Breadcrumb">
               <Link href="/" className="hover:text-[#14f195] transition-colors">
                 Home
               </Link>
@@ -106,7 +116,7 @@ export function ModulesPageClient() {
                           <div className="relative w-24 h-24">
                             <Image
                               src={module.image || "/placeholder.png"}
-                              alt=""
+                              alt={`${module.title} module decorative background`}
                               fill
                               className="object-contain"
                             />

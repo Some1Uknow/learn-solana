@@ -20,6 +20,13 @@ import { useLoginGate } from "@/hooks/use-login-gate";
 import { GAME_REGISTRY, type GameDefinition } from "@/lib/games/registry";
 import type { UserGameStates, NftMetadata, MintedNft, UserStateResponse } from "@/lib/games/types";
 import { Search, Trophy } from "lucide-react";
+import { BreadcrumbSchema } from "@/components/seo";
+
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Games", url: "/games" },
+];
 
 export function GamesPageClient() {
   const { userInfo } = useWeb3AuthUser();
@@ -226,6 +233,9 @@ export function GamesPageClient() {
 
   return (
     <div className="min-h-screen w-full relative text-white">
+      {/* Structured Data for SEO */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       {/* Fixed gradient background - Playful/Interactive theme */}
       <div
         className="fixed inset-0 -z-10"
@@ -247,7 +257,7 @@ export function GamesPageClient() {
         <div className="max-w-5xl mx-auto">
           {/* Breadcrumb */}
           <BlurFade delay={0.05} inView>
-            <nav className="text-sm text-zinc-400 mb-8">
+            <nav className="text-sm text-zinc-400 mb-8" aria-label="Breadcrumb">
               <Link href="/" className="hover:text-[#14f195] transition-colors">
                 Home
               </Link>

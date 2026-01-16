@@ -9,11 +9,25 @@ const __dirname = dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // SEO: Enforce consistent URL structure (no trailing slashes)
+  // This prevents duplicate content and canonical/redirect mismatches
+  trailingSlash: false,
   async rewrites() {
     return [
       {
         source: "/docs/:path*.mdx",
         destination: "/llms.mdx/:path*",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      // Redirect any trailing slash URLs to non-trailing slash versions
+      // This ensures consistent URLs and prevents duplicate content
+      {
+        source: "/:path+/",
+        destination: "/:path+",
+        permanent: true,
       },
     ];
   },

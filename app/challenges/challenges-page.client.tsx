@@ -11,6 +11,13 @@ import { Code, Trophy, Zap, Target, ArrowRight } from "lucide-react";
 import { LoginRequiredModal } from "@/components/ui/login-required-modal";
 import { useLoginGate } from "@/hooks/use-login-gate";
 import { useRouter } from "next/navigation";
+import { BreadcrumbSchema } from "@/components/seo";
+
+// Breadcrumb items for structured data
+const breadcrumbItems = [
+  { name: "Home", url: "/" },
+  { name: "Challenges", url: "/challenges" },
+];
 
 export function ChallengesPageClient() {
   const router = useRouter();
@@ -61,6 +68,9 @@ export function ChallengesPageClient() {
 
   return (
     <div className="min-h-screen w-full relative text-white">
+      {/* Structured Data for SEO */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      
       {/* Fixed gradient background - Competition/Achievement theme */}
       <div
         className="fixed inset-0 -z-10"

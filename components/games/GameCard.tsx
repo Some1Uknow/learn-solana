@@ -76,7 +76,7 @@ export default function GameCard({
         {/* Middle */}
         <div className="mt-4 flex items-start gap-4">
           <div className="relative h-20 w-20 shrink-0">
-            <Image src={img} alt="game" fill sizes="80px" className="rounded-xl object-contain" />
+            <Image src={img} alt={`${game.title} - ${game.category} game thumbnail`} fill sizes="80px" className="rounded-xl object-contain" />
           </div>
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-[0.2em] text-zinc-500">{category}</div>

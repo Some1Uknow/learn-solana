@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/mdx-components";
 import { createCanonical, siteUrl, defaultOpenGraphImage, defaultTwitterImage } from "@/lib/seo";
 import type { Metadata } from "next";
+import { BreadcrumbSchema, ArticleSchema } from "@/components/seo";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -14,15 +15,44 @@ export default async function Page(props: {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  
+  // Build breadcrumb items for structured data
+  const slugParts = params.slug || [];
+  const breadcrumbItems = [
+    { name: "Home", url: "/" },
+    { name: "Tutorials", url: "/tutorials" },
+  ];
+  
+  // Add current page
+  if (slugParts.length > 0) {
+    breadcrumbItems.push({
+      name: page.data.title,
+      url: `/tutorials/${slugParts.join("/")}`,
+    });
+  }
+
+  // Extract keywords for structured data
+  const keywords = (page.data as unknown as Record<string, unknown>).keywords as string[] | undefined;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>
-        <MDX components={getMDXComponents()} />
-      </DocsBody>
-    </DocsPage>
+    <>
+      {/* Structured Data for SEO */}
+      <BreadcrumbSchema items={breadcrumbItems} />
+      <ArticleSchema
+        title={page.data.title}
+        description={page.data.description || ""}
+        url={`/tutorials/${slugParts.join("/")}`}
+        keywords={keywords}
+      />
+      
+      <DocsPage toc={page.data.toc} full={page.data.full}>
+        <DocsTitle>{page.data.title}</DocsTitle>
+        <DocsDescription>{page.data.description}</DocsDescription>
+        <DocsBody>
+          <MDX components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+    </>
   );
 }
 
@@ -40,9 +70,23 @@ export async function generateMetadata(props: {
   const slugPath = params.slug?.join('/') ?? '';
   const canonical = createCanonical(`/tutorials${slugPath ? `/${slugPath}` : ''}`);
 
+  // Extract keywords from frontmatter if available
+  const frontmatterKeywords = (page.data as unknown as Record<string, unknown>).keywords as string[] | undefined;
+  
+  // Generate contextual keywords based on tutorial content
+  const baseKeywords = [
+    "solana tutorial",
+    "solana development",
+    "blockchain tutorial",
+    "web3 development",
+  ];
+  
+  const keywords = frontmatterKeywords || baseKeywords;
+
   return {
     title: page.data.title,
     description: page.data.description,
+    keywords,
     alternates: {
       canonical,
     },
