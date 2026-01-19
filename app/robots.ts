@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://learnsol.site'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.learnsol.site'
 
 /**
  * Optimizes robots.txt for SEO:

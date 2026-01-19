@@ -1,4 +1,4 @@
-const FALLBACK_SITE_URL = "https://learnsol.site";
+const FALLBACK_SITE_URL = "https://www.learnsol.site";
 
 const sanitized = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
 
