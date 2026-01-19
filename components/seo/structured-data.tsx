@@ -7,8 +7,8 @@ import Script from "next/script";
  * Provides JSON-LD schema markup for better search engine understanding
  */
 
-// Base site URL
-const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://learnsol.site";
+// Base site URL - MUST use www version for canonical consistency
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://www.learnsol.site";
 
 export interface BreadcrumbItem {
   name: string;

@@ -29,8 +29,8 @@ export const searchDocumentationTool = tool({
 
       // Format content with comprehensive source information for perfect citations
       const formattedContent = relevantContent.map((item, index) => {
-        // Build the full URL with anchor if section exists
-        const baseUrl = `https://learnsol.site${item.pageUrl}`;
+        // Build the full URL with anchor if section exists (use www for canonical consistency)
+        const baseUrl = `https://www.learnsol.site${item.pageUrl}`;
         const fullUrl = item.headingId ? `${baseUrl}#${item.headingId}` : baseUrl;
 
         // Create citation text with better formatting
