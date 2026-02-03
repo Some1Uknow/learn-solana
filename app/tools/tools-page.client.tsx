@@ -5,7 +5,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { toolCategories } from "@/data/tools-data";
-import { Wrench, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
 
 const categoryCards = toolCategories.map((cat) => ({
@@ -87,6 +87,33 @@ export function ToolsPageClient() {
                 </Link>
               </div>
             </div>
+          </BlurFade>
+
+          {/* LearnSol Labs */}
+          <BlurFade delay={0.18} inView>
+            <section className="mb-12 rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
+              <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="text-xs tracking-[0.25em] text-[#14f195] uppercase font-medium">
+                    [LEARN.SOL LABS]
+                  </div>
+                  <h2 className="mt-3 text-2xl font-semibold text-white">
+                    Visual Solana Builder (Beta)
+                  </h2>
+                  <p className="mt-3 text-sm text-zinc-400 max-w-2xl">
+                    Drag-and-drop Solana blocks to understand programs, accounts, and instructions — then export a
+                    beginner-friendly Anchor <span className="font-mono">lib.rs</span>.
+                  </p>
+                </div>
+                <Link
+                  href="/tools/visual-builder"
+                  className="inline-flex items-center gap-2 rounded-xl border border-[#14f195] bg-[#14f195]/10 px-5 py-3 text-sm font-medium text-[#14f195] transition hover:bg-[#14f195]/20 whitespace-nowrap"
+                >
+                  Try Visual Builder
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </section>
           </BlurFade>
 
           {/* Categories Grid */}
