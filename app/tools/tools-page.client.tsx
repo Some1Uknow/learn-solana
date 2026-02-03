@@ -2,20 +2,9 @@
 
 import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
-import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { BlurFade } from "@/components/ui/blur-fade";
-import { toolCategories } from "@/data/tools-data";
 import { ArrowRight } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
-
-const categoryCards = toolCategories.map((cat) => ({
-  id: cat.id,
-  name: cat.name,
-  description: cat.description,
-  featured: cat.featured,
-  icon: cat.icon,
-  href: `/tools/${cat.id}`,
-}));
 
 // Breadcrumb items for structured data
 const breadcrumbItems = [
@@ -116,55 +105,9 @@ export function ToolsPageClient() {
             </section>
           </BlurFade>
 
-          {/* Categories Grid */}
-          <BlurFade delay={0.2} inView>
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                Tool Categories
-              </h2>
-              <p className="text-sm text-zinc-400 mt-2">
-                Browse by category to find the right tools for your stack.
-              </p>
-            </div>
-          </BlurFade>
-
-          <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-[18rem] gap-5">
-            {categoryCards.map((category, index) => {
-              const isAvailable = category.featured === "Available";
-              return (
-                <BlurFade key={category.id} delay={0.15 + index * 0.05} inView>
-                  <Link href={category.href} className="block h-full group">
-                    <BentoCard
-                      name={category.name}
-                      className="h-full col-span-1 bg-white/[0.02] border-white/[0.06] hover:border-[#14f195]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(20,241,149,0.1)]"
-                      background={
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#9945ff]/5 via-transparent to-[#14f195]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      }
-                      Icon={() => (
-                        <div className="flex items-center gap-3">
-                          <span className="text-4xl">{category.icon}</span>
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                            isAvailable 
-                              ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                              : "border-[#14f195]/30 bg-[#14f195]/10 text-[#14f195]"
-                          }`}>
-                            {isAvailable ? "Open" : "Featured"}
-                          </span>
-                        </div>
-                      )}
-                      description={category.description}
-                      href={category.href}
-                      cta={isAvailable ? "Claim slot" : `View ${category.name.toLowerCase()}`}
-                    />
-                  </Link>
-                </BlurFade>
-              );
-            })}
-          </BentoGrid>
-
           {/* Partnership Footer */}
-          <BlurFade delay={0.3} inView>
-            <section className="mt-16 rounded-3xl border border-white/10 bg-gradient-to-r from-[#14f195]/5 to-[#9945ff]/5 p-8 text-center">
+          <BlurFade delay={0.2} inView>
+            <section className="mt-8 rounded-3xl border border-white/10 bg-gradient-to-r from-[#14f195]/5 to-[#9945ff]/5 p-8 text-center">
               <h3 className="text-xl font-semibold text-white">Become a Featured Partner</h3>
               <p className="mt-2 text-sm text-zinc-400 max-w-xl mx-auto">
                 Get premium placement, AI assistant recommendations, and tutorial mentions across LearnSol.
