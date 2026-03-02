@@ -2,6 +2,10 @@
   "name": "learn.sol",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.27.0",
+  "overrides": {
+    "next-mdx-remote": "^6.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -137,5 +141,10 @@
     "typescript": "^5",
     "wrangler": "^4.28.1",
     "zod": "^4.0.17"
+  },
+  "pnpm": {
+    "overrides": {
+      "next-mdx-remote": "^6.0.0"
+    }
   }
 }

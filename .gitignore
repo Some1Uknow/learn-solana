@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.pnpm-store
 
 # next.js
 /.next/
@@ -39,6 +40,4 @@ next-env.d.ts
 
 .open-next
 
-package-lock.json
-pnpm-lock.yaml
 knip.json
