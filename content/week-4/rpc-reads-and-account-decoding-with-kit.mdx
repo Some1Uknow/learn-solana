@@ -19,6 +19,16 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `MaybeEncodedAccount`: account that may or may not exist
 - `exists` invariant: always check before decode/use
 
+### Mental Model
+
+On Solana, “state” lives inside accounts. An account is just:
+
+- `lamports` (SOL balance)
+- `owner` (which program owns the data layout)
+- `data` (raw bytes)
+
+RPC reads return raw facts. Your client job is to normalize those facts into a UI-safe shape.
+
 ### Invariants
 
 1. A missing account is a valid state, not a runtime surprise.
@@ -43,6 +53,7 @@ import {
 } from "@solana/kit";
 import { SOLANA_RPC } from "@/lib/solana/config";
 
+// Create one RPC client pointing at your configured endpoint (devnet by default).
 const rpc = createSolanaRpc(SOLANA_RPC);
 
 export type AccountView =
@@ -57,16 +68,20 @@ export type AccountView =
     };
 
 export async function fetchAccountView(input: string): Promise<AccountView> {
+  // Convert a string into a strongly typed Address (throws if invalid).
   const addr = address(input) as Address;
+  // Fetch raw account facts from the RPC endpoint.
   const account = await fetchEncodedAccount(rpc, addr);
 
   if (!account.exists) {
+    // Missing account is a valid result: wrong cluster or account never created.
     return { exists: false, address: input };
   }
 
   return {
     exists: true,
     address: input,
+    // Keep values UI-friendly: convert bigints to strings.
     lamports: account.lamports.toString(),
     executable: account.executable,
     owner: account.owner.toString(),
@@ -91,6 +106,7 @@ export function AccountInspector() {
   const onFetch = async () => {
     setLoading(true);
     try {
+      // Trim whitespace so copy/pasted addresses work reliably.
       setResult(await fetchAccountView(pubkey.trim()));
     } finally {
       setLoading(false);
@@ -103,6 +119,7 @@ export function AccountInspector() {
       <button onClick={onFetch} disabled={loading} className="px-3 py-2 rounded bg-cyan-600 text-white">
         {loading ? "Loading..." : "Fetch account"}
       </button>
+      {/* Show raw JSON so beginners can see what the chain returned. */}
       {result && <pre className="text-xs bg-zinc-950 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
     </div>
   );

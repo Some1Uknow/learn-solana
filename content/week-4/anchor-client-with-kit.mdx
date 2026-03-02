@@ -18,6 +18,15 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `ui action`: button/form that calls service
 - `transport`: send/confirm pipeline shared across app
 
+### Mental Model
+
+Think of an on-chain program as an API server that only understands:
+
+- instruction bytes
+- account lists (read/write/sign)
+
+Your client is responsible for building the instruction call, gathering accounts, then using the same send/confirm pipeline every time.
+
 ### Invariants
 
 1. UI does not own program call internals.
@@ -34,6 +43,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Create `lib/solana/programs/counterService.ts`:
 
 ```ts
+// Normalize results so UI logic stays simple and predictable.
 export type ActionResult =
   | { ok: true; signature: string }
   | { ok: false; error: string };
@@ -42,9 +52,11 @@ export async function incrementCounterAction(): Promise<ActionResult> {
   try {
     // In your full app, this calls your transaction helper + program instruction builder.
     // Keep this file as the only place where counter-program action logic is defined.
+    // For now, return a fake signature to demonstrate the pattern.
     const fakeSignature = "5kK...demo-signature";
     return { ok: true, signature: fakeSignature };
   } catch (e: any) {
+    // Always stringify unknown error shapes before returning to UI.
     return { ok: false, error: String(e?.message ?? e) };
   }
 }
@@ -59,6 +71,7 @@ import React, { useState } from "react";
 import { incrementCounterAction } from "@/lib/solana/programs/counterService";
 
 export function CounterActionButton() {
+  // Explicit states make it harder to accidentally double-submit.
   const [state, setState] = useState<"idle" | "working" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -67,6 +80,7 @@ export function CounterActionButton() {
     const result = await incrementCounterAction();
     if (result.ok) {
       setState("ok");
+      // Always show signature on success so users can verify in an explorer.
       setMessage(`Signature: ${result.signature}`);
     } else {
       setState("error");

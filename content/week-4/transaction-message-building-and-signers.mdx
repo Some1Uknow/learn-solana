@@ -20,6 +20,16 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `blockhash lifetime`: validity window
 - `instructions`: ordered program operations
 
+### Mental Model
+
+A transaction is not “a function call”. It is a signed packet that says:
+
+1. which accounts are involved
+2. which programs to invoke
+3. in what order
+
+Signatures cover the message bytes. If you change the message after signing, the signature no longer matches.
+
 ### Invariants
 
 1. Lifetime must be set before signing.
@@ -55,19 +65,26 @@ import {
 } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 
+// Local validator RPC (fastest way to learn without devnet latency).
 const rpc = createSolanaRpc("http://127.0.0.1:8899");
 
 async function main() {
+  // In real apps, the wallet is usually the sender signer.
+  // Here we generate keypairs so the script is self-contained.
   const sender = await generateKeyPairSigner();
   const recipient = await generateKeyPairSigner();
+  // The blockhash defines the transaction lifetime window.
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
+  // Build one instruction: transfer SOL from sender -> recipient.
   const transferIx = getTransferSolInstruction({
     source: sender,
     destination: recipient.address,
     amount: lamports(1_000_000n),
   });
 
+  // Build the message in the correct order:
+  // message -> fee payer -> lifetime -> instructions.
   const message = pipe(
     createTransactionMessage({ version: 0 }),
     (tx) => setTransactionMessageFeePayerSigner(sender, tx),
@@ -75,6 +92,7 @@ async function main() {
     (tx) => appendTransactionMessageInstructions([transferIx], tx),
   );
 
+  // Signatures cover the message bytes; after signing, do not mutate the message.
   const signed = await signTransactionMessageWithSigners(message);
   console.log("Built and signed transaction message", !!signed);
 }

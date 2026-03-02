@@ -21,6 +21,16 @@ This lesson is dev-only and educational. Do not use production funds while learn
 - `token account`: balance holder for owner+mint
 - `token program id`: classic SPL vs Token-2022
 
+### Mental Model
+
+If SOL is “one native balance per address”, tokens are “many balances per address”.
+
+Those balances live in token accounts. Your client must always be clear about:
+
+- which mint you are using
+- which token program owns the accounts
+- how to convert UI amounts into raw integer amounts using decimals
+
 ### Invariants
 
 1. Token program choice must be explicit.
@@ -43,18 +53,25 @@ pnpm add @solana-program/token @solana-program/token-2022
 Create `lib/solana/tokenFlow.ts`:
 
 ```ts
+// Keep token program choice explicit in your app.
+// Classic SPL Token and Token-2022 are different programs.
 export type TokenProgramKind = "spl" | "token2022";
 
 export type TokenTransferInput = {
+  // Which token program are we using for this mint + token accounts?
   programKind: TokenProgramKind;
+  // Base58 strings for simplicity in this beginner module.
   mint: string;
   sourceTokenAccount: string;
   destinationTokenAccount: string;
+  // Raw integer amount (already scaled by decimals).
   amountRaw: bigint;
+  // Number of decimals used by the mint (for UI conversion).
   decimals: number;
 };
 
 export function validateTokenTransferInput(input: TokenTransferInput) {
+  // Fail early with clear messages before you ask the wallet to sign.
   if (!input.mint) throw new Error("Missing mint");
   if (!input.sourceTokenAccount) throw new Error("Missing source token account");
   if (!input.destinationTokenAccount) throw new Error("Missing destination token account");
@@ -90,14 +107,17 @@ import React, { useState } from "react";
 import { buildTokenTransferPlan } from "@/lib/solana/tokenFlow";
 
 export function TokenTransferPreview() {
+  // Show the plan output as JSON so beginners can see what will be signed/sent.
   const [result, setResult] = useState<any>(null);
 
   const onPreview = async () => {
     const plan = await buildTokenTransferPlan({
       programKind: "spl",
+      // These are placeholder strings. Replace with real addresses when you wire up a real mint.
       mint: "Mint111111111111111111111111111111111111111",
       sourceTokenAccount: "Src1111111111111111111111111111111111111111",
       destinationTokenAccount: "Dst1111111111111111111111111111111111111111",
+      // Raw amount: for a 6-decimal mint, 1 token = 1_000_000 raw units.
       amountRaw: 1_000_000n,
       decimals: 6,
     });

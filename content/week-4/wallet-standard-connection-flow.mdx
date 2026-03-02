@@ -19,6 +19,15 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `session`: connected wallet state
 - `status`: runtime wallet state (`idle`, connecting, connected, error)
 
+### Mental Model
+
+Your app does not “log into” a wallet. It asks the user’s wallet app for permission to:
+
+- expose a public address (safe)
+- sign messages/transactions (sensitive)
+
+Wallet UX is good when the user always knows which state they are in and what they can do next.
+
 ### Invariants
 
 1. Never show “Connected” before connection promise resolves.
@@ -44,18 +53,23 @@ import {
   useDisconnectWallet,
 } from "@solana/react-hooks";
 
+// UI helper: keep the address readable for beginners.
 function shortAddress(addr?: string) {
   if (!addr) return "";
   return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
 }
 
 export function WalletPanel() {
+  // wallet: connected wallet session (address + capabilities)
+  // connectors: available Wallet Standard wallets in the browser
+  // status: explicit connection state so the UI never guesses
   const { wallet, connectors, status } = useWalletConnection();
   const connectWallet = useConnectWallet();
   const disconnectWallet = useDisconnectWallet();
 
   const onConnect = async (connectorId: string) => {
     try {
+      // This triggers the wallet's connect prompt (user must approve).
       await connectWallet.mutateAsync({ connectorId });
     } catch (e) {
       // keep UX deterministic; show a toast in your app shell if you have one
@@ -65,6 +79,7 @@ export function WalletPanel() {
 
   const onDisconnect = async () => {
     try {
+      // Disconnect clears the wallet session from app state.
       await disconnectWallet.mutateAsync();
     } catch (e) {
       console.error("disconnect failed", e);
@@ -91,6 +106,7 @@ export function WalletPanel() {
               onClick={() => onConnect(c.id)}
               className="mr-2 px-3 py-2 rounded bg-emerald-600 text-white"
             >
+              {/* Show connector name so the user knows which wallet they are choosing. */}
               Connect {c.name}
             </button>
           ))}

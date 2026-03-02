@@ -23,6 +23,16 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `client runtime`: shared state for wallet/session/network.
 - `transaction message`: the unsigned plan of what the chain should execute.
 
+### Mental Model
+
+Solana client apps have three jobs:
+
+1. Read chain state (RPC reads).
+2. Ask a wallet to sign (the app never sees the private key).
+3. Send the signed bytes and track confirmation.
+
+If those three jobs are mixed across random UI components, beginner projects become impossible to debug.
+
 ### Invariants
 
 1. One app should have one default Solana runtime config.
@@ -40,12 +50,15 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Install:
 
 ```bash
+# Install the Solana client packages we use in Week 4.
 pnpm add @solana/kit @solana/client @solana/react-hooks @tanstack/react-query
 ```
 
 Create `lib/solana/config.ts`:
 
 ```ts
+// Centralize network settings so every page uses the same cluster + commitment.
+// Put your RPC URLs in NEXT_PUBLIC_* so Next.js can expose them to the browser.
 export const SOLANA_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.devnet.solana.com";
 export const SOLANA_WS = process.env.NEXT_PUBLIC_SOLANA_WS ?? "wss://api.devnet.solana.com";
 export const SOLANA_CLUSTER = "devnet" as const;
@@ -63,17 +76,21 @@ import { SolanaProvider } from "@solana/react-hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SOLANA_RPC, SOLANA_WS } from "@/lib/solana/config";
 
+// One shared QueryClient keeps async state stable across pages and rerenders.
 const queryClient = new QueryClient();
 
+// Create one Solana client for the whole app (do not recreate per page).
 const client = createClient({
   endpoint: SOLANA_RPC,
   websocketEndpoint: SOLANA_WS,
+  // Auto-discover Wallet Standard compatible wallets installed in the browser.
   walletConnectors: autoDiscover(),
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
+      {/* SolanaProvider exposes wallet + rpc context to @solana/react-hooks */}
       <SolanaProvider client={client}>{children}</SolanaProvider>
     </QueryClientProvider>
   );
@@ -89,6 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        {/* Wrap the app once so every page shares the same Solana runtime config. */}
         <Providers>{children}</Providers>
       </body>
     </html>

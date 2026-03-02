@@ -19,6 +19,16 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `integration test`: tests feature path across service + state
 - `failure-path test`: proves behavior under expected errors
 
+### Mental Model
+
+Solana client bugs usually show up as:
+
+- wrong inputs (amounts, addresses, cluster)
+- wrong state (wallet disconnected, stale blockhash)
+- wrong expectations (sent vs confirmed)
+
+Tests should match that reality. Start with pure functions (fast) and add one integration path (realistic).
+
 ### Invariants
 
 1. Happy-path-only tests are not enough.
@@ -46,14 +56,17 @@ import { classifyTxError } from "../uiTxState";
 
 describe("classifyTxError", () => {
   it("maps rejection", () => {
+    // User rejection should be treated as a normal user action, not a crash.
     expect(classifyTxError("User rejected request")).toBe("user-rejected");
   });
 
   it("maps blockhash expiry", () => {
+    // Expired blockhash usually means rebuild + re-sign is required.
     expect(classifyTxError("Blockhash not found")).toBe("expired");
   });
 
   it("maps unknown", () => {
+    // Unknown errors are expected; we still want deterministic UX behavior.
     expect(classifyTxError("strange failure")).toBe("unknown");
   });
 });
@@ -68,6 +81,7 @@ import { TxActionCard } from "../TxActionCard";
 
 describe("TxActionCard", () => {
   it("renders default status", () => {
+    // Smoke test: component renders and shows a status label.
     render(<TxActionCard />);
     expect(screen.getByText(/Status:/)).toBeTruthy();
   });

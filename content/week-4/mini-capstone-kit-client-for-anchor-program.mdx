@@ -20,6 +20,14 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `write`: submit state change
 - `verify`: read-back after confirm
 
+### Mental Model
+
+The capstone is one “vertical slice” of a real dApp.
+
+Vertical slice means: one UI path that is fully correct end to end, including failures.
+
+If you can ship one vertical slice cleanly, shipping ten slices becomes mostly repetition.
+
 ### Invariants
 
 1. Every write flow must include post-confirm read-back.
@@ -53,21 +61,25 @@ export default function Week4CapstonePage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-2">1. Wallet</h2>
+        {/* Connect/disconnect and show explicit wallet status. */}
         <WalletPanel />
       </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-2">2. Read</h2>
+        {/* Fetch an account by address and show normalized JSON output. */}
         <AccountInspector />
       </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-2">3. Write + Status</h2>
+        {/* Demonstrate a status machine UX (idle -> confirming -> confirmed/failed). */}
         <TxActionCard />
       </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-2">4. Program Action Service Pattern</h2>
+        {/* Demonstrate the service-layer pattern for program actions. */}
         <CounterActionButton />
       </section>
     </main>

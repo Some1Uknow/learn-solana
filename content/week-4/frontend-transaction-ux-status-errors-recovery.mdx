@@ -18,6 +18,16 @@ import { Callout } from 'fumadocs-ui/components/callout';
 - `error category`: actionable error bucket
 - `recovery action`: explicit next step users can take
 
+### Mental Model
+
+Good transaction UX behaves like a checkout flow:
+
+- it never double-charges
+- it always shows where you are
+- it always tells you what to do if something fails
+
+That is exactly what a simple state machine gives you.
+
 ### Invariants
 
 1. Every failure state must expose one next action.
@@ -34,6 +44,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Create `lib/solana/uiTxState.ts`:
 
 ```ts
+// Keep status values small and explicit so the UI cannot drift.
 export type TxStatus =
   | "idle"
   | "preparing"
@@ -43,10 +54,12 @@ export type TxStatus =
   | "confirmed"
   | "failed";
 
+// Error kinds are user-facing categories. The raw error stays in logs.
 export type TxErrorKind = "user-rejected" | "network" | "expired" | "program" | "unknown";
 
 export function classifyTxError(err: string): TxErrorKind {
   const e = err.toLowerCase();
+  // The goal is not perfect parsing. The goal is actionable UX.
   if (e.includes("reject")) return "user-rejected";
   if (e.includes("blockhash")) return "expired";
   if (e.includes("timeout") || e.includes("network")) return "network";
@@ -64,15 +77,18 @@ import React, { useState } from "react";
 import { classifyTxError, type TxStatus } from "@/lib/solana/uiTxState";
 
 export function TxActionCard() {
+  // Keep tx UI state in a single place so it is impossible to show conflicting statuses.
   const [status, setStatus] = useState<TxStatus>("idle");
   const [signature, setSignature] = useState("");
   const [error, setError] = useState("");
 
   const run = async () => {
+    // Clear previous attempt output.
     setError("");
     setSignature("");
 
     try {
+      // These status transitions are the UX contract.
       setStatus("preparing");
       setStatus("awaiting-signature");
       setStatus("broadcasting");
@@ -83,6 +99,7 @@ export function TxActionCard() {
       setStatus("confirmed");
     } catch (e: any) {
       const kind = classifyTxError(String(e?.message ?? e));
+      // Always show a next action to the user.
       setError(`Failed (${kind}). Suggested action: retry or rebuild.`);
       setStatus("failed");
     }
