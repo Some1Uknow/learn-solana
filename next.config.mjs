@@ -43,6 +43,8 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    // Allow rendering local SVGs via next/image (we use public/solana-kit.svg for Week 4).
+    dangerouslyAllowSVG: true,
     domains: [
       "docs.solana.com",
       "rustacean.net",

@@ -250,7 +250,7 @@ export const contentsData = {
       description:
         "Rebuilding this module with a solana/kit-first client architecture",
       goal: "Master wallet connection, transaction flows, and app patterns using @solana/kit in a clean, modern client architecture",
-      image: "/nextjs.png",
+      image: "/solana-kit.svg",
       icon: "fullstack",
       overviewUrl: "/learn/week-4",
       topics: [
