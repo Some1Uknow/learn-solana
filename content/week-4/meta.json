@@ -1,6 +1,6 @@
 {
   "title": "Solana Kit Client-Side",
-  "description": "Week 4 is being rebuilt around @solana/kit",
+  "description": "Build a Solana client with @solana/kit: connect a wallet, read accounts, and send transactions.",
   "icon": "NextJS",
   "root": true,
   "pages": [

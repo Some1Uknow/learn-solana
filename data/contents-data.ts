@@ -248,7 +248,7 @@ export const contentsData = {
       id: "week-4",
       title: "Client-Side & Full-Stack",
       description:
-        "Rebuilding this module with a solana/kit-first client architecture",
+        "Build a Solana client with @solana/kit: connect a wallet, read accounts, and send transactions.",
       goal: "Master wallet connection, transaction flows, and app patterns using @solana/kit in a clean, modern client architecture",
       image: "/solana-kit.svg",
       icon: "fullstack",
