@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  next-mdx-remote: ^6.0.0
+
 importers:
 
   .:
