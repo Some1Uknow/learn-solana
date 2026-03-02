@@ -72,6 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${module.title} | Learn Solana Course`;
   const description = module.description;
+  const ogImageUrl = createCanonical(`/og/modules/${moduleId}`);
   
   // Get module-specific keywords or use defaults
   const keywords = moduleKeywordsMap[moduleId] || [
@@ -94,10 +95,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: createCanonical(`/modules/${moduleId}`),
       images: [
         {
-          url: "/og/modules",
+          url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: module.title,
+          alt: `${module.title} module cover`,
         },
       ],
     },
@@ -105,7 +106,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: ["/og/modules"],
+      images: [ogImageUrl],
     },
   };
 }

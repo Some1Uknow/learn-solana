@@ -61,7 +61,7 @@ export const contentsData = {
       description:
         "Learn Rust deeply enough to write secure, optimized smart contracts",
       goal: "Master Rust programming with focus on blockchain security and optimization",
-      image: "https://rustacean.net/assets/rustacean-flat-happy.svg",
+      image: "/rust-2.png",
       icon: "rust",
       overviewUrl: "/learn/week-2",
       topics: [
