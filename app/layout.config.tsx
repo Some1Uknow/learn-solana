@@ -7,10 +7,10 @@ export const baseOptions: BaseLayoutProps = {
       <span className="ls-nav-brand">
         <span className="ls-nav-brand-logo" aria-hidden>
           <Image
-            src="/learnsol-logo.png"
+            src="/apple-touch-icon.png"
             alt="learn.sol mark"
-            width={30}
-            height={30}
+            width={34}
+            height={34}
             className="ls-nav-brand-logo-img"
           />
         </span>
