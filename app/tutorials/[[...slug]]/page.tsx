@@ -2,7 +2,7 @@ import { tutorialsSource } from "@/lib/tutorials/source";
 import { DocsBody, DocsPage, DocsTitle, DocsDescription } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
 import { getMDXComponents } from "@/mdx-components";
-import { createCanonical, siteUrl, defaultOpenGraphImage, defaultTwitterImage } from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 import type { Metadata } from "next";
 import { BreadcrumbSchema, ArticleSchema } from "@/components/seo";
 
@@ -69,6 +69,7 @@ export async function generateMetadata(props: {
 
   const slugPath = params.slug?.join('/') ?? '';
   const canonical = createCanonical(`/tutorials${slugPath ? `/${slugPath}` : ''}`);
+  const ogImageUrl = createCanonical(`/og/tutorials${slugPath ? `/${slugPath}` : ""}`);
 
   // Extract keywords from frontmatter if available
   const frontmatterKeywords = (page.data as unknown as Record<string, unknown>).keywords as string[] | undefined;
@@ -97,14 +98,20 @@ export async function generateMetadata(props: {
       siteName: "learn.sol",
       locale: "en_US",
       type: "article",
-      images: [defaultOpenGraphImage],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${page.data.title} tutorial`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: page.data.title,
       description: page.data.description,
-      images: [defaultTwitterImage],
+      images: [ogImageUrl],
     },
   };
 }
-

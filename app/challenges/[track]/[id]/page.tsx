@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ChallengePageWorkspace from "@/components/challenges/ChallengePageWorkspace";
 import { getChallenge, getTrackCount, toMdxSlug, type TrackId } from "@/lib/challenges/registry";
-import { createCanonical, defaultOpenGraphImage, defaultTwitterImage } from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 
 type Params = Promise<{ track: string; id: string }>;
 
@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   const title = `${c.title} · ${c.track.toUpperCase()} Challenge`;
   const canonical = createCanonical(`/challenges/${track}/${id}`);
+  const ogImageUrl = createCanonical(`/og/challenges/${track}/${id}`);
 
   // Generate keywords from challenge tags and track
   const trackKeywords = track === "rust" 
@@ -42,13 +43,20 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       description: c.description,
       url: canonical,
       siteName: "learn.sol",
-      images: [defaultOpenGraphImage],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${c.title} challenge`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: c.description,
-      images: [defaultTwitterImage],
+      images: [ogImageUrl],
     },
   };
 }

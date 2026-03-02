@@ -1,6 +1,9 @@
 import type { MetadataRoute } from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
+import { siteUrl } from "@/lib/seo";
+import { getAllCategoryIds } from "@/data/tools-data";
+import { contentsData } from "@/data/contents-data";
 
 /**
  * Enhanced sitemap for learn.sol with SEO optimizations:
@@ -11,7 +14,7 @@ import path from 'node:path'
  * - Accurate lastModified dates from filesystem
  */
 
-const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.learnsol.site').replace(/\/$/, '')
+const BASE_URL = siteUrl.replace(/\/$/, '')
 const CONTENT_DIR = path.join(process.cwd(), 'content')
 
 /**
@@ -43,12 +46,12 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
 ]
 
 // Tool categories that have actual pages
-const TOOL_CATEGORIES = ['rpc', 'indexing', 'wallets', 'dev-tools']
+const TOOL_CATEGORIES = getAllCategoryIds()
 
 // Module IDs that have actual pages (week-based structure)
 // NOTE: Old IDs (solana-fundamentals, rust-essentials, etc.) were returning 404
 // The actual module pages are at /modules/week-X which map to content/week-X
-const MODULE_IDS = ['week-1', 'week-2', 'week-3', 'week-4', 'week-5']
+const MODULE_IDS = contentsData.modules.map((module) => module.id)
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []

@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 
 // Module-specific keywords for SEO
 const moduleKeywordsMap: Record<string, string[]> = {
-  "solana-fundamentals": [
+  "week-1": [
     "solana basics",
     "solana architecture",
     "blockchain fundamentals",
@@ -26,7 +26,7 @@ const moduleKeywordsMap: Record<string, string[]> = {
     "solana transactions",
     "learn solana basics",
   ],
-  "rust-essentials": [
+  "week-2": [
     "rust programming",
     "rust for solana",
     "learn rust",
@@ -34,7 +34,7 @@ const moduleKeywordsMap: Record<string, string[]> = {
     "rust borrowing",
     "rust basics",
   ],
-  "anchor-development": [
+  "week-3": [
     "anchor framework",
     "anchor solana",
     "solana smart contracts",
@@ -42,15 +42,16 @@ const moduleKeywordsMap: Record<string, string[]> = {
     "anchor cpi",
     "solana program development",
   ],
-  "frontend-integration": [
+  "week-4": [
+    "solana kit",
     "solana frontend",
     "wallet integration",
     "solana react",
-    "web3 frontend",
+    "solana kit tutorial",
     "solana dapp",
-    "solana wallet adapter",
+    "solana client development",
   ],
-  "capstone-project": [
+  "week-5": [
     "solana project",
     "build solana dapp",
     "solana portfolio",

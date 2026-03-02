@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ToolCategoryClient from "./tool-category.client";
-import {
-  createCanonical,
-  defaultOpenGraphImage,
-  defaultTwitterImage,
-} from "@/lib/seo";
+import { createCanonical } from "@/lib/seo";
 import { getToolCategory, getAllCategoryIds } from "@/data/tools-data";
 
 interface PageProps {
@@ -68,6 +64,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${category.name} - Solana Developer Tools`;
   const description = category.description;
+  const ogImageUrl = createCanonical(`/og/tools/${categoryId}`);
   
   // Get category-specific keywords or use defaults
   const keywords = categoryKeywordsMap[categoryId] || [
@@ -88,13 +85,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       url: createCanonical(`/tools/${categoryId}`),
-      images: [defaultOpenGraphImage],
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${category.name} tools`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [defaultTwitterImage],
+      images: [ogImageUrl],
     },
   };
 }

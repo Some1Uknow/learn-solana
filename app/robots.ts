@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next'
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.learnsol.site'
+import { siteUrl } from "@/lib/seo";
 
 /**
  * Optimizes robots.txt for SEO:
@@ -22,6 +21,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   }
 }
