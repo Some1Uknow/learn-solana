@@ -1,16 +1,19 @@
 {
-  "title": "NextJS",
-  "description": "Learn Client Side Development with NextJS",
+  "title": "Solana Kit Client-Side",
+  "description": "Week 4 is being rebuilt around @solana/kit",
   "icon": "NextJS",
   "root": true,
   "pages": [
     "index",
-    "wallet-integration-exercise",
-    "react-integration-project",
-    "ux-enhancements",
-    "testing-cicd-setup",
-    "deployment-strategies",
-    "architecture-optimization",
-    "upgrades-maintenance-challenge"
+    "kit-foundations",
+    "wallet-standard-connection-flow",
+    "rpc-reads-and-account-decoding-with-kit",
+    "transaction-message-building-and-signers",
+    "send-confirm-retry-and-lifetime-management",
+    "spl-token-and-token-2022-client-flows",
+    "anchor-client-with-kit",
+    "frontend-transaction-ux-status-errors-recovery",
+    "client-testing-strategy-lite-unit-and-integration",
+    "mini-capstone-kit-client-for-anchor-program"
   ]
 }

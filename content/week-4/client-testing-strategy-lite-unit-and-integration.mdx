@@ -1,0 +1,106 @@
+---
+title: "Client Testing Strategy: Lite Unit & Integration"
+description: "A practical testing strategy for Solana client code: fast unit checks plus one meaningful integration path."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "client tests"
+  - "unit tests"
+  - "integration tests"
+  - "solana testing"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `unit test`: tests pure functions without network
+- `integration test`: tests feature path across service + state
+- `failure-path test`: proves behavior under expected errors
+
+### Invariants
+
+1. Happy-path-only tests are not enough.
+2. Error mapping logic must be unit tested.
+3. One stable integration path must run in CI.
+
+### Quick Checks
+
+1. Why are failure-path tests mandatory in wallet apps?
+2. What should be mocked vs real in integration tests?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Install test stack if needed:
+
+```bash
+pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+
+Create `lib/solana/__tests__/uiTxState.test.ts`:
+
+```ts
+import { describe, it, expect } from "vitest";
+import { classifyTxError } from "../uiTxState";
+
+describe("classifyTxError", () => {
+  it("maps rejection", () => {
+    expect(classifyTxError("User rejected request")).toBe("user-rejected");
+  });
+
+  it("maps blockhash expiry", () => {
+    expect(classifyTxError("Blockhash not found")).toBe("expired");
+  });
+
+  it("maps unknown", () => {
+    expect(classifyTxError("strange failure")).toBe("unknown");
+  });
+});
+```
+
+Create `components/solana/__tests__/TxActionCard.test.tsx`:
+
+```tsx
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { TxActionCard } from "../TxActionCard";
+
+describe("TxActionCard", () => {
+  it("renders default status", () => {
+    render(<TxActionCard />);
+    expect(screen.getByText(/Status:/)).toBeTruthy();
+  });
+});
+```
+
+Add script:
+
+```json
+{
+  "scripts": {
+    "test": "vitest run"
+  }
+}
+```
+
+Run:
+
+```bash
+pnpm test
+```
+
+Expected result:
+
+- unit tests verify error classification behavior.
+
+## Step 3: Mastery Test
+
+- Easy: what is the fastest pure function to test first?
+- Medium: where should integration tests stop (UI only vs RPC)?
+- Hard: how would you design deterministic tests for retry logic?
+
+## Sources
+
+- https://vitest.dev/
+- https://solana.com/docs/core/transactions

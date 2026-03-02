@@ -1,0 +1,117 @@
+---
+title: "Frontend Transaction UX: Status, Errors, Recovery"
+description: "Implement a strict transaction UX state machine so users always know what is happening and what to do next."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "transaction ux"
+  - "error recovery"
+  - "solana ui state machine"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `status machine`: controlled UI states for tx lifecycle
+- `error category`: actionable error bucket
+- `recovery action`: explicit next step users can take
+
+### Invariants
+
+1. Every failure state must expose one next action.
+2. In-flight actions must disable duplicate submission.
+3. Success must show signature.
+
+### Quick Checks
+
+1. Why is a state machine better than random booleans?
+2. Why should success always include signature?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Create `lib/solana/uiTxState.ts`:
+
+```ts
+export type TxStatus =
+  | "idle"
+  | "preparing"
+  | "awaiting-signature"
+  | "broadcasting"
+  | "confirming"
+  | "confirmed"
+  | "failed";
+
+export type TxErrorKind = "user-rejected" | "network" | "expired" | "program" | "unknown";
+
+export function classifyTxError(err: string): TxErrorKind {
+  const e = err.toLowerCase();
+  if (e.includes("reject")) return "user-rejected";
+  if (e.includes("blockhash")) return "expired";
+  if (e.includes("timeout") || e.includes("network")) return "network";
+  if (e.includes("instruction") || e.includes("program")) return "program";
+  return "unknown";
+}
+```
+
+Create `components/solana/TxActionCard.tsx`:
+
+```tsx
+"use client";
+
+import React, { useState } from "react";
+import { classifyTxError, type TxStatus } from "@/lib/solana/uiTxState";
+
+export function TxActionCard() {
+  const [status, setStatus] = useState<TxStatus>("idle");
+  const [signature, setSignature] = useState("");
+  const [error, setError] = useState("");
+
+  const run = async () => {
+    setError("");
+    setSignature("");
+
+    try {
+      setStatus("preparing");
+      setStatus("awaiting-signature");
+      setStatus("broadcasting");
+      setStatus("confirming");
+      // Replace with real service call:
+      const fakeSig = "3Ab...demo-signature";
+      setSignature(fakeSig);
+      setStatus("confirmed");
+    } catch (e: any) {
+      const kind = classifyTxError(String(e?.message ?? e));
+      setError(`Failed (${kind}). Suggested action: retry or rebuild.`);
+      setStatus("failed");
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-zinc-700 p-4 space-y-2">
+      <div className="text-sm">Status: {status}</div>
+      <button onClick={run} disabled={status !== "idle" && status !== "failed" && status !== "confirmed"} className="px-3 py-2 rounded bg-cyan-700 text-white">
+        Run Transaction
+      </button>
+      {signature && <div className="text-xs">Signature: {signature}</div>}
+      {error && <div className="text-xs text-red-300">{error}</div>}
+    </div>
+  );
+}
+```
+
+Expected result:
+
+- deterministic status progression and actionable error output.
+
+## Step 3: Mastery Test
+
+- Easy: where do we prevent double-submit?
+- Medium: how do we map raw errors to actionable categories?
+- Hard: how would you persist tx status across route navigation?
+
+## Sources
+
+- https://solana.com/docs/core/transactions
+- https://solana.com/docs/frontend/react-hooks

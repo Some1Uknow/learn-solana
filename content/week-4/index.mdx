@@ -1,15 +1,57 @@
 ---
-title: "Client-Side Basics"
-description: "Master Solana frontend development: environment configuration, program deployment, frontend hosting, monitoring setup, and production rollback strategies."
+title: "Client-Side with @solana/kit"
+description: "A beginner-to-intermediate path for modern Solana client development using @solana/kit, @solana/client, and @solana/react-hooks."
 module: "🧑‍💻 Client-Side & Full-Stack"
 keywords:
-  - "solana frontend"
-  - "solana deployment"
-  - "web3 frontend"
-  - "solana hosting"
-  - "solana monitoring"
-  - "production solana"
-  - "solana devops"
+  - "solana kit tutorial"
+  - "solana client-side"
+  - "@solana/kit"
+  - "@solana/client"
+  - "@solana/react-hooks"
+  - "wallet standard"
+  - "solana transaction ux"
 ---
 
-Environment configuration, program deployment, frontend hosting, monitoring, and rollback strategies
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`@solana/web3.js` is now deprecated for new projects.
+
+For this module, we use modern Solana client libraries:
+
+- `@solana/kit` for core transaction/RPC building blocks
+- `@solana/client` for shared runtime state
+- `@solana/react-hooks` for React-friendly wallet and transaction hooks
+
+## What You Will Learn
+
+- How to build a clean kit-first client architecture
+- How Wallet Standard connection flows work in practice
+- How to read accounts and build/send transactions correctly
+- How to handle failure paths, retries, and user-facing status
+- How to test client-side Solana code with confidence
+
+## Learning Path
+
+1. `kit-foundations`
+2. `wallet-standard-connection-flow`
+3. `rpc-reads-and-account-decoding-with-kit`
+4. `transaction-message-building-and-signers`
+5. `send-confirm-retry-and-lifetime-management`
+6. `spl-token-and-token-2022-client-flows`
+7. `anchor-client-with-kit`
+8. `frontend-transaction-ux-status-errors-recovery`
+9. `client-testing-strategy-lite-unit-and-integration`
+10. `mini-capstone-kit-client-for-anchor-program`
+
+<Callout type="info">
+Each lesson is written step by step. Do not skip ahead. The concepts stack on top of each other.
+</Callout>
+
+## Prerequisites
+
+- Comfortable with TypeScript basics
+- Basic Solana program/account mental model
+- Node.js installed
+- A devnet wallet with test SOL
+
+Start with `kit-foundations`.

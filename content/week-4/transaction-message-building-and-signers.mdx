@@ -1,0 +1,104 @@
+---
+title: "Transaction Message Building & Signers"
+description: "Build a transaction the right way: message -> fee payer -> lifetime -> instructions -> signatures."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "createTransactionMessage"
+  - "signTransactionMessageWithSigners"
+  - "transaction lifetime"
+  - "fee payer"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `transaction message`: immutable plan before signing
+- `fee payer`: signer that pays network fee
+- `blockhash lifetime`: validity window
+- `instructions`: ordered program operations
+
+### Invariants
+
+1. Lifetime must be set before signing.
+2. Signatures are invalid if message changes after signing.
+3. Instruction order changes semantics.
+
+### Quick Checks
+
+1. Why can’t you modify a message after signing?
+2. Why is blockhash freshness a runtime invariant?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Install system program client:
+
+```bash
+pnpm add @solana-program/system
+```
+
+Create `scripts/build-message.ts`:
+
+```ts
+import {
+  appendTransactionMessageInstructions,
+  createSolanaRpc,
+  createTransactionMessage,
+  generateKeyPairSigner,
+  lamports,
+  pipe,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  signTransactionMessageWithSigners,
+} from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+
+const rpc = createSolanaRpc("http://127.0.0.1:8899");
+
+async function main() {
+  const sender = await generateKeyPairSigner();
+  const recipient = await generateKeyPairSigner();
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const transferIx = getTransferSolInstruction({
+    source: sender,
+    destination: recipient.address,
+    amount: lamports(1_000_000n),
+  });
+
+  const message = pipe(
+    createTransactionMessage({ version: 0 }),
+    (tx) => setTransactionMessageFeePayerSigner(sender, tx),
+    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+    (tx) => appendTransactionMessageInstructions([transferIx], tx),
+  );
+
+  const signed = await signTransactionMessageWithSigners(message);
+  console.log("Built and signed transaction message", !!signed);
+}
+
+main().catch(console.error);
+```
+
+Run:
+
+```bash
+pnpm tsx scripts/build-message.ts
+```
+
+Expected result:
+
+- script logs successful signed-message build.
+
+## Step 3: Mastery Test
+
+- Easy: what happens if fee payer signer is omitted?
+- Medium: what if blockhash expires before send?
+- Hard: why can instruction reordering create security bugs?
+
+## Sources
+
+- https://www.solanakit.com/docs/getting-started/build-transaction
+- https://solana.com/docs/core/transactions/transaction-structure

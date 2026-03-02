@@ -1,0 +1,130 @@
+---
+title: "SPL Token & Token-2022 Client Flows"
+description: "Build token client flows safely with explicit token program selection and validation checks."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "spl token"
+  - "token-2022"
+  - "token client flow"
+  - "solana token validation"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This lesson is dev-only and educational. Do not use production funds while learning.
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `mint`: token definition account
+- `token account`: balance holder for owner+mint
+- `token program id`: classic SPL vs Token-2022
+
+### Invariants
+
+1. Token program choice must be explicit.
+2. Mint/account pairing must be validated before transfer logic.
+3. Amount handling must respect decimals.
+
+### Quick Checks
+
+1. Why is "assume token program" dangerous?
+2. Why validate mint/account before send?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Install token clients:
+
+```bash
+pnpm add @solana-program/token @solana-program/token-2022
+```
+
+Create `lib/solana/tokenFlow.ts`:
+
+```ts
+export type TokenProgramKind = "spl" | "token2022";
+
+export type TokenTransferInput = {
+  programKind: TokenProgramKind;
+  mint: string;
+  sourceTokenAccount: string;
+  destinationTokenAccount: string;
+  amountRaw: bigint;
+  decimals: number;
+};
+
+export function validateTokenTransferInput(input: TokenTransferInput) {
+  if (!input.mint) throw new Error("Missing mint");
+  if (!input.sourceTokenAccount) throw new Error("Missing source token account");
+  if (!input.destinationTokenAccount) throw new Error("Missing destination token account");
+  if (input.amountRaw <= 0n) throw new Error("Amount must be positive");
+  if (input.decimals < 0 || input.decimals > 18) throw new Error("Invalid decimals");
+}
+
+export async function buildTokenTransferPlan(input: TokenTransferInput) {
+  validateTokenTransferInput(input);
+
+  // In a full implementation, create token program instructions here.
+  // Keep programKind explicit to route SPL vs Token-2022 instruction builders.
+  return {
+    ok: true,
+    programKind: input.programKind,
+    summary: {
+      mint: input.mint,
+      from: input.sourceTokenAccount,
+      to: input.destinationTokenAccount,
+      amountRaw: input.amountRaw.toString(),
+      decimals: input.decimals,
+    },
+  };
+}
+```
+
+Create `components/solana/TokenTransferPreview.tsx`:
+
+```tsx
+"use client";
+
+import React, { useState } from "react";
+import { buildTokenTransferPlan } from "@/lib/solana/tokenFlow";
+
+export function TokenTransferPreview() {
+  const [result, setResult] = useState<any>(null);
+
+  const onPreview = async () => {
+    const plan = await buildTokenTransferPlan({
+      programKind: "spl",
+      mint: "Mint111111111111111111111111111111111111111",
+      sourceTokenAccount: "Src1111111111111111111111111111111111111111",
+      destinationTokenAccount: "Dst1111111111111111111111111111111111111111",
+      amountRaw: 1_000_000n,
+      decimals: 6,
+    });
+    setResult(plan);
+  };
+
+  return (
+    <div>
+      <button onClick={onPreview} className="px-3 py-2 rounded bg-indigo-600 text-white">Preview Transfer</button>
+      {result && <pre className="mt-3 text-xs bg-zinc-950 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+    </div>
+  );
+}
+```
+
+Expected result:
+
+- explicit token flow validation and preview output before transaction assembly.
+
+## Step 3: Mastery Test
+
+- Easy: where do you enforce program kind selection?
+- Medium: what field must be checked before decimals conversion?
+- Hard: how do you prevent cross-program account mixups at client layer?
+
+## Sources
+
+- https://solana.com/docs/tokens
+- https://www.npmjs.com/package/@solana-program/token
+- https://www.npmjs.com/package/@solana-program/token-2022

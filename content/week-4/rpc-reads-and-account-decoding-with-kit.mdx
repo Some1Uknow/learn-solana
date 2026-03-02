@@ -1,0 +1,126 @@
+---
+title: "RPC Reads & Account Decoding with Kit"
+description: "Fetch and decode accounts with a clean helper-first pattern using @solana/kit."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "fetchEncodedAccount"
+  - "solana rpc reads"
+  - "account decode"
+  - "@solana/kit"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `Address`: typed account identifier
+- `MaybeEncodedAccount`: account that may or may not exist
+- `exists` invariant: always check before decode/use
+
+### Invariants
+
+1. A missing account is a valid state, not a runtime surprise.
+2. Fetch and decode are two separate responsibilities.
+3. UI consumes normalized outputs, not raw RPC blobs.
+
+### Quick Checks
+
+1. Why does `exists` matter before decoding?
+2. What bug appears if UI parses raw RPC output directly?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Create `lib/solana/rpc.ts`:
+
+```ts
+import {
+  address,
+  createSolanaRpc,
+  fetchEncodedAccount,
+  type Address,
+} from "@solana/kit";
+import { SOLANA_RPC } from "@/lib/solana/config";
+
+const rpc = createSolanaRpc(SOLANA_RPC);
+
+export type AccountView =
+  | { exists: false; address: string }
+  | {
+      exists: true;
+      address: string;
+      lamports: string;
+      executable: boolean;
+      owner: string;
+      dataLength: number;
+    };
+
+export async function fetchAccountView(input: string): Promise<AccountView> {
+  const addr = address(input) as Address;
+  const account = await fetchEncodedAccount(rpc, addr);
+
+  if (!account.exists) {
+    return { exists: false, address: input };
+  }
+
+  return {
+    exists: true,
+    address: input,
+    lamports: account.lamports.toString(),
+    executable: account.executable,
+    owner: account.owner.toString(),
+    dataLength: account.data.length,
+  };
+}
+```
+
+Create `components/solana/AccountInspector.tsx`:
+
+```tsx
+"use client";
+
+import React, { useState } from "react";
+import { fetchAccountView } from "@/lib/solana/rpc";
+
+export function AccountInspector() {
+  const [pubkey, setPubkey] = useState("");
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const onFetch = async () => {
+    setLoading(true);
+    try {
+      setResult(await fetchAccountView(pubkey.trim()));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <input value={pubkey} onChange={(e) => setPubkey(e.target.value)} className="w-full px-3 py-2 rounded bg-zinc-900" placeholder="Account address" />
+      <button onClick={onFetch} disabled={loading} className="px-3 py-2 rounded bg-cyan-600 text-white">
+        {loading ? "Loading..." : "Fetch account"}
+      </button>
+      {result && <pre className="text-xs bg-zinc-950 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+    </div>
+  );
+}
+```
+
+Expected result:
+
+- existing account returns structured fields
+- unknown account returns `{ exists: false }`
+
+## Step 3: Mastery Test
+
+- Easy: why is `exists: false` better than throwing by default?
+- Medium: how do you batch-fetch many accounts without losing mapping clarity?
+- Hard: how would you cache account reads and invalidate them safely after writes?
+
+## Sources
+
+- https://www.solanakit.com/docs/getting-started/fetch-account
+- https://solana.com/docs/references/rpc-api

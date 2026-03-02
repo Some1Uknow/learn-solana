@@ -1,0 +1,127 @@
+---
+title: "Wallet Standard Connection Flow"
+description: "Build a beginner-safe wallet flow with explicit connection states and clear UX behavior."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "wallet standard"
+  - "connect wallet"
+  - "useWalletConnection"
+  - "solana wallet ux"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `connector`: the concrete wallet option (Phantom, Solflare, etc.)
+- `session`: connected wallet state
+- `status`: runtime wallet state (`idle`, connecting, connected, error)
+
+### Invariants
+
+1. Never show “Connected” before connection promise resolves.
+2. User rejection is not a crash; it is a normal path.
+3. All signer-required actions must be disabled when disconnected.
+
+### Quick Checks
+
+1. Why is explicit status text critical in wallet UX?
+2. Why should rejection and network errors use different messages?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Create `components/solana/WalletPanel.tsx`:
+
+```tsx
+"use client";
+
+import React from "react";
+import {
+  useWalletConnection,
+  useConnectWallet,
+  useDisconnectWallet,
+} from "@solana/react-hooks";
+
+function shortAddress(addr?: string) {
+  if (!addr) return "";
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+}
+
+export function WalletPanel() {
+  const { wallet, connectors, status } = useWalletConnection();
+  const connectWallet = useConnectWallet();
+  const disconnectWallet = useDisconnectWallet();
+
+  const onConnect = async (connectorId: string) => {
+    try {
+      await connectWallet.mutateAsync({ connectorId });
+    } catch (e) {
+      // keep UX deterministic; show a toast in your app shell if you have one
+      console.error("connect failed", e);
+    }
+  };
+
+  const onDisconnect = async () => {
+    try {
+      await disconnectWallet.mutateAsync();
+    } catch (e) {
+      console.error("disconnect failed", e);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-zinc-700 p-4 space-y-3">
+      <div className="text-sm text-zinc-300">Status: {status}</div>
+
+      {wallet ? (
+        <>
+          <div className="text-sm text-zinc-200">Connected: {shortAddress(wallet.address)}</div>
+          <button onClick={onDisconnect} className="px-3 py-2 rounded bg-red-600 text-white">
+            Disconnect
+          </button>
+        </>
+      ) : (
+        <div className="space-y-2">
+          <div className="text-sm text-zinc-300">Choose wallet:</div>
+          {connectors.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => onConnect(c.id)}
+              className="mr-2 px-3 py-2 rounded bg-emerald-600 text-white"
+            >
+              Connect {c.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+Use it on a page:
+
+```tsx
+import { WalletPanel } from "@/components/solana/WalletPanel";
+
+export default function Page() {
+  return <WalletPanel />;
+}
+```
+
+Expected result:
+
+- connect/disconnect flow works with explicit status changes.
+
+## Step 3: Mastery Test
+
+- Easy: user clicks connect then rejects prompt. What should status and UI do?
+- Medium: wallet disconnects during an in-flight tx. What UI guard should trigger?
+- Hard: two tabs open same app; one disconnects wallet. How should the other tab update?
+
+## Sources
+
+- https://solana.com/docs/frontend/react-hooks
+- https://solana.com/docs/frontend/nextjs-solana

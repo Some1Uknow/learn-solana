@@ -1,0 +1,123 @@
+---
+title: "Send, Confirm, Retry & Lifetime Management"
+description: "Handle transaction delivery robustly with explicit confirmation strategy and retry policy."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "sendAndConfirm"
+  - "transaction retry"
+  - "blockhash lifetime"
+  - "solana reliability"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `send`: publish signed bytes to cluster
+- `confirm`: wait for chain commitment outcome
+- `retry`: controlled rebuild/resend policy
+
+### Invariants
+
+1. "Sent" is not "Confirmed".
+2. Retrying stale signed bytes is invalid.
+3. User rejection is non-retryable.
+
+### Quick Checks
+
+1. Which failures are retryable?
+2. Why should retries be policy-driven, not ad hoc?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Create `scripts/send-confirm.ts`:
+
+```ts
+import {
+  appendTransactionMessageInstructions,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  createTransactionMessage,
+  generateKeyPairSigner,
+  getSignatureFromTransaction,
+  lamports,
+  pipe,
+  sendAndConfirmTransactionFactory,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  signTransactionMessageWithSigners,
+} from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+
+const RPC_URL = "http://127.0.0.1:8899";
+
+async function buildAndSign() {
+  const rpc = createSolanaRpc(RPC_URL);
+  const sender = await generateKeyPairSigner();
+  const recipient = await generateKeyPairSigner();
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const ix = getTransferSolInstruction({
+    source: sender,
+    destination: recipient.address,
+    amount: lamports(1_000_000n),
+  });
+
+  const msg = pipe(
+    createTransactionMessage({ version: 0 }),
+    (tx) => setTransactionMessageFeePayerSigner(sender, tx),
+    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+    (tx) => appendTransactionMessageInstructions([ix], tx),
+  );
+
+  return signTransactionMessageWithSigners(msg);
+}
+
+async function main() {
+  const rpc = createSolanaRpc(RPC_URL);
+  const subs = createSolanaRpcSubscriptions(RPC_URL.replace("http", "ws"));
+  const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions: subs });
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const signed = await buildAndSign();
+      await sendAndConfirm(signed, { commitment: "confirmed" });
+      console.log("confirmed", getSignatureFromTransaction(signed));
+      return;
+    } catch (e: any) {
+      const msg = String(e?.message ?? e);
+      const retryable = msg.includes("Blockhash") || msg.includes("timeout");
+      if (!retryable || attempt === 2) throw e;
+      console.log("retrying with fresh blockhash...");
+    }
+  }
+}
+
+main().catch((e) => {
+  console.error("send/confirm failed", e);
+  process.exit(1);
+});
+```
+
+Run:
+
+```bash
+pnpm tsx scripts/send-confirm.ts
+```
+
+Expected result:
+
+- script prints confirmed signature or clear failure reason.
+
+## Step 3: Mastery Test
+
+- Easy: why do we rebuild transaction on retry?
+- Medium: what should UI show between send and confirm?
+- Hard: how would you avoid duplicate user actions during confirm wait?
+
+## Sources
+
+- https://www.solanakit.com/docs/getting-started/send-transaction
+- https://solana.com/docs/core/transactions

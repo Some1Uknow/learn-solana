@@ -1,0 +1,101 @@
+---
+title: "Anchor Client Patterns with Kit"
+description: "Connect Anchor-style program actions to a kit-first client service layer with explicit responsibilities."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "anchor client"
+  - "kit service layer"
+  - "program actions"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `program action service`: one place where program-specific calls live
+- `ui action`: button/form that calls service
+- `transport`: send/confirm pipeline shared across app
+
+### Invariants
+
+1. UI does not own program call internals.
+2. Program service returns normalized app-level results.
+3. Transaction lifecycle remains shared and reusable.
+
+### Quick Checks
+
+1. Why is "service layer first" important for scaling dApps?
+2. Why avoid raw program errors in UI?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Create `lib/solana/programs/counterService.ts`:
+
+```ts
+export type ActionResult =
+  | { ok: true; signature: string }
+  | { ok: false; error: string };
+
+export async function incrementCounterAction(): Promise<ActionResult> {
+  try {
+    // In your full app, this calls your transaction helper + program instruction builder.
+    // Keep this file as the only place where counter-program action logic is defined.
+    const fakeSignature = "5kK...demo-signature";
+    return { ok: true, signature: fakeSignature };
+  } catch (e: any) {
+    return { ok: false, error: String(e?.message ?? e) };
+  }
+}
+```
+
+Create `components/solana/CounterActionButton.tsx`:
+
+```tsx
+"use client";
+
+import React, { useState } from "react";
+import { incrementCounterAction } from "@/lib/solana/programs/counterService";
+
+export function CounterActionButton() {
+  const [state, setState] = useState<"idle" | "working" | "ok" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const onClick = async () => {
+    setState("working");
+    const result = await incrementCounterAction();
+    if (result.ok) {
+      setState("ok");
+      setMessage(`Signature: ${result.signature}`);
+    } else {
+      setState("error");
+      setMessage(result.error);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <button onClick={onClick} disabled={state === "working"} className="px-3 py-2 rounded bg-emerald-700 text-white">
+        {state === "working" ? "Submitting..." : "Increment Counter"}
+      </button>
+      {message && <p className="text-xs text-zinc-300">{message}</p>}
+    </div>
+  );
+}
+```
+
+Expected result:
+
+- program action logic is isolated and UI stays simple.
+
+## Step 3: Mastery Test
+
+- Easy: what does normalized return shape solve?
+- Medium: where should retries live: UI or service layer?
+- Hard: how would you test service logic without rendering components?
+
+## Sources
+
+- https://solana.com/docs/core/programs
+- https://www.anchor-lang.com/docs/clients/typescript

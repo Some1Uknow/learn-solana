@@ -1,0 +1,118 @@
+---
+title: "Kit Foundations"
+description: "0-to-1 foundation for Solana client development with @solana/kit, @solana/client, and @solana/react-hooks."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "solana kit"
+  - "@solana/client"
+  - "@solana/react-hooks"
+  - "wallet standard"
+  - "solana foundations"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`@solana/web3.js` is now a legacy path for new apps. In this module, we build with `@solana/kit` and modern Solana client packages.
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `rpc`: how your app asks the chain for data.
+- `rpcSubscriptions`: how your app listens to live chain changes.
+- `client runtime`: shared state for wallet/session/network.
+- `transaction message`: the unsigned plan of what the chain should execute.
+
+### Invariants
+
+1. One app should have one default Solana runtime config.
+2. Cluster and commitment should be explicit, never hidden.
+3. UI should not build raw transactions directly.
+
+### Quick Checks
+
+1. Why do we separate runtime config from UI components?
+2. Why is one provider better than many providers?
+3. What breaks if cluster is hardcoded in random files?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Install:
+
+```bash
+pnpm add @solana/kit @solana/client @solana/react-hooks @tanstack/react-query
+```
+
+Create `lib/solana/config.ts`:
+
+```ts
+export const SOLANA_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.devnet.solana.com";
+export const SOLANA_WS = process.env.NEXT_PUBLIC_SOLANA_WS ?? "wss://api.devnet.solana.com";
+export const SOLANA_CLUSTER = "devnet" as const;
+export const SOLANA_COMMITMENT = "confirmed" as const;
+```
+
+Create `app/providers.tsx`:
+
+```tsx
+"use client";
+
+import React from "react";
+import { autoDiscover, createClient } from "@solana/client";
+import { SolanaProvider } from "@solana/react-hooks";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SOLANA_RPC, SOLANA_WS } from "@/lib/solana/config";
+
+const queryClient = new QueryClient();
+
+const client = createClient({
+  endpoint: SOLANA_RPC,
+  websocketEndpoint: SOLANA_WS,
+  walletConnectors: autoDiscover(),
+});
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SolanaProvider client={client}>{children}</SolanaProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+Update `app/layout.tsx` (core part only):
+
+```tsx
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+Expected result:
+
+- app starts with one shared Solana runtime.
+
+## Step 3: Mastery Test
+
+- Easy: if websocket URL is wrong, what feature breaks first?
+- Medium: if one page uses a second client with a different endpoint, what bug class appears?
+- Hard (senior): how would you support runtime endpoint switching without tearing wallet session state?
+
+<Callout type="info">
+If you cannot explain the invariants above, do not move to Lesson 2 yet.
+</Callout>
+
+## Sources
+
+- https://solana.com/docs/frontend/client
+- https://solana.com/docs/frontend/react-hooks
+- https://solana.com/docs/frontend/nextjs-solana
+- https://www.solanakit.com/docs

@@ -1,0 +1,99 @@
+---
+title: "Mini Capstone: Kit Client for an Anchor Program"
+description: "Ship a full 0-to-1 client slice: connect wallet, read state, submit action, confirm, and verify outcome."
+module: "🧑‍💻 Client-Side & Full-Stack"
+keywords:
+  - "mini capstone"
+  - "kit client"
+  - "anchor frontend"
+  - "solana client project"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Step 1: 0-to-1 Theory
+
+### Primitives
+
+- `connect`: acquire signer capability
+- `read`: fetch current state
+- `write`: submit state change
+- `verify`: read-back after confirm
+
+### Invariants
+
+1. Every write flow must include post-confirm read-back.
+2. Every user action must expose status and recovery path.
+3. Every successful write should return and display signature.
+
+### Quick Checks
+
+1. Why is read-back mandatory after writes?
+2. Why should capstone scope stay small?
+
+## Step 2: Real-World Implementation (Code Solution)
+
+Build a single page that composes previous lessons.
+
+Create `app/week4-capstone/page.tsx`:
+
+```tsx
+"use client";
+
+import React from "react";
+import { WalletPanel } from "@/components/solana/WalletPanel";
+import { AccountInspector } from "@/components/solana/AccountInspector";
+import { TxActionCard } from "@/components/solana/TxActionCard";
+import { CounterActionButton } from "@/components/solana/CounterActionButton";
+
+export default function Week4CapstonePage() {
+  return (
+    <main className="max-w-3xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Week 4 Mini Capstone</h1>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-2">1. Wallet</h2>
+        <WalletPanel />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-2">2. Read</h2>
+        <AccountInspector />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-2">3. Write + Status</h2>
+        <TxActionCard />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-2">4. Program Action Service Pattern</h2>
+        <CounterActionButton />
+      </section>
+    </main>
+  );
+}
+```
+
+Deliverables checklist:
+
+- wallet connect/disconnect works
+- read panel fetches account data
+- transaction status card shows deterministic states
+- program action button returns normalized result and signature
+
+## Step 3: Mastery Test
+
+- Easy: what single invariant ties all four sections together?
+- Medium: where would you place analytics for transaction failures?
+- Hard (senior): how would you split this into feature modules for a 6-person team?
+
+<Callout type="info">
+If you can explain every state transition and every failure path in this page, you are ready for a larger real dApp client.
+</Callout>
+
+## Sources
+
+- https://solana.com/docs/frontend/client
+- https://solana.com/docs/frontend/react-hooks
+- https://www.solanakit.com/docs

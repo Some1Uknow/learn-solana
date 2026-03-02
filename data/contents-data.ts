@@ -248,67 +248,91 @@ export const contentsData = {
       id: "week-4",
       title: "Client-Side & Full-Stack",
       description:
-        "Integrate smart contracts with React, wallets, and full dApp flows",
-      goal: "Build production-ready frontend applications with seamless blockchain integration",
+        "Rebuilding this module with a solana/kit-first client architecture",
+      goal: "Master wallet connection, transaction flows, and app patterns using @solana/kit in a clean, modern client architecture",
       image: "/nextjs.png",
       icon: "fullstack",
       overviewUrl: "/learn/week-4",
       topics: [
         {
-          id: "wallet-integration-exercise",
-          title: "Exercise: Wallet Connect Implementation",
+          id: "kit-foundations",
+          title: "Kit Foundations",
           description:
-            "Integrate multiple wallet adapters (Phantom, Solflare, Ledger), handle connection states, and manage user sessions",
+            "Start with a clean kit-first setup and understand why @solana/kit is the default for new client code",
+          type: "setup",
+          url: "/learn/week-4/kit-foundations",
+        },
+        {
+          id: "wallet-standard-connection-flow",
+          title: "Wallet Standard Connection Flow",
+          description:
+            "Implement wallet-standard-first connection UX and signing lifecycle for modern Solana clients",
+          type: "theory",
+          url: "/learn/week-4/wallet-standard-connection-flow",
+        },
+        {
+          id: "rpc-reads-and-account-decoding-with-kit",
+          title: "RPC Reads & Account Decoding with Kit",
+          description:
+            "Read accounts, decode on-chain data, and structure reliable query patterns with @solana/kit",
           type: "exercise",
-          url: "/learn/week-4/wallet-integration-exercise",
+          url: "/learn/week-4/rpc-reads-and-account-decoding-with-kit",
         },
         {
-          id: "react-integration-project",
-          title: "Project: React dApp with Real-Time Updates",
+          id: "transaction-message-building-and-signers",
+          title: "Transaction Message Building & Signers",
           description:
-            "Build responsive React application with wallet integration, account subscriptions, and optimistic UI updates",
+            "Build transaction messages, manage fee payer/signer responsibilities, and keep instruction assembly explicit",
+          type: "exercise",
+          url: "/learn/week-4/transaction-message-building-and-signers",
+        },
+        {
+          id: "send-confirm-retry-and-lifetime-management",
+          title: "Send, Confirm, Retry & Lifetime Management",
+          description:
+            "Handle blockhash lifetimes, confirmations, retries, and user-facing transaction states with production-safe defaults",
+          type: "theory",
+          url: "/learn/week-4/send-confirm-retry-and-lifetime-management",
+        },
+        {
+          id: "spl-token-and-token-2022-client-flows",
+          title: "SPL Token & Token-2022 Client Flows",
+          description:
+            "Implement token transfer flows with explicit token program handling and extension-aware checks",
           type: "project",
-          url: "/learn/week-4/react-integration-project",
+          url: "/learn/week-4/spl-token-and-token-2022-client-flows",
         },
         {
-          id: "ux-enhancements",
-          title: "UX Enhancement Patterns",
+          id: "anchor-client-with-kit",
+          title: "Anchor Client Patterns with Kit",
           description:
-            "Transaction status indicators, error handling, loading states, confirmation flows, and user feedback systems",
+            "Connect Anchor program workflows to a kit-first client architecture without confusing abstractions",
           type: "theory",
-          url: "/learn/week-4/ux-enhancements",
+          url: "/learn/week-4/anchor-client-with-kit",
         },
         {
-          id: "testing-cicd-setup",
-          title: "Testing & CI/CD Pipeline",
+          id: "frontend-transaction-ux-status-errors-recovery",
+          title: "Frontend Transaction UX: Status, Errors, Recovery",
           description:
-            "Unit tests, integration tests, E2E testing with Cypress, GitHub Actions, automated deployment workflows",
+            "Design resilient UX for pending, confirmed, failed, and retried transactions with clear user feedback",
+          type: "project",
+          url: "/learn/week-4/frontend-transaction-ux-status-errors-recovery",
+        },
+        {
+          id: "client-testing-strategy-lite-unit-and-integration",
+          title: "Client Testing Strategy: Lite Unit & Integration",
+          description:
+            "Build a practical testing stack for client transaction flows, adapters, and failure-path behavior",
           type: "theory",
-          url: "/learn/week-4/testing-cicd-setup",
+          url: "/learn/week-4/client-testing-strategy-lite-unit-and-integration",
         },
         {
-          id: "deployment-strategies",
-          title: "Deployment to Devnet/Mainnet",
+          id: "mini-capstone-kit-client-for-anchor-program",
+          title: "Mini Capstone: Kit Client for an Anchor Program",
           description:
-            "Environment configuration, program deployment, frontend hosting, monitoring, and rollback strategies",
-          type: "theory",
-          url: "/learn/week-4/deployment-strategies",
-        },
-        {
-          id: "architecture-optimization",
-          title: "Architecture & Gas Optimization",
-          description:
-            "Compute unit budgeting, transaction batching, account optimization, and cost-effective design patterns",
-          type: "theory",
-          url: "/learn/week-4/architecture-optimization",
-        },
-        {
-          id: "upgrades-maintenance-challenge",
-          title: "Challenge: Program Upgrades & Maintenance",
-          description:
-            "Implement upgrade mechanisms, state migration strategies, and backward compatibility for evolving applications",
+            "Ship a small but complete kit-first client that interacts with an Anchor program end to end",
           type: "challenge",
-          url: "/learn/week-4/upgrades-maintenance-challenge",
+          url: "/learn/week-4/mini-capstone-kit-client-for-anchor-program",
         },
       ],
     },
