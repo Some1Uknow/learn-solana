@@ -1,15 +1,114 @@
 ---
-title: "Anchor Development Best Practices"
-description: "Master Anchor's developer experience features: account constraints, custom error handling, event emission, program upgrades, and testing patterns for maintainable Solana code."
+title: "Anchor Development Ergonomics (From Working Code to Clean Code)"
+description: "Move from basic Anchor programs to maintainable code: constraints, custom errors, events, testing strategy, and upgrade-safe design patterns."
 module: "⚓ Anchor Framework"
 keywords:
+  - "anchor best practices"
   - "anchor constraints"
   - "anchor errors"
   - "anchor events"
+  - "anchor testing strategy"
   - "solana program upgrades"
-  - "anchor testing"
-  - "solana best practices"
-  - "anchor patterns"
+  - "clean anchor code"
 ---
 
-Account constraints, error handling, events, program upgrades, and testing patterns for maintainable code
+import { Callout } from 'fumadocs-ui/components/callout';
+
+You can write working Anchor code quickly.
+
+The harder part is writing code that is still easy to trust 3 months later.
+
+This lesson focuses on the habits that prevent expensive bugs.
+
+## 1) Constraint-First Account Validation
+
+Prefer expressive constraints in account structs instead of manual checks deep in handlers.
+
+```rust
+#[account(
+    mut,
+    has_one = authority,
+    constraint = vault.mint == mint.key() @ ErrorCode::InvalidMint,
+)]
+pub vault: Account<'info, VaultState>,
+```
+
+Why this matters:
+
+- Fewer hidden assumptions in handlers
+- Better error locality
+- Easier code review
+
+## 2) Use Specific Error Codes
+
+```rust
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Caller is not authorized for this action")]
+    Unauthorized,
+    #[msg("Vault mint does not match expected mint")]
+    InvalidMint,
+    #[msg("Escrow is not in expected state")]
+    InvalidState,
+}
+```
+
+Specific errors cut debugging time for both frontend and backend teams.
+
+## 3) Emit Events for Critical Actions
+
+```rust
+#[event]
+pub struct Minted {
+    pub admin: Pubkey,
+    pub amount: u64,
+    pub new_total: u64,
+}
+```
+
+Emit events on state transitions, mint/burn, and settlement operations.
+
+## 4) Keep Handlers Thin
+
+Move logic into pure helper functions where possible.
+
+- Easier unit reasoning
+- Lower cognitive load in instruction handlers
+- Better separation between validation and business logic
+
+## 5) Testing Strategy (Beginner -> Intermediate)
+
+- Start with Anchor `anchor test` integration flow
+- Add failure-path assertions for every instruction
+- Add local simulation tests (LiteSVM or Mollusk) when logic gets complex
+- Add realistic protocol integration tests (Surfpool) before production launch
+
+<Callout type="info">
+Do not ship with only happy-path tests.
+</Callout>
+
+## 6) Upgrade & Migration Discipline
+
+- Version account layouts deliberately
+- Add migration instructions before changing state schemas
+- Document upgrade authority ownership and process
+
+## 7) Client Boundary Hygiene
+
+- Prefer `@solana/kit` in new clients/scripts
+- Keep legacy `web3.js` usage behind adapter boundaries
+- Avoid leaking legacy types across your whole app
+
+## Practical Review Checklist
+
+1. Can every mutating instruction explain signer authority in one sentence?
+2. Is every PDA seed formula documented and tested?
+3. Are token program assumptions explicit?
+4. Are failure cases covered with tests?
+5. Are events emitted for critical business actions?
+
+## Try This Next
+
+1. Take one earlier lesson and refactor for thinner handlers.
+2. Add missing custom errors and event emission.
+3. Write one "abuse test" per instruction (wrong signer, wrong state, wrong mint).

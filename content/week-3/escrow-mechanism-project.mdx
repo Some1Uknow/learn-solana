@@ -1,15 +1,99 @@
 ---
-title: "Project - Advanced Escrow System"
-description: "Build a sophisticated escrow system with PDAs: conditional releases, multi-party agreements, time-based unlocking, and secure fund management on Solana."
+title: "Project: Escrow with PDA Vault"
+description: "Build an Anchor escrow flow with deterministic vault PDAs, explicit state transitions, cancellation paths, and safer release logic."
 module: "⚓ Anchor Framework"
 keywords:
-  - "solana escrow"
-  - "pda escrow"
-  - "conditional release"
-  - "multi-party escrow"
-  - "time-locked escrow"
-  - "solana fund management"
   - "anchor escrow"
+  - "solana escrow pda"
+  - "vault pda"
+  - "anchor state machine"
+  - "escrow release"
+  - "escrow cancel"
+  - "solana anchor project"
 ---
 
-Build sophisticated escrow with PDAs, conditional releases, multi-party agreements, and time-based unlocking
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Escrow is a perfect intermediate Anchor project because it combines:
+
+- PDA state accounts
+- Token CPI transfers
+- Clear state machine design
+
+## Problem Statement
+
+A maker deposits tokens into escrow. A taker can fulfill conditions. Then funds release according to program rules.
+
+## Minimal Escrow State
+
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct Escrow {
+    pub maker: Pubkey,
+    pub taker: Pubkey,
+    pub mint: Pubkey,
+    pub amount: u64,
+    pub status: EscrowStatus,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+pub enum EscrowStatus {
+    Initialized,
+    Funded,
+    Completed,
+    Cancelled,
+}
+```
+
+## PDA Design
+
+- Escrow PDA: `b"escrow" + maker + nonce`
+- Vault authority PDA: `b"vault-authority" + escrow_pubkey`
+- Vault ATA owned by vault authority PDA
+
+Keep seed formulas fixed and documented.
+
+## Instruction Flow
+
+1. `initialize_escrow` - writes escrow config
+2. `fund_escrow` - maker transfers tokens into vault
+3. `complete_escrow` - releases vault tokens to taker
+4. `cancel_escrow` - returns funds to maker if rules permit
+
+## Release Guardrails
+
+- Only valid actor can transition current state
+- `status` must match expected prior state
+- Transfer amount must match escrow agreement
+- All token accounts must be validated against expected mint
+
+```rust
+require!(escrow.status == EscrowStatus::Funded, EscrowError::InvalidState);
+require_keys_eq!(escrow.taker, taker.key(), EscrowError::Unauthorized);
+```
+
+## Common Escrow Bugs
+
+- Missing state transition checks (double release)
+- Using client-side booleans instead of on-chain status
+- Forgetting to close escrow account and reclaim rent
+- Not testing race-like repeated calls
+
+<Callout type="warn">
+If an instruction can be called twice, assume someone will call it twice. Protect every state transition.
+</Callout>
+
+## Test Matrix
+
+1. Maker initializes + funds successfully
+2. Unauthorized taker cannot complete
+3. Correct taker completes once
+4. Second complete attempt fails
+5. Cancel path only works in valid states
+
+## Try This Next
+
+1. Add expiry timestamp and allow timeout-based cancellation.
+2. Support partial fills with remaining balance tracking.
+3. Emit events for each state transition and index them in your backend.

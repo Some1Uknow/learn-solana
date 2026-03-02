@@ -1,15 +1,91 @@
 ---
 title: "Cross-Program Invocations (CPI)"
-description: "Learn Cross-Program Invocation (CPI) in Solana: call other programs, build CPI contexts, delegate authority, and design composable program architectures."
+description: "Learn CPI in Anchor by calling other Solana programs safely: CPI contexts, signer seeds, authority delegation, and failure-path testing."
 module: "⚓ Anchor Framework"
 keywords:
-  - "solana cpi"
-  - "cross program invocation"
   - "anchor cpi"
-  - "solana composability"
-  - "program invocation"
-  - "cpi context"
+  - "solana cross program invocation"
+  - "cpi signer seeds"
+  - "anchor composability"
+  - "token cpi"
   - "solana program calls"
+  - "anchor cpi tutorial"
 ---
 
-Calling other programs, building CPI contexts, authority delegation, and composable program design
+import { Callout } from 'fumadocs-ui/components/callout';
+
+CPI is how your program composes with the rest of Solana.
+
+Think of it as: "My program asks another trusted program to perform a specific action."
+
+## When You Need CPI
+
+- Transfer tokens with Token or Token-2022
+- Interact with system program (`create_account`, `transfer`)
+- Integrate with external protocols (DEX, lending, staking)
+
+## CPI Anatomy
+
+A CPI call in Anchor needs:
+
+1. Target program account
+2. CPI account struct (`MintTo`, `TransferChecked`, etc.)
+3. Signer seeds if a PDA must sign
+
+## Example: PDA-Signed Token Transfer
+
+```rust
+pub fn release_from_vault(ctx: Context<ReleaseFromVault>, amount: u64, decimals: u8) -> Result<()> {
+    let escrow_key = ctx.accounts.escrow.key();
+    let signer_seeds: &[&[&[u8]]] = &[&[
+        b"vault-authority",
+        escrow_key.as_ref(),
+        &[ctx.bumps.vault_authority],
+    ]];
+
+    let cpi_accounts = anchor_spl::token_interface::TransferChecked {
+        mint: ctx.accounts.mint.to_account_info(),
+        from: ctx.accounts.vault_ata.to_account_info(),
+        to: ctx.accounts.receiver_ata.to_account_info(),
+        authority: ctx.accounts.vault_authority.to_account_info(),
+    };
+
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+        signer_seeds,
+    );
+
+    anchor_spl::token_interface::transfer_checked(cpi_ctx, amount, decimals)?;
+    Ok(())
+}
+```
+
+## CPI Safety Checklist
+
+- Validate every account before CPI call
+- Ensure signer PDA seeds are exactly what you expect
+- Confirm token mint and decimals assumptions
+- Prevent privilege escalation by checking authorities
+
+<Callout type="warn">
+Most CPI bugs are validation bugs, not CPI API bugs.
+</Callout>
+
+## Testing CPI Flows
+
+1. Success path with valid accounts
+2. Wrong target program id fails
+3. Wrong PDA seeds fail
+4. Wrong authority fails
+5. Wrong mint account fails
+
+## Solana-Dev Integration Note
+
+For off-chain integration tests and service scripts, prefer `@solana/kit` transaction flows. If your current Anchor test stack uses web3 types, isolate those conversions in one compatibility module.
+
+## Try This Next
+
+1. Add CPI event logging before and after call for observability.
+2. Add compute-budget instruction when CPI stack grows.
+3. Prototype a CPI wrapper module to keep handlers small and testable.

@@ -148,49 +148,73 @@ export const contentsData = {
       id: "week-3",
       title: "Anchor Framework",
       description:
-        "Build real apps using Anchor (Solana's Rust-based smart contract framework)",
-      goal: "Master Anchor for ergonomic and powerful smart contract development",
+        "Learn Anchor from beginner to intermediate with a slower, step-by-step path",
+      goal: "Build production-ready Solana programs with clean Anchor patterns, testing, and security-first validation",
       image: "/anchor.png",
       icon: "anchor",
       overviewUrl: "/learn/week-3",
       topics: [
         {
-          id: "anchor-introduction",
-          title: "Anchor Framework Overview",
+          id: "anchor-local-setup",
+          title: "Anchor Local Setup (Your First Working Workspace)",
           description:
-            "Understanding Anchor's benefits: IDL generation, account validation macros, TypeScript client generation, and testing framework",
+            "Install and verify Solana, Rust, and Anchor; create a workspace; and run your first local tests end to end",
+          type: "setup",
+          url: "/learn/week-3/anchor-local-setup",
+        },
+        {
+          id: "anchor-core-concepts",
+          title: "Anchor Core Concepts (Slow and Clear)",
+          description:
+            "Understand instructions, accounts, signers, and constraints before writing CRUD logic",
           type: "theory",
-          url: "/learn/week-3/anchor-introduction",
+          url: "/learn/week-3/anchor-core-concepts",
+        },
+        {
+          id: "anchor-program-anatomy",
+          title: "Anchor Program Anatomy (What Each File Does)",
+          description:
+            "Learn project structure, IDL output, test flow, and how client calls become on-chain state changes",
+          type: "theory",
+          url: "/learn/week-3/anchor-program-anatomy",
+        },
+        {
+          id: "first-anchor-program",
+          title: "First Anchor Program: Counter CRUD (Step by Step)",
+          description:
+            "Build initialize, increment, decrement, and reset instructions one step at a time with tests",
+          type: "exercise",
+          url: "/learn/week-3/first-anchor-program",
+        },
+        {
+          id: "pda-seed-derivation",
+          title: "PDAs & Seed Derivation (Beginner Friendly)",
+          description:
+            "Use deterministic account addresses safely with clear seed design and bump handling",
+          type: "theory",
+          url: "/learn/week-3/pda-seed-derivation",
         },
         {
           id: "spl-token-integration",
-          title: "SPL Token Integration",
+          title: "SPL Token Integration with Anchor",
           description:
-            "Working with SPL tokens: minting, burning, transfers, associated token accounts, and token metadata",
+            "Create mints, token accounts, and safe transfer flows across Token and Token-2022",
           type: "theory",
           url: "/learn/week-3/spl-token-integration",
         },
         {
           id: "token-minting-project",
-          title: "Project: Token Minting & Management dApp",
+          title: "Project: Token Minting & Supply Control",
           description:
-            "Build complete token ecosystem with minting authority, supply management, and holder interactions using Anchor",
+            "Implement PDA mint authority, supply caps, and admin-controlled minting rules",
           type: "project",
           url: "/learn/week-3/token-minting-project",
         },
         {
-          id: "pda-seed-derivation",
-          title: "PDAs & Seed Derivation Mastery",
-          description:
-            "Program Derived Addresses, seed patterns, bump derivation, and using PDAs for program-controlled accounts",
-          type: "theory",
-          url: "/learn/week-3/pda-seed-derivation",
-        },
-        {
           id: "escrow-mechanism-project",
-          title: "Project: Advanced Escrow System",
+          title: "Project: Escrow with PDA Vault",
           description:
-            "Build sophisticated escrow with PDAs, conditional releases, multi-party agreements, and time-based unlocking",
+            "Build escrow state transitions with vault PDAs, cancellation paths, and release guardrails",
           type: "project",
           url: "/learn/week-3/escrow-mechanism-project",
         },
@@ -203,20 +227,20 @@ export const contentsData = {
           url: "/learn/week-3/cpi-cross-program",
         },
         {
-          id: "defi-integration-challenge",
-          title: "Challenge: DeFi Protocol Integration",
-          description:
-            "Integrate with existing DeFi protocols using CPI: token swaps, liquidity provision, or yield farming mechanisms",
-          type: "challenge",
-          url: "/learn/week-3/defi-integration-challenge",
-        },
-        {
           id: "anchor-ergonomics",
-          title: "Anchor Development Best Practices",
+          title: "Anchor Development Ergonomics (From Working Code to Clean Code)",
           description:
-            "Account constraints, error handling, events, program upgrades, and testing patterns for maintainable code",
+            "Use constraints, custom errors, events, and testing strategy to keep programs maintainable",
           type: "theory",
           url: "/learn/week-3/anchor-ergonomics",
+        },
+        {
+          id: "defi-integration-challenge",
+          title: "Challenge: DeFi Integration with Anchor CPI",
+          description:
+            "Capstone challenge: integrate CPI flows with strict validation, state machines, and failure-path tests",
+          type: "challenge",
+          url: "/learn/week-3/defi-integration-challenge",
         },
       ],
     },

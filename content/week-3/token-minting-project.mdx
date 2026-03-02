@@ -1,15 +1,148 @@
 ---
-title: "Project - Token Minting & Management dApp"
-description: "Build a complete token ecosystem with Anchor: minting authority, supply management, holder interactions, and token economics implementation on Solana."
+title: "Project: Token Minting & Supply Control"
+description: "Build an Anchor token project with PDA mint authority, controlled minting, and test-driven supply rules suitable for beginner-to-intermediate learners."
 module: "⚓ Anchor Framework"
 keywords:
-  - "token minting solana"
-  - "mint authority"
-  - "token supply"
-  - "solana tokenomics"
-  - "anchor token"
-  - "token ecosystem"
-  - "solana token creation"
+  - "anchor token project"
+  - "mint authority pda"
+  - "token supply control"
+  - "anchor minting"
+  - "solana token economics"
+  - "anchor project tutorial"
+  - "solana token dapp"
 ---
 
-Build complete token ecosystem with minting authority, supply management, and holder interactions using Anchor
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+This project turns the previous lesson into a real mini-system.
+
+You will create a token where **your program controls minting rules**, not the front end.
+
+## Project Goal
+
+Build a reward token with these constraints:
+
+- Mint authority is a PDA
+- Only approved admin can trigger mint
+- Total minted supply cannot exceed `MAX_SUPPLY`
+
+## Architecture
+
+- `Config` PDA stores admin and minted_total
+- Mint authority PDA signs CPI via seeds
+- Instruction checks cap before minting
+
+## Program Skeleton
+
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct Config {
+    pub admin: Pubkey,
+    pub minted_total: u64,
+}
+
+pub const MAX_SUPPLY: u64 = 1_000_000_000;
+```
+
+## Initialize Config + Mint Authority
+
+```rust
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(
+        init,
+        payer = admin,
+        space = 8 + Config::INIT_SPACE,
+        seeds = [b"config"],
+        bump,
+    )]
+    pub config: Account<'info, Config>,
+
+    /// CHECK: PDA used as mint authority signer
+    #[account(seeds = [b"mint-authority"], bump)]
+    pub mint_authority: UncheckedAccount<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+## Controlled Mint Instruction
+
+```rust
+pub fn mint_with_cap(ctx: Context<MintWithCap>, amount: u64) -> Result<()> {
+    require_keys_eq!(ctx.accounts.admin.key(), ctx.accounts.config.admin, CustomError::Unauthorized);
+
+    let next_total = ctx.accounts.config
+        .minted_total
+        .checked_add(amount)
+        .ok_or(CustomError::Overflow)?;
+
+    require!(next_total <= MAX_SUPPLY, CustomError::SupplyCapExceeded);
+
+    let signer_seeds: &[&[&[u8]]] = &[&[b"mint-authority", &[ctx.bumps.mint_authority]]];
+
+    let cpi_accounts = anchor_spl::token_interface::MintTo {
+        mint: ctx.accounts.mint.to_account_info(),
+        to: ctx.accounts.destination.to_account_info(),
+        authority: ctx.accounts.mint_authority.to_account_info(),
+    };
+
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+        signer_seeds,
+    );
+
+    anchor_spl::token_interface::mint_to(cpi_ctx, amount)?;
+
+    ctx.accounts.config.minted_total = next_total;
+    Ok(())
+}
+```
+
+## What Makes This Intermediate
+
+- PDA signer flow with `new_with_signer`
+- State + token CPI consistency
+- Supply invariants enforced on-chain
+
+## Test Plan
+
+1. Initialize config sets admin correctly
+2. Authorized mint updates `minted_total`
+3. Unauthorized mint fails
+4. Mint over cap fails
+
+<Callout type="warn">
+Do not enforce supply cap only in the client. Always enforce it in program logic.
+</Callout>
+
+## Shipping Checklist
+
+<Steps>
+<Step>
+### Step 1: Program tests pass
+Your failure-path tests should be as strong as success tests.
+</Step>
+
+<Step>
+### Step 2: IDL regenerated
+Rebuild to keep client instruction names and account schemas aligned.
+</Step>
+
+<Step>
+### Step 3: Client uses explicit cluster config
+No hidden RPC defaults in scripts or UI.
+</Step>
+</Steps>
+
+## Try This Next
+
+1. Add per-user mint quotas using a `UserQuota` PDA.
+2. Add pause/unpause admin switch to config.
+3. Add event emission for each mint and index it off-chain.

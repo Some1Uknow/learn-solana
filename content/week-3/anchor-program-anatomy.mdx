@@ -1,0 +1,121 @@
+---
+title: "Anchor Program Anatomy (What Each File Does)"
+description: "Learn how an Anchor project is organized: programs, tests, IDL, migrations, and how a client call becomes an on-chain state change."
+module: "⚓ Anchor Framework"
+keywords:
+  - "anchor project structure"
+  - "anchor toml"
+  - "anchor idl"
+  - "anchor tests"
+  - "anchor workspace anatomy"
+  - "solana anchor files"
+  - "anchor beginner guide"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+This lesson answers a common beginner question:
+
+"I ran `anchor init`... now what are all these files?"
+
+## Standard Anchor Workspace Layout
+
+```txt
+anchor_starter/
+  Anchor.toml
+  programs/
+    anchor_starter/src/lib.rs
+  tests/
+    anchor_starter.ts
+  migrations/
+  target/
+```
+
+## What Each Part Is For
+
+### `Anchor.toml`
+
+Project config:
+
+- Program addresses by cluster
+- Provider wallet path
+- Script aliases
+
+### `programs/<name>/src/lib.rs`
+
+Your on-chain program logic:
+
+- Instructions
+- Account contexts
+- State structs
+- Error codes
+
+### `tests/*.ts`
+
+Your local integration tests:
+
+- Build transactions
+- Call program methods
+- Assert account state changes
+
+### `target/idl/*.json`
+
+Generated IDL (interface definition):
+
+- Instruction names
+- Required accounts
+- Argument types
+
+Clients use this to call your program safely.
+
+<Callout type="info">
+When instruction signatures change, regenerate artifacts with `anchor build` so IDL stays in sync.
+</Callout>
+
+## End-to-End Request Flow
+
+<Steps>
+<Step>
+### Step 1: Client creates instruction data
+Your script/front end builds a method call.
+</Step>
+
+<Step>
+### Step 2: Transaction includes required accounts
+Client attaches signer, program id, and all account metas.
+</Step>
+
+<Step>
+### Step 3: Program executes account validation
+Anchor enforces account constraints first.
+</Step>
+
+<Step>
+### Step 4: Handler updates account data
+Business logic runs and writes back state.
+</Step>
+
+<Step>
+### Step 5: Client reads updated account
+Tests/UI fetch account and verify expected changes.
+</Step>
+</Steps>
+
+## Two Files You Should Open Every Time
+
+1. `programs/<name>/src/lib.rs` -> source of truth for security and logic
+2. `tests/<name>.ts` -> source of truth for expected behavior
+
+## Solana-Dev Note (Client Layer)
+
+Anchor TS tests are fine for onboarding. For new production client/scripts, prefer `@solana/kit` flows and keep any web3-based compatibility code isolated.
+
+## Quick Practice
+
+1. Run `anchor build`.
+2. Open `target/idl/<program>.json`.
+3. Match one IDL instruction to its Rust handler.
+4. Match that same instruction to one test case.
+
+If you can do this mapping, you are ready for CRUD.

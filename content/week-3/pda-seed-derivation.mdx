@@ -1,15 +1,126 @@
 ---
-title: "PDAs & Seed Derivation Mastery"
-description: "Master Program Derived Addresses (PDAs): seed patterns, bump derivation, deterministic addressing, and using PDAs for program-controlled accounts in Solana."
+title: "PDAs & Seed Derivation (Beginner Friendly)"
+description: "Learn Program Derived Addresses with Anchor: deterministic account addresses, seed design, bumps, and safe PDA-based account creation patterns."
 module: "⚓ Anchor Framework"
 keywords:
   - "solana pda"
-  - "program derived address"
-  - "pda seeds"
-  - "bump derivation"
-  - "deterministic address"
   - "anchor pda"
-  - "solana account derivation"
+  - "seed derivation"
+  - "anchor bump"
+  - "program derived address"
+  - "solana deterministic accounts"
+  - "anchor seeds"
 ---
 
-Program Derived Addresses, seed patterns, bump derivation, and using PDAs for program-controlled accounts
+import { Callout } from 'fumadocs-ui/components/callout';
+
+PDAs are one of the most important Solana patterns.
+
+If normal keypairs are user-controlled addresses, PDAs are **program-controlled addresses** derived from predictable seeds.
+
+## Why PDAs Exist
+
+You use PDAs when you need predictable addresses for state.
+
+Examples:
+
+- One profile per user
+- One review per `(movie, user)`
+- One vault per escrow deal
+
+With PDAs, you can always re-derive the same address from the same seed inputs.
+
+## PDA Mental Model
+
+A PDA is derived from:
+
+- Seed bytes (`b"review"`, user pubkey, etc.)
+- Program ID
+- Bump (single byte Anchor finds for a valid curve-off address)
+
+Anchor makes this practical through account constraints.
+
+## Example: Movie Review PDA
+
+```rust title="review PDA account"
+#[derive(Accounts)]
+#[instruction(movie: String)]
+pub struct AddReview<'info> {
+    #[account(mut)]
+    pub reviewer: Signer<'info>,
+
+    #[account(
+        init,
+        payer = reviewer,
+        space = 8 + MovieReview::INIT_SPACE,
+        seeds = [b"review", reviewer.key().as_ref(), movie.as_bytes()],
+        bump,
+    )]
+    pub review: Account<'info, MovieReview>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+```rust title="state"
+#[account]
+#[derive(InitSpace)]
+pub struct MovieReview {
+    pub reviewer: Pubkey,
+    #[max_len(50)]
+    pub movie: String,
+    #[max_len(280)]
+    pub text: String,
+    pub rating: u8,
+}
+```
+
+<Callout type="tip">
+Seed order matters. `review + user + movie` is different from `review + movie + user`.
+</Callout>
+
+## Updating a PDA Account
+
+Use the same seed formula in update/delete contexts.
+
+```rust
+#[derive(Accounts)]
+#[instruction(movie: String)]
+pub struct UpdateReview<'info> {
+    pub reviewer: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"review", reviewer.key().as_ref(), movie.as_bytes()],
+        bump,
+        has_one = reviewer,
+    )]
+    pub review: Account<'info, MovieReview>,
+}
+```
+
+## Seed Design Rules
+
+1. Include a namespace seed first (example: `b"review"`)
+2. Include identity keys when you need per-user separation
+3. Include business keys only if they are stable enough
+4. Keep seed count and size reasonable
+
+## Common PDA Mistakes
+
+- Using mutable text as a seed when the value can change later
+- Forgetting to reuse the same seed formula in later instructions
+- Missing `has_one` checks and trusting only signer presence
+- Storing data in one PDA but validating another seed set
+
+## Security Checklist (PDA Edition)
+
+- Is every PDA derived from deterministic, intentional seeds?
+- Does every mutating instruction validate ownership (`has_one`, signer)?
+- Do tests include wrong-seed and wrong-authority attempts?
+
+## Try This Next
+
+1. Build a `UserProfile` PDA with seed `b"profile" + user_pubkey`.
+2. Add `close` instruction to reclaim rent when a profile is deleted.
+3. Write a failing test for wrong PDA seed order and confirm rejection.

@@ -1,16 +1,20 @@
 {
   "title": "Anchor",
-  "description": "Learn the basics of Anchor",
+  "description": "Beginner to intermediate Anchor tutorials",
   "icon": "Anchor",
   "root": true,
   "pages": [
     "index",
+    "anchor-local-setup",
+    "anchor-core-concepts",
+    "anchor-program-anatomy",
+    "first-anchor-program",
+    "pda-seed-derivation",
     "spl-token-integration",
     "token-minting-project",
-    "pda-seed-derivation",
     "escrow-mechanism-project",
     "cpi-cross-program",
-    "defi-integration-challenge",
-    "anchor-ergonomics"
+    "anchor-ergonomics",
+    "defi-integration-challenge"
   ]
 }

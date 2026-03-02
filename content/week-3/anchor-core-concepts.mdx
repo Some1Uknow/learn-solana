@@ -1,0 +1,135 @@
+---
+title: "Anchor Core Concepts (Slow and Clear)"
+description: "Before writing CRUD logic, learn the four Anchor ideas that control everything: instructions, accounts, signers, and constraints."
+module: "⚓ Anchor Framework"
+keywords:
+  - "anchor basics"
+  - "anchor instructions"
+  - "anchor accounts"
+  - "anchor signer"
+  - "anchor constraints"
+  - "solana anchor beginner"
+  - "anchor mental model"
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+Before you build a full program, lock in the mental model.
+
+If this page is clear, the next lessons feel easy.
+
+## The 4 Ideas You Need
+
+1. **Instruction**: a function your program exposes
+2. **Accounts**: the on-chain data each instruction reads/writes
+3. **Signer**: the wallet that authorizes actions
+4. **Constraints**: rules Anchor checks before your logic runs
+
+<Callout type="info">
+Anchor is mostly a validation layer plus clean Rust handlers.
+</Callout>
+
+## 1) Instruction = "What action are we asking for?"
+
+In Anchor, each instruction is a Rust function inside `#[program]`.
+
+```rust
+pub fn increment(ctx: Context<Update>) -> Result<()> {
+    ctx.accounts.counter.count += 1;
+    Ok(())
+}
+```
+
+What this means:
+
+- Someone sent a transaction calling `increment`
+- Anchor validated `Context<Update>` first
+- Then your business logic ran
+
+## 2) Accounts = "Which data is involved?"
+
+Solana programs do not store memory like normal web servers.
+They read/write **accounts**.
+
+```rust
+#[account]
+pub struct Counter {
+    pub authority: Pubkey,
+    pub count: u64,
+}
+```
+
+Think of this as a row in a database, but on-chain.
+
+## 3) Signer = "Who approved this action?"
+
+When you mark an account as `Signer<'info>`, that account must sign the transaction.
+
+```rust
+pub authority: Signer<'info>
+```
+
+If the caller does not sign, the instruction fails before your logic runs.
+
+## 4) Constraints = "What must be true before we continue?"
+
+Constraints are safety rules in account contexts.
+
+```rust
+#[account(mut, has_one = authority)]
+pub counter: Account<'info, Counter>
+```
+
+This says:
+
+- `mut`: counter can be changed
+- `has_one = authority`: stored `counter.authority` must equal provided signer
+
+<Callout type="tip">
+Good Anchor code pushes checks into constraints first, then keeps handlers small.
+</Callout>
+
+## How It All Connects
+
+<Steps>
+<Step>
+### Step 1: Client sends instruction
+Frontend or script calls `program.methods.increment()`.
+</Step>
+
+<Step>
+### Step 2: Anchor validates accounts
+Signer checks, ownership checks, and constraints run first.
+</Step>
+
+<Step>
+### Step 3: Handler logic executes
+Only after validation passes.
+</Step>
+
+<Step>
+### Step 4: State is committed
+Transaction finishes and account data is updated on-chain.
+</Step>
+</Steps>
+
+## Mini Self-Check
+
+Answer these before moving on:
+
+1. If `has_one` fails, does handler code run? (No)
+2. If account is missing `mut`, can you write to it? (No)
+3. Who pays for new account creation in `init`? (The `payer` account)
+
+## Common Beginner Confusions
+
+- "Instruction and transaction are the same" -> not always; one transaction can include multiple instructions.
+- "Signer means owner" -> not always; signer authorizes, ownership is a separate concept.
+- "If client checks it, program is safe" -> false; program must enforce critical rules itself.
+
+## Try This Next
+
+1. Open any previous Anchor snippet and highlight instruction, accounts, signer, constraints.
+2. Write one sentence for each: what can fail before handler runs?
+3. Then move to `anchor-program-anatomy`.

@@ -1,15 +1,116 @@
 ---
-title: "SPL Token Integration"
-description: "Work with SPL tokens in Anchor: minting, burning, transfers, associated token accounts, token metadata, and building token-based applications on Solana."
+title: "SPL Token Integration with Anchor"
+description: "Integrate SPL tokens in Anchor programs: create mints, create token accounts, mint tokens, transfer safely, and understand Token vs Token-2022 boundaries."
 module: "⚓ Anchor Framework"
 keywords:
-  - "spl token"
-  - "solana tokens"
-  - "token minting"
-  - "associated token account"
-  - "token metadata"
   - "anchor spl"
+  - "spl token anchor"
+  - "token-2022 anchor"
+  - "mint_to anchor"
+  - "transfer_checked anchor"
+  - "associated token account"
   - "solana token program"
 ---
 
-Working with SPL tokens: minting, burning, transfers, associated token accounts, and token metadata
+import { Callout } from 'fumadocs-ui/components/callout';
+
+After PDAs, token integration is the next skill that unlocks real apps.
+
+This lesson focuses on **correct token account wiring** and **safe instruction constraints**.
+
+## Core Accounts You Need To Know
+
+- Mint account: token definition (decimals, authorities)
+- Token account (ATA usually): balance holder for an owner + mint
+- Token program: SPL Token or Token-2022 program
+
+<Callout type="info">
+Always be explicit about which token program you support. Do not assume legacy SPL token program only.
+</Callout>
+
+## Anchor Example: Mint Tokens
+
+```rust title="mint tokens with anchor_spl"
+use anchor_spl::token_interface::{
+    Mint, MintTo, TokenAccount, TokenInterface, mint_to,
+};
+
+#[derive(Accounts)]
+pub struct MintRewards<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    #[account(mut)]
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    #[account(mut)]
+    pub destination: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+}
+
+pub fn mint_rewards(ctx: Context<MintRewards>, amount: u64) -> Result<()> {
+    let cpi_accounts = MintTo {
+        mint: ctx.accounts.mint.to_account_info(),
+        to: ctx.accounts.destination.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+    };
+
+    let cpi_ctx = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+    );
+
+    mint_to(cpi_ctx, amount)?;
+    Ok(())
+}
+```
+
+## Transfer With Decimal Checks
+
+Use checked transfer patterns to avoid decimal mismatch bugs.
+
+```rust
+use anchor_spl::token_interface::{TransferChecked, transfer_checked};
+
+pub fn transfer_points(ctx: Context<TransferPoints>, amount: u64, decimals: u8) -> Result<()> {
+    let cpi_accounts = TransferChecked {
+        mint: ctx.accounts.mint.to_account_info(),
+        from: ctx.accounts.from_ata.to_account_info(),
+        to: ctx.accounts.to_ata.to_account_info(),
+        authority: ctx.accounts.owner.to_account_info(),
+    };
+
+    let cpi_ctx = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+    );
+
+    transfer_checked(cpi_ctx, amount, decimals)?;
+    Ok(())
+}
+```
+
+## Token Integration Guardrails
+
+- Validate account mint matches your expected mint
+- Validate token account owner where required
+- Do not trust client-provided decimals blindly
+- Enforce authority checks before mint/burn flows
+
+## Suggested Test Cases
+
+1. Mint succeeds with valid authority
+2. Mint fails with wrong authority
+3. Transfer fails when source mint mismatches
+4. Transfer succeeds for correct token program
+
+## Solana-Dev Client Note
+
+For new off-chain scripts, prefer `@solana/kit` for transaction construction and confirmation logic. If existing Anchor TS/web3 flows are already in place, isolate legacy types at adapter boundaries.
+
+## Try This Next
+
+1. Add an instruction that mints a fixed daily reward per user.
+2. Prevent double-claim with a PDA claim record.
+3. Add tests for both SPL Token and Token-2022 if your app supports both.

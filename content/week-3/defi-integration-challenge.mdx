@@ -1,15 +1,101 @@
 ---
-title: "Challenge - DeFi Protocol Integration"
-description: "Build DeFi integrations using CPI: implement token swaps, liquidity provision, and yield farming mechanisms by connecting with existing Solana protocols."
+title: "Challenge: DeFi Integration with Anchor CPI"
+description: "Capstone challenge for this module: integrate an Anchor program with external protocol-like flows using CPI, strict account validation, and realistic test scenarios."
 module: "⚓ Anchor Framework"
 keywords:
-  - "solana defi"
-  - "defi integration"
-  - "token swap solana"
-  - "liquidity provision"
-  - "yield farming solana"
-  - "defi cpi"
-  - "solana protocols"
+  - "anchor defi challenge"
+  - "cpi capstone"
+  - "solana defi integration"
+  - "anchor protocol integration"
+  - "token swap challenge"
+  - "anchor intermediate project"
+  - "solana smart contract challenge"
 ---
 
-Integrate with existing DeFi protocols using CPI: token swaps, liquidity provision, or yield farming mechanisms
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+This is your intermediate checkpoint.
+
+You now know enough to design a small protocol integration safely.
+
+## Challenge Brief
+
+Build an Anchor program that performs one of these actions through CPI:
+
+1. Route a token transfer through a vault before settlement
+2. Execute a controlled swap-like flow (simulated or protocol test environment)
+3. Distribute yield/rewards with on-chain accounting
+
+Pick one and implement end-to-end.
+
+## Required Capabilities
+
+- At least one PDA authority signer
+- At least one CPI to token/system/external program
+- State machine with 2+ states
+- 6+ tests including failure paths
+
+## Suggested Scope (4 Milestones)
+
+<Steps>
+<Step>
+### Milestone 1: State and Accounts
+Define account model, seed formulas, and authority model.
+</Step>
+
+<Step>
+### Milestone 2: Happy Path
+Implement main business instruction and make it pass in tests.
+</Step>
+
+<Step>
+### Milestone 3: Abuse Tests
+Add wrong-authority, wrong-mint, wrong-state, and replay-style tests.
+</Step>
+
+<Step>
+### Milestone 4: Client Script
+Add a small client flow (prefer `@solana/kit` for new script code) to execute the path end to end.
+</Step>
+</Steps>
+
+## Acceptance Criteria
+
+Your challenge is complete when:
+
+- Program logic enforces all critical rules on-chain
+- CPI accounts are fully validated
+- Tests cover both success and failure behaviors
+- README explains architecture and trust assumptions
+
+## Risk Review (Must Answer)
+
+1. Who can move funds, and how is that authority enforced?
+2. Which accounts are mutable, and why?
+3. What happens if instruction is called twice?
+4. What assumptions do you make about external program behavior?
+5. How will you safely upgrade this logic later?
+
+<Callout type="warn">
+If you cannot explain your authority model clearly, your design is not ready.
+</Callout>
+
+## Submission Template (Use This)
+
+- Problem statement
+- Account model diagram
+- Instruction list and required signers
+- Test matrix (happy + failure)
+- Known limitations and future hardening
+
+## What “Good” Looks Like
+
+A strong submission is not the longest one. It is the one with:
+
+- Clear account constraints
+- Minimal trust assumptions
+- Thoughtful failure testing
+- Explicit upgrade and security notes
+
+When you finish this challenge, you are ready to start building production-style Anchor modules.

@@ -1,15 +1,70 @@
 ---
-title: "Anchor Framework Overview"
-description: "Master the Anchor framework for Solana development. Learn IDL generation, account validation macros, TypeScript client generation, and comprehensive testing patterns."
+title: "Anchor Framework (Beginner to Intermediate)"
+description: "Learn Anchor step by step: setup, first program, PDAs, SPL tokens, CPI, testing, and production-ready patterns."
 module: "⚓ Anchor Framework"
 keywords:
-  - "anchor framework"
-  - "solana anchor"
-  - "anchor idl"
-  - "anchor macros"
-  - "solana smart contracts"
+  - "anchor tutorial"
+  - "solana anchor beginner"
+  - "anchor pda"
+  - "anchor spl token"
+  - "anchor cpi"
   - "anchor testing"
-  - "solana development"
+  - "solana smart contract"
 ---
 
-Understanding Anchor's benefits: IDL generation, account validation macros, TypeScript client generation, and testing framework
+import { Callout } from 'fumadocs-ui/components/callout';
+
+If you can write basic Rust and run Solana CLI commands, you can learn Anchor.
+
+This module starts simple and gets progressively harder. You will go from "What is an Anchor account context?" to building token and escrow flows with CPI and security checks.
+
+<Callout type="info">
+You do not need to memorize everything on first read. Build each lesson, run tests, then move forward.
+</Callout>
+
+## What You Will Build
+
+- A local Anchor workspace you can run confidently
+- A first program (Counter) with tests
+- PDA-based state accounts
+- SPL token flows (minting and transfers)
+- A small escrow system
+- CPI patterns and intermediate design tradeoffs
+
+## Learning Path
+
+1. `anchor-local-setup` - Install tools, create workspace, run your first tests
+2. `anchor-core-concepts` - Understand instructions, accounts, signers, and constraints
+3. `anchor-program-anatomy` - Learn how Anchor projects are structured end to end
+4. `first-anchor-program` - Build and test a Counter program step by step
+5. `pda-seed-derivation` - Use deterministic addresses safely
+6. `spl-token-integration` - Work with token accounts and token programs
+7. `token-minting-project` - Build a mint authority flow with Anchor
+8. `escrow-mechanism-project` - Add state machines and controlled release
+9. `cpi-cross-program` - Call other programs from your program
+10. `anchor-ergonomics` - Improve code quality, testing, and maintainability
+11. `defi-integration-challenge` - Ship a capstone-style integration plan
+
+## Prerequisites
+
+- Comfortable with Rust basics (`struct`, `enum`, `Result`)
+- Solana CLI installed and configured for `devnet` or `localnet`
+- Node.js and a package manager (`pnpm`/`npm`)
+- Basic understanding of Solana accounts and transactions
+
+## How To Use This Module
+
+- Read each lesson fully once.
+- Run commands as you go.
+- Do the "Try this next" tasks.
+- Keep your own `notes.md` with errors you hit and how you fixed them.
+
+<Callout type="tip">
+Anchor gets easier once you internalize one idea: every instruction is just account validation + state transitions.
+</Callout>
+
+## Outcome
+
+By the end of this module, you should be able to design and test a non-trivial Anchor program, explain your account model, and build a clean client interface for it.
+
+Start with: **`anchor-local-setup`**.
