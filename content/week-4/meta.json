@@ -1,7 +1,7 @@
 {
   "title": "Solana Kit Client-Side",
   "description": "Build a Solana client with @solana/kit: connect a wallet, read accounts, and send transactions.",
-  "icon": "NextJS",
+  "icon": "SolanaKit",
   "root": true,
   "pages": [
     "index",

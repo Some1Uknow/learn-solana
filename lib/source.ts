@@ -48,6 +48,13 @@ export const source = loader({
           width: 48,
           height: 48,
         });
+      case "SolanaKit":
+        return createElement(Image, {
+          src: "/solana-kit.svg",
+          alt: "Solana Kit",
+          width: 48,
+          height: 48,
+        });
     }
   },
 });
