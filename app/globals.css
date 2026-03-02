@@ -557,10 +557,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 0.45rem;
-  background: radial-gradient(circle at 30% 30%, rgba(15, 245, 153, 0.25), transparent 60%);
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.95rem;
+  background: radial-gradient(circle at 30% 30%, rgba(15, 245, 153, 0.24), rgba(10, 12, 22, 0.8));
+  padding: 0.25rem;
 }
 
 .ls-nav-brand-logo-img {
