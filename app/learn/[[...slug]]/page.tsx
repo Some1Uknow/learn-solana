@@ -29,7 +29,7 @@ export default async function Page(props: {
   const slugParts = params.slug || [];
   const breadcrumbItems = [
     { name: "Home", url: "/" },
-    { name: "Learn", url: "/learn" },
+    { name: "Curriculum", url: "/modules" },
   ];
   
   // Add intermediate paths (e.g., week-1)
@@ -88,7 +88,7 @@ export default async function Page(props: {
       >
         <header className="ls-docs-hero">
           <nav className="ls-docs-breadcrumb" aria-label="Breadcrumb">
-            <Link href="/learn">Curriculum</Link>
+            <Link href="/modules">Curriculum</Link>
             {slugParts.slice(0, -1).map((part, index) => {
               const href = `/learn/${slugParts.slice(0, index + 1).join("/")}`;
               return (
