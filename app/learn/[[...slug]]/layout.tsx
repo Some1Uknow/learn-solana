@@ -10,13 +10,14 @@ import { LearnWelcomeModal } from "@/components/learn-welcome-modal";
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
   tree: source.pageTree,
+  containerProps: {
+    className: "ls-docs-layout",
+  },
   sidebar: {
     tabs: {
       transform(option, node) {
         const meta = source.getNodeMeta(node);
         if (!meta) return option;
-
-        const color = `var(--${meta.file.dirname}-color, var(--color-fd-foreground))`;
 
         return {
           ...option,
