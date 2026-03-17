@@ -1,153 +1,279 @@
 ---
-title: "Solana Devnet Program Analysis Challenge"
-description: "Reverse-engineer a Solana devnet program by tracing transactions, decoding accounts, and documenting instructions to build practical on-chain analysis skills."
+title: "Devnet Investigation Challenge"
+description: "Use your Week 1 toolkit to inspect real accounts, send a real transfer on devnet, and write down what changed before and after the transaction."
 type: challenge
 module: "🧱 Solana Fundamentals"
-keywords: ["solana devnet", "program analysis", "accounts", "instructions", "reverse engineering"]
+keywords: ["solana devnet", "account inspection", "transaction analysis", "challenge", "solana kit"]
 ---
 
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
-This challenge will help you sharpen your skills by reverse-engineering existing Solana programs deployed on devnet.
+A bad beginner challenge asks you to reverse-engineer a random devnet program before you can even explain a normal transfer cleanly.
 
-Your goal is to pick a deployed devnet program, analyze its accounts and transactions, and create a report explaining how it works. This includes the instructions it uses, what kind of accounts it manages, and any observed patterns.
+That is not a good Week 1 test.
+
+A good Week 1 challenge asks a simpler question:
+
+Can you observe one real transaction, inspect the accounts around it, and explain what changed without hand-waving?
+
+That is what this challenge is for.
 
 <Callout type="info">
-This is an open-ended investigation challenge. There is no single "correct" program to pick. The value lies in your process and what you uncover.
+Use the toolkit from the previous lesson. Do not build a new client from scratch here. The point is to use your tools to investigate the chain, not to start another project.
 </Callout>
 
 ---
 
-## What You'll Do
+## What You Need To Prove
 
-<Callout type="info">
-In this challenge, you will:
+By the end of this challenge, you should be able to show all of these clearly:
 
--   Pick a non-trivial devnet program from public transaction history.
--   Identify its Program ID and map out its primary instructions by observing interactions.
--   Analyze the data structures of the accounts it creates and modifies.
--   Interpret the program's purpose and document your findings in a clear report.
-</Callout>
+- the sender account before the transfer
+- the recipient account before the transfer
+- the transaction signature that was produced
+- the sender account after the transfer
+- the recipient account after the transfer
+- a short explanation of who signed, who received funds, and why the balances changed the way they did
 
----
-
-## Where to Look
-
-Here are a few tools to help you discover interesting programs. Your first step is always to find a Program ID to investigate.
-
-<Accordions>
-<Accordion title="Solana Explorer (Devnet)">
-### Solana Explorer (Devnet)
-
-Visit [explorer.solana.com?cluster=devnet](https://explorer.solana.com?cluster=devnet) and watch the "Live Transaction Stream." Click on transactions and look at the "Instruction Details." If you see an instruction calling a program that isn't a common system or token program, you may have found a good candidate!
-</Accordion>
-
-<Accordion title="Solscan / SolanaFM">
-### Solscan / SolanaFM
-
-These are powerful alternatives. You can go to the "Transactions" tab on their devnet sites and look for interactions with unfamiliar programs. Their UIs are often better at "parsing" or decoding instruction data, which can give you early clues about what a program does.
-</Accordion>
-
-<Accordion title="Public GitHub Repos">
-### Public GitHub Repos
-
-Search GitHub for queries like `"solana program deploy" devnet` or `"anchor build" devnet`. You can often find open-source projects where developers have left their devnet program IDs in the README files or in test scripts. This is a great way to find a program where you can also check your work against the source code later.
-</Accordion>
-</Accordions>
+If you can do that without guessing, Week 1 is working.
 
 ---
 
-## Project Steps
+## The Challenge Setup
+
+Use the same two wallets from the earlier lessons:
+
+- `wallet1.json` as the sender
+- `wallet2.json` as the recipient
+
+And use the toolkit commands you already built:
+
+- `balance.ts`
+- `inspect.ts`
+- `send.ts`
+
+If your toolkit lives in `kit-toolkit/`, all the examples below assume you are inside that directory.
+
+---
+
+## The Real Goal
+
+This challenge is not really about sending another `0.01 SOL` transfer.
+
+It is about learning to observe a state change properly.
+
+A lot of new developers can send a transaction.
+Far fewer can answer these basic questions cleanly afterward:
+
+- which account authorized the change
+- which account received value
+- why the sender lost slightly more than the recipient gained
+- what the account output looked like before and after
+- where the transaction can be verified independently
+
+That is the skill you are testing here.
+
+---
+
+## Step-by-Step Challenge
 
 <Steps>
 <Step>
-### Step 1: Choose a Devnet Program
+### Step 1: Record the Starting State
 
-Find a real program deployed to devnet. For this example, let's pretend we found a program with the ID `Vote...` that appears to be a simple on-chain voting application. We'll use this hypothetical program for the next steps.
+Fetch the starting balances for both wallets.
+
+```bash title="terminal"
+pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
+pnpm tsx scripts/balance.ts $(solana address -k wallet2.json)
+```
+
+Then inspect both accounts more deeply:
+
+```bash title="terminal"
+pnpm tsx scripts/inspect.ts $(solana address -k wallet1.json)
+pnpm tsx scripts/inspect.ts $(solana address -k wallet2.json)
+```
+
+Write down what you see.
+
+You do not need every field. The important ones are:
+
+- address
+- lamports
+- owner
+- executable
+- data length
+
 </Step>
 
 <Step>
-### Step 2: Investigate Transactions
+### Step 2: Send One Real Transfer
 
-On Solscan, look up the program ID `Vote...` and view its transaction history. You might find two common patterns:
+Now send a small transfer from `wallet1` to `wallet2`.
 
-1.  **Initialization Transaction:** One instruction that involves the System Program and creates a new account. This is likely the `initialize_poll` instruction.
-2.  **Voting Transaction:** Another instruction that involves an existing "poll" account and a user's wallet. This is likely the `vote` instruction.
+```bash title="terminal"
+pnpm tsx scripts/send.ts wallet1.json $(solana address -k wallet2.json) 0.01
+```
 
-By clicking into a "voting" transaction, you might see it takes three accounts: the user's wallet (as a signer), the poll account (writable), and the system clock. This is your first major clue about the program's mechanics.
+Your script should print a transaction signature.
+
+Save that signature.
+
+It is the public receipt for what just happened on-chain.
+
 </Step>
 
 <Step>
-### Step 3: Analyze Account Structures
+### Step 3: Record the Ending State
 
-Pick a "poll" account created by the program and view its details. The data will be shown in a format like Base64. Use an online tool or the `solana account <ADDRESS>` CLI command to view it.
+Run the same balance and inspect commands again.
 
-Let's say the account data (after decoding) is a 16-byte buffer:
-`[216, 128, 13, 85, 22, 16, 203, 73, 5, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0]`
+```bash title="terminal"
+pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
+pnpm tsx scripts/balance.ts $(solana address -k wallet2.json)
+pnpm tsx scripts/inspect.ts $(solana address -k wallet1.json)
+pnpm tsx scripts/inspect.ts $(solana address -k wallet2.json)
+```
 
--   The first 8 bytes (`[216, 128, ...]`) might be the Anchor discriminator for a "Poll" account.
--   The next 8 bytes (`[5, 0, ...]`) in little-endian format represent the number `5`. This could be `votes_for`.
--   The final 8 bytes (`[3, 0, ...]`) represent the number `3`. This could be `votes_against`.
+Now compare before and after.
 
-From this, you can infer the account structure stores two counters for votes.
+You should be able to explain:
+
+- why `wallet2` increased
+- why `wallet1` decreased by the transfer amount plus a fee
+- why both accounts are still normal wallet accounts owned by the System Program
+
 </Step>
 
 <Step>
-### Step 4: Create a Short Report
+### Step 4: Verify the Transaction in an Explorer
 
-Based on your investigation, your report for the `Vote...` program might look like this:
+Take the signature from Step 2 and open it in Solana Explorer on devnet.
 
--   **Program ID:** `Vote...`
--   **Description:** "This program appears to be a simple on-chain polling system. Users can create a poll, and other users can then cast 'for' or 'against' votes, which are tallied in the poll's account."
--   **Sample Instruction (`vote`):**
-    -   `Accounts`:
-        1.  `[Signer]` User Wallet
-        2.  `[Writable]` Poll Account
-        3.  `[]` System Clock Sysvar
-    -   `Instruction Data`: A single byte, `0` for an 'against' vote and `1` for a 'for' vote.
--   **Account Structure (`Poll`):**
-    -   Bytes 0-7: Anchor Discriminator
-    -   Bytes 8-15: `votes_for` (u64)
-    -   Bytes 16-23: `votes_against` (u64)
--   **Unknowns:** "It's unclear if a user can vote more than once on the same poll. Further investigation is needed."
+```txt
+https://explorer.solana.com/tx/<SIGNATURE>?cluster=devnet
+```
+
+Check these details:
+
+- the transaction landed on `devnet`
+- the sender matches `wallet1`
+- the recipient matches `wallet2`
+- the System Program handled the instruction
+- the transaction shows a fee being charged
+
+This matters because your script output is not the only source of truth. A good investigation always checks an independent public view too.
+
+</Step>
+
+<Step>
+### Step 5: Write a Short Report
+
+Create a short note in plain English with this structure:
+
+```md title="report-template.md"
+# Devnet Investigation Report
+
+## Accounts
+- Sender: <wallet1 address>
+- Recipient: <wallet2 address>
+
+## Before
+- Sender balance:
+- Recipient balance:
+
+## Transaction
+- Signature:
+- Program used:
+- Who signed:
+- Who paid the fee:
+
+## After
+- Sender balance:
+- Recipient balance:
+
+## What Changed
+- Explain the balance movement in 3-5 sentences.
+- Explain why the sender lost slightly more than the recipient gained.
+- Explain why the recipient did not need to sign to receive funds.
+```
+
+Keep it short.
+
+The point is clarity, not volume.
+
 </Step>
 </Steps>
 
-<Callout type="tip">
-You can verify an Anchor discriminator. If you suspect an account is named "Poll", you can calculate `sha256("account:Poll")`. The first 8 bytes of that hash should match the first 8 bytes of the on-chain account data.
-</Callout>
+---
+
+## What a Good Answer Looks Like
+
+A strong report does not just say “the transaction worked.”
+
+It says something closer to this:
+
+- `wallet1` signed and paid the fee
+- `wallet2` received `0.01 SOL`
+- the transfer used the System Program
+- the sender balance dropped by the transfer amount plus a network fee
+- the recipient account remained a normal system-owned wallet account
+
+That is the level of precision you want.
 
 ---
 
-## Common Pitfalls
+## Optional Stretch Task
+
+If you finish the main challenge comfortably, add one small improvement to your toolkit:
+
+- print both the signature and Explorer URL directly from `send.ts`
+
+That is useful because it closes the loop between your script output and public verification.
+
+---
+
+## Common Mistakes
 
 <Callout type="warn">
-**Picking token or system programs**
-These are well-documented and not useful for reverse engineering practice. Pick something unfamiliar where you have to deduce the logic yourself.
+**Only checking that the command did not crash**
+
+A successful process exit is not the same thing as understanding the result. Always inspect balances and account output before and after.
 </Callout>
 
 <Callout type="warn">
-**Assuming too much**
-If something is unclear, write it down as a guess or a question. For example: "This 32-byte field could be a public key, but it could also be a data hash." The goal is analysis, not perfection.
+**Ignoring the fee**
+
+If you compare only the transfer amount, your math will look wrong. The sender pays a transaction fee in addition to the amount sent.
 </Callout>
 
 <Callout type="warn">
-**Skipping raw instruction data**
-Be sure to inspect the base64 instruction data. It often contains a leading byte that indicates which instruction variant is being called (e.g., `0` for `initialize`, `1` for `vote`), followed by any arguments. This is a critical clue.
+**Treating Explorer like decoration**
+
+Explorer is part of the investigation. It gives you an external confirmation that the signature, accounts, and program line up with what your script reported.
+</Callout>
+
+<Callout type="warn">
+**Writing a vague report**
+
+If your report says “the blockchain updated” or “the transaction happened,” it is too vague. Name the signer, the recipient, the fee payer, and the observable balance changes.
 </Callout>
 
 ---
 
 ## Summary
 
-This challenge helps you think like a blockchain detective. You now know how to:
+This challenge tests whether you can do more than run commands.
 
--   Explore and investigate deployed programs on devnet using block explorers.
--   Form hypotheses about a program's function by observing its transactions.
--   Attempt to decode on-chain account and instruction data to uncover its structure.
--   Document your findings with clarity, curiosity, and an awareness of what you don't know.
+You used your toolkit to:
 
-This skill will help in bug bounty work, dApp frontend integration, or just understanding what’s happening on-chain.
+- inspect real accounts
+- send a real devnet transaction
+- verify the result in more than one place
+- explain the state change in precise language
+
+That is a real beginner milestone.
+
+It means you are no longer just copying Solana commands. You are starting to reason about what the network actually did.
