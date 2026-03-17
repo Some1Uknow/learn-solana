@@ -1,0 +1,324 @@
+---
+title: "How Solana Stays Fast"
+description: "Understand how Solana orders, executes, and propagates transactions through validators, leaders, Proof of History, Sealevel, Gulf Stream, and Turbine."
+module: "🧱 Solana Fundamentals"
+keywords: ["solana architecture", "proof of history", "validators", "epochs slots", "sealevel", "turbine", "gulf stream"]
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+By this point, you have already done the most important beginner work:
+
+- set up the CLI
+- funded accounts on devnet
+- sent a transaction
+- inspected the state change
+
+Now the question gets bigger.
+
+How does Solana take all of those transactions from all of those users and process them fast enough to feel responsive without turning the network into a black box?
+
+That is the architecture question.
+
+<Callout type="info">
+You do not need to memorize every subsystem in this lesson. The goal is to leave with a clean mental model of how Solana handles ordering, leadership, execution, and propagation.
+</Callout>
+
+---
+
+## What You Are Learning
+
+By the end of this lesson, you will be able to:
+
+- explain the main problem Solana architecture is trying to solve
+- understand what validators, leaders, slots, and epochs do
+- describe why Proof of History exists
+- explain how Sealevel makes parallel execution possible
+- understand what Gulf Stream and Turbine contribute to performance
+
+---
+
+## Start with the Real Problem
+
+Every blockchain has to solve a hard coordination problem.
+
+People all over the world are sending transactions at nearly the same time.
+The network has to answer questions like these:
+
+- which transaction came first
+- who is allowed to produce the next block
+- which transactions can run safely at the same time
+- how the result gets distributed to everyone else
+
+If that process is slow, the chain feels slow.
+If that process is sloppy, the chain becomes unsafe.
+
+Solana is built around the idea that you should make ordering, scheduling, and execution more efficient instead of forcing every validator to pause and rediscover basic timing information from scratch.
+
+---
+
+## The Mental Model
+
+For Week 1, use this simple model:
+
+Solana architecture is doing four jobs at once:
+
+1. **Choose who leads next**
+2. **Give the network a shared sense of ordering**
+3. **Execute transactions efficiently**
+4. **Propagate the results fast enough to keep up**
+
+Most of the named Solana systems fit into one of those jobs.
+
+---
+
+## The Main Moving Parts
+
+Before we follow a transaction through the network, lock in these pieces.
+
+### Validators
+
+Validators are the machines participating in the network.
+
+They do not all do the exact same thing at the exact same moment, but they all help maintain the ledger by:
+
+- receiving transactions
+- verifying blocks
+- voting on results
+- storing and serving network state
+
+A validator is not just a passive observer. It is part of the machinery that keeps Solana consistent.
+
+### Leaders
+
+At any given slot, one validator is the **leader**.
+
+The leader has the short-term job of collecting transactions, ordering them, producing a block, and broadcasting it to the rest of the network.
+
+This matters because Solana does not make every validator compete blindly for block production at every moment. It gives the network a known producer for each short time window.
+
+### Slots and Epochs
+
+A **slot** is a small unit of time in which a leader gets a chance to produce a block.
+
+An **epoch** is a larger stretch of time that contains many slots and defines the broader validator schedule.
+
+You do not need the exact math yet. What matters is the structure:
+
+- epochs organize the schedule
+- slots are the short windows where leaders take turns
+
+That predictable schedule reduces coordination overhead.
+
+### Proof of History
+
+Proof of History, or **PoH**, is Solana's cryptographic clock.
+
+This is the part people often misunderstand.
+
+PoH is not the same thing as consensus.
+PoH does not replace validator voting.
+
+What it does is give the network a verifiable ordering signal so participants do not have to argue from scratch about when things happened.
+
+The short version is:
+
+- a sequential hash process keeps producing outputs
+- those outputs are hard to fake and easy to verify
+- transactions can be anchored into that sequence
+- validators can use that sequence as a shared timing reference
+
+That is why PoH is best thought of as a clock, not as the whole security model.
+
+### Sealevel
+
+Sealevel is Solana's parallel execution runtime.
+
+This is where the account model starts to matter.
+
+Because Solana transactions declare which accounts they touch, the runtime can see when two transactions do not conflict.
+
+If they do not touch the same writable state, they can run in parallel.
+
+If they do conflict, they must wait.
+
+So Solana is not “parallel all the time.”
+It is parallel when the account access pattern allows it.
+
+### Gulf Stream and Turbine
+
+These two systems help Solana move faster without changing the basic meaning of transactions.
+
+- **Gulf Stream** forwards transactions toward upcoming leaders instead of relying on a heavy mempool-style waiting room.
+- **Turbine** helps distribute blocks efficiently across the validator set by breaking the data into smaller pieces for propagation.
+
+One helps transactions get to the right producer quickly.
+The other helps finished blocks spread through the network quickly.
+
+---
+
+## Follow One Transaction Through the Architecture
+
+Use a simple SOL transfer as the anchor example.
+
+```bash title="terminal"
+solana transfer wallet2.json 0.01 --from wallet1.json --allow-unfunded-recipient
+```
+
+You already understand the user-facing side of this transaction.
+Now look at what the network has to do behind the scenes.
+
+<Steps>
+<Step>
+### Step 1: The Transaction Enters the Network
+
+Your client sends the signed transaction to an RPC node.
+
+From there, the network needs to get that transaction in front of the right validators quickly.
+
+This is where transaction forwarding matters. Solana tries to move transactions toward upcoming leaders instead of letting them sit around waiting without direction.
+
+</Step>
+
+<Step>
+### Step 2: The Current Leader Orders It
+
+The leader for the current slot collects transactions and places them into an ordered flow.
+
+Proof of History helps here by giving the network a shared timing reference.
+
+That does not mean every validator blindly trusts the leader. It means the ordering signal is much more structured and easier to verify.
+
+</Step>
+
+<Step>
+### Step 3: The Runtime Decides What Can Run Together
+
+When transactions are ready to execute, Sealevel checks their account access patterns.
+
+If two transactions touch different writable accounts, they can run at the same time.
+If they both need the same writable account, they cannot.
+
+That is one of the biggest reasons Solana can process more work without treating all transactions like one long queue.
+
+</Step>
+
+<Step>
+### Step 4: Validators Verify and Vote
+
+Other validators receive the produced block, verify what happened, and vote.
+
+This is why it is wrong to say PoH alone secures Solana.
+
+The network still depends on validators checking work and participating in consensus around the produced ledger state.
+
+</Step>
+
+<Step>
+### Step 5: The Block Gets Propagated Across the Network
+
+Once produced, block data has to spread fast enough that the rest of the network can keep up.
+
+Turbine helps with that propagation step.
+
+If block distribution were slow, fast execution would not be enough. The network would still bottleneck on communication.
+
+</Step>
+</Steps>
+
+---
+
+## Why This Feels Different from Simpler Blockchain Models
+
+A simpler blockchain mental model is:
+
+- gather transactions
+- produce a block
+- everyone waits
+- repeat
+
+Solana is more structured than that.
+
+It uses:
+
+- scheduled leadership
+- a cryptographic clock for ordering
+- account-aware parallel execution
+- fast forwarding and propagation systems
+
+That is why the network can behave differently from systems where transactions mostly wait in a generic queue and execution is treated as broadly serial.
+
+---
+
+## A Small Example of Parallelism
+
+Imagine three transactions arrive close together:
+
+```txt
+Tx1 writes Alice
+Tx2 writes Bob
+Tx3 writes Alice
+```
+
+Here is the important consequence:
+
+- `Tx1` and `Tx2` can run together because they do not conflict
+- `Tx3` cannot run at the same time as `Tx1` because both need writable access to Alice's state
+
+So the right mental model is not “Solana runs everything in parallel.”
+
+The right model is:
+
+Solana can parallelize work when the account graph allows it.
+
+That is much more precise, and it will help you later when you debug compute and account contention issues.
+
+---
+
+## Common Mistakes
+
+<Callout type="warn">
+**Thinking Proof of History is the whole consensus model**
+
+It is not. Proof of History provides a verifiable clock and ordering aid. Validators still verify blocks and vote as part of the network's broader consensus process.
+</Callout>
+
+<Callout type="warn">
+**Assuming faster means fewer checks**
+
+Solana is not fast because it skips verification. It is fast because the network is organized to reduce waste in ordering, scheduling, execution, and propagation.
+</Callout>
+
+<Callout type="warn">
+**Assuming Sealevel means every transaction runs in parallel**
+
+Parallelism depends on account access. If transactions contend on the same writable state, they still serialize.
+</Callout>
+
+<Callout type="warn">
+**Treating architecture as trivia instead of a debugging tool**
+
+These concepts are not only for interviews. They explain real behavior you will see later: transaction delays, account contention, block production timing, and why some operations compose well while others do not.
+</Callout>
+
+---
+
+## Summary
+
+Solana architecture is easiest to understand as a system for handling four jobs well:
+
+- choose leaders predictably
+- maintain a shared sense of ordering
+- execute non-conflicting work in parallel
+- propagate results across the network quickly
+
+That is where validators, slots, epochs, Proof of History, Sealevel, Gulf Stream, and Turbine fit.
+
+You do not need every internal detail yet.
+You do need the core model:
+
+when you send a transaction, Solana is not just “processing a request.”
+It is scheduling leadership, ordering messages, executing account-aware work, verifying the result, and spreading that result across a distributed network.
+
+With that model in place, the rest of the course will feel much less abstract.

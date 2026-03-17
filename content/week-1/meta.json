@@ -4,10 +4,11 @@
   "icon": "Solana",
   "root": true,
   "pages": [
+    "index",
     "devnet-setup",
     "accounts-lamports-exercise",
     "transaction-anatomy",
-    "index",
+    "solana-architecture",
     "program-interaction-project",
     "basic-exploration-challenge"
   ]
