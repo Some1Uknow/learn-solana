@@ -15,6 +15,14 @@ const nextConfig = {
   async rewrites() {
     return [
       {
+        source: "/learn.mdx",
+        destination: "/llms.mdx",
+      },
+      {
+        source: "/learn/:path*.mdx",
+        destination: "/llms.mdx/:path*",
+      },
+      {
         source: "/docs/:path*.mdx",
         destination: "/llms.mdx/:path*",
       },

@@ -770,6 +770,55 @@
   color: color-mix(in srgb, var(--ls-docs-muted-foreground) 92%, transparent);
 }
 
+.ls-docs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.35rem;
+}
+
+.ls-docs-action-button {
+  min-height: 2.5rem;
+  border-radius: 999px;
+  border-color: color-mix(in srgb, var(--ls-docs-border) 92%, transparent);
+  background: color-mix(in srgb, var(--ls-docs-muted) 54%, transparent);
+  color: color-mix(in srgb, var(--ls-docs-foreground) 92%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.ls-docs-action-button:hover {
+  border-color: color-mix(in srgb, var(--ls-docs-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--ls-docs-primary) 10%, var(--ls-docs-muted));
+  color: color-mix(in srgb, var(--ls-docs-foreground) 98%, transparent);
+}
+
+.ls-docs-assistant-icon {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+}
+
+.ls-docs-assistant-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ls-docs-assistant-icon[data-provider="chatgpt"] {
+  color: #10a37f;
+}
+
+.ls-docs-assistant-icon[data-provider="claude"] {
+  color: #d97757;
+}
+
+.ls-docs-assistant-icon[data-provider="perplexity"] {
+  color: #20b8cd;
+}
+
 .ls-docs-layout #nd-page article .prose {
   max-width: none;
 }
@@ -936,12 +985,54 @@
 }
 
 @media (max-width: 1024px) {
+  .ls-docs-layout {
+    --fd-sidebar-width: 0px;
+    --fd-toc-width: 0px;
+    --fd-layout-width: 100%;
+    --fd-page-width: 100%;
+  }
+
+  .ls-docs-layout #nd-page {
+    padding-inline: clamp(1rem, 4vw, 1.4rem);
+    padding-inline-end: clamp(1rem, 4vw, 1.4rem);
+  }
+
   .ls-docs-layout #nd-page article {
+    width: 100%;
+    max-width: min(100%, 44rem);
     padding-top: 2.1rem;
   }
 
   .ls-docs-title {
     font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+}
+
+@media (max-width: 1279px) {
+  .ls-docs-layout #nd-page {
+    padding-inline-end: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  .ls-docs-layout #nd-toc {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .ls-docs-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ls-docs-action-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ls-docs-description {
+    font-size: 1rem;
+    line-height: 1.65;
   }
 }
 

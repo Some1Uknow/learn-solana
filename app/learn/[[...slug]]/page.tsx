@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { BreadcrumbSchema, LearningResourceSchema } from "@/components/seo";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { LearnPageActions } from "@/components/learn/page-actions";
 
 function toTitleCase(input: string) {
   return input
@@ -57,6 +58,7 @@ export default async function Page(props: {
       .map((part) => toTitleCase(part))
       .join(" • ")
     : "Curriculum";
+  const markdownPath = `${page.url}.mdx`;
 
   return (
     <>
@@ -108,6 +110,11 @@ export default async function Page(props: {
           <DocsDescription className="ls-docs-description">
             {page.data.description}
           </DocsDescription>
+          <LearnPageActions
+            title={page.data.title}
+            pagePath={page.url}
+            markdownPath={markdownPath}
+          />
         </header>
         <DocsBody>
           <MDX components={getMDXComponents()} />

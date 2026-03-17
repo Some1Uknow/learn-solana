@@ -1,34 +1,32 @@
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
-import remarkMdx from 'remark-mdx';
-import { remarkInclude } from 'fumadocs-mdx/config';
-import { source } from '@/lib/source';
-import type { InferPageType } from 'fumadocs-core/source';
+import { createCanonical } from "@/lib/seo";
 
-const processor = remark()
-  .use(remarkMdx)
-  // needed for Fumadocs MDX
-  .use(remarkInclude)
-  .use(remarkGfm);
-
-export async function getLLMText(page: InferPageType<typeof source>) {
-  const data = page.data as typeof page.data & {
-    _file?: { absolutePath?: string; path?: string };
-    content?: string;
+type LLMReadablePage = {
+  url: string;
+  slugs: string[];
+  data: {
+    title: string;
+    description?: string;
+    getText?: (type: "raw" | "processed") => Promise<string>;
   };
-  const filePath =
-    data._file?.absolutePath ??
-    data._file?.path ??
-    `${page.slugs.join("/") || "index"}.mdx`;
-  const processed = await processor.process({
-    path: filePath,
-    value: data.content ?? "",
-  });
+};
+
+export async function getLLMText(page: LLMReadablePage) {
+  const getText = page.data.getText;
+  if (!getText) {
+    throw new Error(
+      "Processed markdown is unavailable. Enable includeProcessedMarkdown in the Fumadocs collection.",
+    );
+  }
+
+  const markdown = await getText("processed");
+  const pageUrl = createCanonical(page.url);
+  const markdownUrl = createCanonical(`${page.url}.mdx`);
 
   return `# ${page.data.title}
-URL: ${page.url}
+URL: ${pageUrl}
+Markdown URL: ${markdownUrl}
 
-${page.data.description}
+${page.data.description ?? ""}
 
-${processed.value}`;
+${markdown}`;
 }
