@@ -1,824 +1,534 @@
 ---
-title: "Rust Ownership System Explained (Borrowing and References)"
-description: "Master Rust’s ownership model with borrowing and references, and learn how stack vs heap, move semantics, and slices deliver memory safety without a garbage collector."
+title: "Understanding Rust Ownership and Borrowing"
+description: "Learn the ownership rule that makes Rust feel different: one owner for a value, borrowing through references, and the compiler checks that prevent invalid memory access."
 module: "🦀 Rust for Solana"
-keywords: ["ownership", "borrowing", "references", "stack heap", "move semantics", "slices"]
+keywords: ["ownership", "borrowing", "references", "move semantics", "slices", "rust memory"]
 ---
 
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 
-Welcome to Day 2, where we dive into Rust's most distinctive feature: the **ownership system**. This is what sets Rust apart from every other programming language and enables it to be both memory-safe and performant without a garbage collector.
+Rust does not feel hard because the syntax is strange.
 
-Understanding ownership is crucial for Solana development because blockchain programs must be extremely efficient and secure. Rust's ownership system prevents entire classes of bugs that could be catastrophic in financial applications.
+Rust feels hard because it forces you to answer a question many other languages hide.
 
-<MermaidWithZoom 
-  title="Rust Ownership System Overview"
-  chart="
-    graph TD
-      A[Rust Ownership System] --> B[Stack Memory]
-      A --> C[Heap Memory]
-      
-      B --> B1[Fixed Size Data]
-      B --> B2[Fast Allocation]
-      B --> B3[Automatic Cleanup]
-      
-      C --> C1[Dynamic Size Data]
-      C --> C2[Manual Management]
-      C --> C3[Ownership Rules Apply]
-      
-      D[Ownership Rules] --> D1[Each value has one owner]
-      D --> D2[When owner goes out of scope, value is dropped]
-      D --> D3[Only one owner at a time]
-      
-      E[Memory Safety] --> E1[No Double Free]
-      E --> E2[No Use After Free]
-      E --> E3[No Memory Leaks]
-      E --> E4[No Data Races]
-      
-      F[Borrowing] --> F1[Immutable References &T]
-      F --> F2[Mutable References &mut T]
-      F --> F3[Reference Rules]
-      
-      F3 --> F3A[One mutable OR many immutable]
-      F3 --> F3B[References must be valid]
-      
-      style A fill:#e1f5fe
-      style D fill:#f3e5f5
-      style E fill:#e8f5e8
-      style F fill:#fff3e0"
-/>
+That question is: who owns this data right now?
+
+If you cannot answer that clearly, Rust will stop the program from compiling.
+
+That is what Day 2 is about.
+
+This is the lesson where Rust stops feeling like “new syntax” and starts feeling like a different model of programming.
 
 <Callout type="info">
-**Why Ownership Matters for Solana**: In blockchain development, programs must be deterministic and efficient. Memory bugs can lead to security vulnerabilities or unpredictable behavior. Rust's ownership system prevents these issues at compile time.
+When Rust rejects your ownership code, the compiler is not being stubborn.
+
+It is usually preventing one of these bugs:
+
+- reading freed memory
+- freeing the same memory twice
+- mutating data while something else is reading it
 </Callout>
 
 ---
 
-## What You'll Learn Today
+## The Core Mental Model
 
-<Callout type="info">
-By the end of Day 2, you'll understand:
+Rust organizes many memory-safety rules around one idea:
 
-- The three fundamental ownership rules
-- How Rust manages memory without garbage collection
-- The difference between stack and heap memory
-- Move semantics and when values are transferred
-- Borrowing with immutable and mutable references
-- The borrowing rules that prevent data races
-- How to work with slices for efficient data access
-- When to clone vs. when to borrow data
-</Callout>
+A value has one owner.
+
+Other code can temporarily borrow that value, but borrowing is tightly controlled.
+
+If you keep that model in your head, most ownership errors stop looking random.
+
+They become questions like these:
+
+- did ownership move to a new variable?
+- am I trying to use the old variable after the move?
+- am I borrowing the value read-only or mutably?
+- am I trying to mix incompatible borrows at the same time?
+
+That is the real teaching spine for this lesson.
 
 ---
 
-## The Problem Ownership Solves
+## Why Rust Needs This Rule
 
-Before diving into Rust's solution, let's understand the memory management problems that plague other languages:
+Other languages solve memory management in different ways.
 
-<Tabs items={['Manual Memory Management', 'Garbage Collection', "Rust's Approach"]}>
-<Tab value="Manual Memory Management">
-**Languages like C/C++:**
+Some languages make you manage memory manually. That gives you speed, but it also gives you bugs like:
 
-```c
-// C code - manual memory management
-char* data = malloc(100);  // Allocate memory
-// ... use data ...
-free(data);               // Must remember to free
-// data is now a dangling pointer!
-```
+- memory leaks
+- dangling pointers
+- double free errors
 
-**Problems:**
-- Memory leaks (forget to free)
-- Double-free errors (free twice)
-- Use-after-free bugs (access freed memory)
-- Buffer overflows
-</Tab>
-<Tab value="Garbage Collection">
-**Languages like Java/JavaScript:**
+Other languages use a garbage collector. That avoids many memory bugs, but cleanup happens later at runtime, not at the exact moment ownership becomes irrelevant.
 
-```java
-// Java code - garbage collected
-String data = new String("Hello");  // Allocate
-// ... use data ...
-// GC automatically frees when no longer referenced
-```
+Rust takes a different path.
 
-**Problems:**
-- Unpredictable performance (GC pauses)
-- Memory overhead for tracking
-- Not suitable for real-time systems
-- Can't control when cleanup happens
-</Tab>
-<Tab value="Rust's Approach">
-**Rust - Ownership System:**
+It tracks ownership at compile time.
+
+That gives you:
+
+- memory safety
+- predictable cleanup
+- no garbage collector pauses
+
+This matters in Solana too. On-chain programs and performance-sensitive clients do not benefit from vague memory behavior.
+
+---
+
+## Start With The Difference Between Copy And Move
+
+Not every assignment behaves the same way in Rust.
+
+That is the first thing to understand.
+
+### Stack-friendly values are usually copied
+
+Simple fixed-size values like integers are cheap to copy.
 
 ```rust
-// Rust code - ownership tracking
-let data = String::from("Hello");  // Allocate
-// ... use data ...
-// Automatically freed when 'data' goes out of scope
-// Compiler ensures no use-after-free
+fn main() {
+    let x = 5;
+    let y = x;
+
+    println!("x: {}, y: {}", x, y);
+}
 ```
 
-**Benefits:**
-- Zero-cost abstraction (no runtime overhead)
-- Memory safety guaranteed at compile time
-- Predictable performance
-- No garbage collector needed
-</Tab>
-</Tabs>
+Both `x` and `y` are valid.
+
+That is because `i32` is a `Copy` type.
+
+Rust can duplicate it cheaply, so assignment does not invalidate `x`.
+
+### Heap-backed values usually move
+
+Now look at `String`.
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    // println!("{}", s1); // this does not compile
+    println!("{}", s2);
+}
+```
+
+This assignment moves ownership from `s1` to `s2`.
+
+After that move, `s1` is no longer valid.
+
+That is not arbitrary.
+
+`String` owns heap data. If both variables thought they owned the same allocation, Rust would have to guess who should free it later. That is exactly the kind of ambiguity Rust refuses.
 
 ---
 
-## Understanding Memory: Stack vs Heap
+## Stack And Heap Only Matter Because Ownership Behaves Differently There
 
-Before we explore ownership, it's crucial to understand how Rust manages different types of memory.
+You do not need a deep computer architecture lecture here.
 
-<Accordions>
-<Accordion title="Stack Memory">
-### Stack Memory
+You only need the practical distinction.
 
-The stack stores data with a known, fixed size. It's fast because:
-- Data is added/removed in LIFO (Last In, First Out) order
-- No need to search for space
-- Automatic cleanup when scope ends
+- stack data is fixed-size and cheap to copy
+- heap data is dynamic and usually owned through a wrapper like `String` or `Vec<T>`
 
-```rust title="stack_example.rs"
+That is why integers often copy cleanly while `String` often moves.
+
+```rust
 fn main() {
-    let x = 5;        // i32 stored on stack
-    let y = 10;       // i32 stored on stack
-    let sum = x + y;  // i32 stored on stack
-    
-    // All values automatically cleaned up when main() ends
+    let amount: u64 = 5000;
+    let copied_amount = amount;
+
+    let wallet_name = String::from("treasury");
+    let moved_name = wallet_name;
+
+    println!("{}", copied_amount);
+    println!("{}", moved_name);
 }
 ```
 
-**Stack-stored types:**
-- All integer types (`i32`, `u64`, etc.)
-- Floating point types (`f32`, `f64`)
-- Booleans (`bool`)
-- Characters (`char`)
-- Tuples and arrays of stack types
-</Accordion>
+The `u64` copy is trivial.
 
-<Accordion title="Heap Memory">
-### Heap Memory
-
-The heap stores data with unknown size at compile time or that might change size:
-
-```rust title="heap_example.rs"
-fn main() {
-    // String data stored on heap, metadata on stack
-    let s1 = String::from("Hello");
-    let s2 = String::from("World");
-    
-    // Vector data stored on heap
-    let mut numbers = Vec::new();
-    numbers.push(1);
-    numbers.push(2);
-    
-    // Heap data cleaned up when variables go out of scope
-}
-```
-
-**Heap allocation characteristics:**
-- Dynamic size allocation
-- Slower than stack (must find available space)
-- Automatic cleanup when owner goes out of scope
-- Enables data structures that grow/shrink
-</Accordion>
-</Accordions>
-
-<Callout type="tip">
-**Mental Model**: Think of the stack like a stack of plates (fast to add/remove from top) and the heap like a library where you need to find an open shelf (slower but more flexible).
-</Callout>
+The `String` move transfers ownership of heap-backed data.
 
 ---
 
 ## The Three Ownership Rules
 
-Rust's ownership system is built on three simple rules that the compiler enforces:
+You can compress most of Day 2 into three rules.
 
 <Steps>
 <Step>
-### Rule 1: Each value has a single owner
-Every value in Rust has exactly one variable that owns it.
+### Rule 1: every value has one owner
 
-```rust title="single_owner.rs"
+```rust
 fn main() {
-    let s = String::from("Hello");  // s owns the String
-    // Only s can modify or control this String's memory
+    let name = String::from("validator");
+    println!("{}", name);
 }
 ```
+
+Here, `name` owns the string.
 </Step>
 
 <Step>
-### Rule 2: Only one owner at a time
-There can only be one owner of a value at any given time.
+### Rule 2: ownership can move
 
-```rust title="one_owner.rs"
+```rust
 fn main() {
-    let s1 = String::from("Hello");
-    let s2 = s1;  // s1 is no longer valid! Ownership moved to s2
-    
-    // println!("{}", s1);  // ❌ Error: s1 is no longer valid
-    println!("{}", s2);     // ✅ Works: s2 owns the String
+    let name = String::from("validator");
+    let next_name = name;
+
+    println!("{}", next_name);
 }
 ```
+
+After the assignment, `next_name` owns the string and `name` does not.
 </Step>
 
 <Step>
-### Rule 3: Owner cleanup on scope exit
-When the owner goes out of scope, the value is automatically cleaned up.
+### Rule 3: when the owner goes out of scope, Rust drops the value
 
-```rust title="scope_cleanup.rs"
+```rust
 fn main() {
     {
-        let s = String::from("Hello");  // s owns the String
-        // ... use s ...
-    }  // s goes out of scope, String is automatically freed
-    
-    // s is no longer accessible here
+        let message = String::from("temporary");
+        println!("{}", message);
+    }
+
+    // message is gone here
 }
 ```
+
+Rust frees the owned data when the scope ends.
 </Step>
 </Steps>
 
----
+That is the cleanup model.
 
-## Move Semantics
-
-When we assign a heap-allocated value to another variable, Rust **moves** the ownership instead of copying the data:
-
-```rust title="move_semantics.rs"
-fn main() {
-    // Example 1: Stack data (Copy types)
-    let x = 5;
-    let y = x;  // x is copied (i32 implements Copy trait)
-    println!("x: {}, y: {}", x, y);  // Both x and y are valid
-    
-    // Example 2: Heap data (Move types)
-    let s1 = String::from("Hello");
-    let s2 = s1;  // s1 is moved to s2 (String doesn't implement Copy)
-    
-    // println!("{}", s1);  // ❌ Error! s1 is no longer valid
-    println!("{}", s2);     // ✅ Only s2 is valid
-    
-    // Example 3: Function calls also move ownership
-    let s3 = String::from("World");
-    take_ownership(s3);     // s3 is moved into the function
-    // println!("{}", s3);  // ❌ Error! s3 is no longer valid
-}
-
-fn take_ownership(some_string: String) {
-    println!("{}", some_string);
-}  // some_string goes out of scope and is freed
-```
-
-### Why Move Instead of Copy?
-
-<Callout type="info">
-Moving prevents expensive deep copies and ensures clear ownership. If Rust copied every String assignment, programs would be slow and memory usage would explode.
-</Callout>
-
-<Tabs items={['Shallow Copy Problem', 'Deep Copy Problem', 'Rust Move Solution']}>
-<Tab value="Shallow Copy Problem">
-```rust
-// If Rust did shallow copies (like some languages)
-let s1 = String::from("Hello");
-let s2 = s1;  // Both point to same memory
-
-// Problem: When both go out of scope, 
-// both try to free the same memory = crash!
-```
-</Tab>
-<Tab value="Deep Copy Problem">
-```rust
-// If Rust did deep copies by default
-let s1 = String::from("Hello");
-let s2 = s1;  // Expensive copy of all string data
-
-// Problem: Performance killer for large data
-// Memory usage doubles
-```
-</Tab>
-<Tab value="Rust Move Solution">
-```rust
-// Rust's move solution
-let s1 = String::from("Hello");
-let s2 = s1;  // Ownership transferred, s1 invalidated
-
-// Benefits:
-// - No expensive copying
-// - No double-free errors
-// - Clear ownership at compile time
-```
-</Tab>
-</Tabs>
+No manual `free`. No garbage collector. Clear ownership and deterministic scope-based cleanup.
 
 ---
 
-## References and Borrowing
+## Function Calls Also Move Ownership
 
-Moving ownership every time we want to use a value would be impractical. Rust provides **references** that let us "borrow" values without taking ownership:
+Many beginners understand assignment moves, then get confused when the same thing happens in a function call.
 
-### Immutable References
+A function parameter can also take ownership.
 
-```rust title="immutable_references.rs"
+```rust
 fn main() {
-    let s1 = String::from("Hello");
-    
-    let len = calculate_length(&s1);  // Borrow s1 with &
-    
-    println!("The length of '{}' is {}.", s1, len);  // s1 still valid!
+    let signature = String::from("abc123");
+    consume_signature(signature);
+
+    // println!("{}", signature); // this does not compile
 }
 
-fn calculate_length(s: &String) -> usize {  // s is a reference
-    s.len()
-}  // s goes out of scope, but it doesn't own the data, so nothing happens
-```
-
-<Callout type="tip">
-**Reference Syntax**: `&` creates a reference, `*` dereferences (though often not needed due to automatic dereferencing).
-</Callout>
-
-### Mutable References
-
-To modify borrowed data, we need a mutable reference:
-
-```rust title="mutable_references.rs"
-fn main() {
-    let mut s = String::from("Hello");  // s must be mutable
-    
-    change(&mut s);  // Borrow s mutably with &mut
-    
-    println!("{}", s);  // s has been modified
-}
-
-fn change(some_string: &mut String) {
-    some_string.push_str(", World!");
+fn consume_signature(value: String) {
+    println!("Consumed: {}", value);
 }
 ```
 
-### The Borrowing Rules
+`consume_signature` takes a `String`, not a reference.
 
-Rust enforces strict borrowing rules to prevent data races:
+That means the function becomes the new owner.
 
-<MermaidWithZoom 
-  title="Borrowing Rules and Data Race Prevention"
-  chart="
-    graph TD
-      A[Borrowing Rules] --> B[Rule 1: Reference Exclusivity]
-      A --> C[Rule 2: Reference Validity]
-      
-      B --> B1[Multiple Immutable &T]
-      B --> B2[One Mutable &mut T]
-      B --> B3[Never Both Together]
-      
-      B1 --> B1A[✅ let r1 = &data]
-      B1 --> B1B[✅ let r2 = &data]
-      B1 --> B1C[✅ Many readers allowed]
-      
-      B2 --> B2A[✅ let r = &mut data]
-      B2 --> B2B[❌ No other references]
-      B2 --> B2C[Exclusive access only]
-      
-      C --> C1[References must be valid]
-      C --> C2[No dangling pointers]
-      C --> C3[Lifetime must outlive usage]
-      
-      D[Data Race Prevention] --> D1[No simultaneous read/write]
-      D --> D2[No multiple writers]
-      D --> D3[Compile-time checking]
-      
-      style B1 fill:#e8f5e8
-      style B2 fill:#e1f5fe
-      style B3 fill:#ffebee
-      style D fill:#f3e5f5"
-/>
+When the function ends, `value` goes out of scope and Rust drops it.
 
-<Steps>
-<Step>
-### Rule 1: Multiple immutable references OR one mutable reference
-You can have either:
-- Any number of immutable references
-- Exactly one mutable reference
+If you still need the original value afterward, do not move it. Borrow it instead.
+
+---
+
+## Borrowing Lets You Use Data Without Taking Ownership
+
+Moving every `String` into every function would be annoying and wasteful.
+
+That is why Rust has references.
+
+A reference lets you borrow data without becoming its owner.
+
+### Immutable borrowing
+
+```rust
+fn main() {
+    let wallet_label = String::from("treasury-wallet");
+    let length = label_length(&wallet_label);
+
+    println!("{} has length {}", wallet_label, length);
+}
+
+fn label_length(label: &String) -> usize {
+    label.len()
+}
+```
+
+`label_length` borrows the string with `&String`.
+
+That means:
+
+- the function can read the data
+- the function does not own the data
+- the original variable is still valid afterward
+
+This is your first important ownership escape hatch.
+
+---
+
+## Mutable Borrowing Means Temporary Exclusive Access
+
+If a function needs to change the borrowed value, immutable borrowing is not enough.
+
+Use a mutable reference.
+
+```rust
+fn main() {
+    let mut memo = String::from("pending");
+    append_status(&mut memo);
+
+    println!("{}", memo);
+}
+
+fn append_status(value: &mut String) {
+    value.push_str(" -> confirmed");
+}
+```
+
+Two things changed here.
+
+- the owner, `memo`, is declared with `mut`
+- the borrow uses `&mut`
+
+That is Rust being explicit again.
+
+Mutation is allowed, but only when the code says so clearly.
+
+---
+
+## The Borrowing Rule That Trips Up Most People
+
+Rust allows either:
+
+- many immutable references
+- one mutable reference
 
 But not both at the same time.
 
-```rust title="borrowing_rules.rs"
+This is one of the most important rules in the language.
+
+```rust
 fn main() {
-    let mut s = String::from("Hello");
-    
-    // ✅ Multiple immutable references are fine
-    let r1 = &s;
-    let r2 = &s;
-    println!("{} and {}", r1, r2);
-    
-    // ✅ One mutable reference is fine (after immutable ones are done)
-    let r3 = &mut s;
+    let mut state = String::from("ready");
+
+    let r1 = &state;
+    let r2 = &state;
+    println!("{} {}", r1, r2);
+
+    let r3 = &mut state;
+    r3.push_str(" -> sent");
     println!("{}", r3);
-    
-    // ❌ This would be an error:
-    // let r4 = &s;     // Immutable reference
-    // let r5 = &mut s; // Mutable reference
-    // println!("{} {}", r4, r5);  // Using both = error!
 }
 ```
-</Step>
 
-<Step>
-### Rule 2: References must always be valid
-References cannot outlive the data they point to.
+This works because the immutable borrows are finished before the mutable borrow begins.
 
-```rust title="reference_lifetime.rs"
+Now look at the broken version:
+
+```rust
 fn main() {
-    let reference_to_nothing = dangle();  // ❌ This won't compile
-}
+    let mut state = String::from("ready");
 
-fn dangle() -> &String {  // ❌ Error: missing lifetime specifier
-    let s = String::from("Hello");
-    &s  // s is freed when function ends, but we're returning a reference to it
-}  // s goes out of scope and is freed
+    let r1 = &state;
+    let r2 = &mut state;
 
-// ✅ Correct version: return the String itself
-fn no_dangle() -> String {
-    let s = String::from("Hello");
-    s  // Ownership is moved out, so no dangling reference
+    println!("{} {}", r1, r2);
 }
 ```
-</Step>
-</Steps>
+
+Rust rejects that code because one part of the program wants read access while another part wants exclusive write access.
+
+That is exactly how data races start in less strict languages.
+
+Rust stops it before the program runs.
 
 ---
 
-## Slices: References to Parts of Data
+## Slices Are Borrowed Views Into Data
 
-Slices let us reference a contiguous sequence of elements without taking ownership:
+A slice is not a new owned value.
 
-### String Slices
+A slice is a borrowed view into part of existing data.
 
-```rust title="string_slices.rs"
+### String slices
+
+```rust
 fn main() {
-    let s = String::from("Hello, World!");
-    
-    // String slice syntax: [start..end]
-    let hello = &s[0..5];    // "Hello"
-    let world = &s[7..12];   // "World"
-    let whole = &s[..];      // Entire string
-    
-    println!("hello: {}", hello);
-    println!("world: {}", world);
-    println!("whole: {}", whole);
-    
-    // Practical example: finding the first word
-    let first = first_word(&s);
-    println!("First word: {}", first);
-}
+    let phrase = String::from("solana runtime");
 
-fn first_word(s: &String) -> &str {  // Returns a string slice
-    let bytes = s.as_bytes();
-    
-    for (i, &item) in bytes.iter().enumerate() {
-        if item == b' ' {  // b' ' is a byte literal for space
-            return &s[0..i];
-        }
-    }
-    
-    &s[..]  // Return the whole string if no space found
+    let first = &phrase[0..6];
+    let second = &phrase[7..14];
+
+    println!("{}", first);
+    println!("{}", second);
 }
 ```
 
-### String Literals Are Slices
+Both `first` and `second` borrow part of `phrase`.
 
-```rust title="string_literals.rs"
+They do not own new strings.
+
+That is why slices are efficient.
+
+### `&str` matters more than `&String`
+
+When you only need read access to string data, prefer `&str` in function signatures.
+
+```rust
 fn main() {
-    // String literals have type &str (string slice)
-    let s = "Hello, World!";  // Type: &str
-    
-    // This function works with both String and &str
-    let len1 = string_length(&String::from("Hello"));  // String
-    let len2 = string_length("Hello");                  // &str literal
-    
-    println!("Lengths: {}, {}", len1, len2);
+    let owned = String::from("rpc-node");
+    let literal = "validator";
+
+    println!("{}", describe(owned.as_str()));
+    println!("{}", describe(literal));
 }
 
-// Best practice: take &str instead of &String for flexibility
-fn string_length(s: &str) -> usize {
-    s.len()
+fn describe(value: &str) -> &str {
+    value
 }
 ```
 
-### Array Slices
+`&str` is more flexible than `&String`.
 
-```rust title="array_slices.rs"
-fn main() {
-    let numbers = [1, 2, 3, 4, 5];
-    
-    let slice = &numbers[1..4];  // [2, 3, 4]
-    
-    println!("Original: {:?}", numbers);
-    println!("Slice: {:?}", slice);
-    
-    // Works with vectors too
-    let vec = vec![10, 20, 30, 40, 50];
-    let vec_slice = &vec[2..];  // [30, 40, 50]
-    
-    println!("Vector slice: {:?}", vec_slice);
-}
-```
+It works with string literals and borrowed pieces of `String` values too.
 
-<Callout type="tip">
-**Slice Syntax Summary**:
-- `&s[start..end]`: Elements from start to end-1
-- `&s[start..]`: Elements from start to the end
-- `&s[..end]`: Elements from beginning to end-1
-- `&s[..]`: All elements
-</Callout>
+That is the interface you usually want for read-only string input.
 
 ---
 
-## Practical Examples: Blockchain Concepts
+## Clone Only When You Actually Need A Second Owned Copy
 
-Let's apply ownership concepts to blockchain-relevant scenarios:
+A lot of beginners overuse `.clone()` because it feels like an easy way out.
 
-### Transaction Processing
+Sometimes it is correct. Often it is just hiding confusion.
 
-```rust title="transaction_example.rs"
+```rust
+fn main() {
+    let original = String::from("payer");
+    let copied = original.clone();
+
+    println!("{} {}", original, copied);
+}
+```
+
+This is legal because `.clone()` creates a real second owned string.
+
+But cloning allocates and copies data.
+
+So the default order of thinking should be:
+
+1. can I borrow this?
+2. if not, does moving ownership make sense?
+3. only then: do I truly need to clone?
+
+That rule matters even more when data structures get bigger.
+
+---
+
+## One Small Ownership Example That Looks Like Real Work
+
+Now put the ideas together in a simple transaction-like example.
+
+```rust title="src/main.rs"
 #[derive(Debug)]
-struct Transaction {
+struct TransferRequest {
     from: String,
     to: String,
     amount: u64,
-    signature: String,
-}
-
-impl Transaction {
-    fn new(from: String, to: String, amount: u64) -> Self {
-        Transaction {
-            from,
-            to,
-            amount,
-            signature: String::from("unsigned"),
-        }
-    }
-    
-    fn sign(&mut self, private_key: &str) {
-        // Simulate signing process
-        self.signature = format!("signed_with_{}", private_key);
-    }
-    
-    fn verify(&self) -> bool {
-        // Simulate verification
-        !self.signature.starts_with("unsigned")
-    }
+    note: String,
 }
 
 fn main() {
-    // Create transaction
-    let mut tx = Transaction::new(
-        String::from("Alice"),
-        String::from("Bob"),
-        1000,
+    let mut request = TransferRequest {
+        from: String::from("alice"),
+        to: String::from("bob"),
+        amount: 500_000,
+        note: String::from("pending"),
+    };
+
+    print_summary(&request);
+    mark_confirmed(&mut request);
+    print_summary(&request);
+}
+
+fn print_summary(request: &TransferRequest) {
+    println!(
+        "{} -> {} | amount: {} | note: {}",
+        request.from, request.to, request.amount, request.note
     );
-    
-    println!("Created transaction: {:?}", tx);
-    
-    // Sign transaction (needs mutable reference)
-    sign_transaction(&mut tx, "alice_private_key");
-    
-    // Verify transaction (immutable reference is fine)
-    if verify_transaction(&tx) {
-        // Process transaction (ownership transfer)
-        process_transaction(tx);
-        // tx is no longer accessible here - it was moved
-    }
 }
 
-fn sign_transaction(tx: &mut Transaction, private_key: &str) {
-    tx.sign(private_key);
-    println!("Transaction signed");
-}
-
-fn verify_transaction(tx: &Transaction) -> bool {
-    let is_valid = tx.verify();
-    println!("Transaction valid: {}", is_valid);
-    is_valid
-}
-
-fn process_transaction(tx: Transaction) {  // Takes ownership
-    println!("Processing transaction: {:?}", tx);
-    // Transaction is consumed here
+fn mark_confirmed(request: &mut TransferRequest) {
+    request.note = String::from("confirmed");
 }
 ```
 
-### Account Management
+What is happening here:
 
-```rust title="account_example.rs"
-#[derive(Debug, Clone)]
-struct Account {
-    address: String,
-    balance: u64,
-    nonce: u32,
-}
+- `request` owns all its fields
+- `print_summary` borrows it immutably because it only reads
+- `mark_confirmed` borrows it mutably because it changes `note`
+- ownership never moves out of `main`, so `request` is still usable at the end
 
-impl Account {
-    fn new(address: String, initial_balance: u64) -> Self {
-        Account {
-            address,
-            balance: initial_balance,
-            nonce: 0,
-        }
-    }
-    
-    fn transfer(&mut self, amount: u64) -> Result<(), String> {
-        if self.balance >= amount {
-            self.balance -= amount;
-            self.nonce += 1;
-            Ok(())
-        } else {
-            Err("Insufficient funds".to_string())
-        }
-    }
-    
-    fn receive(&mut self, amount: u64) {
-        self.balance += amount;
-    }
-}
-
-fn main() {
-    let mut alice = Account::new("Alice123".to_string(), 5000);
-    let mut bob = Account::new("Bob456".to_string(), 1000);
-    
-    println!("Initial state:");
-    print_account_summary(&alice);
-    print_account_summary(&bob);
-    
-    // Transfer funds
-    let transfer_amount = 1500;
-    match execute_transfer(&mut alice, &mut bob, transfer_amount) {
-        Ok(()) => println!("Transfer successful!"),
-        Err(e) => println!("Transfer failed: {}", e),
-    }
-    
-    println!("\nFinal state:");
-    print_account_summary(&alice);
-    print_account_summary(&bob);
-}
-
-fn execute_transfer(
-    from: &mut Account, 
-    to: &mut Account, 
-    amount: u64
-) -> Result<(), String> {
-    from.transfer(amount)?;  // ? operator propagates errors
-    to.receive(amount);
-    Ok(())
-}
-
-fn print_account_summary(account: &Account) {
-    println!("{}: Balance={}, Nonce={}", 
-             account.address, account.balance, account.nonce);
-}
-```
+This is the kind of reasoning you need before structs and methods start feeling natural.
 
 ---
 
-## When to Clone vs. Borrow
-
-Understanding when to clone data versus when to borrow is crucial for efficient Rust programming:
-
-<Tabs items={['Borrow When Possible', 'Clone When Necessary', 'Move When Appropriate']}>
-<Tab value="Borrow When Possible">
-```rust
-// ✅ Prefer borrowing for read-only access
-fn analyze_data(data: &Vec<u64>) -> (u64, u64, f64) {
-    let sum: u64 = data.iter().sum();
-    let max = *data.iter().max().unwrap_or(&0);
-    let avg = sum as f64 / data.len() as f64;
-    (sum, max, avg)
-}
-
-// ✅ Borrow mutably when you need to modify
-fn sort_data(data: &mut Vec<u64>) {
-    data.sort();
-}
-```
-</Tab>
-<Tab value="Clone When Necessary">
-```rust
-// ✅ Clone when you need to store data beyond the lifetime
-fn store_important_data(data: &String) -> String {
-    // We need to own this data, so we clone
-    data.clone()
-}
-
-// ✅ Clone when multiple ownership is needed
-fn distribute_data(data: &Vec<u64>) -> (Vec<u64>, Vec<u64>) {
-    (data.clone(), data.clone())  // Two separate copies
-}
-```
-</Tab>
-<Tab value="Move When Appropriate">
-```rust
-// ✅ Move when transferring ownership is natural
-fn consume_and_transform(mut data: Vec<u64>) -> Vec<String> {
-    data.iter().map(|x| x.to_string()).collect()
-}
-
-// ✅ Move when the original is no longer needed
-fn main() {
-    let data = vec![1, 2, 3, 4, 5];
-    let result = consume_and_transform(data);
-    // data is gone, but that's fine - we have result
-}
-```
-</Tab>
-</Tabs>
-
-<Callout type="tip">
-**Performance Guideline**: Borrow > Move > Clone. Try borrowing first, move if ownership transfer makes sense, clone only when you truly need multiple copies.
-</Callout>
-
----
-
-## Common Ownership Pitfalls
+## Common Ownership Mistakes
 
 <Callout type="warn">
-**Trying to use moved values**
-```rust
-let s1 = String::from("Hello");
-let s2 = s1;  // s1 is moved
-println!("{}", s1);  // ❌ Error: s1 is no longer valid
+### Using a value after it moved
 
-// Solution: use references or clone
-let s1 = String::from("Hello");
-let s2 = &s1;  // Borrow instead of move
-println!("{} {}", s1, s2);  // ✅ Both valid
-```
+If you assign a `String` to a new variable or pass it into a function that takes ownership, the original binding is no longer valid.
+
+Do not fight that rule. Decide whether you actually wanted a borrow instead.
 </Callout>
 
 <Callout type="warn">
-**Violating borrowing rules**
-```rust
-let mut s = String::from("Hello");
-let r1 = &s;
-let r2 = &mut s;  // ❌ Error: can't have mutable ref while immutable ref exists
-println!("{} {}", r1, r2);
+### Mixing immutable and mutable borrows carelessly
 
-// Solution: separate the borrows
-let mut s = String::from("Hello");
-let r1 = &s;
-println!("{}", r1);  // r1 scope ends here
-let r2 = &mut s;     // ✅ Now we can borrow mutably
-r2.push_str(", World!");
-```
+If one part of the code is reading a value, Rust will not let another part mutate it at the same time.
+
+That restriction prevents inconsistent state and data races.
 </Callout>
 
 <Callout type="warn">
-**Creating dangling references**
-```rust
-fn dangle() -> &String {  // ❌ Error: missing lifetime specifier
-    let s = String::from("Hello");
-    &s  // s is freed when function ends
-}
+### Cloning when borrowing would be enough
 
-// Solution: return the owned value
-fn no_dangle() -> String {  // ✅ Return ownership
-    let s = String::from("Hello");
-    s
-}
-```
+`.clone()` is not evil, but it is not the default solution either.
+
+If you only need temporary access, borrow the value.
 </Callout>
 
 ---
 
 ## Summary
 
-Today you've mastered Rust's ownership system - the foundation that makes Rust both safe and fast:
+Ownership is the rule that makes Rust feel different.
 
-**Key Concepts Learned:**
-- ✅ **Three ownership rules**: single owner, one at a time, cleanup on scope exit
-- ✅ **Memory management**: stack vs. heap, automatic cleanup
-- ✅ **Move semantics**: ownership transfer prevents expensive copies
-- ✅ **Borrowing**: references allow data access without ownership transfer
-- ✅ **Borrowing rules**: prevent data races at compile time
-- ✅ **Slices**: efficient references to data subsequences
+The short version is:
 
-**Why This Matters for Solana:**
-- Memory safety prevents security vulnerabilities
-- Zero-cost abstractions ensure optimal performance
-- Predictable resource management for blockchain constraints
-- Compile-time guarantees eliminate runtime errors
+- one owner controls a value
+- ownership can move
+- borrows let other code use the value temporarily
+- mutable borrows require exclusive access
+- slices are borrowed views, not owned copies
 
-**Tomorrow Preview:** Day 3 will build upon ownership to explore structs and methods - how to create custom data types and organize code in a way that's perfect for modeling blockchain entities like accounts, transactions, and programs.
+If you can trace who owns the data and who is only borrowing it, Rust starts to make sense.
 
----
+That is the capability you should leave Day 2 with.
 
-## Practice Time!
-
-Ready to test your ownership understanding? Head over to [Day 2 Challenges](/learn/week-2/day-2-challenges) to practice with string analysis, array manipulation, and memory management exercises!
+The next lesson builds on this by introducing structs and methods, where ownership stops being a toy example and starts shaping real program design.
