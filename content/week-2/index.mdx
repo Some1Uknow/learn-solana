@@ -1,253 +1,164 @@
 ---
-title: "Rust for Solana Development Curriculum"
-description: "Master essential Rust concepts to build Anchor dApps with a complete path from fundamentals to Solana-specific patterns across seven focused days."
-keywords: ["rust for solana", "anchor", "ownership", "structs", "enums", "collections", "async"]
-module: '🦀 Rust for Solana'
+title: "Rust for Solana"
+description: "Week 2 teaches the Rust fundamentals you need before Solana programs stop looking intimidating: ownership, structs, enums, collections, and project practice."
+keywords: ["rust for solana", "ownership", "structs", "enums", "collections", "week 2"]
+module: "🦀 Rust for Solana"
 ---
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 
-Welcome to your intensive 7-day journey into Rust programming, specifically tailored for Solana development! This curriculum is designed to take you from Rust novice to someone ready to build sophisticated Anchor programs on Solana.
+If Week 1 taught you how Solana behaves from the outside, Week 2 teaches you the language that most Solana programs are written in.
 
-**Why Rust for Solana?** Rust's ownership system, zero-cost abstractions, and memory safety make it perfect for blockchain development where security and performance are paramount. Solana programs are written in Rust, and understanding the language deeply will make you a more effective dApp developer.
+That language is Rust.
+
+And Rust has a reputation for being hard for a reason.
+
+You do not get far by memorizing syntax alone. You need the right mental models for ownership, borrowing, data modeling, and pattern matching. Without those, Solana program code looks hostile even when it is correct.
+
+That is what this module fixes.
 
 <Callout type="info">
-This course assumes no prior Rust experience but expects familiarity with basic programming concepts. Each day builds upon the previous, so follow the sequence for the best learning experience.
+Follow Week 2 in order. Rust concepts build on each other much more aggressively than many JavaScript or Python learners expect.
 </Callout>
 
 ---
 
-## Course Overview
+## What Week 2 Covers
 
-This 7-day curriculum combines theoretical understanding with practical exercises. You'll learn core Rust concepts and immediately apply them to blockchain-relevant scenarios.
+By the end of this module, you should be able to:
 
-<MermaidWithZoom 
-  title="7-Day Rust Curriculum Flow"
-  chart="
-    graph TD
-      A[Day 1: Fundamentals] --> B[Day 2: Ownership System]
-      B --> C[Day 3: Data Structures]
-      C --> D[Day 4: Error Handling]
-      D --> E[Day 5: Async Programming]
-      E --> F[Day 6: External Crates]
-      F --> G[Day 7: Solana Preparation]
-      
-      A --> A1[Variables & Functions]
-      A --> A2[Control Flow]
-      B --> B1[Memory Management]
-      B --> B2[Borrowing Rules]
-      C --> C1[Structs & Enums]
-      C --> C2[Methods & Traits]
-      D --> D1[Result & Option]
-      D --> D2[Custom Errors]
-      E --> E1[async/await]
-      E --> E2[Tokio Runtime]
-      F --> F1[Cargo.toml]
-      F --> F2[External Dependencies]
-      G --> G1[Solana Programs]
-      G --> G2[Account Model]
-      
-      style A fill:#e1f5fe
-      style B fill:#f3e5f5
-      style C fill:#e8f5e8
-      style D fill:#fff3e0
-      style E fill:#fce4ec
-      style F fill:#f1f8e9
-      style G fill:#e3f2fd"
-/>
+- set up a clean Rust development environment
+- write basic Rust syntax without fighting the compiler constantly
+- explain ownership and borrowing in plain language
+- model data with structs and methods
+- use enums and pattern matching to represent state safely
+- work with vectors, maps, and strings without getting lost in types
+- apply those ideas in small projects and challenge exercises
 
-<Callout type="tip">
-**Learning Strategy**: Each day introduces new concepts, followed by targeted challenges. Mid-course and final projects help consolidate your knowledge through practical application.
-</Callout>
+That is the Rust foundation you need before Solana program code starts feeling reasonable.
 
 ---
 
-## Weekly Schedule
+## Why This Module Exists
+
+A lot of Solana learners try to jump from JavaScript straight into Anchor or on-chain Rust.
+
+That usually leads to fake progress.
+
+You can copy program code and still have no idea:
+
+- why a value moved
+- why a borrow is invalid
+- why the compiler rejects two references
+- why a struct method needs `&self` instead of `self`
+- why enums are a better fit than stringly typed state
+
+This module exists to remove that confusion before you hit real Solana program code.
+
+---
+
+## Week 2 Roadmap
 
 <Steps>
 <Step>
-### Days 1-3: Core Rust Fundamentals
-**Foundation Building**
+### Day 1: Rust Fundamentals
 
-- **Day 1**: Development environment, basic syntax, control flow
-- **Day 2**: Ownership system - Rust's most unique feature
-- **Day 3**: Structs and methods - building custom data types
+You install the toolchain, write your first programs, and get comfortable with variables, functions, types, and control flow.
 
-*Mid-Course Project Break*: Crypto Portfolio Tracker & Blockchain Simulator
+This removes the first layer of Rust friction.
+
 </Step>
 
 <Step>
-### Days 4-5: Advanced Data Handling
-**Practical Patterns**
+### Day 2: Ownership and Borrowing
 
-- **Day 4**: Enums and pattern matching - handling complex data
-- **Day 5**: Collections and string processing - managing data efficiently
+You learn the rule that makes Rust feel different from almost every other language.
 
-*Practical Build Session*: NFT Metadata Manager & DEX Order Book
+This is the day that changes how you think about memory, references, and mutation.
+
 </Step>
 
 <Step>
-### Days 6-7: Production-Ready Code
-**Solana Preparation**
+### Day 3: Structs and Methods
 
-- **Day 6**: Error handling and code organization
-- **Day 7**: Solana-specific Rust patterns and Anchor preparation
+You start modeling real data with custom types and attach behavior to that data.
+
+This is where Rust starts to feel useful instead of merely strict.
+
+</Step>
+
+<Step>
+### Mid-Course Projects
+
+You stop reading and start combining the first half of the module into small working systems.
+
+This is where the theory either becomes real or falls apart.
+
+</Step>
+
+<Step>
+### Day 4: Enums and Pattern Matching
+
+You learn how Rust represents state variants safely.
+
+This matters for everything from program state machines to error handling.
+
+</Step>
+
+<Step>
+### Day 5: Collections and Strings
+
+You learn how to organize and process real data using vectors, maps, and string types.
+
+This is the layer that makes practical Rust programs less awkward.
+
 </Step>
 </Steps>
 
 ---
 
-## What Makes This Course Special
+## How To Use This Module Well
 
-<Accordions>
-<Accordion title="Solana-Focused Examples">
-### Solana-Focused Examples
+Use these rules while going through Week 2:
 
-Every concept is taught through examples relevant to blockchain development:
-- Wallet structures instead of generic data types
-- Transaction handling patterns instead of basic collections
-- Account models that mirror Solana's architecture
-</Accordion>
+- type the examples yourself instead of only reading them
+- let compiler errors teach you instead of treating them as noise
+- rewrite small examples in your own words after they compile
+- do the challenge pages right after the lesson pages, not days later
+- when confused, ask what Rust is protecting you from
 
-<Accordion title="Hands-On Projects">
-### Hands-On Projects
+That last question is the important one.
 
-Real projects that simulate common Solana development tasks:
-- **Crypto Portfolio Tracker**: Practice structs and ownership
-- **Blockchain Simulator**: Understand block structures
-- **NFT Metadata Manager**: Work with enums and collections
-- **DEX Order Book**: Apply pattern matching to trading logic
-</Accordion>
-
-<Accordion title="Anchor-Ready Patterns">
-### Anchor-Ready Patterns
-
-Learn Rust patterns that directly translate to Anchor development:
-- Account deserialization patterns
-- Error handling strategies
-- Macro usage fundamentals
-- Memory management for on-chain programs
-</Accordion>
-</Accordions>
+Rust feels strict because it is trying to make bugs impossible or harder to express.
 
 ---
 
-## Prerequisites and Setup
+## What Success Looks Like
 
-<Callout type="warn">
-**Before Starting**: Ensure you have a working development environment. Day 1 covers the complete setup process, but having a computer with internet access and the ability to install software is essential.
-</Callout>
+A strong Week 2 outcome sounds like this:
 
-**What You'll Need:**
-- A computer (Windows, macOS, or Linux)
-- Internet connection for downloading tools
-- Text editor (VS Code recommended)
-- Terminal/command line access
-- About 2-3 hours per day for lessons and exercises
+- I understand what ownership means
+- I know when to borrow and when to move
+- I can design a struct and attach methods to it
+- I can use enums instead of vague string states
+- I can work with collections without panicking over every type annotation
+- I can read beginner-level Solana Rust code without feeling completely blind
 
-**Prior Knowledge:**
-- Basic programming concepts (variables, functions, loops)
-- Familiarity with command line basics
-- Understanding of basic data structures (arrays, objects)
+If you can say that honestly, this module did its job.
 
 ---
 
-## Learning Approach
+## Summary
 
-### Daily Structure
+Week 2 is the Rust foundation layer for the rest of the Solana curriculum.
 
-Each day follows a consistent pattern:
+It teaches the language patterns that real Solana development depends on:
 
-<Tabs items={['Morning: Theory', 'Afternoon: Practice', 'Evening: Challenges']}>
-<Tab value="Morning: Theory">
-**Concept Introduction (45-60 mins)**
-- New Rust concepts explained with examples
-- Interactive code demonstrations
-- Common pitfalls and best practices
-</Tab>
-<Tab value="Afternoon: Practice">
-**Guided Practice (30-45 mins)**
-- Step-by-step coding exercises
-- Building small, focused programs
-- Immediate feedback and debugging
-</Tab>
-<Tab value="Evening: Challenges">
-**Independent Challenges (60-90 mins)**
-- Multiple difficulty levels
-- Real-world problem solving
-- Portfolio-building projects
-</Tab>
-</Tabs>
+- ownership
+- borrowing
+- data modeling
+- safe state representation
+- practical data handling
 
-### Assessment Strategy
-
-<Callout type="info">
-**No Formal Tests**: This course uses project-based assessment. Your understanding is measured through working code and problem-solving ability, not memorization.
-</Callout>
-
-**Progress Markers:**
-- ✅ Daily challenge completion
-- 🏗️ Mid-course project functionality
-- 🚀 Final project demonstrating integrated knowledge
-- 🎯 Code review and improvement iterations
-
----
-
-## Course Outcomes
-
-By the end of this 7-day journey, you will:
-
-**Understand Rust Fundamentals:**
-- Master ownership, borrowing, and lifetimes
-- Write memory-safe, efficient code
-- Handle errors gracefully
-- Organize code with modules and traits
-
-**Apply Solana-Specific Patterns:**
-- Understand account models and serialization
-- Work with Program Derived Addresses (PDAs)
-- Handle transaction structures
-- Prepare for Anchor framework development
-
-**Build Real Projects:**
-- Complete portfolio of Rust programs
-- Experience with blockchain-relevant data structures
-- Confidence to tackle Solana program development
-- Ready to dive into Anchor and advanced Solana concepts
-
----
-
-## Getting Support
-
-<Callout type="tip">
-**Community Learning**: Join our Discord channel for real-time help, code reviews, and collaboration with fellow learners. The Rust community is known for being welcoming and helpful!
-</Callout>
-
-**Resources Available:**
-- 📖 Comprehensive documentation for each concept
-- 💬 Community Discord for questions and discussion
-- 🔧 Debugging guides and common error solutions
-- 📺 Video walkthroughs for complex topics
-- 🎯 Office hours for personalized help
-
----
-
-## Ready to Begin?
-
-Your Rust journey starts with Day 1: Rust Fundamentals & Development Environment. Remember, learning Rust can feel challenging at first - the ownership system is unlike anything in other languages. But once it "clicks," you'll have superpowers for building secure, fast systems.
-
-<Callout type="success">
-**Pro Tip**: Keep a "learning journal" throughout the week. Write down concepts that confuse you, "aha!" moments, and questions to explore further. This reflection will accelerate your learning.
-</Callout>
-
-Take your time, ask questions, and most importantly - write lots of code. Let's build something amazing together!
-
----
-
-## Quick Navigation
-
-- 🚀 [Day 1: Rust Fundamentals](/learn/week-2/day-1-rust-fundamentals)
-- 🏗️ [Mid-Course Projects](/learn/week-2/mid-course-projects)
+Get these right now, and the later Anchor and program lessons will stop feeling like a wall of unfamiliar syntax.

@@ -1,762 +1,517 @@
 ---
-title: "Rust Fundamentals and Dev Environment Setup (Beginner Guide)"
-description: "Set up the Rust toolchain and learn core programming concepts for Solana development, including variables, functions, types, and control flow with practical examples."
+title: "Rust Setup and Core Syntax"
+description: "Install the Rust toolchain, create your first Cargo project, and learn the variables, functions, types, and control flow that later Solana lessons depend on."
 module: "🦀 Rust for Solana"
-keywords: ["rust basics", "variables", "functions", "control flow", "setup", "rust toolchain"]
+keywords: ["rust setup", "cargo", "rust syntax", "variables", "functions", "control flow"]
 ---
 
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 
-Welcome to Day 1 of your Rust journey! Today we'll set up your development environment and explore the fundamental building blocks of Rust programming. By the end of today, you'll have written your first Rust programs and understand the basic syntax that makes Rust unique.
+A lot of new Solana learners think Rust becomes hard only when ownership starts.
 
-<MermaidWithZoom 
-  title="Rust Compilation and Safety Overview"
-  chart="
-    graph TD
-      A[Rust Source Code] --> B[Rust Compiler rustc]
-      B --> C[Binary Executable]
-      B --> D[Compilation Errors]
-      
-      E[.rs Files] --> F[Cargo Build System]
-      F --> B
-      F --> G[Dependencies from Crates.io]
-      G --> B
-      
-      H[Runtime Safety] --> I[Memory Safety]
-      H --> J[Thread Safety]
-      H --> K[Type Safety]
-      
-      style A fill:#e1f5fe
-      style B fill:#f3e5f5
-      style C fill:#e8f5e8
-      style D fill:#ffebee
-      style E fill:#f1f8e9
-      style F fill:#fff3e0"
-/>
+That is not true.
+
+Many people get blocked earlier because their toolchain is half-set up, they do not know what `cargo` is doing, and basic Rust syntax still feels unfamiliar.
+
+Day 1 fixes that.
+
+The goal is simple: get a working Rust environment, write code that compiles, and understand the small language rules that show up in every later Solana lesson.
 
 <Callout type="info">
-Today's focus is on getting comfortable with Rust syntax and thinking patterns. Don't worry about advanced concepts yet - we're building a solid foundation.
+Treat the compiler as part of the lesson.
+
+If Rust rejects your code, that is not friction to ignore. It is the language telling you what rule you just violated.
 </Callout>
 
 ---
 
-## What You'll Learn Today
+## The Mental Model For Day 1
 
-<Callout type="info">
-By the end of Day 1, you'll be able to:
+You do not need to learn all of Rust today.
 
-- Install and configure the Rust toolchain
-- Set up VS Code with Rust-analyzer for optimal development
-- Write and run basic Rust programs
-- Understand variables, mutability, and basic data types
-- Create functions with parameters and return values
-- Use control flow constructs (if/else, loops)
-- Distinguish between expressions and statements
-</Callout>
+You need to learn the workflow:
+
+1. write a small program
+2. compile it with `cargo`
+3. read what the compiler says
+4. fix the code until the program does what you expect
+
+That loop is the foundation for everything else.
+
+By the end of this lesson, you should be comfortable with:
+
+- the Rust toolchain: `rustup`, `rustc`, and `cargo`
+- creating and running a project
+- variables and mutability
+- basic scalar types
+- functions and return values
+- `if`, `loop`, `while`, and `for`
 
 ---
 
-## Getting Started with Rust
+## Install The Rust Toolchain
 
-### Installing the Rust Toolchain
+Rust development usually starts with three tools:
 
-Rust comes with an excellent installer called `rustup` that manages your Rust installation and keeps it up to date.
+- `rustup`: installs and manages Rust toolchains
+- `rustc`: the Rust compiler
+- `cargo`: the project manager and build tool
+
+You will use `cargo` most of the time. `rustc` is the compiler under the hood.
 
 <Steps>
 <Step>
-### Step 1: Install Rustup
+### Install Rust
 
-Visit [rustup.rs](https://rustup.rs/) and follow the installation instructions for your operating system.
+On macOS and Linux:
 
-**For Windows:**
-Download and run `rustup-init.exe`
-
-**For macOS/Linux:**
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
+On Windows, install `rustup-init.exe` from [rustup.rs](https://rustup.rs/).
 </Step>
 
 <Step>
-### Step 2: Verify Installation
+### Verify the installation
 
-Open a new terminal and verify your installation:
+Open a new terminal and run:
 
 ```bash
 rustc --version
 cargo --version
+rustup show
 ```
 
-You should see version information for both the Rust compiler (`rustc`) and Cargo (Rust's package manager).
+If these commands work, your toolchain is installed correctly.
+
+If they fail, fix that now. Do not move deeper into Rust with a broken environment.
 </Step>
 
 <Step>
-### Step 3: Update Your Toolchain
-
-Keep your Rust installation up to date:
+### Update to the latest stable toolchain
 
 ```bash
 rustup update
-```
-</Step>
-</Steps>
-
-### Understanding the Rust Ecosystem
-
-<Accordions>
-<Accordion title="rustc - The Rust Compiler">
-### rustc - The Rust Compiler
-
-`rustc` is the core Rust compiler. It transforms your Rust source code into executable binaries. While you can use it directly, most developers use Cargo instead.
-
-```bash
-# Compile a single file
-rustc main.rs
-```
-</Accordion>
-
-<Accordion title="Cargo - The Package Manager">
-### Cargo - The Package Manager
-
-Cargo is Rust's build tool and package manager. It handles:
-- Creating new projects
-- Managing dependencies
-- Building and running your code
-- Running tests
-- Publishing packages
-
-```bash
-# Create a new project
-cargo new my_project
-cd my_project
-
-# Build your project
-cargo build
-
-# Run your project
-cargo run
-```
-</Accordion>
-
-<Accordion title="rustup - The Toolchain Manager">
-### rustup - The Toolchain Manager
-
-`rustup` manages your Rust installations. It can install multiple versions of Rust and switch between them as needed.
-
-```bash
-# List installed toolchains
-rustup show
-
-# Install a specific version
-rustup install stable
-rustup install nightly
-
-# Set default toolchain
 rustup default stable
 ```
-</Accordion>
-</Accordions>
 
----
-
-## Setting Up VS Code
-
-VS Code with the Rust-analyzer extension provides an excellent Rust development experience.
-
-<Steps>
-<Step>
-### Step 1: Install VS Code
-
-Download and install [Visual Studio Code](https://code.visualstudio.com/)
-</Step>
-
-<Step>
-### Step 2: Install Rust-analyzer Extension
-
-1. Open VS Code
-2. Go to Extensions (Ctrl+Shift+X / Cmd+Shift+X)
-3. Search for "rust-analyzer"
-4. Install the official rust-analyzer extension
-</Step>
-
-<Step>
-### Step 3: Optional Extensions
-
-Consider these additional extensions for a better experience:
-- **Error Lens**: Shows errors inline
-- **Better TOML**: For Cargo.toml syntax highlighting
-- **CodeLLDB**: For debugging support
+This makes sure your local setup matches the stable Rust ecosystem most tutorials assume.
 </Step>
 </Steps>
 
-<Callout type="tip">
-**Pro Tip**: Rust-analyzer provides incredible features like inline type hints, error diagnostics, and code completion. Let it guide your learning!
-</Callout>
+---
+
+## Set Up Your Editor
+
+Use VS Code with the official `rust-analyzer` extension.
+
+That gives you the minimum useful developer experience:
+
+- inline errors
+- type hints
+- jump to definitions
+- quick fixes
+
+You can add extras later. `rust-analyzer` is the only extension that really matters right now.
 
 ---
 
-## Your First Rust Program
+## Create Your First Cargo Project
 
-Let's start with the traditional "Hello, World!" program and understand what makes it special in Rust.
+Do not start with a random `.rs` file.
 
-<Steps>
-<Step>
-### Step 1: Create a New Project
+Start with Cargo.
+
+Cargo gives you the correct project structure, handles builds, and will later manage dependencies for real Solana projects.
 
 ```bash
-cargo new hello_rust
-cd hello_rust
+cargo new day1_rust
+cd day1_rust
+cargo run
 ```
 
-This creates a new directory with:
-- `Cargo.toml`: Project configuration
-- `src/main.rs`: Your main source file
-</Step>
+When `cargo run` succeeds, three useful things happened:
 
-<Step>
-### Step 2: Examine the Generated Code
+- Cargo created a project directory
+- Rust compiled your program into a binary
+- Cargo ran that binary for you
 
-Open `src/main.rs`:
+You should see output similar to:
 
-```rust title="src/main.rs"
+```text
+Compiling day1_rust v0.1.0
+Finished dev profile
+Running `target/debug/day1_rust`
+Hello, world!
+```
+
+That output matters.
+
+It proves your local Rust workflow works end to end.
+
+---
+
+## Read The Smallest Useful Rust Program
+
+Open `src/main.rs`. You will see this:
+
+```rust
 fn main() {
     println!("Hello, world!");
 }
 ```
 
-Let's break this down:
-- `fn main()`: Defines the main function (entry point)
-- `println!`: A macro (note the `!`) that prints to console
-- Statements end with semicolons
-</Step>
+This tiny file already teaches you several Rust rules.
 
-<Step>
-### Step 3: Run Your Program
+- `fn main()` declares the program entry point
+- braces `{}` define the function body
+- `println!` is a macro, which is why it ends with `!`
+- the line ends with `;`, so it is a statement
+
+At this stage, you do not need macro theory. You just need to recognize that `println!` writes text to the terminal.
+
+---
+
+## Build One Small Program You Can Reason About
+
+Instead of throwing isolated syntax examples at you, we will build one small Rust program.
+
+The program will simulate a wallet balance check.
+
+That keeps the logic simple while staying close to Solana-style thinking.
+
+Replace `src/main.rs` with this:
+
+```rust title="src/main.rs"
+const NETWORK_FEE_LAMPORTS: u64 = 5_000;
+
+fn main() {
+    // `u64` is common for balances because balances cannot be negative.
+    let starting_balance: u64 = 2_000_000;
+    let transfer_amount: u64 = 750_000;
+
+    println!("Starting balance: {} lamports", starting_balance);
+    println!("Transfer amount: {} lamports", transfer_amount);
+
+    let final_balance = calculate_remaining_balance(starting_balance, transfer_amount);
+
+    println!("Final balance: {} lamports", final_balance);
+}
+
+fn calculate_remaining_balance(balance: u64, amount: u64) -> u64 {
+    balance - amount - NETWORK_FEE_LAMPORTS
+}
+```
+
+Run it:
 
 ```bash
 cargo run
 ```
 
-You should see:
-```
-   Compiling hello_rust v0.1.0 (/path/to/hello_rust)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.50s
-     Running `target/debug/hello_rust`
-Hello, world!
-```
-</Step>
-</Steps>
+### What this teaches
 
-<Callout type="info">
-**Understanding macros**: `println!` is a macro, not a function. Macros in Rust are indicated by the `!` and are expanded at compile time. They're more powerful than functions but we'll cover them in detail later.
-</Callout>
+- `const` creates a compile-time constant
+- `u64` is an unsigned 64-bit integer
+- `let` creates an immutable variable
+- `fn ... -> u64` means the function returns a `u64`
+- the last line of a function can return a value without using `return`
 
----
+That last rule matters a lot in Rust.
 
-## Variables and Mutability
+The final line in `calculate_remaining_balance` is an expression, not a statement.
 
-One of Rust's core principles is that variables are **immutable by default**. This prevents many common programming errors.
-
-<Mermaid 
-  chart="
-    graph TD
-      A[let x = 5] --> B{Immutable by default}
-      B --> C[✅ Can read value]
-      B --> D[❌ Cannot change value]
-      
-      E[let mut y = 5] --> F{Explicitly mutable}
-      F --> G[✅ Can read value]
-      F --> H[✅ Can change value]
-      F --> I[y = 10 // Valid]
-      
-      J[const MAX_POINTS: u32 = 100_000] --> K{Compile-time constant}
-      K --> L[✅ Always immutable]
-      K --> M[✅ Known at compile time]
-      K --> N[✅ Can use in any scope]
-      
-      style A fill:#e1f5fe
-      style E fill:#f3e5f5
-      style J fill:#e8f5e8
-      style D fill:#ffebee
-      style C fill:#e8f5e8
-      style G fill:#e8f5e8
-      style H fill:#e8f5e8"
-/>
-
-### Basic Variables
-
-```rust title="variables.rs"
-fn main() {
-    let x = 5;
-    println!("The value of x is: {}", x);
-    
-    // This would cause a compile error:
-    // x = 6; // Cannot assign twice to immutable variable
-}
-```
-
-### Mutable Variables
-
-To change a variable's value, you must explicitly make it mutable:
-
-```rust title="mutable.rs"
-fn main() {
-    let mut x = 5;
-    println!("The value of x is: {}", x);
-    
-    x = 6; // This works because x is mutable
-    println!("The value of x is now: {}", x);
-}
-```
-
-### Constants vs Variables
-
-<Tabs items={['Variables (let)', 'Constants (const)']}>
-<Tab value="Variables (let)">
-```rust
-fn main() {
-    let x = 5;          // Immutable by default
-    let mut y = 10;     // Explicitly mutable
-    
-    // Can be shadowed (redeclared)
-    let x = x + 1;      // Creates new variable
-    let x = x * 2;      // x is now 12
-    
-    println!("x: {}, y: {}", x, y);
-}
-```
-</Tab>
-<Tab value="Constants (const)">
-```rust
-// Constants are always immutable and must have type annotations
-const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
-
-fn main() {
-    println!("Three hours in seconds: {}", THREE_HOURS_IN_SECONDS);
-}
-```
-</Tab>
-</Tabs>
-
-<Callout type="tip">
-**Naming Convention**: Constants use `SCREAMING_SNAKE_CASE`, while variables use `snake_case`.
-</Callout>
+If you add a semicolon there, the function stops returning the number you expect.
 
 ---
 
-## Basic Data Types
+## Variables Are Immutable Unless You Opt In
 
-Rust is a statically typed language, meaning all variable types must be known at compile time.
+This is one of the first Rust rules that surprises JavaScript learners.
 
-### Scalar Types
+In Rust, variables do not change unless you say they can change.
 
-<Accordions>
-<Accordion title="Integer Types">
-### Integer Types
-
-Rust has several integer types based on size and signedness:
-
-```rust title="integers.rs"
-fn main() {
-    let a: i8 = -128;      // 8-bit signed (-128 to 127)
-    let b: u8 = 255;       // 8-bit unsigned (0 to 255)
-    let c: i32 = -50_000;  // 32-bit signed (default integer type)
-    let d: u64 = 1_000_000; // 64-bit unsigned
-    
-    // Type inference - Rust can often determine types
-    let guess = 42;        // defaults to i32
-    
-    println!("a: {}, b: {}, c: {}, d: {}, guess: {}", a, b, c, d, guess);
-}
-```
-
-**Common integer types:**
-- `i32` / `u32`: Most common, good default choice
-- `i64` / `u64`: For larger numbers
-- `usize` / `isize`: For indexing and memory addresses
-</Accordion>
-
-<Accordion title="Floating-Point Types">
-### Floating-Point Types
-
-```rust title="floats.rs"
-fn main() {
-    let x = 2.0;        // f64 by default
-    let y: f32 = 3.0;   // f32 (single precision)
-    
-    // Mathematical operations
-    let sum = x + y as f64;  // Type casting required
-    let difference = 95.5 - 4.3;
-    let product = 4.0 * 30.0;
-    let quotient = 56.7 / 32.2;
-    
-    println!("sum: {}, difference: {}, product: {}, quotient: {}", 
-             sum, difference, product, quotient);
-}
-```
-</Accordion>
-
-<Accordion title="Boolean Type">
-### Boolean Type
-
-```rust title="booleans.rs"
-fn main() {
-    let t = true;
-    let f: bool = false; // with explicit type annotation
-    
-    // Boolean operations
-    let is_morning = true;
-    let is_weekday = false;
-    let go_to_work = is_morning && is_weekday;
-    
-    println!("Go to work: {}", go_to_work);
-}
-```
-</Accordion>
-
-<Accordion title="Character Type">
-### Character Type
-
-```rust title="characters.rs"
-fn main() {
-    let c = 'z';
-    let z: char = 'ℤ';  // Unicode support
-    let heart_eyed_cat = '😻';
-    
-    println!("Characters: {}, {}, {}", c, z, heart_eyed_cat);
-}
-```
-
-**Note**: `char` literals use single quotes and represent Unicode scalar values.
-</Accordion>
-</Accordions>
-
-### Type Annotations and Inference
-
-<Tabs items={['Type Inference', 'Explicit Annotations']}>
-<Tab value="Type Inference">
 ```rust
 fn main() {
-    // Rust can infer types from context
-    let mut guess = String::new();  // String type inferred
-    
-    let x = 5;          // i32 inferred
-    let y = 2.5;        // f64 inferred
-    let is_active = true; // bool inferred
-    
-    // Sometimes context helps with inference
-    let numbers: Vec<i32> = Vec::new();  // Vector of i32s
+    let balance = 100;
+    // balance = 200; // this does not compile
 }
 ```
-</Tab>
-<Tab value="Explicit Annotations">
+
+If a value really needs to change, use `mut`.
+
 ```rust
 fn main() {
-    // Explicit type annotations
-    let x: i64 = 5;
-    let y: f32 = 2.5;
-    let name: String = String::from("Rust");
-    
-    // Sometimes required when multiple types are possible
-    let parsed: u32 = "42".parse().expect("Not a number!");
+    let mut balance = 100;
+    balance = 200;
+
+    println!("{}", balance);
 }
 ```
-</Tab>
-</Tabs>
+
+This is not just syntax preference.
+
+Rust makes mutation explicit because hidden state changes are a common source of bugs.
 
 ---
 
-## Functions and Control Flow
+## The Basic Types You Will Use First
 
-### Function Syntax
+You do not need the whole type system today.
 
-Functions in Rust are defined with the `fn` keyword:
+You need the small set that shows up constantly.
 
-```rust title="functions.rs"
+```rust
 fn main() {
-    println!("Hello from main!");
-    
-    greet_user("Alice");
-    
-    let result = add_numbers(5, 3);
-    println!("5 + 3 = {}", result);
-    
-    let (sum, product) = calculate(4, 6);
-    println!("Sum: {}, Product: {}", sum, product);
-}
+    let balance: u64 = 2_000_000;
+    let retry_count: u8 = 3;
+    let price: f64 = 1.25;
+    let is_confirmed: bool = true;
+    let grade: char = 'A';
 
-// Function with parameters
-fn greet_user(name: &str) {
-    println!("Hello, {}!", name);
-}
-
-// Function with return value
-fn add_numbers(a: i32, b: i32) -> i32 {
-    a + b  // No semicolon = return value (expression)
-}
-
-// Function returning multiple values (tuple)
-fn calculate(x: i32, y: i32) -> (i32, i32) {
-    (x + y, x * y)
+    println!("{} {} {} {} {}", balance, retry_count, price, is_confirmed, grade);
 }
 ```
 
-<Callout type="info">
-**Expressions vs Statements**: 
-- **Expressions** evaluate to a value (no semicolon at end)
-- **Statements** perform an action (end with semicolon)
-- Functions return the last expression in their body
-</Callout>
+Use this mental shortcut:
 
-### Control Flow
+- integers like `u64` for counts and balances
+- `f64` for decimal values
+- `bool` for true or false
+- `char` for a single Unicode character
 
-<Accordions>
-<Accordion title="if/else Conditionals">
-### if/else Conditionals
+Rust can often infer types for you, but explicit types are useful when you want the code to be obvious.
 
-```rust title="conditionals.rs"
+---
+
+## Functions Are Where Rust Starts To Feel Structured
+
+A function is just named behavior.
+
+Here is the same wallet example, expanded slightly:
+
+```rust
+const NETWORK_FEE_LAMPORTS: u64 = 5_000;
+
 fn main() {
-    let number = 6;
-    
-    // Basic if/else
-    if number % 4 == 0 {
-        println!("number is divisible by 4");
-    } else if number % 3 == 0 {
-        println!("number is divisible by 3");
-    } else if number % 2 == 0 {
-        println!("number is divisible by 2");
+    let balance = 2_000_000;
+    let amount = 750_000;
+
+    if can_afford_transfer(balance, amount) {
+        let final_balance = calculate_remaining_balance(balance, amount);
+        println!("Transfer is valid. Final balance: {}", final_balance);
     } else {
-        println!("number is not divisible by 4, 3, or 2");
+        println!("Transfer would fail: not enough lamports.");
     }
-    
-    // if as an expression
-    let condition = true;
-    let number = if condition { 5 } else { 6 };
-    println!("The value of number is: {}", number);
+}
+
+fn can_afford_transfer(balance: u64, amount: u64) -> bool {
+    balance >= amount + NETWORK_FEE_LAMPORTS
+}
+
+fn calculate_remaining_balance(balance: u64, amount: u64) -> u64 {
+    balance - amount - NETWORK_FEE_LAMPORTS
 }
 ```
-</Accordion>
 
-<Accordion title="Loop Constructs">
-### Loop Constructs
+Two points matter here.
 
-Rust has three kinds of loops: `loop`, `while`, and `for`.
+First, function parameters need explicit types.
 
-```rust title="loops.rs"
+Second, Rust makes return types explicit too. That is what `-> bool` and `-> u64` mean.
+
+That strictness helps later when Solana programs start passing around accounts, lamports, and custom structs. The compiler forces you to be precise.
+
+---
+
+## `if` Is Not Just Control Flow
+
+In Rust, `if` can decide execution, but it can also produce a value.
+
+That makes it more powerful than many beginners expect.
+
+```rust
 fn main() {
-    // Infinite loop with break
-    let mut counter = 0;
-    let result = loop {
-        counter += 1;
-        
-        if counter == 10 {
-            break counter * 2;  // Return value from loop
+    let priority_fee = true;
+
+    let extra_fee = if priority_fee { 10_000 } else { 0 };
+
+    println!("Extra fee: {}", extra_fee);
+}
+```
+
+Both branches must return the same kind of value.
+
+That rule prevents messy code where one branch produces a number and the other produces something unrelated.
+
+---
+
+## Learn The Three Loop Forms Early
+
+Rust gives you three common ways to repeat work.
+
+### `loop`
+
+Use `loop` when you want a manual exit with `break`.
+
+```rust
+fn main() {
+    let mut attempts = 0;
+
+    let final_attempt = loop {
+        attempts += 1;
+
+        if attempts == 3 {
+            break attempts;
         }
     };
-    println!("The result is {}", result);
-    
-    // While loop
-    let mut number = 3;
-    while number != 0 {
-        println!("{}!", number);
-        number -= 1;
-    }
-    println!("LIFTOFF!!!");
-    
-    // For loop with range
-    for number in 1..4 {  // 1, 2, 3 (4 is excluded)
-        println!("{}!", number);
-    }
-    
-    // For loop with array
-    let a = [10, 20, 30, 40, 50];
-    for element in a {
-        println!("the value is: {}", element);
-    }
-    
-    // For loop with index
-    for (index, value) in a.iter().enumerate() {
-        println!("Index {}: {}", index, value);
+
+    println!("Stopped after {} attempts", final_attempt);
+}
+```
+
+### `while`
+
+Use `while` when repetition depends on a condition.
+
+```rust
+fn main() {
+    let mut confirmations_left = 3;
+
+    while confirmations_left > 0 {
+        println!("Waiting... {}", confirmations_left);
+        confirmations_left -= 1;
     }
 }
 ```
-</Accordion>
-</Accordions>
+
+### `for`
+
+Use `for` when iterating over a range or collection.
+
+```rust
+fn main() {
+    let transfers = [100_000, 250_000, 400_000];
+
+    for amount in transfers {
+        println!("Observed transfer: {}", amount);
+    }
+}
+```
+
+For beginner Rust, `for` is usually the cleanest loop to reach for first.
 
 ---
 
-## Comments and Documentation
+## Put The Pieces Together
 
-Good documentation is crucial for any codebase, especially in blockchain development where security and clarity are paramount.
+Now build one complete program that uses constants, variables, functions, `if`, and `for` together.
 
-<Tabs items={['Regular Comments', 'Documentation Comments']}>
-<Tab value="Regular Comments">
-```rust
+Replace `src/main.rs` with this:
+
+```rust title="src/main.rs"
+const NETWORK_FEE_LAMPORTS: u64 = 5_000;
+
 fn main() {
-    // This is a line comment
-    let x = 5; // Comments can be at the end of lines
-    
-    /*
-     * This is a block comment
-     * spanning multiple lines
-     */
-    let y = 10;
+    let starting_balance: u64 = 2_000_000;
+    let outgoing_transfers: [u64; 3] = [150_000, 300_000, 900_000];
+    let mut current_balance = starting_balance;
+
+    println!("Starting balance: {} lamports", current_balance);
+
+    for amount in outgoing_transfers {
+        if can_afford_transfer(current_balance, amount) {
+            current_balance = calculate_remaining_balance(current_balance, amount);
+            println!("Sent {} lamports", amount);
+            println!("New balance: {} lamports", current_balance);
+        } else {
+            println!("Skipped {} lamports: insufficient balance", amount);
+        }
+    }
+
+    println!("Finished with {} lamports", current_balance);
+}
+
+fn can_afford_transfer(balance: u64, amount: u64) -> bool {
+    balance >= amount + NETWORK_FEE_LAMPORTS
+}
+
+fn calculate_remaining_balance(balance: u64, amount: u64) -> u64 {
+    balance - amount - NETWORK_FEE_LAMPORTS
 }
 ```
-</Tab>
-<Tab value="Documentation Comments">
+
+Run it, then change the numbers yourself.
+
+Try these edits:
+
+- make one transfer too large and watch the `else` branch run
+- change the starting balance and predict the output before running
+- add a fourth transfer to the array and confirm the loop handles it
+
+That is the right way to learn basic Rust syntax: change the program and observe what breaks or what changes.
+
+---
+
+## Common Day 1 Mistakes
+
+<Callout type="warn">
+### Forgetting `mut`
+
+If you try to reassign an immutable variable, Rust will stop you.
+
+That error is correct. Add `mut` only when the value truly changes.
+</Callout>
+
+<Callout type="warn">
+### Accidentally returning `()` instead of a value
+
+This fails:
+
 ```rust
-/// This function adds two numbers together
-/// 
-/// # Examples
-/// 
-/// ```
-/// let result = add(2, 3);
-/// assert_eq!(result, 5);
-/// ```
+fn add(a: i32, b: i32) -> i32 {
+    a + b;
+}
+```
+
+The semicolon turns the expression into a statement.
+
+This works:
+
+```rust
 fn add(a: i32, b: i32) -> i32 {
     a + b
 }
-
-/// Represents a simple wallet in our blockchain
-/// 
-/// Contains a balance and can perform basic operations
-struct Wallet {
-    /// The current balance in lamports
-    balance: u64,
-    /// The public key address
-    address: String,
-}
-```
-</Tab>
-</Tabs>
-
-<Callout type="tip">
-**Documentation Best Practice**: Use `///` for documenting public APIs. These comments can be turned into HTML documentation with `cargo doc`.
-</Callout>
-
----
-
-## Practical Example: Blockchain Basics
-
-Let's put together what we've learned by creating a simple program that demonstrates blockchain concepts:
-
-```rust title="blockchain_basics.rs"
-fn main() {
-    println!("=== Simple Blockchain Demo ===");
-    
-    // Initialize genesis block
-    let genesis_balance = 1_000_000; // 1 million tokens
-    let mut current_balance = genesis_balance;
-    
-    println!("Genesis block created with {} tokens", genesis_balance);
-    
-    // Simulate some transactions
-    let transactions = [
-        ("Alice", 50_000),
-        ("Bob", 25_000),
-        ("Charlie", 75_000),
-    ];
-    
-    for (recipient, amount) in transactions {
-        if current_balance >= amount {
-            current_balance -= amount;
-            println!("✅ Sent {} tokens to {} (Remaining: {})", 
-                     amount, recipient, current_balance);
-        } else {
-            println!("❌ Insufficient funds to send {} tokens to {}", 
-                     amount, recipient);
-        }
-    }
-    
-    // Calculate final statistics
-    let total_sent = genesis_balance - current_balance;
-    let transaction_count = transactions.len();
-    
-    print_summary(total_sent, current_balance, transaction_count);
-}
-
-/// Prints a summary of blockchain transactions
-fn print_summary(total_sent: u64, remaining: u64, tx_count: usize) {
-    println!("\n=== Transaction Summary ===");
-    println!("Total transactions: {}", tx_count);
-    println!("Total tokens sent: {}", total_sent);
-    println!("Remaining balance: {}", remaining);
-    
-    let average_tx = if tx_count > 0 {
-        total_sent / tx_count as u64
-    } else {
-        0
-    };
-    println!("Average transaction size: {}", average_tx);
-}
-```
-
----
-
-## Common Pitfalls for Day 1
-
-<Callout type="warn">
-**Forgetting Mutability**
-```rust
-let x = 5;
-x = 6; // ❌ Error: cannot assign twice to immutable variable
-
-let mut x = 5;
-x = 6; // ✅ Works because x is mutable
 ```
 </Callout>
 
 <Callout type="warn">
-**Mixing Statement and Expression Syntax**
-```rust
-fn add(a: i32, b: i32) -> i32 {
-    a + b;  // ❌ Error: semicolon makes this a statement, not expression
-}
+### Mixing incompatible numeric types
 
-fn add(a: i32, b: i32) -> i32 {
-    a + b   // ✅ Expression returns the value
-}
-```
-</Callout>
+Rust does not silently smooth over type mismatches for you.
 
-<Callout type="warn">
-**Type Mismatches**
-```rust
-let x: i32 = 5;
-let y: i64 = x; // ❌ Error: type mismatch
-
-let x: i32 = 5;
-let y: i64 = x as i64; // ✅ Explicit type conversion
-```
+If one value is `u8` and another is `u64`, be explicit about conversions.
 </Callout>
 
 ---
 
 ## Summary
 
-Congratulations! You've completed Day 1 of your Rust journey. Today you:
+Day 1 was about getting the Rust workflow under control.
 
-- ✅ Set up a complete Rust development environment
-- ✅ Learned about variables, mutability, and constants
-- ✅ Explored Rust's basic data types
-- ✅ Understood functions and control flow
-- ✅ Practiced with a blockchain-themed example
+You now have the basics that later Solana Rust lessons rely on:
 
-**Key Takeaways:**
-- Rust variables are immutable by default (use `mut` for mutability)
-- Functions can return values using expressions (no semicolon)
-- Type safety is enforced at compile time
-- Documentation is built into the language
+- a working Rust toolchain
+- a usable Cargo workflow
+- immutable and mutable variables
+- core scalar types
+- functions with explicit return types
+- `if`, `loop`, `while`, and `for`
 
-**Tomorrow Preview:** Day 2 will introduce Rust's most distinctive feature - the ownership system. This is what makes Rust memory-safe without garbage collection, and it's crucial for understanding how to write efficient Solana programs.
+That is enough to start reading and writing small Rust programs without guessing what the syntax is doing.
 
----
+The next lesson goes deeper into the rule that makes Rust feel fundamentally different: ownership and borrowing.
 
-## Next Steps
-
-Ready for some hands-on practice? Head over to [Day 1 Challenges](/learn/week-2/day-1-challenges) to test your understanding with practical exercises!
+Before you move on, do the challenge page while today’s syntax is still fresh.
