@@ -1,212 +1,327 @@
 ---
-title: "Solana Transaction Structure Explained (Beginner Friendly)"
-description: "Understand Solana transaction structure, signers, instructions, recent blockhashes, and the full lifecycle from creation to confirmation and finality."
+title: "Understanding Solana Transactions"
+description: "Use one simple SOL transfer to understand what a Solana transaction contains, why signers and recent blockhashes matter, and how a transaction moves through the network."
 type: theory
-module: 🧱 Solana Fundamentals
+module: "🧱 Solana Fundamentals"
 keywords: ["solana transaction", "instructions", "signers", "recent blockhash", "accounts", "confirmation"]
 ---
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
-At the heart of every blockchain interaction is a **transaction**. Whether you're sending SOL, minting NFTs, or invoking a smart contract, you're submitting a transaction to the network.
+Most beginners think a transaction is just “the thing that sends SOL.”
 
-But what exactly is a transaction on Solana? What data does it carry, how does it get confirmed, and why are things like **recent blockhashes** and **signers** important?
+That description is too shallow.
 
-Let’s break it down step by step.
+A Solana transaction is a **signed message** that tells the network which instruction to run, which accounts are involved, and who has approved the action.
+
+That is the mental model you need for everything that comes later.
+
+If you understand transactions, program calls stop feeling magical.
 
 <Callout type="info">
-Don’t worry if this feels abstract at first. You’ll get familiar with these concepts naturally as you start building programs and sending transactions.
+This lesson builds directly on the previous one. The `solana transfer` command you already ran is the concrete example we will keep returning to.
 </Callout>
 
 ---
 
-## What You’ll Learn
+## What You Are Learning
 
-<Callout type="info">
-By the end of this lesson, you’ll be able to:
+By the end of this lesson, you will be able to:
 
-- Understand the internal structure of a Solana transaction
-- Explain the roles of instructions, signers, and recent blockhashes
-- Describe the lifecycle of a transaction from creation to confirmation
-- Identify how errors and replays are avoided using hashes
-</Callout>
+- explain what a Solana transaction actually is
+- identify the main pieces inside a transaction
+- understand why some accounts sign and others do not
+- explain what a recent blockhash does
+- describe how a transaction goes from your machine to the network
 
 ---
 
-## What Makes Up a Solana Transaction?
+## Start with One Real Transaction
 
-A Solana transaction consists of:
+Use the transfer from the last lesson as the anchor example:
 
-- **Instructions**: What you want the program to do
-- **Accounts**: Who is involved (including programs, data accounts, wallets)
-- **Signers**: Who has authorized the transaction
-- **Recent blockhash**: A freshness marker to prevent replay attacks
+```bash title="terminal"
+solana transfer wallet2.json 0.01 --from wallet1.json --allow-unfunded-recipient
+```
 
-<Tabs items={['Abstract View', 'Concrete Example']}>
-<Tab value="Abstract View">
+From the terminal, that looks like one line.
+
+Inside the network, it is more structured.
+
+This command causes the CLI to build a transaction that roughly means:
 
 ```txt
-Transaction {
-  signatures: [signer1, signer2],
-  message: {
-    recent_blockhash: "abc123...",
-    instructions: [
-      { program_id: ..., accounts: [...], data: ... },
-      ...
-    ]
-  }
-}
-````
-
-</Tab>
-<Tab value="Concrete Example">
-
-```bash
-solana transfer <RECIPIENT_ADDRESS> 1 --from my-keypair.json
+Run a system transfer instruction.
+Move 0.01 SOL from wallet1 to wallet2.
+Use wallet1 as the signer and fee payer.
+Attach a recent blockhash so the network treats the message as fresh.
 ```
 
-This generates a transaction where:
+That is already enough to see the important shift in thinking:
 
-* signer = your keypair
-* instruction = transfer SOL
-* accounts = your wallet + recipient
-* recent\_blockhash = pulled from cluster
+A transaction is not the same thing as a command.
 
-</Tab>
-
-</Tabs>
-
-<Callout type="tip">
-All instructions are executed atomically. If one fails, the whole transaction fails, no partial state changes.
-</Callout>
+The command is what you type.
+The transaction is the signed message the CLI sends to Solana.
 
 ---
 
-## The Role of Signers
+## The Four Pieces Inside a Transaction
 
-Transactions must be signed by accounts that are either:
+For Week 1, you can think of a transaction as having four important pieces:
 
-* Writing to state (e.g., sending SOL)
-* Creating new accounts
-* Paying for the transaction
+1. **Instruction**
+2. **Accounts**
+3. **Signatures**
+4. **Recent blockhash**
 
-This proves the transaction is authorized and prevents unauthorized access to funds or data.
+Here is what each one means.
 
-```bash
-solana transfer <RECIPIENT> 1 --from keypair.json
-```
+### 1. Instruction
 
-Here, `keypair.json` must sign the transaction since it is the sender and payer.
+The instruction is the actual action you want the network to execute.
 
-<Callout type="warn">
-Transactions with missing or invalid signatures will be rejected immediately.
-</Callout>
+In the example above, the instruction is a system transfer.
+
+Later in the course, instructions might also mean:
+
+- create an account
+- mint a token
+- call an Anchor program
+- update some on-chain state
+
+A transaction can contain one instruction or several.
+
+### 2. Accounts
+
+Instructions do not run in a vacuum. They need accounts.
+
+For a simple SOL transfer, the important accounts are:
+
+- the sender account
+- the recipient account
+- the System Program
+
+The transaction has to name those accounts explicitly so the runtime knows what can be read, written, or executed.
+
+### 3. Signatures
+
+A signature proves that the right private key approved the transaction.
+
+In the SOL transfer example, `wallet1` must sign because it is authorizing funds to leave that account.
+
+This is where beginners often get tripped up:
+
+- an account can be involved in a transaction without signing
+- an account can be writable without being a signer
+
+For example, `wallet2` receives funds, but it does not need to sign just to receive them.
+
+That distinction matters later when you start passing multiple accounts into programs.
+
+### 4. Recent Blockhash
+
+A transaction also carries a recent blockhash.
+
+Do not think of it as a timestamp in the normal wall-clock sense.
+Think of it as a freshness marker.
+
+It tells the network, “this transaction was built recently enough to still be valid.”
+
+That helps prevent old signed transactions from being replayed later.
+
+Most of the time, the CLI or SDK fetches and inserts the blockhash for you. You still need to know why it is there.
 
 ---
 
-## Understanding the Recent Blockhash
+## What the Transaction Is Really Saying
 
-Each transaction must include a **recent blockhash**, a hash of a recent block (within 150 blocks). This acts as:
+If we rewrite the earlier transfer in plain English, the transaction is roughly saying:
 
-* A **timestamp** to prevent replaying old transactions
-* A **way to expire** stale or delayed transactions
-
-You can fetch it manually:
-
-```bash
-solana block-production
+```txt
+System Program,
+please move value from wallet1 to wallet2.
+wallet1 approves this action.
+Here is a recent blockhash to prove this request is still fresh.
 ```
 
-Most SDKs (like Solana Web3.js or Anchor) handle this under the hood for you.
+That is a much better mental model than “I ran a transfer command.”
+
+The network is not reading your terminal command.
+It is validating and executing a structured, signed message.
 
 ---
 
-## Lifecycle of a Transaction
+## How a Transaction Moves Through the Network
 
-Let’s walk through the full journey.
+Now that you know what is inside the message, here is the lifecycle.
 
 <Steps>
 <Step>
-### Step 1: Create the Transaction
+### Step 1: The Client Builds the Transaction
 
-The client (like Anchor, Web3.js, or CLI) builds a transaction with instructions, signers, and a recent blockhash. 
+Your client can be the CLI, a frontend, or a backend script.
+
+It chooses:
+
+- which instruction to run
+- which accounts to include
+- which signer or fee payer is required
+- which recent blockhash to attach
+
+At this point, the transaction exists as data, but it is not authorized yet.
+
 </Step>
 
 <Step>
-### Step 2: Sign It
+### Step 2: Required Signers Approve It
 
-Each required signer signs the transaction with their private key. 
+The transaction is signed with the private keys that must authorize it.
+
+For the transfer example, `wallet1.json` signs because it is the source of funds.
+
+If the required signature is missing or wrong, the network rejects the transaction.
+
 </Step>
 
 <Step>
-### Step 3: Send to Cluster
+### Step 3: The Transaction Is Sent to Solana
 
-The transaction is sent to the Solana cluster (devnet, mainnet, etc.) using an RPC node or CLI. 
+The signed transaction is submitted to an RPC node, which forwards it into the network.
+
+At this point, the network can inspect:
+
+- whether the signatures are valid
+- whether the blockhash is still fresh
+- whether the accounts and instruction are well formed
+
 </Step>
 
 <Step>
-### Step 4: Leader Processes It
+### Step 4: A Leader Validator Executes It
 
-A validator (slot leader) picks up the transaction, executes instructions, and includes it in a block.
+A leader validator includes the transaction in a block and executes the instruction.
+
+If execution succeeds, the account state changes.
+
+In the transfer example, that means:
+
+- the sender balance goes down
+- the recipient balance goes up
+- the fee payer also pays a transaction fee
+
+If execution fails, the state change does not partially apply.
+
 </Step>
 
 <Step>
-### Step 5: Confirmation
+### Step 5: The Network Confirms the Result
 
-Other validators vote to finalize the block. Once confirmed, the transaction becomes part of the immutable ledger. 
-</Step> </Steps>
+Other validators observe and vote on the block.
+
+From the developer point of view, this is when the transaction moves from “submitted” to “confirmed,” and later toward stronger finality.
+
+For now, the important beginner takeaway is simple:
+
+sending a transaction is not the same thing as knowing it succeeded. Confirmation is a separate part of the lifecycle.
+
+</Step>
+</Steps>
 
 ---
 
-## Instruction Format Internals
+## Why Signers Matter So Much
 
-Every instruction contains:
+Signers are the permission layer of Solana transactions.
 
-* `program_id`: the program being called
-* `accounts`: list of accounts passed to the program (read or write)
-* `data`: custom binary-encoded instruction data
+If the wrong account signs, or a required signer is missing, the instruction should fail.
 
-You’ll often see this structured when writing Solana programs in Rust or Web3.js.
+That is how Solana prevents random clients from spending someone else’s funds or mutating protected state.
 
-```rust title="example.rs"
-Instruction {
-    program_id: Pubkey,
-    accounts: Vec<AccountMeta>,
-    data: Vec<u8>,
-}
-```
+A useful Week 1 rule is:
 
-This layout is what your program receives in its entrypoint.
+- if an account is paying, authorizing, or proving ownership, expect a signature to matter
+- if an account is only being referenced or receiving value, it may not need to sign
+
+This rule is not the full runtime model, but it will keep your intuition pointed in the right direction.
 
 ---
 
-## Common Pitfalls
+## Why the Recent Blockhash Matters
+
+Without a freshness check, an old signed transaction could be reused later.
+
+That would be dangerous.
+
+The recent blockhash reduces that risk by making transactions expire after they are no longer recent enough.
+
+This has a practical consequence for developers:
+
+if you build a transaction and wait too long before sending it, the transaction can expire and fail even if the signatures are correct.
+
+That is why transaction-building libraries fetch blockhashes close to send time.
+
+---
+
+## One More Useful Detail: Instructions Are Atomic
+
+A transaction can contain multiple instructions.
+
+When that happens, they run as one atomic unit.
+
+That means:
+
+- either the whole transaction succeeds
+- or the whole transaction fails
+
+You do not get half a successful transaction.
+
+That property becomes more important once you start creating accounts and then using them in the same transaction.
+
+---
+
+## Common Mistakes
 
 <Callout type="warn">
-**Missing recent blockhash**  
-Transactions without a recent blockhash are rejected by the cluster. If you're manually constructing transactions, be sure to fetch and include a valid one.
+**Confusing the command with the transaction**
+
+The CLI command is just how you ask for a transaction to be built. The network only sees the serialized transaction message and its signatures.
 </Callout>
 
 <Callout type="warn">
-**Incorrect signer list**  
-If you forget to include a required signer (e.g., the fee payer or an account that modifies state), the transaction will fail.
+**Assuming every account in a transaction must sign**
+
+That is not true. The sender in a transfer must sign. The recipient usually does not.
 </Callout>
 
 <Callout type="warn">
-**Invalid instruction format**  
-Instructions must include the correct program ID, accounts (in order), and properly encoded data. A mismatch causes program errors.
+**Treating the recent blockhash like an implementation detail you can ignore**
+
+You may not fetch it manually very often, but transaction freshness depends on it. If a transaction sits around too long, it can expire.
+</Callout>
+
+<Callout type="warn">
+**Thinking “sent” means “succeeded”**
+
+Submitting a transaction and confirming a transaction are two different stages. Always care about the final result, not just the submission step.
 </Callout>
 
 ---
 
 ## Summary
 
-Here’s what you now understand:
+A Solana transaction is a signed message, not just a wallet action.
 
-* A transaction contains instructions, accounts, signers, and a recent blockhash
-* Signers authorize a transaction and must match the required account permissions
-* The recent blockhash ensures freshness and avoids replay
-* The lifecycle spans creation → signing → submission → confirmation
-* Instructions are atomic and must be formatted correctly for on-chain programs to accept them
+It carries:
+
+- an instruction that says what should happen
+- the accounts involved in that action
+- signatures that authorize it
+- a recent blockhash that proves the message is still fresh
+
+That is why the transfer from the previous lesson worked the way it did.
+
+The CLI built the message, `wallet1` signed it, the network checked it, and validators applied the state change.
+
+With that model in place, the next lessons on architecture and programs will make much more sense because you now know what is actually moving through the network when you interact with Solana.

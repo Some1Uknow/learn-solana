@@ -1,173 +1,477 @@
 ---
-title: "Solana Program Interaction Toolkit (Web3.js CLI Project)"
-description: "Build a TypeScript CLI toolkit using @solana/web3.js to query accounts, send transactions, decode data, and analyze logs without relying on Anchor."
+title: "Build a Solana Devnet Toolkit with Kit"
+description: "Build a small TypeScript CLI with @solana/kit to read balances, inspect accounts, and send SOL on devnet using the modern Solana client stack."
 type: project
-module: 🧱 Solana Fundamentals
-keywords: ["solana web3.js", "cli toolkit", "accounts", "transactions", "decode data", "logs"]
+module: "🧱 Solana Fundamentals"
+keywords: ["solana kit", "devnet toolkit", "accounts", "transactions", "cli", "@solana-program/system"]
 ---
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
+A lot of older Solana tutorials still teach client code with `@solana/web3.js`.
+
+That is no longer the right default for new code.
+
+For new scripts and clients, `@solana/web3.js` 1.x is the legacy path. The modern low-level SDK is `@solana/kit`, which is the renamed 2.x direction for Solana JavaScript development.
+
+So this project will not teach the old client surface first and fix it later.
+We will build with `@solana/kit` from the start.
+
 <Callout type="info">
-This project does not involve writing Solana smart contracts. Instead, you're building tools to interact with them, which is a key skill for frontend devs, indexers, or tooling engineers.
+This project does not ask you to write an on-chain program yet. The goal is to build a small off-chain toolkit that can talk to devnet, inspect state, and send a real transaction.
 </Callout>
 
 ---
 
-## What You’ll Build
+## What You Are Building
 
-<Callout type="info">
-By the end of this project, you will:
+By the end of this project, you will have a tiny CLI toolkit with three commands:
 
-- Write scripts to connect to devnet and read account state
-- Send custom transactions using `@solana/web3.js`
-- Query program accounts and decode their data
-- Fetch transaction logs and simulate transactions
-</Callout>
+- `balance`: read the balance of any address
+- `inspect`: fetch raw account facts and print them clearly
+- `send`: send SOL from one wallet to another on devnet
+
+That is enough for a strong Week 1 project because it teaches three real client responsibilities:
+
+1. reading chain state
+2. understanding account shape
+3. building and sending a transaction correctly
 
 ---
 
-## Requirements
+## The Mental Model for This Project
+
+Do not think of this toolkit as “three random scripts.”
+
+Think of it as one small client with three jobs:
+
+- connect to an RPC endpoint
+- turn user input into typed Solana values
+- either read state or produce a signed transaction
+
+That is the same pattern you will keep using later in frontend code, backend services, and Anchor clients.
+
+---
+
+## What You Need Before You Start
+
+You should already have:
 
 - Node.js installed
-- A funded keypair (`solana-keygen new` + `solana airdrop`)
-- TypeScript + basic CLI project setup
-- Installed `@solana/web3.js`
+- `pnpm` available on your machine
+- the Solana CLI set to `devnet`
+- a funded wallet from the earlier Week 1 lessons, such as `wallet1.json`
+- a second wallet address to receive SOL, such as the address from `wallet2.json`
 
-```bash
-npm install @solana/web3.js
-````
-
----
-
-## Suggested Toolkit Features
-
-You don’t need to build all of these; pick at least 3 to implement fully.
-
-<Accordions>
-<Accordion title="Fetch account info">
-### Fetch account info
-
-Given a public key, print balance, owner, executable flag, and raw data. 
-</Accordion>
-
-<Accordion title="Decode account data">
-### Decode account data
-
-Given a known data layout (like a counter or token account), parse and print fields in human-readable form. 
-</Accordion>
-
-<Accordion title="Send lamports">
-### Send lamports
-
-Transfer lamports between accounts using a script. 
-</Accordion>
-
-<Accordion title="Simulate a transaction">
-### Simulate a transaction
-
-Use `simulateTransaction()` to preview logs and execution results without sending.
-</Accordion>
-
-<Accordion title="Analyze transaction logs">
-### Analyze transaction logs
-
-Fetch a transaction by signature and print its instruction list, log messages, and error (if any).
-</Accordion>
-</Accordions>
+If you are not sure those are ready, stop and re-run the earlier setup and account lessons first.
 
 ---
 
-## Sample Snippets
+## The Final Project Shape
 
-Here are some examples you can adapt.
+We are going to build this exact file structure:
 
-### Connect to Devnet
-
-```ts title="connect.ts"
-import { Connection, clusterApiUrl } from "@solana/web3.js";
-
-// Using public devnet endpoint
-const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-
-// Alternative: Use a premium RPC provider for production
-// const connection = new Connection("https://your-rpc-endpoint.com", "confirmed");
+```txt
+kit-toolkit/
+  package.json
+  tsconfig.json
+  scripts/
+    lib/
+      solana.ts
+    balance.ts
+    inspect.ts
+    send.ts
 ```
 
-### Fetch Account Info
+Keep it small.
 
-```ts title="account-info.ts"
-import { PublicKey } from "@solana/web3.js";
+Week 1 is not the time to build a framework.
+Week 1 is the time to make the client model feel normal.
 
-const pubkey = new PublicKey("...");
-const info = await connection.getAccountInfo(pubkey);
+---
 
-console.log({
-  lamports: info?.lamports,
-  owner: info?.owner.toBase58(),
-  executable: info?.executable,
-  dataLength: info?.data.length
+## Step 1: Scaffold the Toolkit
+
+Create a fresh project directory and install the dependencies.
+
+```bash title="terminal"
+mkdir kit-toolkit
+cd kit-toolkit
+pnpm init
+pnpm add @solana/kit @solana-program/system
+pnpm add -D typescript tsx @types/node
+```
+
+Why these packages:
+
+- `@solana/kit` gives you the modern RPC, signer, and transaction-building APIs
+- `@solana-program/system` gives you the System Program instruction builder for SOL transfers
+- `tsx` lets you run TypeScript files directly without adding extra build friction
+
+Now create `tsconfig.json`:
+
+```json title="tsconfig.json"
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["scripts/**/*.ts"]
+}
+```
+
+This is a minimal config. It is enough for a small Node-based toolkit.
+
+---
+
+## Step 2: Create the Shared Solana Helper
+
+All three scripts need the same basic pieces:
+
+- a devnet RPC client
+- a devnet WebSocket subscriptions client for confirmation
+- a helper that loads a signer from a local keypair JSON file
+
+Create `scripts/lib/solana.ts`:
+
+```ts title="scripts/lib/solana.ts"
+import { readFile } from "node:fs/promises";
+import {
+  createKeyPairSignerFromBytes,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+} from "@solana/kit";
+
+export const DEVNET_RPC_URL = "https://api.devnet.solana.com";
+export const DEVNET_WS_URL = "wss://api.devnet.solana.com";
+
+// One HTTP RPC client for read requests and transaction-building data.
+export const rpc = createSolanaRpc(DEVNET_RPC_URL);
+
+// One subscriptions client for waiting on transaction confirmation.
+export const rpcSubscriptions = createSolanaRpcSubscriptions(DEVNET_WS_URL);
+
+export async function loadSignerFromFile(path: string) {
+  // Solana CLI keypair files are JSON arrays of secret key bytes.
+  const file = await readFile(path, "utf8");
+  const bytes = new Uint8Array(JSON.parse(file));
+
+  // Convert raw bytes into a Kit signer that can actually sign transactions.
+  return createKeyPairSignerFromBytes(bytes);
+}
+```
+
+Why this file matters:
+
+It keeps the RPC and signer setup in one place.
+If you scatter that logic across every script, the project gets harder to reason about for no benefit.
+
+---
+
+## Step 3: Build the Balance Command
+
+Start with the easiest possible read.
+
+Create `scripts/balance.ts`:
+
+```ts title="scripts/balance.ts"
+import { address } from "@solana/kit";
+import { rpc } from "./lib/solana";
+
+async function main() {
+  const input = process.argv[2];
+
+  if (!input) {
+    throw new Error("Usage: pnpm tsx scripts/balance.ts <ADDRESS>");
+  }
+
+  // Convert the raw string into a typed Solana address.
+  const accountAddress = address(input);
+  const { value: balanceInLamports } = await rpc.getBalance(accountAddress).send();
+
+  console.log({
+    address: input,
+    lamports: balanceInLamports.toString(),
+    sol: Number(balanceInLamports) / 1_000_000_000,
+  });
+}
+
+main().catch((error) => {
+  console.error("balance failed", error);
+  process.exit(1);
 });
 ```
 
----
+Run it against the wallet you funded earlier:
 
-## Project Steps
+```bash title="terminal"
+pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
+```
 
-<Steps>
-<Step>
-### Step 1: Scaffold the CLI
+What this teaches:
 
-Create a basic Node.js/TypeScript project with one command per file (e.g., `send.ts`, `info.ts`). Use `ts-node` or `esbuild-runner` to run.
-</Step>
-
-<Step>
-### Step 2: Implement Script Logic
-
-Use `@solana/web3.js` to write CLI tools that can connect, fetch data, and send transactions.
-</Step>
-
-<Step>
-### Step 3: Test on Devnet
-
-Use `solana airdrop` to get funds and run your tools against devnet programs or accounts. 
-</Step>
-
-<Step>
-### Step 4: Add Flags or Arguments
-
-Use `process.argv` or libraries like `yargs` to pass CLI arguments (e.g., `--to`, `--amount`, `--program-id`). 
-</Step> </Steps>
+- how to create an RPC client with Kit
+- how to turn a string into an `Address`
+- how basic RPC reads work in the `request.send()` model
 
 ---
 
-## Common Pitfalls
+## Step 4: Build the Account Inspector
+
+Balance is only one fact.
+
+Now inspect the account itself.
+
+Create `scripts/inspect.ts`:
+
+```ts title="scripts/inspect.ts"
+import { address, fetchEncodedAccount } from "@solana/kit";
+import { rpc } from "./lib/solana";
+
+async function main() {
+  const input = process.argv[2];
+
+  if (!input) {
+    throw new Error("Usage: pnpm tsx scripts/inspect.ts <ADDRESS>");
+  }
+
+  const accountAddress = address(input);
+  const account = await fetchEncodedAccount(rpc, accountAddress);
+
+  if (!account.exists) {
+    console.log({ exists: false, address: input });
+    return;
+  }
+
+  console.log({
+    exists: true,
+    address: input,
+    lamports: account.lamports.toString(),
+    owner: account.owner.toString(),
+    executable: account.executable,
+    dataLength: account.data.length,
+  });
+}
+
+main().catch((error) => {
+  console.error("inspect failed", error);
+  process.exit(1);
+});
+```
+
+Run it:
+
+```bash title="terminal"
+pnpm tsx scripts/inspect.ts $(solana address -k wallet2.json)
+```
+
+What to notice in the output:
+
+- `lamports` is the raw balance stored in the account
+- `owner` tells you which program owns the account layout
+- `executable` is `false` for a normal wallet account
+- `dataLength` is usually `0` for a plain system wallet
+
+This is the same account model you already saw in the CLI lessons, now accessed through code.
+
+---
+
+## Step 5: Build the Send Command
+
+This is the most important part of the project.
+
+You are now moving from reads to writes.
+That means you need to:
+
+- load a signer
+- fetch a fresh blockhash
+- build a transaction message
+- append an instruction
+- sign the message
+- send it and wait for confirmation
+
+Create `scripts/send.ts`:
+
+```ts title="scripts/send.ts"
+import {
+  address,
+  appendTransactionMessageInstructions,
+  createTransactionMessage,
+  getSignatureFromTransaction,
+  lamports,
+  pipe,
+  sendAndConfirmTransactionFactory,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  signTransactionMessageWithSigners,
+} from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+import { loadSignerFromFile, rpc, rpcSubscriptions } from "./lib/solana";
+
+async function main() {
+  const senderKeypairPath = process.argv[2];
+  const recipientAddressInput = process.argv[3];
+  const amountSolInput = process.argv[4];
+
+  if (!senderKeypairPath || !recipientAddressInput || !amountSolInput) {
+    throw new Error(
+      "Usage: pnpm tsx scripts/send.ts <SENDER_KEYPAIR_PATH> <RECIPIENT_ADDRESS> <AMOUNT_SOL>"
+    );
+  }
+
+  const sender = await loadSignerFromFile(senderKeypairPath);
+  const recipientAddress = address(recipientAddressInput);
+  const amountSol = Number(amountSolInput);
+
+  if (!Number.isFinite(amountSol) || amountSol <= 0) {
+    throw new Error("Amount must be a positive SOL value like 0.01");
+  }
+
+  // Convert SOL into lamports so the on-chain amount is explicit.
+  const amountLamports = BigInt(Math.round(amountSol * 1_000_000_000));
+
+  // Fetch a fresh blockhash before building the transaction message.
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  // Build the transfer instruction for the System Program.
+  const transferInstruction = getTransferSolInstruction({
+    source: sender,
+    destination: recipientAddress,
+    amount: lamports(amountLamports),
+  });
+
+  // Build the transaction in the correct order:
+  // message -> fee payer -> lifetime -> instructions.
+  const message = pipe(
+    createTransactionMessage({ version: 0 }),
+    (tx) => setTransactionMessageFeePayerSigner(sender, tx),
+    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+    (tx) => appendTransactionMessageInstructions([transferInstruction], tx)
+  );
+
+  // Sign after the message is fully built.
+  const signedTransaction = await signTransactionMessageWithSigners(message);
+
+  // Send the transaction bytes and wait for confirmation.
+  const sendAndConfirm = sendAndConfirmTransactionFactory({
+    rpc,
+    rpcSubscriptions,
+  });
+
+  await sendAndConfirm(signedTransaction, { commitment: "confirmed" });
+
+  console.log({
+    signature: getSignatureFromTransaction(signedTransaction),
+    from: sender.address,
+    to: recipientAddress,
+    amountSol,
+  });
+}
+
+main().catch((error) => {
+  console.error("send failed", error);
+  process.exit(1);
+});
+```
+
+Now run it using the wallet from your earlier lessons:
+
+```bash title="terminal"
+pnpm tsx scripts/send.ts wallet1.json $(solana address -k wallet2.json) 0.01
+```
+
+Then confirm the state change:
+
+```bash title="terminal"
+pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
+pnpm tsx scripts/balance.ts $(solana address -k wallet2.json)
+```
+
+What this command teaches that the read scripts did not:
+
+- the fee payer must be explicit
+- transaction lifetime depends on a fresh blockhash
+- the message must be fully built before signing
+- sending and confirming are separate steps
+
+---
+
+## Why This Project Is Better Than the Old Version
+
+The old version of this lesson pushed you toward `@solana/web3.js` and told you to pick a few random features.
+
+That is weak teaching for Week 1.
+
+A beginner project should not feel like product planning.
+It should feel like guided contact with the real client model.
+
+This version is better because it gives you:
+
+- one modern SDK path
+- one shared helper file
+- one read command for balances
+- one read command for full account facts
+- one write command for a real SOL transfer
+
+That is a complete first toolkit.
+
+---
+
+## Common Mistakes
 
 <Callout type="warn">
-**Missing await**  
-Most `@solana/web3.js` methods are async. Be sure to `await` or use `.then()` to get actual results.
+**Using `@solana/web3.js` out of habit**
+
+For new low-level client code, prefer `@solana/kit`. If you keep learning through the legacy surface first, you will eventually have to unlearn the object-heavy API model anyway.
 </Callout>
 
 <Callout type="warn">
-**Wrong cluster or account**  
-Double-check that you're connecting to the correct cluster (`devnet`, not `mainnet`) and using valid base58-encoded keys.
+**Forgetting that reads and writes are different kinds of work**
+
+Reading an account only needs a valid address and RPC access. Sending a transaction needs a signer, a fresh blockhash, a complete message, and a confirmation flow.
 </Callout>
 
 <Callout type="warn">
-**Data decoding mismatch**  
-If you’re decoding account data manually, ensure your buffer layout matches the on-chain structure exactly.
+**Signing too early**
+
+Once the transaction message is signed, you should not mutate it. Build the fee payer, lifetime, and instructions first. Sign last.
+</Callout>
+
+<Callout type="warn">
+**Treating the local keypair file like a harmless config file**
+
+`wallet1.json` contains secret key material. Never commit it, publish it, or paste it into random tools.
 </Callout>
 
 ---
 
 ## Summary
 
-This project introduced you to interacting with Solana programs and accounts through the raw JavaScript SDK. By building your own CLI tooling, you now understand:
+You built a real Solana client toolkit with the modern SDK direction:
 
-* How to read and write to the Solana blockchain from scripts
-* What happens under the hood of wallets and UIs
-* How to analyze account state and transaction logs
+- one helper for RPC and signer loading
+- one script for balance reads
+- one script for account inspection
+- one script for signed SOL transfers
 
-You can now extend these tools or reuse this structure for future indexing, simulation, or debugging work.
+That means you can now do the three things every real Solana client must eventually do:
+
+- fetch state
+- interpret state
+- submit state changes
+
+That is a much stronger Week 1 outcome than just knowing a few commands.
+
+## Sources
+
+- https://github.com/anza-xyz/kit
+- https://solana.com/developers/cookbook/wallets/restore-keypair
+- https://solana.com/developers/cookbook/accounts/get-account-balance
+- https://www.solanakit.com/docs/getting-started/build-transaction
+- https://www.solanakit.com/docs/getting-started/send-transaction

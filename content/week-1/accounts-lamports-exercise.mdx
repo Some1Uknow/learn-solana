@@ -1,32 +1,61 @@
 ---
-title: "Solana Accounts and Lamports Exercise (Hands-On)"
-description: "Create wallets, transfer lamports, inspect account layout, and learn rent thresholds to build confidence with Solana accounts using the CLI."
+title: "Working with Solana Accounts and Lamports"
+description: "Create two wallets, fund one, transfer SOL between them, inspect the receiving account, and understand what lamports and rent actually mean."
 type: exercise
 module: "🧱 Solana Fundamentals"
 keywords: ["solana accounts", "lamports", "rent exempt", "cli", "transfers"]
 ---
 
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 
-This exercise helps you explore the basics of Solana's account system and lamports. You’ll create wallets, transfer funds, examine how rent works, and inspect the structure of an account.
+A lot of beginner confusion comes from treating a wallet, an address, and an account like they are three different things.
 
-These operations are foundational for interacting with on-chain programs.
+For this lesson, use a simpler model:
+
+- A **wallet keypair** controls an address
+- That **address** points to an on-chain account
+- That **account** can hold a balance in **lamports**
+
+When you send SOL, you are changing the balance stored in accounts on the network.
+
+That is the core idea this exercise is meant to lock in.
 
 <Callout type="info">
-You don’t need to understand everything about programs yet. This is all about getting comfortable with how accounts and transfers work at the CLI level.
+This lesson assumes you already finished the devnet setup lesson. If something looks wrong, run `solana config get` first and make sure your CLI is still pointed at `devnet`.
 </Callout>
 
 ---
 
-## What You’ll Practice
+## What You Are Learning
 
-<Callout type="info">
-By the end of this exercise, you will:
+By the end of this exercise, you will be able to:
 
-</Callout>
+- create two separate wallet keypairs
+- inspect the address behind each wallet
+- fund one wallet on devnet
+- transfer SOL to a second wallet
+- inspect the receiving account and read its important fields
+- understand what lamports and rent mean in practice
+
+---
+
+## The Mental Model You Need First
+
+Before you type commands, keep these two facts in your head:
+
+1. **SOL is the user-facing unit**
+2. **Lamports are the smallest unit underneath**
+
+The relationship is simple:
+
+```txt
+1 SOL = 1,000,000,000 lamports
+```
+
+So if you send `0.01` SOL, you are really moving `10,000,000` lamports.
+
+You do not need to memorize that number forever. You do need to understand that the CLI may show balances in either SOL or lamports depending on the command flags you use.
 
 ---
 
@@ -36,138 +65,220 @@ By the end of this exercise, you will:
 <Step>
 ### Step 1: Create Two Wallets
 
-Generate two keypairs and save them as separate files.
+Create two fresh keypairs so you can send funds between them.
 
-```bash
+```bash title="terminal"
 solana-keygen new --outfile wallet1.json
 solana-keygen new --outfile wallet2.json
-````
+```
+
+These files are not just labels.
+
+They contain the private keys for two different wallets. In this exercise:
+
+- `wallet1.json` will be the sender
+- `wallet2.json` will be the receiver
 
 </Step>
 
 <Step>
+### Step 2: Inspect the Addresses Behind Those Wallets
 
-### Step 2: Check Wallet Balances
+A keypair file is local. The public key derived from it is the on-chain address.
 
-Use the `--keypair` flag to check balances of both wallets.
+Print both addresses:
 
-```bash
-solana balance --keypair wallet1.json
-solana balance --keypair wallet2.json
+```bash title="terminal"
+solana address -k wallet1.json
+solana address -k wallet2.json
 ```
+
+You should see two different base58 addresses.
+
+That matters because it proves you are working with two separate accounts, not two names for the same wallet.
+
+If you want, copy the second address somewhere temporary so you can recognize it in the next steps.
 
 </Step>
 
 <Step>
+### Step 3: Check the Starting Balances
 
-### Step 3: Airdrop to Wallet 1
+New wallets on devnet usually start with no SOL.
 
-Request 2 SOL to the first wallet on devnet.
+Confirm that before funding anything:
 
-```bash
-solana airdrop 2 --keypair wallet1.json
-solana balance --keypair wallet1.json
+```bash title="terminal"
+solana balance -k wallet1.json
+solana balance -k wallet2.json
 ```
+
+You should see `0 SOL` or something very close to it.
+
+This is your baseline. From here on, every command should change something you can observe.
 
 </Step>
 
 <Step>
+### Step 4: Fund Wallet 1
 
-### Step 4: Transfer Lamports to Wallet 2
+Now give the sender some devnet SOL.
 
-Send 0.01 SOL (10,000,000 lamports) to wallet2 using its public key.
-
-```bash
-solana transfer ADDRESS_2 10000000 --from wallet1.json --allow-unfunded-recipient
+```bash title="terminal"
+solana airdrop 2 wallet1.json
+solana balance -k wallet1.json
 ```
+
+After the airdrop, `wallet1` should show about `2 SOL`.
+
+If the airdrop fails, check these first:
+
+- you are on `devnet`
+- you are not being rate-limited by the faucet
+- you did not accidentally fund a different wallet
 
 </Step>
 
 <Step>
+### Step 5: Transfer SOL to Wallet 2
 
-### Step 5: Confirm Transfer
+Now send funds from the first wallet to the second.
 
-Verify that the balances are updated as expected.
-
-```bash
-solana balance --keypair wallet1.json
-solana balance --keypair wallet2.json
+```bash title="terminal"
+solana transfer wallet2.json 0.01 --from wallet1.json --allow-unfunded-recipient
 ```
+
+This command is doing four important things:
+
+- `wallet2.json` tells the CLI who should receive the funds
+- `0.01` is the amount in **SOL**
+- `--from wallet1.json` says which wallet should sign and pay
+- `--allow-unfunded-recipient` allows the transfer even if the receiving account has not been funded before
+
+Why that last flag matters:
+
+If the recipient account does not exist on-chain yet, Solana has to create it as part of the transfer flow.
 
 </Step>
 
 <Step>
+### Step 6: Confirm the Balances Changed
 
-### Step 6: Inspect Account Layout
+Check both wallets again.
 
-Use the `solana account` command to see internal fields like owner, lamports, and rent status.
-
-```bash
-solana account ADDRESS_2
+```bash title="terminal"
+solana balance -k wallet1.json
+solana balance -k wallet2.json
+solana balance wallet2.json --lamports
 ```
+
+You should now see:
+
+- `wallet1` has a little less than before because it sent funds and paid a fee
+- `wallet2` now has about `0.01 SOL`
+- the lamport view shows about `10000000` lamports in `wallet2`
+
+That is the same balance shown in two different units.
+
+</Step>
+
+<Step>
+### Step 7: Inspect the Receiving Account
+
+Now look at the account itself instead of just the balance.
+
+```bash title="terminal"
+solana account wallet2.json
+```
+
+Pay attention to these fields in the output:
+
+- `lamports`: the raw balance stored in the account
+- `owner`: for a normal wallet, this should be the System Program
+- `executable`: this should be `false` for a wallet account
+- `dataLength`: for a plain system wallet, this is usually `0`
+
+This is the first time you are looking at account state directly instead of only looking at a wallet app or balance number.
 
 </Step>
 </Steps>
 
------
+---
 
-## Rent and Minimum Balance
+## What Rent Means Here
 
-Accounts on Solana either:
+Solana accounts need enough balance to stay alive on-chain.
 
-  * Stay rent-exempt by holding a minimum balance
-  * Or lose balance over time through rent fees
+That minimum is called the **rent-exempt threshold**.
 
-To check the rent-exempt threshold for an empty account:
+For an empty system account, you can inspect it with:
 
-```bash
+```bash title="terminal"
 solana rent 0
 ```
 
+Why this matters:
+
+- wallet accounts need enough lamports to exist and pay fees
+- program-owned accounts often need to be funded above a rent threshold based on their data size
+- later, when you create accounts for programs, rent becomes part of account design
+
 <Callout type="tip">
-For most accounts used by smart contracts, it is best to make them rent-exempt to avoid unexpected deletion.
+Right now, you do not need to calculate rent by hand. The important thing is to understand that account storage on Solana is not free, and balance is part of keeping account state alive.
 </Callout>
 
------
+---
 
-## Additional Practice Ideas
+## What You Just Proved
 
-  * Try sending lamports without the `--allow-unfunded-recipient` flag
-  * Airdrop to wallet2 directly and then inspect its account layout
-  * Run `solana account` on a known public account (e.g. SPL Token Mint) and study the fields
+This exercise was small, but it gave you four important facts:
 
-<Callout type="info">
-Feel free to explore variations. Small tweaks help you deeply understand Solana’s account system.
-</Callout>
+1. A wallet keypair maps to a real on-chain account
+2. Balances live in accounts, not in your CLI or your laptop
+3. SOL and lamports are the same value shown in different units
+4. A transfer is not abstract magic, it is a state change you can inspect before and after
 
------
+That is the foundation for understanding transactions in the next lesson.
 
-## Common Pitfalls
+---
+
+## Common Mistakes
 
 <Callout type="warn">
-**Forgetting `--keypair`**
-The CLI will default to the wallet in `~/.config/solana/id.json` if no keypair is provided, which can lead to using the wrong wallet.
-</Callout>
+**Using the wrong wallet by accident**
 
-<Callout type="warn">
-**Mixing up SOL and lamports**
-Solana CLI expects lamports in most commands. 1 SOL = 1,000,000,000 lamports.
+When you work with multiple keypairs, always pass `-k wallet1.json` or `-k wallet2.json` explicitly. If you do not, the CLI may fall back to the default wallet in your global Solana config.
 </Callout>
 
 <Callout type="warn">
-**Transfer fails without `--allow-unfunded-recipient`**
-If the receiving account has never existed before, Solana requires this flag to cover rent and create the account.
+**Assuming the transfer amount is in lamports**
+
+For `solana transfer`, the amount is in SOL by default. If you send `0.01`, you are sending `0.01 SOL`, not `0.01 lamports`.
 </Callout>
 
------
+<Callout type="warn">
+**Forgetting that fees exist**
+
+After the transfer, the sender will not be reduced by exactly `0.01 SOL`. It will be reduced by the transfer amount plus a small network fee.
+</Callout>
+
+<Callout type="warn">
+**Thinking every account stores user data**
+
+A plain wallet account is usually just a system-owned account with a balance and no custom data. Program accounts are where richer state starts to appear.
+</Callout>
+
+---
 
 ## Summary
 
-In this exercise, you:
+You created two wallets, funded one, transferred SOL, inspected the receiving account, and checked the same balance in both SOL and lamports.
 
-  * Created two Solana wallets
-  * Funded one and transferred lamports to the other
-  * Used CLI commands to inspect balances and accounts
-  * Learned how rent and lamport units affect account health
+That means you now understand the basic unit of state on Solana:
 
-These are the basic CLI skills every Solana developer should know before deploying or interacting with smart contracts.
+- accounts hold value
+- keypairs control accounts
+- transfers update account balances
+- rent affects whether accounts can stay alive on-chain
+
+Next, you can move into transactions with a much better mental model because you have already seen what a balance change looks like from the CLI.
