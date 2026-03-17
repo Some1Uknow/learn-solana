@@ -13,8 +13,3 @@ export const docs = defineDocs({
 export const challenges = defineDocs({
   dir: 'content/challenges',
 });
-
-// Dedicated collection for tutorials
-export const tutorials = defineDocs({
-  dir: 'content/tutorials',
-});

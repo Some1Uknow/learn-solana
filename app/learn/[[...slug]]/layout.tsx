@@ -5,7 +5,6 @@ import { source } from "@/lib/source";
 import DocsBackground from "@/components/docs-background";
 import { ChatProvider } from "@/components/chat-context";
 import ChatLayout from "@/components/chat-layout";
-import { LearnWelcomeModal } from "@/components/learn-welcome-modal";
 
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
@@ -34,7 +33,6 @@ export default function Layout({ children }: { children: ReactNode }) {
         <DocsLayout {...docsOptions}>
           <DocsBackground />
           {children}
-          <LearnWelcomeModal />
         </DocsLayout>
       </ChatLayout>
     </ChatProvider>

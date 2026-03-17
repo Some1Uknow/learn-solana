@@ -33,7 +33,6 @@ function normalizeUrl(baseUrl: string, urlPath: string): string {
 }
 
 // Static routes with SEO priorities - these are the canonical, final URLs
-// NOTE: /tutorials removed as it returns 404 (tutorials are accessed via /tutorials/[slug])
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' | 'weekly' | 'monthly' }[] = [
   { path: '/', priority: 1.0, changeFrequency: 'weekly' },
   { path: '/modules', priority: 0.9, changeFrequency: 'weekly' },
@@ -134,31 +133,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         entries.push({
           url: normalizeUrl(BASE_URL, `/learn/${week}/${slug}`),
           priority: 0.8,
-          changeFrequency: 'monthly',
-          lastModified,
-        })
-      }
-    }
-
-    // Add tutorials if they exist
-    const tutorialsDir = path.join(CONTENT_DIR, 'tutorials')
-    if (fs.existsSync(tutorialsDir)) {
-      const tutorialFiles = fs
-        .readdirSync(tutorialsDir)
-        .filter((f) => /\.mdx?$/.test(f))
-        
-      for (const file of tutorialFiles) {
-        const slug = file.replace(/\.mdx?$/, '')
-        const filePath = path.join(tutorialsDir, file)
-        let lastModified: Date = now
-        try {
-          lastModified = fs.statSync(filePath).mtime
-        } catch {
-          // Use current date if stat fails
-        }
-        entries.push({
-          url: normalizeUrl(BASE_URL, `/tutorials/${slug}`),
-          priority: 0.7,
           changeFrequency: 'monthly',
           lastModified,
         })

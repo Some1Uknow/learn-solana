@@ -22,7 +22,7 @@ export async function GET() {
 
   const body = `# learn.sol
 
-> Learn Solana development through structured lessons and hands-on tutorials.
+> Learn Solana development through structured lessons and hands-on projects.
 
 - Docs home: ${createCanonical("/learn")}
 - Full content dump: ${createCanonical("/llms-full.txt")}

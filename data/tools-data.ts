@@ -76,47 +76,9 @@ export const toolCategories: ToolCategory[] = [
     id: "rpc",
     name: "RPC Providers",
     description: "High-performance RPC endpoints and developer APIs for reliable Solana network access.",
-    // TEMPORARILY CHANGED - GetBlock sponsorship paused
     featured: "Available",
     icon: "🌐",
     featuredTool: createPlaceholderFeaturedTool(),
-    /* ORIGINAL GetBlock featuredTool - uncomment when sponsor returns:
-    featuredTool: {
-      name: "GetBlock",
-      description: "Blockchain-as-a-Service (BaaS) platform providing instant API access to 100+ blockchain protocols. Launched in 2019, GetBlock has grown to serve 100,000+ active users and processes over 50 billion API requests monthly with guaranteed 99.9%+ uptime.",
-      logo: "/sponsor/getblock-square.png",
-      website: "https://getblock.io",
-      features: [
-        "Access to 100+ blockchain networks including Solana, Ethereum, Bitcoin, and Layer 2 solutions",
-        "Multiple API formats: JSON-RPC, REST, WebSocket, and GraphQL",
-        "Both shared and dedicated nodes with fully customized, high-performance solutions",
-        "Advanced monitoring and statistics dashboards for tracking method usage",
-        "Enterprise-grade infrastructure with 99.9%+ uptime guarantee",
-      ],
-      stats: [
-        { label: "Uptime", value: "99.9%+" },
-        { label: "Networks", value: "100+" },
-        { label: "Monthly Requests", value: "50B+" },
-      ],
-      tutorials: [
-        {
-          title: "Getting Started with GetBlock",
-          description: "Learn how to integrate GetBlock's premium RPC infrastructure into your Solana applications in under 5 minutes.",
-          slug: "/tutorials/getblock-getting-started",
-        },
-        {
-          title: "Advanced GetBlock Features",
-          description: "Master WebSocket subscriptions, load balancing, transaction optimization, and multi-chain development.",
-          slug: "/tutorials/getblock-advanced",
-        },
-        {
-          title: "Optimizing RPC Performance",
-          description: "Production-grade performance optimization for DeFi, NFTs, and high-throughput applications.",
-          slug: "/tutorials/getblock-performance",
-        },
-      ],
-    },
-    */
     projectsBuiltWith: [],
     otherTools: [
       {
