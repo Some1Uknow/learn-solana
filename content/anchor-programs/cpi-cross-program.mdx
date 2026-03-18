@@ -1,91 +1,344 @@
 ---
-title: "Cross-Program Invocations (CPI)"
-description: "Learn CPI in Anchor by calling other Solana programs safely: CPI contexts, signer seeds, authority delegation, and failure-path testing."
-module: "⚓ Anchor Framework"
+title: "Cross-Program Invocations"
+description: "Learn how one Anchor program calls another program safely, how to build a CpiContext, and how PDA signer seeds change the authority model."
+module: "Anchor Programs"
 keywords:
   - "anchor cpi"
-  - "solana cross program invocation"
+  - "cross program invocation"
+  - "anchor with_signer"
   - "cpi signer seeds"
   - "anchor composability"
   - "token cpi"
-  - "solana program calls"
-  - "anchor cpi tutorial"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-CPI is how your program composes with the rest of Solana.
+CPI is the point where Solana composability becomes real.
 
-Think of it as: "My program asks another trusted program to perform a specific action."
+It is also the point where many learners start treating code they do not understand as magic.
 
-## When You Need CPI
+Do not do that.
 
-- Transfer tokens with Token or Token-2022
-- Interact with system program (`create_account`, `transfer`)
-- Integrate with external protocols (DEX, lending, staking)
+A CPI is simpler than it looks once you reduce it to the actual moving parts.
 
-## CPI Anatomy
+## What A CPI Really Is
 
-A CPI call in Anchor needs:
+A cross-program invocation means your program calls an instruction on another Solana program.
 
-1. Target program account
-2. CPI account struct (`MintTo`, `TransferChecked`, etc.)
-3. Signer seeds if a PDA must sign
+That is all.
 
-## Example: PDA-Signed Token Transfer
+Your program becomes the caller.
+
+The other program becomes the callee.
+
+The current Anchor docs describe the same basic ingredients every time:
+
+1. the program ID being called
+2. the accounts required by that instruction
+3. the instruction data or arguments
+
+If those three things are clear, the CPI pattern is clear.
+
+## Why CPI Exists
+
+Without CPI, every program would be isolated.
+
+With CPI, one program can reuse another program's logic.
+
+That is how Solana programs compose.
+
+Common examples:
+
+- call the system program to transfer SOL or create accounts
+- call the token program to mint or transfer tokens
+- call another protocol program as part of a larger flow
+
+This is why CPI matters.
+
+A serious Solana program rarely lives alone.
+
+## Start With The Simplest Mental Model
+
+Do not start with token vaults.
+
+Start with a plain system-program transfer.
+
+The official Anchor CPI docs use exactly that move for a reason.
+
+It lets you see the pattern without extra token complexity.
 
 ```rust
-pub fn release_from_vault(ctx: Context<ReleaseFromVault>, amount: u64, decimals: u8) -> Result<()> {
-    let escrow_key = ctx.accounts.escrow.key();
-    let signer_seeds: &[&[&[u8]]] = &[&[
-        b"vault-authority",
-        escrow_key.as_ref(),
-        &[ctx.bumps.vault_authority],
-    ]];
+use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
 
-    let cpi_accounts = anchor_spl::token_interface::TransferChecked {
-        mint: ctx.accounts.mint.to_account_info(),
-        from: ctx.accounts.vault_ata.to_account_info(),
-        to: ctx.accounts.receiver_ata.to_account_info(),
-        authority: ctx.accounts.vault_authority.to_account_info(),
-    };
+#[derive(Accounts)]
+pub struct SolTransfer<'info> {
+    #[account(mut)]
+    pub sender: Signer<'info>,
 
-    let cpi_ctx = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        cpi_accounts,
-        signer_seeds,
+    #[account(mut)]
+    pub recipient: SystemAccount<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+    let cpi_context = CpiContext::new(
+        ctx.accounts.system_program.to_account_info(),
+        Transfer {
+            from: ctx.accounts.sender.to_account_info(),
+            to: ctx.accounts.recipient.to_account_info(),
+        },
     );
 
-    anchor_spl::token_interface::transfer_checked(cpi_ctx, amount, decimals)?;
+    transfer(cpi_context, amount)?;
     Ok(())
 }
 ```
 
-## CPI Safety Checklist
+## Read That CPI In Order
 
-- Validate every account before CPI call
-- Ensure signer PDA seeds are exactly what you expect
-- Confirm token mint and decimals assumptions
-- Prevent privilege escalation by checking authorities
+### The target program
 
-<Callout type="warn">
-Most CPI bugs are validation bugs, not CPI API bugs.
+```rust
+ctx.accounts.system_program.to_account_info()
+```
+
+This is the program being called.
+
+That matters because CPI is not a vague helper action.
+
+It is a concrete instruction invocation against a specific program.
+
+### The CPI account struct
+
+```rust
+Transfer {
+    from: ctx.accounts.sender.to_account_info(),
+    to: ctx.accounts.recipient.to_account_info(),
+}
+```
+
+This is the account set the system program expects for its transfer instruction.
+
+That is the second core CPI idea.
+
+You must build the account layout expected by the callee.
+
+### The `CpiContext`
+
+```rust
+let cpi_context = CpiContext::new(program_id, cpi_accounts);
+```
+
+This packages:
+
+- which program is being called
+- which accounts are being passed into that call
+
+Then the helper function like `transfer(...)` actually performs the invocation.
+
+## What Changes When A PDA Must Sign
+
+The basic CPI shape stays the same.
+
+The authority model changes.
+
+If the account that needs to authorize the CPI is a PDA, the program cannot sign the way a wallet signs.
+
+Instead, the runtime allows the program to sign for the PDA by verifying the PDA seeds.
+
+That is where `with_signer(...)` comes in.
+
+## A CPI With PDA Signer Seeds
+
+The official Anchor docs show this pattern with a PDA sending SOL through the system program.
+
+That is the right next step to learn.
+
+```rust
+use anchor_lang::prelude::*;
+use anchor_lang::system_program::{transfer, Transfer};
+
+#[derive(Accounts)]
+pub struct SolTransferWithPda<'info> {
+    #[account(
+        mut,
+        seeds = [b"vault", recipient.key().as_ref()],
+        bump,
+    )]
+    pub vault: SystemAccount<'info>,
+
+    #[account(mut)]
+    pub recipient: SystemAccount<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn sol_transfer_with_pda(ctx: Context<SolTransferWithPda>, amount: u64) -> Result<()> {
+    let signer_seeds: &[&[&[u8]]] = &[&[
+        b"vault",
+        ctx.accounts.recipient.key().as_ref(),
+        &[ctx.bumps.vault],
+    ]];
+
+    let cpi_context = CpiContext::new(
+        ctx.accounts.system_program.to_account_info(),
+        Transfer {
+            from: ctx.accounts.vault.to_account_info(),
+            to: ctx.accounts.recipient.to_account_info(),
+        },
+    )
+    .with_signer(signer_seeds);
+
+    transfer(cpi_context, amount)?;
+    Ok(())
+}
+```
+
+## The Most Important CPI Rule In This Lesson
+
+The PDA signer seeds in the CPI must match the PDA derivation rule you validated in the account context.
+
+That is the whole game.
+
+Here, the account context says:
+
+```rust
+seeds = [b"vault", recipient.key().as_ref()]
+bump
+```
+
+So the signer seeds passed into `with_signer(...)` must reflect that same rule.
+
+If those rules drift apart, the PDA cannot sign correctly.
+
+That is why CPI signer logic is really just another validation consistency problem.
+
+## `with_signer(...)` Does Not Mean "Bypass Security"
+
+This is a common beginner misunderstanding.
+
+`with_signer(...)` does not create fake authority.
+
+It tells the runtime:
+
+- here are the seeds
+- here is the bump
+- if these really derive a PDA owned by this program, treat that PDA as a signer for this invocation
+
+So the runtime still verifies the derivation.
+
+This is not a shortcut.
+
+It is a controlled PDA-signing mechanism.
+
+<Callout type="info">
+If you do not understand why a PDA is allowed to sign in a CPI, go back to the PDA lesson first.
+
+CPI signer seeds only make sense once PDA derivation itself is clear.
 </Callout>
 
-## Testing CPI Flows
+## Where Token CPI Fits In
 
-1. Success path with valid accounts
-2. Wrong target program id fails
-3. Wrong PDA seeds fail
-4. Wrong authority fails
-5. Wrong mint account fails
+The exact same CPI structure appears in token flows.
 
-## Solana-Dev Integration Note
+For example, a token transfer via CPI still needs:
 
-For off-chain integration tests and service scripts, prefer `@solana/kit` transaction flows. If your current Anchor test stack uses web3 types, isolate those conversions in one compatibility module.
+- the token program as the callee
+- a CPI account struct like `TransferChecked`
+- any instruction data such as amount and decimals
+- signer seeds if a PDA is the token authority
 
-## Try This Next
+That is why the token lesson came before this one.
 
-1. Add CPI event logging before and after call for observability.
-2. Add compute-budget instruction when CPI stack grows.
-3. Prototype a CPI wrapper module to keep handlers small and testable.
+The token account model is one layer.
+
+CPI is the invocation layer on top of it.
+
+## One Token CPI Shape To Recognize
+
+This is the pattern you should be able to read now:
+
+```rust
+let signer_seeds: &[&[&[u8]]] = &[&[
+    b"vault-authority",
+    escrow.key().as_ref(),
+    &[ctx.bumps.vault_authority],
+]];
+
+let cpi_accounts = TransferChecked {
+    mint: ctx.accounts.mint.to_account_info(),
+    from: ctx.accounts.vault_ata.to_account_info(),
+    to: ctx.accounts.receiver_ata.to_account_info(),
+    authority: ctx.accounts.vault_authority.to_account_info(),
+};
+
+let cpi_context = CpiContext::new(
+    ctx.accounts.token_program.to_account_info(),
+    cpi_accounts,
+)
+.with_signer(signer_seeds);
+```
+
+Even if you have not built escrow yet, you should now understand the structure:
+
+- a PDA is the authority
+- the token program is the callee
+- the CPI account struct names the required accounts
+- `with_signer(...)` lets the PDA authorize the transfer
+
+## The Real Security Questions For CPI
+
+Whenever you see a CPI instruction, ask these questions:
+
+1. which program is being called?
+2. which accounts is that program actually being given?
+3. who is authorizing the CPI?
+4. if a PDA signs, are the seeds exactly correct?
+5. what happens if this instruction is called twice or with the wrong accounts?
+
+Those questions matter much more than memorizing helper function names.
+
+## Common CPI Mistakes
+
+### Mistake 1: focusing only on the helper call
+
+The helper call is often the easy part.
+
+The real risk is passing the wrong accounts or wrong authority model.
+
+### Mistake 2: treating signer seeds like random syntax
+
+They are not syntax noise.
+
+They are the rule that tells the runtime whether your PDA is allowed to sign.
+
+### Mistake 3: validating too little before the CPI
+
+Most CPI bugs are validation bugs.
+
+You should know exactly why every mutable account is present before the CPI happens.
+
+### Mistake 4: forgetting that the callee has its own rules
+
+Your program does not get to redefine what the callee expects.
+
+You must satisfy the callee's instruction contract correctly.
+
+## Suggested Test Cases
+
+For a first serious CPI flow, test these:
+
+1. the happy path succeeds with the correct accounts
+2. the wrong target program fails
+3. the wrong PDA seeds fail
+4. the wrong authority fails
+5. a mismatched account relationship fails
+
+That is how you move from “it worked once” to “the authority model is actually correct.”
+
+## What Comes Next
+
+The next lesson should use this exact CPI mental model in a guided project where PDAs, token authority, and on-chain rules all meet in one place.

@@ -1,39 +1,74 @@
 ---
-title: "Project: Token Minting & Supply Control"
-description: "Build an Anchor token project with PDA mint authority, controlled minting, and test-driven supply rules suitable for beginner-to-intermediate learners."
-module: "⚓ Anchor Framework"
+title: "Token Minting and Supply Control"
+description: "Build one Anchor token project step by step using a PDA mint authority, a config account, and on-chain supply rules that the client cannot bypass."
+module: "Anchor Programs"
 keywords:
-  - "anchor token project"
-  - "mint authority pda"
+  - "anchor token minting"
+  - "pda mint authority"
+  - "anchor mint_to"
   - "token supply control"
-  - "anchor minting"
-  - "solana token economics"
-  - "anchor project tutorial"
-  - "solana token dapp"
+  - "anchor token project"
+  - "anchor token_interface"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-This project turns the previous lesson into a real mini-system.
+This is the first Anchor project in this section where multiple earlier ideas finally meet in one build:
 
-You will create a token where **your program controls minting rules**, not the front end.
+- PDA design
+- token accounts
+- CPI
+- signer seeds
+- on-chain business rules
 
-## Project Goal
+That is why this project matters.
 
-Build a reward token with these constraints:
+It is not just “mint some tokens.”
 
-- Mint authority is a PDA
-- Only approved admin can trigger mint
-- Total minted supply cannot exceed `MAX_SUPPLY`
+It is: make the program itself control minting, and make the rules live on-chain.
 
-## Architecture
+## What You Are Building
 
-- `Config` PDA stores admin and minted_total
-- Mint authority PDA signs CPI via seeds
-- Instruction checks cap before minting
+You will build one reward-token system with these rules:
 
-## Program Skeleton
+- the mint authority is a PDA
+- an admin initializes the system
+- minting updates tracked on-chain supply state
+- minting fails if it would exceed a max supply cap
+
+This is the right first token project because it is small enough to finish, but serious enough to teach the real design pattern.
+
+## The Core Idea
+
+Do not let the frontend decide who can mint.
+
+Do not let the client pretend a supply cap exists.
+
+Put the rule in the program.
+
+That means the project needs two kinds of state:
+
+1. token state in the mint account
+2. business state in your own config account
+
+The token program controls balances.
+
+Your program controls the business rule for when minting is allowed.
+
+## The Architecture
+
+This project uses three main pieces:
+
+- a `Config` account that stores the admin and total minted amount
+- a mint account whose mint authority is a PDA
+- a mint instruction that performs a token CPI only after your own checks pass
+
+That is the cleanest way to teach program-controlled minting.
+
+## Step 1: Define The State You Actually Need
+
+Start with the smallest useful config state.
 
 ```rust
 #[account]
@@ -46,9 +81,25 @@ pub struct Config {
 pub const MAX_SUPPLY: u64 = 1_000_000_000;
 ```
 
-## Initialize Config + Mint Authority
+Why each field exists:
+
+- `admin` tells the program who is allowed to request minting
+- `minted_total` lets the program enforce a supply cap itself
+
+That is enough.
+
+Do not add pause flags, quotas, or role hierarchies in the first version.
+
+## Step 2: Create The Mint With A PDA As Authority
+
+The current Anchor token docs explicitly support a PDA mint authority pattern.
+
+That is the correct base for this project.
 
 ```rust
+use anchor_lang::prelude::*;
+use anchor_spl::token_interface::{Mint, TokenInterface};
+
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(mut)]
@@ -63,86 +114,298 @@ pub struct Initialize<'info> {
     )]
     pub config: Account<'info, Config>,
 
-    /// CHECK: PDA used as mint authority signer
-    #[account(seeds = [b"mint-authority"], bump)]
-    pub mint_authority: UncheckedAccount<'info>,
+    #[account(
+        init,
+        payer = admin,
+        mint::decimals = 6,
+        mint::authority = mint,
+        mint::freeze_authority = mint,
+        seeds = [b"mint"],
+        bump,
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
 
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 ```
 
-## Controlled Mint Instruction
+Read the important part carefully:
 
 ```rust
-pub fn mint_with_cap(ctx: Context<MintWithCap>, amount: u64) -> Result<()> {
-    require_keys_eq!(ctx.accounts.admin.key(), ctx.accounts.config.admin, CustomError::Unauthorized);
+mint::authority = mint
+mint::freeze_authority = mint
+seeds = [b"mint"]
+bump
+```
 
-    let next_total = ctx.accounts.config
-        .minted_total
-        .checked_add(amount)
-        .ok_or(CustomError::Overflow)?;
+That means the mint account itself is also the PDA authority.
 
-    require!(next_total <= MAX_SUPPLY, CustomError::SupplyCapExceeded);
+This is a strong beginner pattern because it keeps the authority model simple.
 
-    let signer_seeds: &[&[&[u8]]] = &[&[b"mint-authority", &[ctx.bumps.mint_authority]]];
+## Step 3: Initialize The Config State
 
-    let cpi_accounts = anchor_spl::token_interface::MintTo {
-        mint: ctx.accounts.mint.to_account_info(),
-        to: ctx.accounts.destination.to_account_info(),
-        authority: ctx.accounts.mint_authority.to_account_info(),
-    };
+Now write the initialize handler.
 
-    let cpi_ctx = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        cpi_accounts,
-        signer_seeds,
-    );
-
-    anchor_spl::token_interface::mint_to(cpi_ctx, amount)?;
-
-    ctx.accounts.config.minted_total = next_total;
+```rust
+pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+    config.admin = ctx.accounts.admin.key();
+    config.minted_total = 0;
     Ok(())
 }
 ```
 
-## What Makes This Intermediate
+This handler is intentionally boring.
 
-- PDA signer flow with `new_with_signer`
-- State + token CPI consistency
-- Supply invariants enforced on-chain
+That is correct.
 
-## Test Plan
+The account constraints already did the heavy setup work.
 
-1. Initialize config sets admin correctly
-2. Authorized mint updates `minted_total`
-3. Unauthorized mint fails
-4. Mint over cap fails
+The handler only needs to store the initial business state.
 
-<Callout type="warn">
-Do not enforce supply cap only in the client. Always enforce it in program logic.
-</Callout>
+## Step 4: Define The Mint Instruction Accounts
 
-## Shipping Checklist
+Now define the instruction that will mint tokens.
 
-<Steps>
-<Step>
-### Step 1: Program tests pass
-Your failure-path tests should be as strong as success tests.
-</Step>
+```rust
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{Mint, TokenAccount, TokenInterface},
+};
 
-<Step>
-### Step 2: IDL regenerated
-Rebuild to keep client instruction names and account schemas aligned.
-</Step>
+#[derive(Accounts)]
+pub struct MintRewards<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
 
-<Step>
-### Step 3: Client uses explicit cluster config
-No hidden RPC defaults in scripts or UI.
-</Step>
-</Steps>
+    #[account(
+        mut,
+        seeds = [b"config"],
+        bump,
+        has_one = admin,
+    )]
+    pub config: Account<'info, Config>,
 
-## Try This Next
+    #[account(
+        mut,
+        seeds = [b"mint"],
+        bump,
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
 
-1. Add per-user mint quotas using a `UserQuota` PDA.
-2. Add pause/unpause admin switch to config.
-3. Add event emission for each mint and index it off-chain.
+    #[account(
+        init_if_needed,
+        payer = admin,
+        associated_token::mint = mint,
+        associated_token::authority = recipient,
+        associated_token::token_program = token_program,
+    )]
+    pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    /// CHECK: recipient only needs to be a valid public key for ATA derivation
+    pub recipient: UncheckedAccount<'info>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+This context enforces most of the project already.
+
+What it guarantees:
+
+- the caller must sign as `admin`
+- the config account must be the expected PDA
+- the stored config admin must match the signer
+- the mint must be the expected mint PDA
+- the recipient token account is derived for the right mint and recipient
+
+This is the real lesson again:
+
+good Anchor code pushes rules into the account context first.
+
+## Step 5: Enforce The Supply Rule Before The CPI
+
+Now write the business logic.
+
+```rust
+use anchor_spl::token_interface::{self, MintTo};
+
+pub fn mint_rewards(ctx: Context<MintRewards>, amount: u64) -> Result<()> {
+    let config = &mut ctx.accounts.config;
+
+    let next_total = config
+        .minted_total
+        .checked_add(amount)
+        .ok_or(TokenProjectError::Overflow)?;
+
+    require!(next_total <= MAX_SUPPLY, TokenProjectError::SupplyCapExceeded);
+
+    let signer_seeds: &[&[&[u8]]] = &[&[b"mint", &[ctx.bumps.mint]]];
+
+    let cpi_accounts = MintTo {
+        mint: ctx.accounts.mint.to_account_info(),
+        to: ctx.accounts.recipient_token_account.to_account_info(),
+        authority: ctx.accounts.mint.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+    )
+    .with_signer(signer_seeds);
+
+    token_interface::mint_to(cpi_context, amount)?;
+
+    config.minted_total = next_total;
+    Ok(())
+}
+```
+
+## Read The Mint Logic In The Right Order
+
+### First, update the projected supply
+
+```rust
+let next_total = config
+    .minted_total
+    .checked_add(amount)
+    .ok_or(TokenProjectError::Overflow)?;
+```
+
+This prevents arithmetic bugs from turning into silent bad state.
+
+### Then enforce the cap
+
+```rust
+require!(next_total <= MAX_SUPPLY, TokenProjectError::SupplyCapExceeded);
+```
+
+This is the actual business rule.
+
+The frontend cannot override it.
+
+That is the whole point of the project.
+
+### Then prepare PDA signer seeds
+
+```rust
+let signer_seeds: &[&[&[u8]]] = &[&[b"mint", &[ctx.bumps.mint]]];
+```
+
+These seeds match the PDA rule that created the mint.
+
+That is what allows the mint PDA to act as the mint authority during CPI.
+
+### Then perform the CPI
+
+```rust
+let cpi_context = CpiContext::new(
+    ctx.accounts.token_program.to_account_info(),
+    cpi_accounts,
+)
+.with_signer(signer_seeds);
+```
+
+This is the same CPI model from the previous lesson.
+
+The only difference is that now the callee is the token program and the signer is a PDA mint authority.
+
+### Then commit your own state update
+
+```rust
+config.minted_total = next_total;
+```
+
+This is important.
+
+Your program is not only minting tokens.
+
+It is also maintaining its own rule-tracking state.
+
+That is what makes the project more than a raw token CPI wrapper.
+
+## Step 6: Add Clear Errors
+
+The project should fail clearly when business rules are violated.
+
+```rust
+#[error_code]
+pub enum TokenProjectError {
+    #[msg("Minted total overflowed")]
+    Overflow,
+
+    #[msg("Minting would exceed the max supply")]
+    SupplyCapExceeded,
+}
+```
+
+Specific errors make tests and client behavior much easier to reason about.
+
+## Step 7: Build The Test Plan Before You Expand The Project
+
+Do not add more features yet.
+
+Test the core rule first.
+
+Minimum test plan:
+
+1. initialize sets admin and zero minted total
+2. mint succeeds for the admin
+3. minted total updates correctly
+4. non-admin mint attempt fails
+5. mint over the supply cap fails
+
+That is enough to prove the design.
+
+## Why This Project Is Strong
+
+This project teaches one of the most important real patterns in Anchor:
+
+- let the token program handle token balances
+- let your own program handle business rules
+- use a PDA when the program itself should control authority
+
+That pattern appears everywhere in real Solana apps.
+
+## Common Mistakes
+
+### Mistake 1: enforcing the supply cap only in the client
+
+That is not a real rule.
+
+If the rule matters, the program must enforce it.
+
+### Mistake 2: using a wallet as the long-term mint authority when the program should control minting
+
+If the business logic belongs on-chain, the authority model should usually belong on-chain too.
+
+### Mistake 3: forgetting that the signer seeds must match the mint PDA rule
+
+If the PDA was derived with `seeds = [b"mint"]`, your signer seeds must reflect that exact rule.
+
+### Mistake 4: trying to add reward logic, claim logic, and quotas immediately
+
+That makes the first build harder without improving the core lesson.
+
+The first version should prove one thing clearly.
+
+## One Good Extension
+
+If the base version works, add exactly one improvement:
+
+- a `UserQuota` PDA that limits how much one recipient can receive
+
+That is a good extension because it deepens the same mental model:
+
+- more PDA state
+- more business rules
+- same token CPI pattern
+
+## What Comes Next
+
+The next project should take the same ideas and make the state machine more complex.
+
+That is where escrow becomes useful.
