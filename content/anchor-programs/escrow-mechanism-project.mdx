@@ -1,30 +1,67 @@
 ---
-title: "Project: Escrow with PDA Vault"
-description: "Build an Anchor escrow flow with deterministic vault PDAs, explicit state transitions, cancellation paths, and safer release logic."
-module: "⚓ Anchor Framework"
+title: "Escrow with a PDA Vault"
+description: "Build one guided escrow project in Anchor using PDA state, a vault authority PDA, token CPI, and explicit state transitions that cannot be bypassed."
+module: "Anchor Programs"
 keywords:
   - "anchor escrow"
   - "solana escrow pda"
-  - "vault pda"
+  - "vault authority pda"
   - "anchor state machine"
-  - "escrow release"
-  - "escrow cancel"
-  - "solana anchor project"
+  - "token escrow anchor"
+  - "anchor cancel escrow"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-Escrow is a perfect intermediate Anchor project because it combines:
+Escrow is the first project in this section where your program has to do four hard things at once:
 
-- PDA state accounts
-- Token CPI transfers
-- Clear state machine design
+- hold state over time
+- control token movement with a PDA
+- enforce who is allowed to act next
+- stop repeated or invalid state transitions
 
-## Problem Statement
+That is why escrow matters.
 
-A maker deposits tokens into escrow. A taker can fulfill conditions. Then funds release according to program rules.
+If token minting taught you program-controlled authority, escrow teaches you program-controlled flows.
 
-## Minimal Escrow State
+## What You Are Building
+
+You will build one simple token escrow with this lifecycle:
+
+1. a maker creates the escrow terms
+2. the maker funds a vault token account controlled by the program
+3. the taker completes the escrow and receives the tokens
+4. or the maker cancels before completion and receives the tokens back
+
+That is enough.
+
+Do not add deadlines, partial fills, fees, or multi-party settlement in the first version.
+
+The point of this project is to make one state machine completely clear.
+
+## The Core Idea
+
+The escrow has two separate responsibilities:
+
+- state tracking in your own escrow account
+- token custody through a vault controlled by a PDA
+
+Those are different jobs.
+
+That is why the project needs both:
+
+- an escrow state PDA
+- a vault authority PDA
+- a vault token account owned by that vault authority PDA
+
+The token program still controls token balances.
+
+Your Anchor program controls when those balances are allowed to move.
+
+## Step 1: Define The Escrow State Clearly
+
+Start with the smallest useful state machine.
 
 ```rust
 #[account]
@@ -46,54 +83,417 @@ pub enum EscrowStatus {
 }
 ```
 
-## PDA Design
+Why each field exists:
 
-- Escrow PDA: `b"escrow" + maker + nonce`
-- Vault authority PDA: `b"vault-authority" + escrow_pubkey`
-- Vault ATA owned by vault authority PDA
+- `maker` tells the program who created the escrow
+- `taker` tells the program who is allowed to complete it
+- `mint` ties the escrow to one token mint
+- `amount` records the agreed token quantity
+- `status` prevents invalid transitions and repeated execution
 
-Keep seed formulas fixed and documented.
+That is enough for the first version.
 
-## Instruction Flow
+## Step 2: Choose Deterministic PDA Rules
 
-1. `initialize_escrow` - writes escrow config
-2. `fund_escrow` - maker transfers tokens into vault
-3. `complete_escrow` - releases vault tokens to taker
-4. `cancel_escrow` - returns funds to maker if rules permit
+This project needs two PDA formulas.
 
-## Release Guardrails
+### The escrow PDA
 
-- Only valid actor can transition current state
-- `status` must match expected prior state
-- Transfer amount must match escrow agreement
-- All token accounts must be validated against expected mint
+Use one PDA for the business state itself.
+
+A clean rule is:
 
 ```rust
-require!(escrow.status == EscrowStatus::Funded, EscrowError::InvalidState);
-require_keys_eq!(escrow.taker, taker.key(), EscrowError::Unauthorized);
+seeds = [b"escrow", maker.key().as_ref(), escrow_id.as_ref()]
 ```
 
-## Common Escrow Bugs
+The exact third seed can vary.
 
-- Missing state transition checks (double release)
-- Using client-side booleans instead of on-chain status
-- Forgetting to close escrow account and reclaim rent
-- Not testing race-like repeated calls
+It can be a nonce, an ID, or another stable unique value.
 
-<Callout type="warn">
-If an instruction can be called twice, assume someone will call it twice. Protect every state transition.
-</Callout>
+The important part is the design principle:
 
-## Test Matrix
+- namespace the account
+- tie it to the maker
+- make the final seed stable enough to derive again later
 
-1. Maker initializes + funds successfully
-2. Unauthorized taker cannot complete
-3. Correct taker completes once
-4. Second complete attempt fails
-5. Cancel path only works in valid states
+### The vault authority PDA
 
-## Try This Next
+Use a second PDA for token authority.
 
-1. Add expiry timestamp and allow timeout-based cancellation.
-2. Support partial fills with remaining balance tracking.
-3. Emit events for each state transition and index them in your backend.
+A clean rule is:
+
+```rust
+seeds = [b"vault-authority", escrow.key().as_ref()]
+```
+
+This is a good pattern because the vault authority is tied directly to one escrow record.
+
+That makes the authority model easier to reason about.
+
+## Step 3: Create The Escrow State
+
+The first instruction writes the escrow terms, but does not move tokens yet.
+
+```rust
+#[derive(Accounts)]
+#[instruction(escrow_id: [u8; 8])]
+pub struct InitializeEscrow<'info> {
+    #[account(mut)]
+    pub maker: Signer<'info>,
+
+    pub taker: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        payer = maker,
+        space = 8 + Escrow::INIT_SPACE,
+        seeds = [b"escrow", maker.key().as_ref(), &escrow_id],
+        bump,
+    )]
+    pub escrow: Account<'info, Escrow>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+Then the handler stores the deal terms.
+
+```rust
+pub fn initialize_escrow(
+    ctx: Context<InitializeEscrow>,
+    _escrow_id: [u8; 8],
+    amount: u64,
+) -> Result<()> {
+    let escrow = &mut ctx.accounts.escrow;
+    escrow.maker = ctx.accounts.maker.key();
+    escrow.taker = ctx.accounts.taker.key();
+    escrow.mint = Pubkey::default();
+    escrow.amount = amount;
+    escrow.status = EscrowStatus::Initialized;
+    Ok(())
+}
+```
+
+The important part here is not that the handler is long.
+
+The important part is that it is short.
+
+The instruction is only defining the agreement.
+
+It is not trying to define the agreement and move funds and settle the trade all at once.
+
+## Step 4: Define The Vault Flow
+
+Now you need a token account that actually holds the escrowed tokens.
+
+The clean beginner design is:
+
+- derive a vault authority PDA from the escrow PDA
+- create an ATA for that vault authority and the chosen mint
+- move maker tokens into that ATA during the funding step
+
+That keeps the authority model consistent with the lessons you already learned.
+
+## Step 5: Fund The Escrow
+
+This is the instruction where the maker deposits tokens into the vault.
+
+```rust
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token_interface::{self, Mint, TokenAccount, TokenInterface, TransferChecked},
+};
+
+#[derive(Accounts)]
+pub struct FundEscrow<'info> {
+    #[account(mut)]
+    pub maker: Signer<'info>,
+
+    #[account(
+        mut,
+        has_one = maker,
+        constraint = escrow.status == EscrowStatus::Initialized @ EscrowError::InvalidState,
+    )]
+    pub escrow: Account<'info, Escrow>,
+
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    #[account(
+        mut,
+        constraint = maker_token_account.mint == mint.key() @ EscrowError::InvalidMint,
+    )]
+    pub maker_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(
+        seeds = [b"vault-authority", escrow.key().as_ref()],
+        bump,
+    )]
+    pub vault_authority: UncheckedAccount<'info>,
+
+    #[account(
+        init_if_needed,
+        payer = maker,
+        associated_token::mint = mint,
+        associated_token::authority = vault_authority,
+        associated_token::token_program = token_program,
+    )]
+    pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+Now the handler can move the tokens.
+
+```rust
+pub fn fund_escrow(ctx: Context<FundEscrow>) -> Result<()> {
+    let escrow = &mut ctx.accounts.escrow;
+
+    let cpi_accounts = TransferChecked {
+        mint: ctx.accounts.mint.to_account_info(),
+        from: ctx.accounts.maker_token_account.to_account_info(),
+        to: ctx.accounts.vault_token_account.to_account_info(),
+        authority: ctx.accounts.maker.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+    );
+
+    token_interface::transfer_checked(cpi_context, escrow.amount, ctx.accounts.mint.decimals)?;
+
+    escrow.mint = ctx.accounts.mint.key();
+    escrow.status = EscrowStatus::Funded;
+    Ok(())
+}
+```
+
+## What This Funding Step Is Really Doing
+
+It is doing two jobs:
+
+1. moving tokens into program-controlled custody
+2. advancing the state machine from `Initialized` to `Funded`
+
+That second job matters as much as the transfer.
+
+If you move tokens and forget the state transition, your escrow model is already weak.
+
+## Step 6: Complete The Escrow
+
+Now the taker should be able to receive the tokens, but only if the escrow is actually funded.
+
+```rust
+#[derive(Accounts)]
+pub struct CompleteEscrow<'info> {
+    #[account(mut)]
+    pub taker: Signer<'info>,
+
+    #[account(
+        mut,
+        constraint = escrow.status == EscrowStatus::Funded @ EscrowError::InvalidState,
+        constraint = escrow.taker == taker.key() @ EscrowError::Unauthorized,
+    )]
+    pub escrow: Account<'info, Escrow>,
+
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    #[account(
+        seeds = [b"vault-authority", escrow.key().as_ref()],
+        bump,
+    )]
+    pub vault_authority: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub taker_token_account: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+}
+```
+
+And the handler uses a PDA-signed token CPI.
+
+```rust
+pub fn complete_escrow(ctx: Context<CompleteEscrow>) -> Result<()> {
+    let escrow = &mut ctx.accounts.escrow;
+
+    let signer_seeds: &[&[&[u8]]] = &[&[
+        b"vault-authority",
+        escrow.key().as_ref(),
+        &[ctx.bumps.vault_authority],
+    ]];
+
+    let cpi_accounts = TransferChecked {
+        mint: ctx.accounts.mint.to_account_info(),
+        from: ctx.accounts.vault_token_account.to_account_info(),
+        to: ctx.accounts.taker_token_account.to_account_info(),
+        authority: ctx.accounts.vault_authority.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        cpi_accounts,
+    )
+    .with_signer(signer_seeds);
+
+    token_interface::transfer_checked(cpi_context, escrow.amount, ctx.accounts.mint.decimals)?;
+
+    escrow.status = EscrowStatus::Completed;
+    Ok(())
+}
+```
+
+## Read The Completion Flow In The Right Order
+
+### First, confirm the state
+
+```rust
+constraint = escrow.status == EscrowStatus::Funded
+```
+
+If the escrow is not funded, completion must fail.
+
+### Then confirm the actor
+
+```rust
+constraint = escrow.taker == taker.key()
+```
+
+The program decides who the taker is.
+
+The client does not get to redefine that at call time.
+
+### Then let the PDA sign for the vault authority
+
+```rust
+.with_signer(signer_seeds)
+```
+
+This is the same PDA-signing pattern from the CPI lesson.
+
+Now it is being used for real custody movement.
+
+### Then update the state machine
+
+```rust
+escrow.status = EscrowStatus::Completed;
+```
+
+If you forget this line, the escrow can be completed again.
+
+That is the kind of bug this project is supposed to teach you to avoid.
+
+## Step 7: Add Cancellation Before Completion
+
+A minimal escrow also needs a cancellation path.
+
+The simplest rule is:
+
+- only the maker can cancel
+- cancellation is allowed only while the escrow is funded or initialized, depending on your design
+
+A clean beginner rule is to allow cancellation only before completion.
+
+The same pattern applies:
+
+- validate actor
+- validate current state
+- move tokens back with a PDA-signed CPI if needed
+- mark the escrow `Cancelled`
+
+## Step 8: Add Explicit Errors
+
+A state-machine project should fail clearly.
+
+```rust
+#[error_code]
+pub enum EscrowError {
+    #[msg("Escrow is not in the required state")]
+    InvalidState,
+
+    #[msg("Caller is not authorized for this action")]
+    Unauthorized,
+
+    #[msg("Token mint does not match the escrow configuration")]
+    InvalidMint,
+}
+```
+
+Specific errors make your tests and reviews much stronger.
+
+## The Real Lesson In This Project
+
+Escrow is not hard because token CPI is hard.
+
+Escrow is hard because state transitions and authority rules must stay correct across time.
+
+That is the real engineering problem.
+
+The project works only if all of these remain aligned:
+
+- escrow state PDA
+- vault authority PDA
+- vault token account
+- current status
+- expected actor
+- expected mint
+
+If one of those drifts, the design gets unsafe quickly.
+
+## Minimum Test Matrix
+
+Do not ship this project with one happy-path test.
+
+The minimum useful tests are:
+
+1. maker initializes and funds successfully
+2. wrong taker cannot complete
+3. correct taker completes successfully
+4. second completion attempt fails
+5. maker cancel path works only in allowed states
+6. wrong mint or wrong token account relationships fail
+
+That is the real proof that the state machine is working.
+
+## Common Escrow Mistakes
+
+### Mistake 1: using client-side booleans instead of on-chain status
+
+Escrow state belongs on-chain.
+
+The client can display state, but the program must enforce it.
+
+### Mistake 2: forgetting to tie the vault authority PDA to one escrow
+
+A vague authority model creates review problems and safety problems.
+
+Tie the vault authority to the escrow directly.
+
+### Mistake 3: moving tokens without advancing the state machine
+
+If the transfer succeeds but the status stays stale, the program logic is already inconsistent.
+
+### Mistake 4: relying on signer checks without stored authority checks
+
+For serious state transitions, the business rule must be explicit in account data and constraints.
+
+## One Good Extension
+
+If the core version works, add exactly one improvement:
+
+- an expiry timestamp that lets the maker cancel after timeout
+
+That is a good extension because it deepens the same state-machine logic without exploding the scope.
+
+## What Comes Next
+
+After this project, the next lesson should move from “working flows” to “cleaner and safer program structure.”
+
+That is where ergonomics and maintainability start to matter more.
