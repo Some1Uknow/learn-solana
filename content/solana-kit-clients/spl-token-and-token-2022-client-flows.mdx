@@ -1,6 +1,6 @@
 ---
-title: "SPL Token & Token-2022 Client Flows"
-description: "Build token client flows safely with explicit token program selection and validation checks."
+title: "SPL Token and Token-2022 Client Flows"
+description: "Build token transfer plans with explicit program selection, real instruction builders, and validation that happens before the wallet prompt."
 module: "Solana Kit Clients"
 keywords:
   - "spl token"
@@ -9,139 +9,214 @@ keywords:
   - "solana token validation"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+Token flows go wrong when the client guesses.
 
-This lesson is dev-only and educational. Do not use production funds while learning.
+The app guesses the token program.
 
-## Step 1: 0-to-1 Theory
+It guesses the decimals.
 
-### Primitives
+It assumes any token account pair is valid for the chosen mint.
 
-- `mint`: token definition account
-- `token account`: balance holder for owner+mint
-- `token program id`: classic SPL vs Token-2022
+That is how users end up signing transfers that were malformed before the wallet popup even opened.
 
-### Mental Model
+The correct model is stricter.
 
-If SOL is “one native balance per address”, tokens are “many balances per address”.
+Before you ask the wallet to sign, the client should already know:
 
-Those balances live in token accounts. Your client must always be clear about:
+- which token program you are using
+- which mint the transfer is for
+- which token accounts belong to that mint
+- which raw amount should be transferred
 
-- which mint you are using
-- which token program owns the accounts
-- how to convert UI amounts into raw integer amounts using decimals
+That is the whole lesson.
 
-### Invariants
+## Classic SPL Token and Token-2022 Are Different Programs
 
-1. Token program choice must be explicit.
-2. Mint/account pairing must be validated before transfer logic.
-3. Amount handling must respect decimals.
+They are not just two names for the same thing.
 
-### Quick Checks
+They are different program IDs with different extension capabilities.
 
-1. Why is "assume token program" dangerous?
-2. Why validate mint/account before send?
+So the client must keep the token program choice explicit.
 
-## Step 2: Real-World Implementation (Code Solution)
+Do not hide it inside a helper that silently assumes classic SPL Token.
 
-Install token clients:
+## Step 1: Build A Transfer Plan With Explicit Program Choice
+
+Install the token clients if you have not already:
 
 ```bash
 pnpm add @solana-program/token @solana-program/token-2022
 ```
 
-Create `lib/solana/tokenFlow.ts`:
+Now create `lib/solana/tokenFlow.ts`:
 
 ```ts
-// Keep token program choice explicit in your app.
-// Classic SPL Token and Token-2022 are different programs.
+import { address } from "@solana/kit";
+import {
+  getTransferCheckedInstruction as getSplTransferCheckedInstruction,
+} from "@solana-program/token";
+import {
+  getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+} from "@solana-program/token-2022";
+
 export type TokenProgramKind = "spl" | "token2022";
 
 export type TokenTransferInput = {
-  // Which token program are we using for this mint + token accounts?
   programKind: TokenProgramKind;
-  // Base58 strings for simplicity in this beginner module.
   mint: string;
   sourceTokenAccount: string;
   destinationTokenAccount: string;
-  // Raw integer amount (already scaled by decimals).
+  authority: string;
   amountRaw: bigint;
-  // Number of decimals used by the mint (for UI conversion).
   decimals: number;
 };
 
 export function validateTokenTransferInput(input: TokenTransferInput) {
-  // Fail early with clear messages before you ask the wallet to sign.
-  if (!input.mint) throw new Error("Missing mint");
+  if (!input.mint) throw new Error("Missing mint address");
   if (!input.sourceTokenAccount) throw new Error("Missing source token account");
   if (!input.destinationTokenAccount) throw new Error("Missing destination token account");
+  if (!input.authority) throw new Error("Missing transfer authority");
   if (input.amountRaw <= 0n) throw new Error("Amount must be positive");
   if (input.decimals < 0 || input.decimals > 18) throw new Error("Invalid decimals");
 }
 
-export async function buildTokenTransferPlan(input: TokenTransferInput) {
+export function buildTokenTransferInstruction(input: TokenTransferInput) {
   validateTokenTransferInput(input);
 
-  // In a full implementation, create token program instructions here.
-  // Keep programKind explicit to route SPL vs Token-2022 instruction builders.
-  return {
-    ok: true,
-    programKind: input.programKind,
-    summary: {
-      mint: input.mint,
-      from: input.sourceTokenAccount,
-      to: input.destinationTokenAccount,
-      amountRaw: input.amountRaw.toString(),
+  const mint = address(input.mint);
+  const sourceTokenAccount = address(input.sourceTokenAccount);
+  const destinationTokenAccount = address(input.destinationTokenAccount);
+  const authority = address(input.authority);
+
+  if (input.programKind === "spl") {
+    return getSplTransferCheckedInstruction({
+      source: sourceTokenAccount,
+      mint,
+      destination: destinationTokenAccount,
+      authority,
+      amount: input.amountRaw,
       decimals: input.decimals,
-    },
-  };
+    });
+  }
+
+  return getToken2022TransferCheckedInstruction({
+    source: sourceTokenAccount,
+    mint,
+    destination: destinationTokenAccount,
+    authority,
+    amount: input.amountRaw,
+    decimals: input.decimals,
+  });
 }
 ```
 
-Create `components/solana/TokenTransferPreview.tsx`:
+This file does the two jobs that matter most:
+
+- it rejects obviously broken transfer inputs early
+- it makes program choice explicit before instruction assembly
+
+That is what a safe token client should do.
+
+## Why `transferChecked` Matters
+
+`transferChecked` is the right beginner default because the transfer instruction includes decimals explicitly.
+
+That forces the client to be honest about the mint precision it thinks it is dealing with.
+
+If your UI math and mint metadata disagree, the client should fail before that turns into a silent bad transfer.
+
+## Step 2: Preview The Transfer Before Sending
+
+Now create `components/solana/TokenTransferPreview.tsx`:
 
 ```tsx
 "use client";
 
 import React, { useState } from "react";
-import { buildTokenTransferPlan } from "@/lib/solana/tokenFlow";
+import { buildTokenTransferInstruction, type TokenProgramKind } from "@/lib/solana/tokenFlow";
 
 export function TokenTransferPreview() {
-  // Show the plan output as JSON so beginners can see what will be signed/sent.
-  const [result, setResult] = useState<any>(null);
+  const [programKind, setProgramKind] = useState<TokenProgramKind>("spl");
+  const [result, setResult] = useState<string>("");
+  const [error, setError] = useState("");
 
   const onPreview = async () => {
-    const plan = await buildTokenTransferPlan({
-      programKind: "spl",
-      // These are placeholder strings. Replace with real addresses when you wire up a real mint.
-      mint: "Mint111111111111111111111111111111111111111",
-      sourceTokenAccount: "Src1111111111111111111111111111111111111111",
-      destinationTokenAccount: "Dst1111111111111111111111111111111111111111",
-      // Raw amount: for a 6-decimal mint, 1 token = 1_000_000 raw units.
-      amountRaw: 1_000_000n,
-      decimals: 6,
-    });
-    setResult(plan);
+    setError("");
+
+    try {
+      const instruction = buildTokenTransferInstruction({
+        programKind,
+        mint: "ENTER_REAL_MINT_ADDRESS",
+        sourceTokenAccount: "ENTER_REAL_SOURCE_TOKEN_ACCOUNT",
+        destinationTokenAccount: "ENTER_REAL_DESTINATION_TOKEN_ACCOUNT",
+        authority: "ENTER_REAL_AUTHORITY_ADDRESS",
+        amountRaw: 1_000_000n,
+        decimals: 6,
+      });
+
+      setResult(JSON.stringify(instruction, null, 2));
+    } catch (e: any) {
+      setResult("");
+      setError(String(e?.message ?? e));
+    }
   };
 
   return (
-    <div>
-      <button onClick={onPreview} className="px-3 py-2 rounded bg-indigo-600 text-white">Preview Transfer</button>
-      {result && <pre className="mt-3 text-xs bg-zinc-950 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+    <div className="space-y-3">
+      <select
+        value={programKind}
+        onChange={(e) => setProgramKind(e.target.value as TokenProgramKind)}
+        className="px-3 py-2 rounded bg-zinc-900"
+      >
+        <option value="spl">Classic SPL Token</option>
+        <option value="token2022">Token-2022</option>
+      </select>
+
+      <button
+        onClick={onPreview}
+        className="px-3 py-2 rounded bg-indigo-600 text-white"
+      >
+        Preview Transfer Instruction
+      </button>
+
+      {error ? <div className="text-xs text-red-300">{error}</div> : null}
+      {result ? <pre className="text-xs bg-zinc-950 p-3 rounded">{result}</pre> : null}
     </div>
   );
 }
 ```
 
-Expected result:
+This component still does not send the transfer.
 
-- explicit token flow validation and preview output before transaction assembly.
+That is correct.
 
-## Step 3: Mastery Test
+First learn to build the instruction honestly.
 
-- Easy: where do you enforce program kind selection?
-- Medium: what field must be checked before decimals conversion?
-- Hard: how do you prevent cross-program account mixups at client layer?
+Then attach wallet signing and transport.
+
+## The Failure Modes To Avoid
+
+### Assuming classic SPL Token by default
+
+That is how Token-2022 support quietly breaks.
+
+Make the token program part of your input model.
+
+### Treating decimals as a display-only concern
+
+Decimals affect raw amount construction.
+
+They are part of transfer correctness.
+
+### Skipping mint and token-account validation
+
+If the mint and token accounts do not line up, the transfer is already wrong before the wallet signs anything.
+
+## What You Can Do After This
+
+You can build token transfer instructions with explicit program choice, validate the critical inputs early, and use checked transfer builders instead of hand-waving token precision.
+
+That is the client-side baseline for both classic SPL Token and Token-2022 flows.
 
 ## Sources
 

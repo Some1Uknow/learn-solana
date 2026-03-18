@@ -1,6 +1,6 @@
 ---
-title: "Transaction Message Building & Signers"
-description: "Build a transaction the right way: message -> fee payer -> lifetime -> instructions -> signatures."
+title: "Transaction Message Building and Signers"
+description: "Build one transaction message in the correct order, understand who really signs it, and see why message mutation after signing is invalid."
 module: "Solana Kit Clients"
 keywords:
   - "createTransactionMessage"
@@ -9,47 +9,52 @@ keywords:
   - "fee payer"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+Most client-side transaction bugs come from one bad assumption.
 
-## Step 1: 0-to-1 Theory
+People treat a transaction like a function call they can keep editing until the last second.
 
-### Primitives
+That is not what it is.
 
-- `transaction message`: immutable plan before signing
-- `fee payer`: signer that pays network fee
-- `blockhash lifetime`: validity window
-- `instructions`: ordered program operations
+A Solana transaction message is a plan.
 
-### Mental Model
+It fixes:
 
-A transaction is not “a function call”. It is a signed packet that says:
+- which instructions will run
+- which accounts are involved
+- who pays fees
+- which recent blockhash defines the lifetime
 
-1. which accounts are involved
-2. which programs to invoke
-3. in what order
+Then signers approve that exact plan.
 
-Signatures cover the message bytes. If you change the message after signing, the signature no longer matches.
+If the plan changes after signing, the signatures are no longer valid.
 
-### Invariants
+That is the whole mental model for this lesson.
 
-1. Lifetime must be set before signing.
-2. Signatures are invalid if message changes after signing.
-3. Instruction order changes semantics.
+## The Order Is Not Arbitrary
 
-### Quick Checks
+With Kit, the correct build order is:
 
-1. Why can’t you modify a message after signing?
-2. Why is blockhash freshness a runtime invariant?
+1. create the message shell
+2. set the fee payer signer
+3. set the lifetime with a fresh blockhash
+4. append instructions
+5. sign the final message
 
-## Step 2: Real-World Implementation (Code Solution)
+That order exists for a reason.
 
-Install system program client:
+The fee payer and lifetime are part of what gets signed.
+
+So they must exist before the signature step.
+
+## Step 1: Build One Transfer Message
+
+Install the system program client if you have not already:
 
 ```bash
 pnpm add @solana-program/system
 ```
 
-Create `scripts/build-message.ts`:
+Now create `scripts/build-message.ts`:
 
 ```ts
 import {
@@ -57,6 +62,7 @@ import {
   createSolanaRpc,
   createTransactionMessage,
   generateKeyPairSigner,
+  getSignatureFromTransaction,
   lamports,
   pipe,
   setTransactionMessageFeePayerSigner,
@@ -65,56 +71,137 @@ import {
 } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 
-// Local validator RPC (fastest way to learn without devnet latency).
 const rpc = createSolanaRpc("http://127.0.0.1:8899");
 
 async function main() {
-  // In real apps, the wallet is usually the sender signer.
-  // Here we generate keypairs so the script is self-contained.
   const sender = await generateKeyPairSigner();
   const recipient = await generateKeyPairSigner();
-  // The blockhash defines the transaction lifetime window.
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-  // Build one instruction: transfer SOL from sender -> recipient.
-  const transferIx = getTransferSolInstruction({
+  const transferInstruction = getTransferSolInstruction({
     source: sender,
     destination: recipient.address,
     amount: lamports(1_000_000n),
   });
 
-  // Build the message in the correct order:
-  // message -> fee payer -> lifetime -> instructions.
   const message = pipe(
     createTransactionMessage({ version: 0 }),
     (tx) => setTransactionMessageFeePayerSigner(sender, tx),
     (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-    (tx) => appendTransactionMessageInstructions([transferIx], tx),
+    (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
   );
 
-  // Signatures cover the message bytes; after signing, do not mutate the message.
-  const signed = await signTransactionMessageWithSigners(message);
-  console.log("Built and signed transaction message", !!signed);
+  const signedTransaction = await signTransactionMessageWithSigners(message);
+
+  console.log("signature", getSignatureFromTransaction(signedTransaction));
 }
 
 main().catch(console.error);
 ```
 
-Run:
+Run it with:
 
 ```bash
 pnpm tsx scripts/build-message.ts
 ```
 
-Expected result:
+This script does not send the transaction.
 
-- script logs successful signed-message build.
+That is intentional.
 
-## Step 3: Mastery Test
+The lesson is about building and signing the message correctly first.
 
-- Easy: what happens if fee payer signer is omitted?
-- Medium: what if blockhash expires before send?
-- Hard: why can instruction reordering create security bugs?
+## Read The Script In The Right Order
+
+### `createTransactionMessage({ version: 0 })`
+
+This creates the message shell.
+
+At this point, you do not have enough information to sign anything yet.
+
+You only have the basic container.
+
+### `setTransactionMessageFeePayerSigner(...)`
+
+The fee payer is not just metadata.
+
+It is part of the signed message.
+
+In this example, the sender is also paying fees.
+
+That is common, but it is not required by the protocol.
+
+### `setTransactionMessageLifetimeUsingBlockhash(...)`
+
+The recent blockhash defines how long the message stays valid.
+
+This is why blockhash freshness matters.
+
+A stale blockhash means the message may be structurally correct and still be rejected by the runtime.
+
+### `appendTransactionMessageInstructions(...)`
+
+Only now do you attach the ordered program operations.
+
+Instruction order is part of the message.
+
+If you reorder instructions later, you did not make a small edit.
+
+You created a different message.
+
+### `signTransactionMessageWithSigners(...)`
+
+This is the lock point.
+
+After this, the message contents must not change.
+
+If they change, the signatures no longer describe the transaction honestly.
+
+## Who Actually Signs
+
+This is where beginners often get lost.
+
+In the transfer above:
+
+- `sender` signs
+- `recipient` does not sign
+
+Why:
+
+- the sender is authorizing SOL to leave their account
+- the recipient is only receiving funds
+
+Being involved in a transaction is not the same as being a signer.
+
+That distinction matters in every serious client flow.
+
+## The Failure Modes To Avoid
+
+### Setting lifetime after signing
+
+That invalidates the signatures.
+
+The message changed.
+
+### Reusing an old blockhash blindly
+
+That makes retries fail for the wrong reason.
+
+If the message lifetime expired, rebuild the message first.
+
+### Treating recipients like signers by default
+
+Most accounts in a transaction do not sign.
+
+Only accounts that must authorize the message do.
+
+## What You Can Do After This
+
+You can build a transaction message in the right order, explain why the fee payer and blockhash belong inside the signed plan, and identify which accounts actually need to sign.
+
+That is the minimum foundation for sending transactions safely.
+
+The next lesson builds on this by covering confirmation, retries, and lifetime-aware resend behavior.
 
 ## Sources
 

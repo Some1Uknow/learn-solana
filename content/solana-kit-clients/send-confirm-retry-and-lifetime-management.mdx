@@ -1,46 +1,49 @@
 ---
-title: "Send, Confirm, Retry & Lifetime Management"
-description: "Handle transaction delivery robustly with explicit confirmation strategy and retry policy."
+title: "Send, Confirm, Retry and Lifetime Management"
+description: "Send a signed transaction the right way, separate sending from confirmation, and retry only when rebuilding is actually safe."
 module: "Solana Kit Clients"
 keywords:
-  - "sendAndConfirm"
+  - "sendAndConfirmTransactionFactory"
   - "transaction retry"
   - "blockhash lifetime"
   - "solana reliability"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+The biggest transaction UX bug is simple.
 
-## Step 1: 0-to-1 Theory
+Apps act like `submitted` means `done`.
 
-### Primitives
+It does not.
 
-- `send`: publish signed bytes to cluster
-- `confirm`: wait for chain commitment outcome
-- `retry`: controlled rebuild/resend policy
+A transaction can be signed, have a valid signature, and still fail to confirm.
 
-### Mental Model
+It can also expire before the network accepts it.
 
-Sending a transaction is like dropping a letter into a mailbox. Confirmation is waiting for a receipt.
+That is why the send flow has to separate three different ideas:
 
-On Solana, confirmation depends on:
+- the transaction already has a signature
+- the transaction has been sent to the network
+- the transaction has been confirmed at the commitment you care about
 
-- which commitment level you choose (`processed`, `confirmed`, `finalized`)
-- whether your transaction reached the leader and propagated
-- whether it expired (blockhash lifetime)
+If you collapse those into one step, your retry logic will be wrong.
 
-### Invariants
+## The Signature Exists Before Sending
 
-1. "Sent" is not "Confirmed".
-2. Retrying stale signed bytes is invalid.
-3. User rejection is non-retryable.
+This matters more than most beginners expect.
 
-### Quick Checks
+With Kit, the transaction signature is available as soon as the transaction is signed by the fee payer.
 
-1. Which failures are retryable?
-2. Why should retries be policy-driven, not ad hoc?
+You do not need to wait for the RPC node to return it.
 
-## Step 2: Real-World Implementation (Code Solution)
+That means:
+
+- you can display the signature immediately
+- you can log it before send
+- you can still fail later during send or confirmation
+
+That is the right model.
+
+## Step 1: Build, Sign, Then Confirm
 
 Create `scripts/send-confirm.ts`:
 
@@ -61,54 +64,60 @@ import {
 } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 
-// Use local validator for predictable learning and quick iteration.
 const RPC_URL = "http://127.0.0.1:8899";
 const RPC_WS_URL = "ws://127.0.0.1:8900";
 
 async function buildAndSign() {
   const rpc = createSolanaRpc(RPC_URL);
-  // Generate signers so the script is self-contained.
   const sender = await generateKeyPairSigner();
   const recipient = await generateKeyPairSigner();
-  // Blockhash is the transaction lifetime. You must refresh it for retries.
   const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-  const ix = getTransferSolInstruction({
+  const instruction = getTransferSolInstruction({
     source: sender,
     destination: recipient.address,
     amount: lamports(1_000_000n),
   });
 
-  const msg = pipe(
+  const message = pipe(
     createTransactionMessage({ version: 0 }),
     (tx) => setTransactionMessageFeePayerSigner(sender, tx),
     (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-    (tx) => appendTransactionMessageInstructions([ix], tx),
+    (tx) => appendTransactionMessageInstructions([instruction], tx),
   );
 
-  return signTransactionMessageWithSigners(msg);
+  return signTransactionMessageWithSigners(message);
 }
 
 async function main() {
   const rpc = createSolanaRpc(RPC_URL);
-  // Local validator uses RPC on 8899 and PubSub WebSocket on 8900.
-  const subs = createSolanaRpcSubscriptions(RPC_WS_URL);
-  // This helper sends bytes and waits for confirmation.
-  const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions: subs });
+  const rpcSubscriptions = createSolanaRpcSubscriptions(RPC_WS_URL);
+  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+    rpc,
+    rpcSubscriptions,
+  });
 
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const signed = await buildAndSign();
-      await sendAndConfirm(signed, { commitment: "confirmed" });
-      console.log("confirmed", getSignatureFromTransaction(signed));
+      const transaction = await buildAndSign();
+      const signature = getSignatureFromTransaction(transaction);
+
+      console.log("submitted", signature);
+      await sendAndConfirmTransaction(transaction, { commitment: "confirmed" });
+      console.log("confirmed", signature);
       return;
     } catch (e: any) {
-      const msg = String(e?.message ?? e);
-      // Keep a simple retry policy for beginners:
-      // retry only on lifetime/timeouts, and rebuild with a fresh blockhash.
-      const retryable = msg.includes("Blockhash") || msg.includes("timeout");
-      if (!retryable || attempt === 2) throw e;
-      console.log("retrying with fresh blockhash...");
+      const message = String(e?.message ?? e);
+      const retryable =
+        message.includes("Blockhash") ||
+        message.includes("timeout") ||
+        message.includes("expired");
+
+      if (!retryable || attempt === 2) {
+        throw e;
+      }
+
+      console.log("retrying with a freshly rebuilt transaction...");
     }
   }
 }
@@ -119,21 +128,96 @@ main().catch((e) => {
 });
 ```
 
-Run:
+Run it with:
 
 ```bash
 pnpm tsx scripts/send-confirm.ts
 ```
 
-Expected result:
+## Read The Flow In The Right Order
 
-- script prints confirmed signature or clear failure reason.
+### First, rebuild before every retry
 
-## Step 3: Mastery Test
+This is the real rule.
 
-- Easy: why do we rebuild transaction on retry?
-- Medium: what should UI show between send and confirm?
-- Hard: how would you avoid duplicate user actions during confirm wait?
+A retry is not `send the same bytes again forever`.
+
+If the blockhash lifetime is stale, the correct retry path is:
+
+1. fetch a fresh blockhash
+2. rebuild the message
+3. sign again
+4. send again
+
+That is why the helper above calls `buildAndSign()` again inside the retry loop.
+
+### Then separate submission from confirmation
+
+```ts
+const signature = getSignatureFromTransaction(transaction);
+console.log("submitted", signature);
+await sendAndConfirmTransaction(transaction, { commitment: "confirmed" });
+console.log("confirmed", signature);
+```
+
+That is the correct distinction.
+
+The signature exists before confirmation.
+
+Confirmation is about network outcome, not identity.
+
+### Then keep retry policy explicit
+
+This line matters:
+
+```ts
+const retryable =
+  message.includes("Blockhash") ||
+  message.includes("timeout") ||
+  message.includes("expired");
+```
+
+The point is not perfect string parsing.
+
+The point is policy.
+
+Some failures deserve rebuild-and-retry.
+
+Some failures do not.
+
+User rejection is not retryable.
+
+Program logic errors are not retryable until inputs or state change.
+
+## The Failure Modes To Avoid
+
+### Retrying stale signed bytes
+
+That is one of the most common client mistakes.
+
+If the lifetime expired, you need a new message.
+
+### Reporting `confirmed` too early
+
+Users need honest state.
+
+If the app only knows the transaction was submitted, say that.
+
+Do not claim success before the confirmation path finishes.
+
+### Treating every error as retryable
+
+That turns real bugs into noisy loops.
+
+Retry only when the failure mode actually supports retry.
+
+## What You Can Do After This
+
+You can separate signature, submission, and confirmation correctly, and you can retry only by rebuilding the transaction when the lifetime requires it.
+
+That is the baseline for reliable client-side transaction delivery.
+
+The next lessons build on that for token flows and broader client testing.
 
 ## Sources
 

@@ -1,6 +1,6 @@
 ---
-title: "Client Testing Strategy: Lite Unit & Integration"
-description: "A practical testing strategy for Solana client code: fast unit checks plus one meaningful integration path."
+title: "Client Testing Strategy: Lite Unit and Integration"
+description: "Test Solana client code at the right layers: pure logic first, UI behavior second, and one meaningful integration path on top of the shared runtime."
 module: "Solana Kit Clients"
 keywords:
   - "client tests"
@@ -9,112 +9,179 @@ keywords:
   - "solana testing"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+Client testing gets expensive fast when the test layers are wrong.
 
-## Step 1: 0-to-1 Theory
+If you make every test talk to a live network, your feedback loop becomes slow and flaky.
 
-### Primitives
+If you only test pure helpers, your UI and wallet flows break in ways the test suite never sees.
 
-- `unit test`: tests pure functions without network
-- `integration test`: tests feature path across service + state
-- `failure-path test`: proves behavior under expected errors
+The right model is layered.
 
-### Mental Model
+Test three things separately:
 
-Solana client bugs usually show up as:
+- pure client logic
+- UI behavior around hooks and statuses
+- one real integration path that proves the stack works together
 
-- wrong inputs (amounts, addresses, cluster)
-- wrong state (wallet disconnected, stale blockhash)
-- wrong expectations (sent vs confirmed)
+That is enough for most serious frontend work.
 
-Tests should match that reality. Start with pure functions (fast) and add one integration path (realistic).
+## Start With Pure Logic
 
-### Invariants
+Pure logic is the cheapest place to catch mistakes.
 
-1. Happy-path-only tests are not enough.
-2. Error mapping logic must be unit tested.
-3. One stable integration path must run in CI.
+Examples from this section:
 
-### Quick Checks
+- `classifyTxError(...)`
+- `getRecoveryHint(...)`
+- token transfer input validation
+- address normalization helpers
 
-1. Why are failure-path tests mandatory in wallet apps?
-2. What should be mocked vs real in integration tests?
+These functions do not need a wallet.
 
-## Step 2: Real-World Implementation (Code Solution)
+They do not need RPC.
 
-Install test stack if needed:
+They should be tested first.
+
+## Step 1: Unit Test The Logic That Drives UX Decisions
+
+Install the test stack if needed:
 
 ```bash
 pnpm add -D vitest @testing-library/react @testing-library/jest-dom jsdom
 ```
 
-Create `lib/solana/__tests__/uiTxState.test.ts`:
+Now create `lib/solana/__tests__/uiTxState.test.ts`:
 
 ```ts
-import { describe, it, expect } from "vitest";
-import { classifyTxError } from "../uiTxState";
+import { describe, expect, it } from "vitest";
+import { classifyTxError, getRecoveryHint } from "../uiTxState";
 
-describe("classifyTxError", () => {
-  it("maps rejection", () => {
-    // User rejection should be treated as a normal user action, not a crash.
+describe("uiTxState", () => {
+  it("maps user rejection", () => {
     expect(classifyTxError("User rejected request")).toBe("user-rejected");
   });
 
   it("maps blockhash expiry", () => {
-    // Expired blockhash usually means rebuild + re-sign is required.
     expect(classifyTxError("Blockhash not found")).toBe("expired");
   });
 
-  it("maps unknown", () => {
-    // Unknown errors are expected; we still want deterministic UX behavior.
-    expect(classifyTxError("strange failure")).toBe("unknown");
+  it("returns a recovery hint for program errors", () => {
+    expect(getRecoveryHint("program")).toMatch(/inputs/i);
   });
 });
 ```
 
-Create `components/solana/__tests__/TxActionCard.test.tsx`:
+This is the kind of test that should run constantly.
+
+It is fast.
+
+It is deterministic.
+
+And it directly protects the user-facing behavior of your app.
+
+## Step 2: Test UI Behavior With Mocked Hook State
+
+The official React hooks docs explicitly call out two useful testing patterns:
+
+- mock hook return values directly
+- pass a mocked client into `SolanaProvider`
+
+For most UI components, mocking hook return values is the fastest path.
+
+Create `components/solana/__tests__/WalletPanel.test.tsx`:
 
 ```tsx
-import { describe, it, expect } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { TxActionCard } from "../TxActionCard";
+import { WalletPanel } from "../WalletPanel";
 
-describe("TxActionCard", () => {
-  it("renders default status", () => {
-    // Smoke test: component renders and shows a status label.
-    render(<TxActionCard />);
-    expect(screen.getByText(/Status:/)).toBeTruthy();
+vi.mock("@solana/react-hooks", () => ({
+  useWalletConnection: () => ({
+    connectors: [{ id: "phantom", name: "Phantom" }],
+    wallet: null,
+    status: "disconnected",
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+  }),
+}));
+
+describe("WalletPanel", () => {
+  it("renders available connectors when disconnected", () => {
+    render(<WalletPanel />);
+    expect(screen.getByText(/Choose wallet/i)).toBeTruthy();
+    expect(screen.getByText(/Connect Phantom/i)).toBeTruthy();
   });
 });
 ```
 
-Add script:
+This test is still cheap.
 
-```json
-{
-  "scripts": {
-    "test": "vitest run"
-  }
-}
-```
+But it protects a real UI contract.
 
-Run:
+If the component stops showing available connectors correctly, the test catches it.
 
-```bash
-pnpm test
-```
+## Step 3: Keep One Real Integration Path
 
-Expected result:
+After unit tests and UI tests, keep one integration path that proves your client stack still works together.
 
-- unit tests verify error classification behavior.
+That path should be small and meaningful.
 
-## Step 3: Mastery Test
+For this module, a good candidate is:
 
-- Easy: what is the fastest pure function to test first?
-- Medium: where should integration tests stop (UI only vs RPC)?
-- Hard: how would you design deterministic tests for retry logic?
+- connect wallet in app state
+- build one SOL transfer instruction
+- send it through the shared transport
+- assert a real signature comes back
+
+That is enough.
+
+You do not need ten end-to-end tests to trust the client.
+
+You need one honest path that exercises the real runtime.
+
+## A Practical Rule For This Section
+
+Use this split:
+
+- unit tests for logic helpers
+- component tests for status and rendering behavior
+- one integration flow for wallet + transport + signature outcome
+
+That gives you speed without losing realism.
+
+## The Failure Modes To Avoid
+
+### Testing only happy paths
+
+Solana clients fail in normal ways:
+
+- user rejection
+- disconnected wallet
+- expired lifetime
+- invalid program input
+
+If those are untested, the suite is weak.
+
+### Making every test hit the network
+
+That turns the suite into a latency benchmark.
+
+Keep most tests local and deterministic.
+
+### Letting UI tests depend on a real browser wallet
+
+Mock the hook state or pass a mocked client.
+
+Do not make simple component tests depend on wallet extensions.
+
+## What You Can Do After This
+
+You can design a test suite that protects the real failure modes in a Solana client without making every test expensive or flaky.
+
+That is the correct testing posture for a modern kit-first frontend.
 
 ## Sources
 
+- https://solana.com/docs/frontend/react-hooks
+- https://solana.com/docs/frontend/client
 - https://vitest.dev/
-- https://solana.com/docs/core/transactions
