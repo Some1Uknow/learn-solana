@@ -1,28 +1,48 @@
 ---
-title: "Anchor Development Ergonomics (From Working Code to Clean Code)"
-description: "Move from basic Anchor programs to maintainable code: constraints, custom errors, events, testing strategy, and upgrade-safe design patterns."
-module: "⚓ Anchor Framework"
+title: "Anchor Development Ergonomics"
+description: "Learn how to keep Anchor programs readable and trustworthy with stronger constraints, clearer errors, thinner handlers, better events, and a more disciplined testing strategy."
+module: "Anchor Programs"
 keywords:
   - "anchor best practices"
   - "anchor constraints"
   - "anchor errors"
   - "anchor events"
   - "anchor testing strategy"
-  - "solana program upgrades"
-  - "clean anchor code"
+  - "anchor maintainability"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-You can write working Anchor code quickly.
+By this point in the section, you have already built enough Anchor code to see the real problem.
 
-The harder part is writing code that is still easy to trust 3 months later.
+Getting a program to work once is not the hard part.
 
-This lesson focuses on the habits that prevent expensive bugs.
+Keeping it readable, reviewable, and safe as it grows is the hard part.
 
-## 1) Constraint-First Account Validation
+That is what this lesson is about.
 
-Prefer expressive constraints in account structs instead of manual checks deep in handlers.
+## The Real Goal
+
+Anchor ergonomics is not about making code look fancy.
+
+It is about reducing the number of places bugs can hide.
+
+Good ergonomics means:
+
+- validation rules are easy to see
+- authority rules are easy to explain
+- handlers are short enough to reason about
+- failures are specific
+- tests describe the real risk surface
+
+That is the standard you want.
+
+## 1. Push Validation Into Account Constraints First
+
+The official Anchor account constraint system exists for a reason.
+
+If a rule can be expressed in the account context, do not bury it deep in the handler unless you have a strong reason.
 
 ```rust
 #[account(
@@ -33,82 +53,273 @@ Prefer expressive constraints in account structs instead of manual checks deep i
 pub vault: Account<'info, VaultState>,
 ```
 
-Why this matters:
+Why this is better than manual checks hidden later:
 
-- Fewer hidden assumptions in handlers
-- Better error locality
-- Easier code review
+- the rule is visible near the account itself
+- the handler stays shorter
+- reviewers can see the security model faster
+- error locality improves
 
-## 2) Use Specific Error Codes
+This is not about style.
+
+It is about making the program easier to trust.
+
+## 2. Keep Handlers Thin
+
+A good handler should usually do one short sequence:
+
+1. rely on the account context for setup and validation
+2. perform the minimal business logic
+3. write the state change
+4. emit an event if the action matters externally
+
+When handlers become long, review gets harder.
+
+That is when people start missing authority bugs and stale state bugs.
+
+A thin handler looks like this:
+
+```rust
+pub fn complete_escrow(ctx: Context<CompleteEscrow>) -> Result<()> {
+    let escrow = &mut ctx.accounts.escrow;
+
+    require!(escrow.status == EscrowStatus::Funded, ErrorCode::InvalidState);
+
+    transfer_from_vault(ctx.accounts)?;
+
+    escrow.status = EscrowStatus::Completed;
+    Ok(())
+}
+```
+
+The helper functions can still be complex if needed.
+
+But the instruction entrypoint should stay easy to read.
+
+## 3. Use Specific Error Codes
+
+Anchor's custom error system is there to make failures explicit.
+
+Use it properly.
 
 ```rust
 #[error_code]
 pub enum ErrorCode {
     #[msg("Caller is not authorized for this action")]
     Unauthorized,
+
     #[msg("Vault mint does not match expected mint")]
     InvalidMint,
-    #[msg("Escrow is not in expected state")]
+
+    #[msg("Escrow is not in the required state")]
     InvalidState,
 }
 ```
 
-Specific errors cut debugging time for both frontend and backend teams.
+Good errors do three things:
 
-## 3) Emit Events for Critical Actions
+- tell you what failed
+- tell the client what kind of failure happened
+- make tests easier to write and review
+
+Bad errors hide intent.
+
+Specific errors expose intent.
+
+## 4. Emit Events For State Changes That Matter
+
+Anchor supports events directly.
+
+Use them for meaningful transitions, not for noise.
 
 ```rust
 #[event]
-pub struct Minted {
-    pub admin: Pubkey,
+pub struct EscrowCompleted {
+    pub escrow: Pubkey,
+    pub maker: Pubkey,
+    pub taker: Pubkey,
     pub amount: u64,
-    pub new_total: u64,
 }
 ```
 
-Emit events on state transitions, mint/burn, and settlement operations.
+Events are useful when:
 
-## 4) Keep Handlers Thin
+- off-chain systems need to index state changes
+- you want a clean activity trail for important actions
+- business-critical transitions should be visible without re-parsing every account later
 
-Move logic into pure helper functions where possible.
+Do not emit events just because the framework supports them.
 
-- Easier unit reasoning
-- Lower cognitive load in instruction handlers
-- Better separation between validation and business logic
+Emit them when the action actually matters to observers.
 
-## 5) Testing Strategy (Beginner -> Intermediate)
+## 5. Keep Authority Rules Explainable In One Sentence
 
-- Start with Anchor `anchor test` integration flow
-- Add failure-path assertions for every instruction
-- Add local simulation tests (LiteSVM or Mollusk) when logic gets complex
-- Add realistic protocol integration tests (Surfpool) before production launch
+This is one of the best review tests you can apply.
+
+For every mutating instruction, ask:
+
+who is allowed to do this, and why?
+
+If the answer takes a paragraph, your authority model is probably too muddy.
+
+A good answer sounds like this:
+
+- "Only the stored admin can mint because the config account has `has_one = admin`."
+- "Only the recorded taker can complete the escrow when the status is `Funded`."
+- "Only the PDA derived from the escrow key can sign the vault transfer."
+
+If you cannot explain the rule cleanly, reviewers will struggle too.
+
+## 6. Treat PDA Seed Formulas Like Schemas
+
+The PDA lesson already covered this at the mechanics level.
+
+At the ergonomics level, the important rule is stronger:
+
+seed formulas should be stable, documented, and reused consistently.
+
+A seed formula is not a random helper expression.
+
+It is part of the contract of your program.
+
+That means:
+
+- choose the namespace deliberately
+- keep seed order fixed
+- keep the same derivation rule across creation and later validation
+- test the wrong-seed path explicitly
+
+This is one of the easiest places for a program to become confusing over time.
+
+## 7. Separate Business Logic From Transport Logic
+
+Anchor instructions do two different jobs at once:
+
+- they receive accounts and instruction inputs
+- they express business rules and state changes
+
+Do not let those concerns get tangled more than necessary.
+
+Bad shape:
+
+- parsing inputs
+- validating authority
+- checking state
+- performing CPI
+- mutating three accounts
+- formatting side effects
+
+all in one long handler
+
+Better shape:
+
+- context expresses most validation
+- handler expresses the business step
+- helper functions handle repeated logic like vault transfers or state updates
+
+That makes review much easier.
+
+## 8. Testing Should Follow The Risk, Not The Tutorial
+
+The official Anchor docs still make `anchor test` the default local integration path.
+
+That is still the right baseline.
+
+Start there.
+
+Then add more focused tools only when the program complexity justifies them.
+
+A sensible progression now looks like this:
+
+1. `anchor test` for full local integration flow
+2. LiteSVM when you want faster in-process tests in Rust, TS/JS, or Python
+3. Mollusk when you want very explicit, deterministic account-by-account instruction testing in Rust
+
+The current docs describe LiteSVM as a fast in-process VM and Mollusk as a lightweight harness where accounts are defined explicitly.
+
+That should tell you when to reach for them.
 
 <Callout type="info">
-Do not ship with only happy-path tests.
+Do not replace clear integration tests with clever simulation tests too early.
+
+The point is to increase confidence, not to collect testing tools for their own sake.
 </Callout>
 
-## 6) Upgrade & Migration Discipline
+## 9. Test Failure Paths As First-Class Behavior
 
-- Version account layouts deliberately
-- Add migration instructions before changing state schemas
-- Document upgrade authority ownership and process
+A serious Anchor program should not only prove that success works.
 
-## 7) Client Boundary Hygiene
+It should prove that abuse fails correctly.
 
-- Prefer `@solana/kit` in new clients/scripts
-- Keep legacy `web3.js` usage behind adapter boundaries
-- Avoid leaking legacy types across your whole app
+For each important instruction, you should usually have tests for at least some of these:
 
-## Practical Review Checklist
+- wrong signer
+- wrong PDA seeds
+- wrong mint
+- wrong state transition
+- repeated execution attempt
+- overflow or cap violation
 
-1. Can every mutating instruction explain signer authority in one sentence?
-2. Is every PDA seed formula documented and tested?
-3. Are token program assumptions explicit?
-4. Are failure cases covered with tests?
-5. Are events emitted for critical business actions?
+That is the real shape of trust.
 
-## Try This Next
+A happy-path-only suite proves much less than people think.
 
-1. Take one earlier lesson and refactor for thinner handlers.
-2. Add missing custom errors and event emission.
-3. Write one "abuse test" per instruction (wrong signer, wrong state, wrong mint).
+## 10. Treat Upgrades And State Evolution Deliberately
+
+As soon as a program has real users or real assets, account layout changes stop being casual refactors.
+
+That means you should start thinking clearly about:
+
+- how account schemas evolve
+- whether migrations are needed
+- who controls upgrade authority
+- how that authority is documented operationally
+
+This lesson is not about full upgrade mechanics.
+
+It is about discipline.
+
+If state evolution is not planned, maintainability is already weak.
+
+## A Better Review Checklist
+
+Before shipping or merging a significant Anchor change, ask:
+
+1. can every mutating instruction explain its authority rule in one sentence?
+2. are the PDA derivation rules stable and tested?
+3. are important token assumptions explicit?
+4. do custom errors tell you what failed clearly?
+5. are critical state transitions represented on-chain, not just in the client?
+6. do tests cover at least the main abuse path for each important instruction?
+
+If several answers are weak, the program is not ready just because the happy path works.
+
+## Common Ergonomics Failures
+
+### Failure 1: the handler is the only place the rules are visible
+
+That makes review harder than it should be.
+
+### Failure 2: every failure becomes a generic error
+
+That slows debugging and hides intent.
+
+### Failure 3: PDA rules are copied manually in too many places
+
+That increases the chance of drift.
+
+### Failure 4: tests only prove the demo path
+
+That is not enough for stateful or token-moving programs.
+
+## What Comes Next
+
+At this point, the main teaching spine of the Anchor section is in place.
+
+The remaining capstone should only make sense if all of these habits are already normal:
+
+- clear authority rules
+- clear state transitions
+- clear PDA derivation
+- clear CPI structure
+- clear failure testing
