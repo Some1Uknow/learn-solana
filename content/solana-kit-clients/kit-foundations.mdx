@@ -1,71 +1,79 @@
 ---
 title: "Kit Foundations"
-description: "0-to-1 foundation for Solana client development with @solana/kit, @solana/client, and @solana/react-hooks."
+description: "Set up one shared Solana client runtime so your app reads state, manages wallet sessions, and sends transactions without duplicating transport logic."
 module: "Solana Kit Clients"
 keywords:
   - "solana kit"
   - "@solana/client"
   - "@solana/react-hooks"
   - "wallet standard"
-  - "solana foundations"
+  - "solana runtime"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+`@solana/web3.js` is now the legacy path for new frontend work.
 
-`@solana/web3.js` is now a legacy path for new apps. In this module, we build with `@solana/kit` and modern Solana client packages.
+The modern client stack is not just a package swap.
 
-## Step 1: 0-to-1 Theory
+It changes the architecture.
 
-### Primitives
+The old mistake was letting every page create its own RPC connection, wallet glue, and transaction helpers.
 
-- `rpc`: how your app asks the chain for data.
-- `rpcSubscriptions`: how your app listens to live chain changes.
-- `client runtime`: shared state for wallet/session/network.
-- `transaction message`: the unsigned plan of what the chain should execute.
+That leads to inconsistent cluster state, duplicated subscriptions, and UI bugs that are hard to explain.
 
-### Mental Model
+The correct model is simpler.
 
-Solana client apps have three jobs:
+Your app should create one shared Solana client runtime and let everything else sit on top of it.
 
-1. Read chain state (RPC reads).
-2. Ask a wallet to sign (the app never sees the private key).
-3. Send the signed bytes and track confirmation.
+## What The Shared Runtime Actually Owns
 
-If those three jobs are mixed across random UI components, beginner projects become impossible to debug.
+A proper Solana client runtime owns these responsibilities:
 
-### Invariants
+- RPC endpoint selection
+- WebSocket subscriptions
+- wallet connector registry
+- wallet session state
+- transaction helpers and watchers
 
-1. One app should have one default Solana runtime config.
-2. Cluster and commitment should be explicit, never hidden.
-3. UI should not build raw transactions directly.
+That is what `@solana/client` gives you.
 
-### Quick Checks
+Then `@solana/react-hooks` exposes React hooks on top of the same runtime.
 
-1. Why do we separate runtime config from UI components?
-2. Why is one provider better than many providers?
-3. What breaks if cluster is hardcoded in random files?
+That split is the key idea for this whole section.
 
-## Step 2: Real-World Implementation (Code Solution)
-
-Install:
+## Install The Client Stack Once
 
 ```bash
-# Install the Solana client packages we use in this section.
-pnpm add @solana/kit @solana/client @solana/react-hooks @tanstack/react-query
+pnpm add @solana/client @solana/react-hooks @solana/kit @tanstack/react-query
 ```
+
+You need:
+
+- `@solana/client` for the shared runtime
+- `@solana/react-hooks` for React integration
+- `@solana/kit` for typed transaction and RPC building blocks used elsewhere in this module
+- `@tanstack/react-query` if you want query state to stay predictable across the app
+
+## Step 1: Centralize Network Configuration
 
 Create `lib/solana/config.ts`:
 
 ```ts
-// Centralize network settings so every page uses the same cluster + commitment.
-// Put your RPC URLs in NEXT_PUBLIC_* so Next.js can expose them to the browser.
-export const SOLANA_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.devnet.solana.com";
-export const SOLANA_WS = process.env.NEXT_PUBLIC_SOLANA_WS ?? "wss://api.devnet.solana.com";
-export const SOLANA_CLUSTER = "devnet" as const;
-export const SOLANA_COMMITMENT = "confirmed" as const;
+export const SOLANA_RPC =
+  process.env.NEXT_PUBLIC_SOLANA_RPC ?? "https://api.devnet.solana.com";
+
+export const SOLANA_WS =
+  process.env.NEXT_PUBLIC_SOLANA_WS ?? "wss://api.devnet.solana.com";
 ```
 
-Create `app/providers.tsx`:
+This file should stay boring.
+
+That is the point.
+
+If cluster configuration is spread across random files, you will eventually read from one cluster and send to another.
+
+## Step 2: Create One Client Instance
+
+Now create `app/providers.tsx`:
 
 ```tsx
 "use client";
@@ -76,28 +84,39 @@ import { SolanaProvider } from "@solana/react-hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SOLANA_RPC, SOLANA_WS } from "@/lib/solana/config";
 
-// One shared QueryClient keeps async state stable across pages and rerenders.
 const queryClient = new QueryClient();
 
-// Create one Solana client for the whole app (do not recreate per page).
 const client = createClient({
   endpoint: SOLANA_RPC,
   websocketEndpoint: SOLANA_WS,
-  // Auto-discover Wallet Standard compatible wallets installed in the browser.
   walletConnectors: autoDiscover(),
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {/* SolanaProvider exposes wallet + rpc context to @solana/react-hooks */}
       <SolanaProvider client={client}>{children}</SolanaProvider>
     </QueryClientProvider>
   );
 }
 ```
 
-Update `app/layout.tsx` (core part only):
+Read this file in the right order:
+
+1. `createClient(...)` builds the shared runtime
+2. `autoDiscover()` registers Wallet Standard connectors available in the browser
+3. `SolanaProvider` makes that runtime available to hooks
+4. `QueryClientProvider` keeps async UI state stable around it
+
+That is the real foundation.
+
+Not the UI.
+
+The runtime.
+
+## Step 3: Wrap The App Once
+
+In `app/layout.tsx`:
 
 ```tsx
 import { Providers } from "./providers";
@@ -106,7 +125,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        {/* Wrap the app once so every page shares the same Solana runtime config. */}
         <Providers>{children}</Providers>
       </body>
     </html>
@@ -114,23 +132,63 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-Expected result:
+Do this once.
 
-- app starts with one shared Solana runtime.
+Do not recreate the client per page.
 
-## Step 3: Mastery Test
+Do not create a different provider subtree for every feature.
 
-- Easy: if websocket URL is wrong, what feature breaks first?
-- Medium: if one page uses a second client with a different endpoint, what bug class appears?
-- Hard (senior): how would you support runtime endpoint switching without tearing wallet session state?
+One runtime is the clean default.
 
-<Callout type="info">
-If you cannot explain the invariants above, do not move to Lesson 2 yet.
-</Callout>
+## Why This Architecture Matters
+
+The official docs describe one client instance exposing store, actions, watchers, and helpers.
+
+That matters because it gives your app one shared truth for:
+
+- current wallet session
+- current endpoint
+- account watchers
+- pending transaction state
+
+If each page rolls its own transport logic, those truths drift apart.
+
+That is when frontend bugs start to feel random.
+
+They are not random.
+
+They are architecture problems.
+
+## The Failure Modes To Avoid
+
+### Recreating the client inside components
+
+That resets transport and wallet-related state far more often than you think.
+
+Keep client creation at the app boundary.
+
+### Hardcoding a different endpoint in one feature
+
+That produces split-brain behavior.
+
+One screen reads devnet while another flow sends somewhere else.
+
+### Treating hooks as magic
+
+The hooks are just a React interface over the shared client runtime.
+
+If the runtime is wrong, the hooks will still fail correctly.
+
+## What You Can Do After This
+
+You can explain where wallet sessions, RPC state, and transaction helpers actually live in a kit-first app.
+
+That is the baseline for every other client lesson.
+
+The next lesson moves one layer up and shows how wallet connection works on top of this shared runtime.
 
 ## Sources
 
 - https://solana.com/docs/frontend/client
 - https://solana.com/docs/frontend/react-hooks
 - https://solana.com/docs/frontend/nextjs-solana
-- https://www.solanakit.com/docs
