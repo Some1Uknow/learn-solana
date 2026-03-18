@@ -244,10 +244,10 @@ export const contentsData = {
         },
         {
           id: "defi-integration-challenge",
-          title: "DeFi Integration Challenge",
+          title: "DeFi Integration Capstone",
           description:
             "Use the full Anchor toolchain in an optional capstone once the main path feels solid.",
-          type: "challenge",
+          type: "project",
           url: "/learn/anchor-programs/defi-integration-challenge",
         },
       ],

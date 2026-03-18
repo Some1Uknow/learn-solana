@@ -136,6 +136,8 @@ That makes the authority model easier to reason about.
 The first instruction writes the escrow terms, but does not move tokens yet.
 
 ```rust
+use anchor_spl::token_interface::Mint;
+
 #[derive(Accounts)]
 #[instruction(escrow_id: [u8; 8])]
 pub struct InitializeEscrow<'info> {
@@ -143,6 +145,7 @@ pub struct InitializeEscrow<'info> {
     pub maker: Signer<'info>,
 
     pub taker: UncheckedAccount<'info>,
+    pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(
         init,
@@ -168,7 +171,7 @@ pub fn initialize_escrow(
     let escrow = &mut ctx.accounts.escrow;
     escrow.maker = ctx.accounts.maker.key();
     escrow.taker = ctx.accounts.taker.key();
-    escrow.mint = Pubkey::default();
+    escrow.mint = ctx.accounts.mint.key();
     escrow.amount = amount;
     escrow.status = EscrowStatus::Initialized;
     Ok(())
@@ -182,6 +185,10 @@ The important part is that it is short.
 The instruction is only defining the agreement.
 
 It is not trying to define the agreement and move funds and settle the trade all at once.
+
+The chosen mint should be part of that agreement immediately.
+
+If the asset is not fixed during initialization, the escrow terms are still incomplete.
 
 ## Step 4: Define The Vault Flow
 
@@ -213,6 +220,7 @@ pub struct FundEscrow<'info> {
     #[account(
         mut,
         has_one = maker,
+        has_one = mint,
         constraint = escrow.status == EscrowStatus::Initialized @ EscrowError::InvalidState,
     )]
     pub escrow: Account<'info, Escrow>,
@@ -265,8 +273,6 @@ pub fn fund_escrow(ctx: Context<FundEscrow>) -> Result<()> {
     );
 
     token_interface::transfer_checked(cpi_context, escrow.amount, ctx.accounts.mint.decimals)?;
-
-    escrow.mint = ctx.accounts.mint.key();
     escrow.status = EscrowStatus::Funded;
     Ok(())
 }
@@ -297,6 +303,7 @@ pub struct CompleteEscrow<'info> {
         mut,
         constraint = escrow.status == EscrowStatus::Funded @ EscrowError::InvalidState,
         constraint = escrow.taker == taker.key() @ EscrowError::Unauthorized,
+        has_one = mint,
     )]
     pub escrow: Account<'info, Escrow>,
 
@@ -308,10 +315,20 @@ pub struct CompleteEscrow<'info> {
     )]
     pub vault_authority: UncheckedAccount<'info>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = vault_authority,
+        associated_token::token_program = token_program,
+    )]
     pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = taker,
+        associated_token::token_program = token_program,
+    )]
     pub taker_token_account: InterfaceAccount<'info, TokenAccount>,
 
     pub token_program: Interface<'info, TokenInterface>,
@@ -369,6 +386,26 @@ constraint = escrow.taker == taker.key()
 The program decides who the taker is.
 
 The client does not get to redefine that at call time.
+
+### Then confirm the exact token accounts
+
+```rust
+associated_token::authority = vault_authority
+associated_token::mint = mint
+```
+
+and
+
+```rust
+associated_token::authority = taker
+associated_token::mint = mint
+```
+
+This is important.
+
+You do not want the completion path to accept arbitrary token accounts and hope the token CPI rejects bad input later.
+
+The account context should already describe the exact custody model.
 
 ### Then let the PDA sign for the vault authority
 

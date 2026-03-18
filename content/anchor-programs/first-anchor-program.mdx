@@ -309,12 +309,13 @@ Replace the generated test with this version.
 ```ts
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+import type { Counter } from "../target/types/counter";
 
 describe("counter", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.Counter as Program;
+  const program = anchor.workspace.Counter as Program<Counter>;
   const counter = anchor.web3.Keypair.generate();
 
   it("initializes the counter", async () => {
@@ -423,12 +424,14 @@ That is your first full Anchor loop.
 This line depends on the generated workspace name:
 
 ```ts
-const program = anchor.workspace.Counter as Program;
+const program = anchor.workspace.Counter as Program<Counter>;
 ```
 
 If your actual program name is different, update it.
 
 The test has to match your workspace, not a copied tutorial name.
+
+The generated type import should also match your workspace name.
 
 ### Wrong `declare_id!`
 
