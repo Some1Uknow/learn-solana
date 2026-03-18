@@ -41,7 +41,183 @@ Do not add tabs, dashboards, or multi-program routing.
 
 The point is correctness, not surface area.
 
-## Step 1: Put The Capstone On A Semantic Route
+## Step 1: Prepare One Real Devnet Wallet And One Real Recipient
+
+This page only becomes runnable if the browser wallet and the local setup script both use the same authority.
+
+Use one dedicated devnet wallet for that.
+
+The cleanest path is to use a mnemonic and derive the first Solana account from it in both places.
+
+1. create or import one dedicated devnet wallet in your browser extension
+2. keep that wallet connected to devnet
+3. store its mnemonic locally in `.env.local`
+
+```bash
+CAPSTONE_AUTHORITY_MNEMONIC="word1 word2 word3 ... word12"
+```
+
+Now install the one extra dependency needed to derive the same wallet locally:
+
+```bash
+pnpm add bip39 micro-ed25519-hdkey
+```
+
+Next, create one real recipient address you can inspect later:
+
+```bash
+mkdir -p keys
+solana-keygen new --no-bip39-passphrase -o keys/kit-capstone-recipient.json
+solana address -k keys/kit-capstone-recipient.json
+```
+
+Copy the printed recipient address.
+
+You will use it for the SOL transfer card.
+
+## Step 2: Create One Real Counter Account With The Same Authority
+
+Create `scripts/create-capstone-counter.ts`:
+
+```ts
+import fs from "node:fs";
+import * as bip39 from "bip39";
+import { HDKey } from "micro-ed25519-hdkey";
+import {
+  airdropFactory,
+  address,
+  appendTransactionMessageInstructions,
+  createKeyPairSignerFromBytes,
+  createKeyPairSignerFromPrivateKeyBytes,
+  createSolanaRpc,
+  createSolanaRpcSubscriptions,
+  createTransactionMessage,
+  generateKeyPairSigner,
+  getSignatureFromTransaction,
+  lamports,
+  pipe,
+  sendAndConfirmTransactionFactory,
+  setTransactionMessageFeePayerSigner,
+  setTransactionMessageLifetimeUsingBlockhash,
+  signTransactionMessageWithSigners,
+} from "@solana/kit";
+import { getInitializeInstruction } from "../lib/generated/counter";
+
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.devnet.solana.com";
+const RPC_WS_URL = process.env.NEXT_PUBLIC_RPC_WS_URL ?? "wss://api.devnet.solana.com";
+const SYSTEM_PROGRAM_ADDRESS = address("11111111111111111111111111111111");
+
+async function getAuthorityFromMnemonic(mnemonic: string) {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const hd = HDKey.fromMasterSeed(seed.toString("hex"));
+  const child = hd.derive("m/44'/501'/0'/0'");
+
+  return createKeyPairSignerFromPrivateKeyBytes(new Uint8Array(child.privateKey));
+}
+
+async function loadRecipient() {
+  const recipientBytes = Uint8Array.from(
+    JSON.parse(fs.readFileSync("keys/kit-capstone-recipient.json", "utf8")),
+  );
+
+  return createKeyPairSignerFromBytes(recipientBytes);
+}
+
+async function main() {
+  const mnemonic = process.env.CAPSTONE_AUTHORITY_MNEMONIC;
+
+  if (!mnemonic) {
+    throw new Error("Missing CAPSTONE_AUTHORITY_MNEMONIC in .env.local");
+  }
+
+  const rpc = createSolanaRpc(RPC_URL);
+  const rpcSubscriptions = createSolanaRpcSubscriptions(RPC_WS_URL);
+  const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+    rpc,
+    rpcSubscriptions,
+  });
+
+  const authority = await getAuthorityFromMnemonic(mnemonic);
+  const recipient = await loadRecipient();
+  const counter = await generateKeyPairSigner();
+
+  await airdropFactory({ rpc, rpcSubscriptions })({
+    recipientAddress: authority.address,
+    lamports: lamports(2_000_000_000n),
+    commitment: "confirmed",
+  });
+
+  const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const initializeInstruction = getInitializeInstruction({
+    authority: authority.address,
+    counter,
+    systemProgram: SYSTEM_PROGRAM_ADDRESS,
+  });
+
+  const transactionMessage = pipe(
+    createTransactionMessage({ version: 0 }),
+    (tx) => setTransactionMessageFeePayerSigner(authority, tx),
+    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+    (tx) => appendTransactionMessageInstructions([initializeInstruction], tx),
+  );
+
+  const signedTransaction = await signTransactionMessageWithSigners(
+    transactionMessage,
+  );
+
+  await sendAndConfirmTransaction(signedTransaction, {
+    commitment: "confirmed",
+  });
+
+  console.log("AUTHORITY_ADDRESS=", authority.address);
+  console.log("TRANSFER_DESTINATION=", recipient.address);
+  console.log("COUNTER_ACCOUNT=", counter.address);
+  console.log(
+    "INITIALIZE_SIGNATURE=",
+    getSignatureFromTransaction(signedTransaction),
+  );
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
+```
+
+Run it with:
+
+```bash
+pnpm tsx scripts/create-capstone-counter.ts
+```
+
+This script does four important jobs:
+
+- derives the same authority that your browser wallet should be using
+- funds that authority on devnet
+- creates a brand new counter account
+- prints the exact addresses the capstone page needs
+
+If the authority address printed here does not match the connected browser wallet, stop and fix that first.
+
+Do not keep going with mismatched authorities.
+
+## Step 3: Save The Printed Values In One Config File
+
+Create `lib/solana/capstoneConfig.ts`:
+
+```ts
+export const CAPSTONE_TRANSFER_DESTINATION = "PASTE_TRANSFER_DESTINATION_HERE";
+export const CAPSTONE_COUNTER_ACCOUNT = "PASTE_COUNTER_ACCOUNT_HERE";
+```
+
+Paste the exact values printed by `create-capstone-counter.ts`.
+
+That makes the page deterministic.
+
+No fake placeholders. No guessing.
+
+## Step 4: Put The Capstone On A Semantic Route
 
 Create `app/kit-client-capstone/page.tsx`:
 
@@ -53,9 +229,10 @@ import { WalletPanel } from "@/components/solana/WalletPanel";
 import { AccountInspector } from "@/components/solana/AccountInspector";
 import { TxActionCard } from "@/components/solana/TxActionCard";
 import { CounterActionButton } from "@/components/solana/CounterActionButton";
-
-const DEMO_TRANSFER_DESTINATION = "ENTER_A_REAL_DEVNET_ADDRESS_HERE";
-const COUNTER_ACCOUNT = "ENTER_YOUR_COUNTER_ACCOUNT_ADDRESS_HERE";
+import {
+  CAPSTONE_COUNTER_ACCOUNT,
+  CAPSTONE_TRANSFER_DESTINATION,
+} from "@/lib/solana/capstoneConfig";
 
 export default function KitClientCapstonePage() {
   return (
@@ -74,12 +251,12 @@ export default function KitClientCapstonePage() {
 
       <section>
         <h2 className="text-lg font-semibold mb-2">Send A Real Transaction</h2>
-        <TxActionCard destination={DEMO_TRANSFER_DESTINATION} />
+        <TxActionCard destination={CAPSTONE_TRANSFER_DESTINATION} />
       </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-2">Submit A Real Program Action</h2>
-        <CounterActionButton counterAddress={COUNTER_ACCOUNT} />
+        <CounterActionButton counterAddress={CAPSTONE_COUNTER_ACCOUNT} />
       </section>
     </main>
   );
@@ -92,21 +269,7 @@ The curriculum is not week-based anymore.
 
 Your app structure should stop pretending it is.
 
-## Step 2: Replace Placeholder Values Before Testing
-
-Two values in this page must become real before the capstone means anything:
-
-- `DEMO_TRANSFER_DESTINATION`
-- `COUNTER_ACCOUNT`
-
-Why:
-
-- the SOL transfer card should send to a real devnet address you control or can inspect
-- the program action button should target a real counter account created by your Anchor program flow
-
-If those values stay fake, the capstone becomes another mock.
-
-## Step 3: Verify The Slice End To End
+## Step 5: Verify The Slice End To End
 
 A successful capstone run should let you prove all of these:
 
@@ -129,7 +292,7 @@ That usually means one of these:
 - wrong cluster
 - wrong destination address
 - not enough devnet SOL
-- the counter account does not exist on the cluster you are using
+- the connected wallet does not match the mnemonic used by the setup script
 
 ### The read panel works but the program action fails
 
@@ -157,4 +320,7 @@ That is enough foundation to start a larger Solana frontend responsibly.
 
 - https://solana.com/docs/frontend/client
 - https://solana.com/docs/frontend/react-hooks
+- https://solana.com/developers/cookbook/wallets/restore-from-mnemonic
+- https://solana.com/developers/cookbook/development/load-keypair-from-file
+- https://solana.com/developers/cookbook/development/test-sol
 - https://www.anchor-lang.com/docs/clients/typescript

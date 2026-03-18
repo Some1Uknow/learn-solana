@@ -101,6 +101,8 @@ export function WalletPanel() {
             Disconnect
           </button>
         </>
+      ) : connectors.length === 0 ? (
+        <div className="text-sm text-zinc-300">No wallet connector was found in this browser.</div>
       ) : (
         <div className="space-y-2">
           <div className="text-sm text-zinc-300">Choose wallet:</div>

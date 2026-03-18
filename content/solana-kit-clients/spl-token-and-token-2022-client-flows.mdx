@@ -40,7 +40,7 @@ So the client must keep the token program choice explicit.
 
 Do not hide it inside a helper that silently assumes classic SPL Token.
 
-## Step 1: Build A Transfer Plan With Explicit Program Choice
+## Step 1: Build A Transfer Plan With Real Preflight Validation
 
 Install the token clients if you have not already:
 
@@ -51,11 +51,19 @@ pnpm add @solana-program/token @solana-program/token-2022
 Now create `lib/solana/tokenFlow.ts`:
 
 ```ts
-import { address } from "@solana/kit";
+import { address, createSolanaRpc, type Address } from "@solana/kit";
 import {
+  TOKEN_PROGRAM_ADDRESS,
+  fetchMint as fetchSplMint,
+  fetchToken as fetchSplToken,
+  findAssociatedTokenPda as findSplAssociatedTokenPda,
   getTransferCheckedInstruction as getSplTransferCheckedInstruction,
 } from "@solana-program/token";
 import {
+  TOKEN_2022_PROGRAM_ADDRESS,
+  fetchMint as fetchToken2022Mint,
+  fetchToken as fetchToken2022Token,
+  findAssociatedTokenPda as findToken2022AssociatedTokenPda,
   getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
 } from "@solana-program/token-2022";
 
@@ -63,67 +71,153 @@ export type TokenProgramKind = "spl" | "token2022";
 
 export type TokenTransferInput = {
   programKind: TokenProgramKind;
-  mint: string;
-  sourceTokenAccount: string;
-  destinationTokenAccount: string;
-  authority: string;
+  mintAddress: string;
+  sourceOwnerAddress: string;
+  destinationOwnerAddress: string;
+  authorityAddress: string;
   amountRaw: bigint;
-  decimals: number;
 };
 
-export function validateTokenTransferInput(input: TokenTransferInput) {
-  if (!input.mint) throw new Error("Missing mint address");
-  if (!input.sourceTokenAccount) throw new Error("Missing source token account");
-  if (!input.destinationTokenAccount) throw new Error("Missing destination token account");
-  if (!input.authority) throw new Error("Missing transfer authority");
-  if (input.amountRaw <= 0n) throw new Error("Amount must be positive");
-  if (input.decimals < 0 || input.decimals > 18) throw new Error("Invalid decimals");
-}
+const rpc = createSolanaRpc(
+  process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.devnet.solana.com",
+);
 
-export function buildTokenTransferInstruction(input: TokenTransferInput) {
-  validateTokenTransferInput(input);
-
-  const mint = address(input.mint);
-  const sourceTokenAccount = address(input.sourceTokenAccount);
-  const destinationTokenAccount = address(input.destinationTokenAccount);
-  const authority = address(input.authority);
-
-  if (input.programKind === "spl") {
-    return getSplTransferCheckedInstruction({
-      source: sourceTokenAccount,
-      mint,
-      destination: destinationTokenAccount,
-      authority,
-      amount: input.amountRaw,
-      decimals: input.decimals,
-    });
+function getTokenApi(programKind: TokenProgramKind) {
+  if (programKind === "spl") {
+    return {
+      tokenProgramAddress: TOKEN_PROGRAM_ADDRESS,
+      fetchMint: fetchSplMint,
+      fetchToken: fetchSplToken,
+      findAssociatedTokenPda: findSplAssociatedTokenPda,
+      getTransferCheckedInstruction: getSplTransferCheckedInstruction,
+    };
   }
 
-  return getToken2022TransferCheckedInstruction({
-    source: sourceTokenAccount,
-    mint,
-    destination: destinationTokenAccount,
-    authority,
-    amount: input.amountRaw,
-    decimals: input.decimals,
+  return {
+    tokenProgramAddress: TOKEN_2022_PROGRAM_ADDRESS,
+    fetchMint: fetchToken2022Mint,
+    fetchToken: fetchToken2022Token,
+    findAssociatedTokenPda: findToken2022AssociatedTokenPda,
+    getTransferCheckedInstruction: getToken2022TransferCheckedInstruction,
+  };
+}
+
+export function validateTokenTransferInput(input: TokenTransferInput) {
+  if (!input.mintAddress) throw new Error("Missing mint address");
+  if (!input.sourceOwnerAddress) throw new Error("Missing source owner address");
+  if (!input.destinationOwnerAddress) {
+    throw new Error("Missing destination owner address");
+  }
+  if (!input.authorityAddress) throw new Error("Missing transfer authority");
+  if (input.amountRaw <= 0n) throw new Error("Amount must be positive");
+}
+
+export async function buildTokenTransferPlan(input: TokenTransferInput) {
+  validateTokenTransferInput(input);
+
+  const mintAddress = address(input.mintAddress) as Address;
+  const sourceOwnerAddress = address(input.sourceOwnerAddress) as Address;
+  const destinationOwnerAddress = address(input.destinationOwnerAddress) as Address;
+  const authorityAddress = address(input.authorityAddress) as Address;
+  const tokenApi = getTokenApi(input.programKind);
+
+  if (authorityAddress !== sourceOwnerAddress) {
+    throw new Error("This example expects the source owner to sign the transfer.");
+  }
+
+  const mint = await tokenApi.fetchMint(rpc, mintAddress);
+
+  const [sourceTokenAccount] = await tokenApi.findAssociatedTokenPda({
+    mint: mintAddress,
+    owner: sourceOwnerAddress,
+    tokenProgram: tokenApi.tokenProgramAddress,
   });
+
+  const [destinationTokenAccount] = await tokenApi.findAssociatedTokenPda({
+    mint: mintAddress,
+    owner: destinationOwnerAddress,
+    tokenProgram: tokenApi.tokenProgramAddress,
+  });
+
+  const sourceToken = await tokenApi.fetchToken(rpc, sourceTokenAccount);
+  const destinationToken = await tokenApi.fetchToken(rpc, destinationTokenAccount);
+
+  if (sourceToken.data.mint !== mintAddress) {
+    throw new Error("Source token account is not for the selected mint.");
+  }
+
+  if (destinationToken.data.mint !== mintAddress) {
+    throw new Error("Destination token account is not for the selected mint.");
+  }
+
+  if (sourceToken.data.owner !== sourceOwnerAddress) {
+    throw new Error("Source token account is not owned by the expected wallet.");
+  }
+
+  if (destinationToken.data.owner !== destinationOwnerAddress) {
+    throw new Error(
+      "Destination token account is not owned by the expected wallet.",
+    );
+  }
+
+  return {
+    tokenProgramAddress: tokenApi.tokenProgramAddress,
+    sourceTokenAccount,
+    destinationTokenAccount,
+    decimals: mint.data.decimals,
+    instruction: tokenApi.getTransferCheckedInstruction({
+      source: sourceTokenAccount,
+      mint: mintAddress,
+      destination: destinationTokenAccount,
+      authority: authorityAddress,
+      amount: input.amountRaw,
+      decimals: mint.data.decimals,
+    }),
+  };
 }
 ```
 
-This file does the two jobs that matter most:
+This file now does the job the old version only claimed to do:
 
-- it rejects obviously broken transfer inputs early
-- it makes program choice explicit before instruction assembly
+- fetch the mint before trusting decimals
+- derive the token accounts instead of trusting pasted token-account strings
+- verify that both accounts belong to the selected mint
+- verify that the source and destination owners are the wallets you think they are
+- only then build the transfer instruction
 
-That is what a safe token client should do.
+That is real client-side token validation.
 
-## Why `transferChecked` Matters
+## Why The Input Model Changed
 
-`transferChecked` is the right beginner default because the transfer instruction includes decimals explicitly.
+The old version asked for raw token-account addresses.
 
-That forces the client to be honest about the mint precision it thinks it is dealing with.
+That is too loose for a beginner client.
 
-If your UI math and mint metadata disagree, the client should fail before that turns into a silent bad transfer.
+It makes the UI responsible for knowing three things at once:
+
+- the wallet owner
+- the token account address
+- whether that token account was created for the chosen mint and token program
+
+This version is stricter.
+
+You give the client wallet owner addresses and the mint.
+
+The client derives the associated token accounts itself and verifies the actual on-chain data before it builds the transfer.
+
+## Why `transferChecked` Still Matters
+
+`transferChecked` is still the right beginner default.
+
+But now the client is not guessing the decimals anymore.
+
+It reads `mint.data.decimals` from chain state and uses that value in the instruction.
+
+That is the correct relationship:
+
+- the mint defines precision
+- the client reads that precision
+- the transfer builder uses that exact precision
 
 ## Step 2: Preview The Transfer Before Sending
 
@@ -133,7 +227,10 @@ Now create `components/solana/TokenTransferPreview.tsx`:
 "use client";
 
 import React, { useState } from "react";
-import { buildTokenTransferInstruction, type TokenProgramKind } from "@/lib/solana/tokenFlow";
+import {
+  buildTokenTransferPlan,
+  type TokenProgramKind,
+} from "@/lib/solana/tokenFlow";
 
 export function TokenTransferPreview() {
   const [programKind, setProgramKind] = useState<TokenProgramKind>("spl");
@@ -144,17 +241,27 @@ export function TokenTransferPreview() {
     setError("");
 
     try {
-      const instruction = buildTokenTransferInstruction({
+      const plan = await buildTokenTransferPlan({
         programKind,
-        mint: "ENTER_REAL_MINT_ADDRESS",
-        sourceTokenAccount: "ENTER_REAL_SOURCE_TOKEN_ACCOUNT",
-        destinationTokenAccount: "ENTER_REAL_DESTINATION_TOKEN_ACCOUNT",
-        authority: "ENTER_REAL_AUTHORITY_ADDRESS",
+        mintAddress: "ENTER_REAL_MINT_ADDRESS",
+        sourceOwnerAddress: "ENTER_REAL_SOURCE_WALLET_ADDRESS",
+        destinationOwnerAddress: "ENTER_REAL_DESTINATION_WALLET_ADDRESS",
+        authorityAddress: "ENTER_REAL_SOURCE_WALLET_ADDRESS",
         amountRaw: 1_000_000n,
-        decimals: 6,
       });
 
-      setResult(JSON.stringify(instruction, null, 2));
+      setResult(
+        JSON.stringify(
+          {
+            tokenProgram: plan.tokenProgramAddress,
+            sourceTokenAccount: plan.sourceTokenAccount,
+            destinationTokenAccount: plan.destinationTokenAccount,
+            decimals: plan.decimals,
+          },
+          null,
+          2,
+        ),
+      );
     } catch (e: any) {
       setResult("");
       setError(String(e?.message ?? e));
@@ -176,7 +283,7 @@ export function TokenTransferPreview() {
         onClick={onPreview}
         className="px-3 py-2 rounded bg-indigo-600 text-white"
       >
-        Preview Transfer Instruction
+        Preview Transfer Plan
       </button>
 
       {error ? <div className="text-xs text-red-300">{error}</div> : null}
@@ -186,21 +293,21 @@ export function TokenTransferPreview() {
 }
 ```
 
-This component still does not send the transfer.
+This preview still does not send the transfer.
 
-That is correct.
+That is still correct.
 
-First learn to build the instruction honestly.
+But now the preview is honest.
 
-Then attach wallet signing and transport.
+It only succeeds after the client has validated the mint, derived the token accounts, and confirmed the chain data matches the requested transfer.
 
 ## The Failure Modes To Avoid
 
-### Assuming classic SPL Token by default
+### Assuming any token account can be pasted into the form
 
-That is how Token-2022 support quietly breaks.
+That is exactly how clients build invalid transfers.
 
-Make the token program part of your input model.
+If your app already knows the wallet owner and the mint, derive the associated token account and verify it.
 
 ### Treating decimals as a display-only concern
 
@@ -208,18 +315,22 @@ Decimals affect raw amount construction.
 
 They are part of transfer correctness.
 
-### Skipping mint and token-account validation
+The client should read them from the mint instead of trusting a manual input field.
 
-If the mint and token accounts do not line up, the transfer is already wrong before the wallet signs anything.
+### Letting the wallet prompt become the first validation step
+
+By the time the wallet opens, the transfer plan should already be coherent.
+
+If the mint, owners, and token accounts do not line up, fail before the signature request.
 
 ## What You Can Do After This
 
-You can build token transfer instructions with explicit program choice, validate the critical inputs early, and use checked transfer builders instead of hand-waving token precision.
+You can build token transfer plans with explicit program choice, derive and validate the actual token accounts involved, and use the mint's real decimals instead of guessing.
 
 That is the client-side baseline for both classic SPL Token and Token-2022 flows.
 
 ## Sources
 
-- https://solana.com/docs/tokens
-- https://www.npmjs.com/package/@solana-program/token
-- https://www.npmjs.com/package/@solana-program/token-2022
+- https://solana.com/docs/tokens/basics/transfer-tokens
+- https://solana.com/developers/cookbook/tokens/get-token-account
+- https://solana.com/developers/cookbook/tokens/get-token-mint
