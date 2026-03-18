@@ -1,0 +1,544 @@
+---
+title: "Structs and Methods in Rust"
+description: "Learn how Rust structs model related data and how methods attach behavior to that data, using small account-style examples that prepare you for Solana program code."
+module: "Rust Foundations"
+keywords: ["rust structs", "methods", "impl", "associated functions", "self", "data modeling"]
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+After ownership, the next Rust question is simpler.
+
+How do you represent real data without scattering related values across loose variables?
+
+That is what structs solve.
+
+A struct lets you group related data into one named type.
+
+A method lets you attach behavior to that type.
+
+That combination is the start of real Rust program design.
+
+<Callout type="info">
+If ownership answers "who controls this data?", structs answer "what shape does this data have?"
+
+And methods answer "what can this data do?"
+</Callout>
+
+---
+
+## The Core Mental Model
+
+Do not think of a struct as just “an object” because other languages have objects.
+
+Think of it more precisely.
+
+A struct is a custom data shape.
+
+It lets you say:
+
+- these fields belong together
+- this type has a clear meaning
+- this data should be passed around as one value instead of four unrelated variables
+
+Then methods let you say:
+
+- this behavior belongs with that data
+- reading this field should look one way
+- mutating this type should look another way
+
+That is the teaching spine for this lesson.
+
+---
+
+## Start With The Problem Structs Actually Solve
+
+Without a struct, related values drift apart quickly.
+
+```rust
+fn main() {
+    let address = String::from("alice");
+    let balance = 1_500_000_u64;
+    let nonce = 3_u32;
+    let is_active = true;
+
+    println!("{} {} {} {}", address, balance, nonce, is_active);
+}
+```
+
+This compiles, but the data shape is weak.
+
+Nothing in the type system says these four values belong to one account.
+
+A struct fixes that.
+
+```rust
+struct Account {
+    address: String,
+    balance: u64,
+    nonce: u32,
+    is_active: bool,
+}
+
+fn main() {
+    let account = Account {
+        address: String::from("alice"),
+        balance: 1_500_000,
+        nonce: 3,
+        is_active: true,
+    };
+
+    println!("{}", account.address);
+}
+```
+
+Now the data has a name and a shape.
+
+That is the first real benefit.
+
+---
+
+## Define One Useful Struct First
+
+Do not start by memorizing every struct variation.
+
+Start with the named-field struct because that is the one you will use most.
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    confirmed: bool,
+}
+
+fn main() {
+    let request = TransferRequest {
+        from: String::from("alice"),
+        to: String::from("bob"),
+        amount: 500_000,
+        confirmed: false,
+    };
+
+    println!("{:?}", request);
+}
+```
+
+### What this teaches
+
+- `struct TransferRequest { ... }` defines a new type
+- each field has a name and a type
+- creating a value means filling in every required field
+- `#[derive(Debug)]` lets you print the value with `{:?}`
+
+That last part is practical, not cosmetic.
+
+When you are learning or debugging, `Debug` printing is one of the fastest ways to inspect your data.
+
+---
+
+## Field Access And Mutation Are Deliberate
+
+Field access is simple.
+
+```rust
+println!("{}", request.amount);
+```
+
+Mutation still follows the Rust rules you already learned.
+
+If the struct value needs to change, the binding must be mutable.
+
+```rust
+#[derive(Debug)]
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    confirmed: bool,
+}
+
+fn main() {
+    let mut request = TransferRequest {
+        from: String::from("alice"),
+        to: String::from("bob"),
+        amount: 500_000,
+        confirmed: false,
+    };
+
+    request.confirmed = true;
+
+    println!("{:?}", request);
+}
+```
+
+This matters because a struct does not bypass ownership or mutability rules.
+
+It just groups values together.
+
+---
+
+## Methods Attach Behavior To The Struct
+
+A struct by itself only stores data.
+
+An `impl` block adds behavior.
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    confirmed: bool,
+}
+
+impl TransferRequest {
+    fn mark_confirmed(&mut self) {
+        self.confirmed = true;
+    }
+
+    fn summary(&self) -> String {
+        format!(
+            "{} -> {} | amount: {} | confirmed: {}",
+            self.from, self.to, self.amount, self.confirmed
+        )
+    }
+}
+
+fn main() {
+    let mut request = TransferRequest {
+        from: String::from("alice"),
+        to: String::from("bob"),
+        amount: 500_000,
+        confirmed: false,
+    };
+
+    println!("{}", request.summary());
+    request.mark_confirmed();
+    println!("{}", request.summary());
+}
+```
+
+Now the code reads better because the behavior sits next to the data it operates on.
+
+That is why methods matter.
+
+---
+
+## `&self`, `&mut self`, and `self` Mean Three Different Things
+
+This is the part that beginners must get right before methods stop feeling magical.
+
+### `&self`
+
+Use `&self` when the method only reads the struct.
+
+```rust
+impl TransferRequest {
+    fn summary(&self) -> String {
+        format!("{} -> {}", self.from, self.to)
+    }
+}
+```
+
+The method borrows the struct immutably.
+
+It can inspect fields, but it cannot change them.
+
+### `&mut self`
+
+Use `&mut self` when the method changes the struct.
+
+```rust
+impl TransferRequest {
+    fn mark_confirmed(&mut self) {
+        self.confirmed = true;
+    }
+}
+```
+
+This needs exclusive mutable access.
+
+That is why the caller must have a mutable binding.
+
+### `self`
+
+Use `self` when the method should consume the value.
+
+```rust
+impl TransferRequest {
+    fn into_log_entry(self) -> String {
+        format!("LOG: {} sent {} to {}", self.from, self.amount, self.to)
+    }
+}
+```
+
+This takes ownership of the entire struct.
+
+After calling that method, the original value is gone.
+
+That is sometimes correct, but it should be a deliberate choice.
+
+---
+
+## Associated Functions Usually Build Values
+
+Not every function in an `impl` block is a method.
+
+If it does not take `self`, it is an associated function.
+
+The most common use is constructing a value cleanly.
+
+```rust
+#[derive(Debug)]
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    confirmed: bool,
+}
+
+impl TransferRequest {
+    fn new(from: String, to: String, amount: u64) -> Self {
+        Self {
+            from,
+            to,
+            amount,
+            confirmed: false,
+        }
+    }
+}
+
+fn main() {
+    let request = TransferRequest::new(
+        String::from("alice"),
+        String::from("bob"),
+        500_000,
+    );
+
+    println!("{:?}", request);
+}
+```
+
+`new` is not special syntax.
+
+It is just a naming convention Rust developers use for constructors.
+
+---
+
+## Field Init Shorthand Helps When Names Match
+
+Sometimes function parameters and struct fields use the same names.
+
+Rust lets you write this more cleanly.
+
+```rust
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    confirmed: bool,
+}
+
+fn build_request(from: String, to: String, amount: u64) -> TransferRequest {
+    TransferRequest {
+        from,
+        to,
+        amount,
+        confirmed: false,
+    }
+}
+```
+
+That shorthand matters because it keeps constructors and factory functions readable.
+
+---
+
+## Struct Update Syntax Is Useful, But It Still Follows Ownership Rules
+
+Rust can build a new struct from an older one.
+
+```rust
+#[derive(Debug)]
+struct RpcConfig {
+    network: String,
+    url: String,
+    timeout_seconds: u32,
+}
+
+fn main() {
+    let devnet = RpcConfig {
+        network: String::from("devnet"),
+        url: String::from("https://api.devnet.solana.com"),
+        timeout_seconds: 30,
+    };
+
+    let localnet = RpcConfig {
+        network: String::from("localnet"),
+        url: String::from("http://127.0.0.1:8899"),
+        ..devnet
+    };
+
+    println!("{:?}", localnet);
+}
+```
+
+This is convenient, but it is not free magic.
+
+If the reused fields own data, the original struct may be partially or fully moved.
+
+So struct update syntax is still part of the ownership world, not outside it.
+
+---
+
+## Tuple Structs And Unit Structs Exist, But They Are Secondary Today
+
+You should know they exist.
+
+You do not need to center your mental model around them yet.
+
+### Tuple struct
+
+```rust
+struct Lamports(u64);
+
+fn main() {
+    let amount = Lamports(1_000_000);
+    println!("{}", amount.0);
+}
+```
+
+Tuple structs are useful when you want a named type without named fields.
+
+### Unit struct
+
+```rust
+struct Devnet;
+
+fn main() {
+    let _network = Devnet;
+}
+```
+
+Unit structs are useful when the type itself matters more than stored data.
+
+For beginner Solana-oriented Rust, named-field structs are still the priority.
+
+---
+
+## One Complete Example That Feels Like Real Program Design
+
+Now combine data and behavior in one small account model.
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct Wallet {
+    owner: String,
+    balance: u64,
+    frozen: bool,
+}
+
+impl Wallet {
+    fn new(owner: String) -> Self {
+        Self {
+            owner,
+            balance: 0,
+            frozen: false,
+        }
+    }
+
+    fn deposit(&mut self, amount: u64) {
+        self.balance += amount;
+    }
+
+    fn can_withdraw(&self, amount: u64) -> bool {
+        !self.frozen && self.balance >= amount
+    }
+
+    fn withdraw(&mut self, amount: u64) -> Result<(), String> {
+        if self.frozen {
+            return Err(String::from("wallet is frozen"));
+        }
+
+        if amount > self.balance {
+            return Err(String::from("insufficient balance"));
+        }
+
+        self.balance -= amount;
+        Ok(())
+    }
+
+    fn freeze(&mut self) {
+        self.frozen = true;
+    }
+}
+
+fn main() {
+    let mut wallet = Wallet::new(String::from("alice"));
+
+    wallet.deposit(1_000_000);
+    println!("Can withdraw 500000? {}", wallet.can_withdraw(500_000));
+
+    wallet.withdraw(500_000).unwrap();
+    wallet.freeze();
+
+    println!("{:?}", wallet);
+}
+```
+
+Why this example matters:
+
+- the struct keeps related wallet state together
+- methods make state transitions easier to read
+- `&self` and `&mut self` encode which operations read and which operations mutate
+- the API starts looking like real domain logic, not just loose helper functions
+
+That is the point of this lesson.
+
+---
+
+## Common Struct Mistakes
+
+<Callout type="warn">
+### Treating structs as only storage and pushing all behavior outside them
+
+That usually leads to code where the data shape and the logic drift apart.
+
+If behavior clearly belongs to the type, a method is usually the cleaner choice.
+</Callout>
+
+<Callout type="warn">
+### Using `self` when `&self` or `&mut self` is enough
+
+If a method consumes the whole value, the caller loses it.
+
+Do that only when ownership transfer is intentional.
+</Callout>
+
+<Callout type="warn">
+### Forgetting that struct fields still obey ownership rules
+
+A struct does not erase the ownership lesson that came before it.
+
+It just packages owned values together.
+</Callout>
+
+---
+
+## Summary
+
+This lesson teaches the next layer of Rust program design.
+
+You now have the core mental model:
+
+- a struct defines a named data shape
+- methods attach behavior to that data
+- `&self`, `&mut self`, and `self` describe different ownership relationships to the instance
+- associated functions usually construct values cleanly
+
+If you can read a struct and explain both its fields and its methods, you are ready for the next level of Rust code.
+
+The next step is practice: designing small types and attaching the right behavior to them without overcomplicating the API.

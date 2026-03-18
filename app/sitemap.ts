@@ -47,9 +47,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
 // Tool categories that have actual pages
 const TOOL_CATEGORIES = getAllCategoryIds()
 
-// Module IDs that have actual pages (week-based structure)
-// NOTE: Old IDs (solana-fundamentals, rust-essentials, etc.) were returning 404
-// The actual module pages are at /modules/week-X which map to content/week-X
+// Module IDs that have actual pages
 const MODULE_IDS = contentsData.modules.map((module) => module.id)
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -86,44 +84,44 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })
   }
 
-  // Add week directories and their lesson files
+  // Add curriculum section directories and their lesson files
   try {
-    const weekDirs = fs
+    const sectionDirs = fs
       .readdirSync(CONTENT_DIR)
-      .filter((f) => f.startsWith('week-'))
+      .filter((f) => f !== 'challenges')
       .filter((f) => fs.statSync(path.join(CONTENT_DIR, f)).isDirectory())
       .sort()
 
-    for (const week of weekDirs) {
-      const weekPath = path.join(CONTENT_DIR, week)
+    for (const section of sectionDirs) {
+      const sectionPath = path.join(CONTENT_DIR, section)
       
-      // Check if index.mdx exists for week landing page
-      const indexPath = path.join(weekPath, 'index.mdx')
-      let weekLastModified = now
+      // Check if index.mdx exists for section landing page
+      const indexPath = path.join(sectionPath, 'index.mdx')
+      let sectionLastModified = now
       if (fs.existsSync(indexPath)) {
         try {
-          weekLastModified = fs.statSync(indexPath).mtime
+          sectionLastModified = fs.statSync(indexPath).mtime
         } catch {
           // Use current date if stat fails
         }
       }
       
-      // Week landing pages get high priority (course content)
+      // Section landing pages get high priority
       entries.push({
-        url: normalizeUrl(BASE_URL, `/learn/${week}`),
+        url: normalizeUrl(BASE_URL, `/learn/${section}`),
         priority: 0.85,
         changeFrequency: 'weekly',
-        lastModified: weekLastModified,
+        lastModified: sectionLastModified,
       })
       
       // Individual lesson files
       const files = fs
-        .readdirSync(weekPath)
+        .readdirSync(sectionPath)
         .filter((f) => /\.mdx?$/.test(f) && f.toLowerCase() !== 'index.mdx')
         
       for (const file of files) {
         const slug = file.replace(/\.mdx?$/, '')
-        const filePath = path.join(weekPath, file)
+        const filePath = path.join(sectionPath, file)
         let lastModified: Date = now
         try {
           lastModified = fs.statSync(filePath).mtime
@@ -131,7 +129,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
           // Use current date if stat fails
         }
         entries.push({
-          url: normalizeUrl(BASE_URL, `/learn/${week}/${slug}`),
+          url: normalizeUrl(BASE_URL, `/learn/${section}/${slug}`),
           priority: 0.8,
           changeFrequency: 'monthly',
           lastModified,

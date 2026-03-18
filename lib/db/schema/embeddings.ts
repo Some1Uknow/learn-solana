@@ -14,7 +14,7 @@ export const embeddings = pgTable(
     embedding: vector('embedding', { dimensions: 1536 }).notNull(),
     
     // Enhanced citation support
-    pageUrl: text('page_url').notNull(), // /learn/week-1
+    pageUrl: text('page_url').notNull(), // /learn/solana-foundations
     pageTitle: text('page_title').notNull(), // "A Beginners Guide to Solana Architecture"
     sectionTitle: text('section_title'), // "Proof of History: A Clock Before Consensus"
     headingId: text('heading_id'), // "proof-of-history-a-clock-before-consensus"

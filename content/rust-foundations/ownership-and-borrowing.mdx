@@ -1,7 +1,7 @@
 ---
 title: "Understanding Rust Ownership and Borrowing"
 description: "Learn the ownership rule that makes Rust feel different: one owner for a value, borrowing through references, and the compiler checks that prevent invalid memory access."
-module: "🦀 Rust for Solana"
+module: "Rust Foundations"
 keywords: ["ownership", "borrowing", "references", "move semantics", "slices", "rust memory"]
 ---
 
@@ -16,7 +16,7 @@ That question is: who owns this data right now?
 
 If you cannot answer that clearly, Rust will stop the program from compiling.
 
-That is what Day 2 is about.
+That is what this lesson is about.
 
 This is the lesson where Rust stops feeling like “new syntax” and starts feeling like a different model of programming.
 
@@ -160,7 +160,7 @@ The `String` move transfers ownership of heap-backed data.
 
 ## The Three Ownership Rules
 
-You can compress most of Day 2 into three rules.
+You can compress most of this lesson into three rules.
 
 <Steps>
 <Step>
@@ -529,6 +529,6 @@ The short version is:
 
 If you can trace who owns the data and who is only borrowing it, Rust starts to make sense.
 
-That is the capability you should leave Day 2 with.
+That is the capability you should leave this lesson with.
 
 The next lesson builds on this by introducing structs and methods, where ownership stops being a toy example and starts shaping real program design.

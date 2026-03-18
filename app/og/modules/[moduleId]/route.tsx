@@ -22,12 +22,11 @@ export async function GET(
   const logoUrl = module.image.startsWith("http")
     ? module.image
     : createCanonical(module.image);
-  const moduleNumber = module.id.replace("week-", "Week ");
 
   return generateModuleOgImage({
     title: module.title,
     description: module.description,
     logoUrl,
-    eyebrow: `${moduleNumber} module`,
+    eyebrow: "Learning path",
   });
 }

@@ -1,6 +1,6 @@
 {
-  "title": "Solana",
-  "description": "Learn the basics of Solana",
+  "title": "Solana Foundations",
+  "description": "Learn how Solana works, use the CLI confidently, and understand the core transaction model.",
   "icon": "Solana",
   "root": true,
   "pages": [

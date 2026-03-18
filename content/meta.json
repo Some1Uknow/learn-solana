@@ -2,10 +2,10 @@
   "title": "Learn Solana",
   "root": true,
   "pages": [
-    "week-1",
-    "week-2",
-    "week-3",
-    "week-4",
-    "week-5"
+    "solana-foundations",
+    "rust-foundations",
+    "anchor-programs",
+    "solana-kit-clients",
+    "ship-and-production"
   ]
 }

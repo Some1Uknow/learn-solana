@@ -1,0 +1,340 @@
+---
+title: "Struct and Method Practice"
+description: "Practice Rust by designing small types, adding methods, and choosing the right receiver: `&self`, `&mut self`, or `self`."
+type: challenge
+module: "Rust Foundations"
+keywords: ["rust structs practice", "methods practice", "impl blocks", "self", "data modeling"]
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This is where Rust starts looking like real program design.
+
+You are no longer just pushing values through helper functions.
+
+Now you are deciding:
+
+- what data belongs together
+- what behavior belongs on that data
+- which methods only read
+- which methods mutate
+- which methods should consume the value entirely
+
+That is what these exercises are testing.
+
+<Callout type="info">
+Do these in order.
+
+The first exercise is about struct shape. The second adds methods. The third forces you to choose the correct receiver type.
+</Callout>
+
+---
+
+## What You Are Practicing
+
+By the end of this page, you should be able to:
+
+- design a named-field struct that has a clear purpose
+- instantiate that struct cleanly
+- add methods with `impl`
+- choose between `&self`, `&mut self`, and `self`
+- use an associated function like `new` when it improves clarity
+
+If any of those still feels shaky, that is exactly what the exercises are for.
+
+---
+
+## Exercise 1: Model A Wallet Cleanly
+
+Start with the base skill.
+
+Take related values and turn them into one named type.
+
+### What to build
+
+Create a new Cargo project:
+
+```bash
+cargo new wallet_model
+cd wallet_model
+```
+
+Replace `src/main.rs` with this starter:
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct Wallet {
+    owner: String,
+    balance: u64,
+    frozen: bool,
+}
+
+fn main() {
+    let wallet = Wallet {
+        owner: String::from("alice"),
+        balance: 1_500_000,
+        frozen: false,
+    };
+
+    println!("{:?}", wallet);
+}
+```
+
+### Why this exercise matters
+
+This is the first real shift from scattered variables to deliberate data modeling.
+
+You are saying that `owner`, `balance`, and `frozen` are not separate facts. They are one wallet.
+
+### Your job
+
+1. type the struct and run it with `cargo run`
+2. add one more field like `nonce: u32` or `label: String`
+3. print a couple of fields directly with dot syntax
+4. explain why this is better than storing the same data as unrelated variables
+
+### What success looks like
+
+You should be able to say:
+
+- what this struct represents
+- why these fields belong together
+- what the type means in plain language
+
+If you cannot do that, the struct is probably not well designed yet.
+
+---
+
+## Exercise 2: Add Methods That Match The Data
+
+Now give the struct behavior.
+
+A wallet should not just exist. It should do things.
+
+### What to build
+
+Extend the same `Wallet` type with methods.
+
+Use this starter:
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct Wallet {
+    owner: String,
+    balance: u64,
+    frozen: bool,
+}
+
+impl Wallet {
+    fn deposit(&mut self, amount: u64) {
+        // write this
+    }
+
+    fn can_withdraw(&self, amount: u64) -> bool {
+        // write this
+        false
+    }
+
+    fn freeze(&mut self) {
+        // write this
+    }
+}
+
+fn main() {
+    let mut wallet = Wallet {
+        owner: String::from("alice"),
+        balance: 1_500_000,
+        frozen: false,
+    };
+
+    wallet.deposit(250_000);
+    println!("Can withdraw 500000? {}", wallet.can_withdraw(500_000));
+
+    wallet.freeze();
+    println!("Can withdraw 500000 after freeze? {}", wallet.can_withdraw(500_000));
+}
+```
+
+### Why this exercise matters
+
+This is where method receiver choices stop being abstract.
+
+- `deposit` changes state, so it needs `&mut self`
+- `can_withdraw` only reads state, so it should use `&self`
+- `freeze` changes state too, so it also needs `&mut self`
+
+The method signature should match the behavior exactly.
+
+### Your job
+
+1. implement all three methods
+2. run the program and check the outputs
+3. add another read-only method like `summary(&self) -> String`
+4. explain why `can_withdraw` should not take `&mut self`
+
+### What success looks like
+
+You should be able to explain each method signature in one sentence.
+
+If the method reads, say that.
+
+If it mutates, say that.
+
+That clarity matters more than the syntax itself.
+
+---
+
+## Exercise 3: Choose Between `&self`, `&mut self`, and `self`
+
+This is the decision that separates “I saw the syntax” from “I understand the design.”
+
+### What to build
+
+Take the same wallet and add:
+
+- an associated function `new`
+- a read-only method `summary`
+- a consuming method `close`
+
+Use this starter:
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct Wallet {
+    owner: String,
+    balance: u64,
+    frozen: bool,
+}
+
+impl Wallet {
+    fn new(owner: String) -> Self {
+        // write this
+        Self {
+            owner,
+            balance: 0,
+            frozen: false,
+        }
+    }
+
+    fn summary(&self) -> String {
+        // write this
+        String::new()
+    }
+
+    fn close(self) -> String {
+        // write this
+        String::new()
+    }
+}
+
+fn main() {
+    let wallet = Wallet::new(String::from("alice"));
+
+    println!("{}", wallet.summary());
+
+    let closing_message = wallet.close();
+    println!("{}", closing_message);
+
+    // wallet should not be usable here anymore
+}
+```
+
+### Why this exercise matters
+
+This exercise forces three different design choices.
+
+- `new` does not operate on an existing instance, so it takes no `self`
+- `summary` reads the wallet, so it uses `&self`
+- `close` consumes the wallet, so it takes `self`
+
+That is the cleanest possible way to understand receiver types.
+
+### Your job
+
+1. implement `new`, `summary`, and `close`
+2. run the program
+3. uncomment or add code after `wallet.close()` that tries to use `wallet` again
+4. read the compiler error and explain why it happens
+
+### What success looks like
+
+You should be able to explain exactly why these three signatures are different.
+
+That is the real point of the exercise.
+
+---
+
+## How To Work Through These Exercises
+
+<Steps>
+<Step>
+### Start with the type before the methods
+
+First decide what fields belong together.
+
+Only after that should you add behavior.
+</Step>
+
+<Step>
+### Make method signatures tell the truth
+
+Do not choose `&mut self` just because it feels safer.
+
+Use the narrowest receiver that matches what the method actually does.
+</Step>
+
+<Step>
+### Let the compiler teach ownership again
+
+When you experiment with a consuming method like `close(self)`, try using the value afterward on purpose.
+
+The error message is part of the lesson.
+</Step>
+</Steps>
+
+---
+
+## Common Failure Modes
+
+<Callout type="warn">
+### Turning every helper into a method
+
+Not every function belongs on the struct.
+
+Put behavior in `impl` only when it clearly belongs to the type.
+</Callout>
+
+<Callout type="warn">
+### Using `&mut self` too often
+
+A method that only reads data should not demand mutable access.
+
+That makes your API harder to use and hides the real behavior.
+</Callout>
+
+<Callout type="warn">
+### Forgetting that consuming methods destroy the old value
+
+If a method takes `self`, the caller loses that instance afterward.
+
+That is correct when you truly want ownership transfer.
+</Callout>
+
+---
+
+## Summary
+
+These exercises were designed to make the lesson practical.
+
+If you finished them honestly, you have now practiced:
+
+- designing a struct
+- grouping related data into one named type
+- adding methods with `impl`
+- choosing `&self`, `&mut self`, and `self` correctly
+- using an associated function to construct a value cleanly
+
+That is the core of this lesson.
+
+The next lessons can build on this only if this part is solid.

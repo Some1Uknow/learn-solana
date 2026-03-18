@@ -1,7 +1,7 @@
 ---
-title: "Rust Collections and String Handling (Vectors, HashMap, BTreeMap)"
+title: "Collections and String Handling in Rust"
 description: "Learn Rust collections and string handling with vectors, hash maps, BTreeMap, sets, and efficient string operations to manage data in Solana-style apps."
-module: "🦀 Rust for Solana"
+module: "Rust Foundations"
 keywords: ["vectors", "hashmap", "btree", "strings", "slices", "iterators"]
 ---
 
@@ -14,7 +14,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Learn to efficiently store, organize, and manipulate data using Rust's collection types. Essential for managing accounts, transactions, and program state in Solana applications.
 </Callout>
 
-## 📊 Rust Collections Overview
+## Rust Collections Overview
 
 Rust provides several powerful collection types for different use cases:
 
@@ -50,7 +50,7 @@ graph TD
 
 ---
 
-## 🚀 Vectors: Dynamic Arrays
+## Vectors: Dynamic Arrays
 
 Vectors are the most commonly used collection type in Rust.
 
@@ -199,7 +199,7 @@ fn vector_performance_tips() {
 
 ---
 
-## 🗺️ HashMap: Key-Value Storage
+## HashMap: Key-Value Storage
 
 HashMap provides fast key-value lookups with O(1) average performance.
 
@@ -377,7 +377,7 @@ fn map_comparison() {
 
 ---
 
-## 🔤 String Handling in Rust
+## String Handling in Rust
 
 Rust has two main string types: `String` (owned) and `&str` (borrowed).
 
@@ -456,7 +456,7 @@ multiline string";
 
 ```rust
 fn string_slicing() {
-    let text = "Hello, 世界"; // Mixed ASCII and Unicode
+    let text = "Hello, world"; // Plain ASCII example
     
     // Length in bytes vs characters
     println!("Length in bytes: {}", text.len());
@@ -638,7 +638,7 @@ fn advanced_string_processing() {
 
 ---
 
-## 🏗️ Practical Example: Transaction Log Processor
+## Practical Example: Transaction Log Processor
 
 Let's build a comprehensive transaction log processor that demonstrates all collection concepts:
 
@@ -1014,7 +1014,7 @@ fn main() {
 
 ---
 
-## 🎯 Day 5 Practice Exercises
+## Practice Exercises
 
 ### Exercise 1: Token Registry
 Build a token registry system:
@@ -1153,17 +1153,17 @@ struct TextStats {
 
 ---
 
-## 🚀 What's Next?
+## What's Next?
 
 You've now mastered:
 
-- ✅ **Vector operations and performance optimization**
-- ✅ **HashMap and BTreeMap for key-value storage**
-- ✅ **String creation, manipulation, and parsing**
-- ✅ **Collection iteration and transformation**
-- ✅ **Real-world data processing patterns**
+- **Vector operations and performance optimization**
+- **HashMap and BTreeMap for key-value storage**
+- **String creation, manipulation, and parsing**
+- **Collection iteration and transformation**
+- **Real-world data processing patterns**
 
-Next up is our **Practical Build Session** where you'll combine everything you've learned to build real Solana-related projects!
+Next up is the guided build where you combine the earlier Rust lessons into a small working program with clearer state and data flow.
 
 <Callout type="tip">
 **Solana Connection**

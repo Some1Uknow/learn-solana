@@ -1,8 +1,8 @@
 ---
-title: "Solana Wallet Manager Challenge (Enums + Pattern Matching)"
+title: "Wallet Manager Practice"
 description: "Build a Solana-style wallet manager using enums and pattern matching to handle account types, transaction states, and robust error handling."
 type: challenge
-module: "🦀 Rust for Solana"
+module: "Rust Foundations"
 keywords: ["enums", "pattern matching", "wallet manager", "transactions", "error handling"]
 ---
 
@@ -12,10 +12,10 @@ import { Callout } from 'fumadocs-ui/components/callout';
 <Callout type="warn">
 **Challenge Mission: Wallet Management System**
 
-Build a comprehensive wallet management system that handles different account types, transaction states, and error conditions. This challenge will test your mastery of enums, pattern matching, and error handling!
+Build a comprehensive wallet management system that handles different account types, transaction states, and error conditions. This challenge tests your understanding of enums, pattern matching, and error handling.
 </Callout>
 
-## 🎯 Challenge Overview
+## Challenge Overview
 
 Create a Solana wallet management system that can:
 - Handle different types of accounts
@@ -67,7 +67,7 @@ graph TD
   title="Wallet Management System Architecture"
 />
 
-## 🏗️ Part 1: Core Enums and Structs
+## Part 1: Core Enums and Structs
 
 Start by implementing the foundational types:
 
@@ -151,7 +151,7 @@ struct Transaction {
 }
 ```
 
-## 🔧 Part 2: Account Implementation
+## Part 2: Account Implementation
 
 Implement the `Account` with methods for different operations:
 
@@ -208,7 +208,7 @@ impl Account {
 }
 ```
 
-## 🚀 Part 3: Transaction Implementation
+## Part 3: Transaction Implementation
 
 Implement the `Transaction` with state management:
 
@@ -265,7 +265,7 @@ impl Transaction {
 }
 ```
 
-## 💼 Part 4: Wallet Manager Implementation
+## Part 4: Wallet Manager Implementation
 
 Create the main wallet manager:
 
@@ -386,7 +386,7 @@ struct NetworkStats {
 }
 ```
 
-## 🧪 Part 5: Testing Your Implementation
+## Part 5: Testing Your Implementation
 
 Create a comprehensive test suite:
 
@@ -518,7 +518,7 @@ fn main() {
 }
 ```
 
-## 🎯 Challenge Requirements
+## Challenge Requirements
 
 Your implementation must:
 
@@ -528,7 +528,7 @@ Your implementation must:
 4. **State Validation**: Accounts and transactions must validate state changes
 5. **Memory Safety**: No panics - handle all error conditions gracefully
 
-## 🏆 Bonus Challenges
+## Bonus Challenges
 
 If you complete the basic implementation, try these extensions:
 
@@ -589,7 +589,7 @@ impl WalletManager {
 
 ---
 
-## ✅ Success Criteria
+## Success Criteria
 
 Your solution should demonstrate:
 
@@ -605,4 +605,4 @@ Your solution should demonstrate:
 Once you've implemented this wallet manager, you'll have mastered the core patterns used in Solana program development. These same concepts appear in every Anchor program - from account validation to instruction processing!
 </Callout>
 
-**Ready for tomorrow?** Day 5 will cover **Collections and String Handling** - the tools you need to efficiently manage data structures in blockchain applications!
+**Next up:** Collections and string handling, the tools you need to manage richer data structures in Rust.

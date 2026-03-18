@@ -1,6 +1,6 @@
 {
-  "title": "Anchor",
-  "description": "Beginner to intermediate Anchor tutorials",
+  "title": "Anchor Programs",
+  "description": "Learn Anchor step by step, from setup and program anatomy to PDAs, CPIs, and guided projects.",
   "icon": "Anchor",
   "root": true,
   "pages": [

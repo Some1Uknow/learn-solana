@@ -1,0 +1,20 @@
+{
+  "title": "Rust Foundations",
+  "description": "Learn the Rust fundamentals you need before writing Solana programs.",
+  "icon": "Rust",
+  "root": true,
+  "pages": [
+    "index",
+    "rust-setup-and-core-syntax",
+    "rust-syntax-practice",
+    "ownership-and-borrowing",
+    "ownership-and-borrowing-practice",
+    "structs-and-methods",
+    "structs-and-methods-practice",
+    "wallet-ledger-build",
+    "enums-and-pattern-matching",
+    "enums-and-pattern-matching-practice",
+    "collections-and-string-handling",
+    "collections-and-string-handling-practice"
+  ]
+}

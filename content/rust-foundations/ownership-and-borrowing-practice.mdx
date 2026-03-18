@@ -1,0 +1,325 @@
+---
+title: "Ownership and Borrowing Practice"
+description: "Practice Rust ownership with three focused exercises that make you distinguish copying, moving, immutable borrowing, mutable borrowing, and when cloning is actually necessary."
+type: challenge
+module: "Rust Foundations"
+keywords: ["ownership practice", "borrowing practice", "rust references", "move semantics", "slices"]
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Ownership only becomes real when the compiler starts rejecting code you thought was fine.
+
+That is what this page is for.
+
+These exercises are designed to force one decision again and again:
+
+Should this value move, be borrowed, or be cloned?
+
+If you can answer that clearly, this lesson did its job.
+
+<Callout type="info">
+Do these in order.
+
+The first exercise is read-only borrowing. The second adds mutation. The third makes you debug ownership decisions directly.
+</Callout>
+
+---
+
+## What You Are Practicing
+
+By the end of this page, you should be able to:
+
+- tell when assignment copies and when it moves
+- pass borrowed data into functions without losing the original owner
+- use `&mut` only when a function really needs to change data
+- prefer borrowing over cloning when borrowing is enough
+- read basic ownership compiler errors without panicking
+
+If any of those still feels fuzzy, that is the exact reason to do the exercises carefully.
+
+---
+
+## Exercise 1: Borrow A Transfer Note Without Moving It
+
+Start with the simplest useful ownership decision.
+
+You have a `String` containing a transfer note. You want to inspect it in a helper function, but you still need to use the original value afterward.
+
+That means this exercise is about borrowing, not moving.
+
+### What to build
+
+Create a new Cargo project:
+
+```bash
+cargo new borrow_note
+cd borrow_note
+```
+
+Replace `src/main.rs` with this starter:
+
+```rust title="src/main.rs"
+fn main() {
+    let note = String::from("rent payment for validator account");
+
+    let word_count = count_words(&note);
+    let first_word = first_word(&note);
+
+    println!("Word count: {}", word_count);
+    println!("First word: {}", first_word);
+
+    // `note` should still be usable here.
+    println!("Original note: {}", note);
+}
+
+fn count_words(note: &str) -> usize {
+    // write this
+    0
+}
+
+fn first_word(note: &str) -> &str {
+    // write this
+    ""
+}
+```
+
+### Why this exercise matters
+
+It proves that you understand three important ideas:
+
+- a helper function does not need ownership if it only reads data
+- `&str` is a better read-only interface than `&String`
+- slices let you return part of the original string without allocating a new one
+
+### Your job
+
+1. implement `count_words`
+2. implement `first_word`
+3. run `cargo run`
+4. confirm that `note` is still usable after both function calls
+5. change the note text and predict the output before rerunning
+
+### What success looks like
+
+You should be able to explain:
+
+- why `note` was borrowed instead of moved
+- why `first_word` returns `&str` instead of `String`
+- why returning a slice is cheaper than cloning a new string
+
+---
+
+## Exercise 2: Update Transaction State With A Mutable Borrow
+
+Now move from read-only borrowing to mutation.
+
+You have a transfer request that starts as `pending`. A helper function should change it to `confirmed`.
+
+That means the function needs temporary exclusive access.
+
+### What to build
+
+Use this starter code:
+
+```rust title="src/main.rs"
+#[derive(Debug)]
+struct TransferRequest {
+    from: String,
+    to: String,
+    amount: u64,
+    status: String,
+}
+
+fn main() {
+    let mut request = TransferRequest {
+        from: String::from("alice"),
+        to: String::from("bob"),
+        amount: 250_000,
+        status: String::from("pending"),
+    };
+
+    print_summary(&request);
+    mark_confirmed(&mut request);
+    print_summary(&request);
+}
+
+fn print_summary(request: &TransferRequest) {
+    println!(
+        "{} -> {} | amount: {} | status: {}",
+        request.from, request.to, request.amount, request.status
+    );
+}
+
+fn mark_confirmed(request: &mut TransferRequest) {
+    // write this
+}
+```
+
+### Why this exercise matters
+
+This is the ownership rule that beginners usually understand in theory but misuse in code.
+
+- `print_summary` only reads, so it should borrow immutably
+- `mark_confirmed` changes the struct, so it needs `&mut`
+- `request` itself must be declared with `mut` because the owned value is changing
+
+### Your job
+
+1. implement `mark_confirmed`
+2. run the program and confirm the second print shows `confirmed`
+3. add another helper like `mark_failed` or `mark_sent`
+4. explain why Rust would reject this if an immutable borrow and mutable borrow overlapped incorrectly
+
+### What success looks like
+
+You should be able to say this cleanly:
+
+- immutable borrows are for reading
+- mutable borrows are for changing
+- one mutable borrow needs exclusive access while it is active
+
+---
+
+## Exercise 3: Fix Move Errors Without Reaching For `clone()` First
+
+Now practice the part that actually trips people up.
+
+The code below is broken on purpose.
+
+Your job is not just to make it compile. Your job is to choose the right fix.
+
+### Broken program
+
+```rust title="src/main.rs"
+fn main() {
+    let wallet_name = String::from("treasury-wallet");
+    print_label(wallet_name);
+
+    println!("Wallet still available: {}", wallet_name);
+}
+
+fn print_label(label: String) {
+    println!("Label: {}", label);
+}
+```
+
+### What is wrong
+
+`wallet_name` moves into `print_label` because the function takes ownership with `String`.
+
+That means the final `println!` tries to use a value that no longer belongs to `main`.
+
+### Your job
+
+Fix this in the best way.
+
+The correct first fix is to change the function so it borrows the string:
+
+```rust
+fn print_label(label: &str) {
+    println!("Label: {}", label);
+}
+```
+
+And then call it like this:
+
+```rust
+print_label(&wallet_name);
+```
+
+After that works, try two more experiments:
+
+1. intentionally use `.clone()` instead and explain why it works but is not the best default
+2. write a second function that really should take ownership, such as one that returns the string uppercased after consuming it
+
+### What success looks like
+
+You should be able to explain the difference between these three choices:
+
+- borrow when the function only needs temporary read access
+- move when ownership transfer is the point
+- clone only when you truly need a second owned copy
+
+That decision process is the real exercise.
+
+---
+
+## How To Work Through These Exercises
+
+<Steps>
+<Step>
+### Read the function signatures first
+
+Before changing any code, inspect the function parameter types.
+
+Ownership problems usually start there.
+</Step>
+
+<Step>
+### Ask what the function actually needs
+
+Does it only read the data?
+
+Then borrow it.
+
+Does it need to change the data?
+
+Then use `&mut`.
+
+Does it need to become the new owner?
+
+Then moving may be correct.
+</Step>
+
+<Step>
+### Treat `clone()` as a deliberate cost
+
+Do not use `.clone()` as your first reflex.
+
+Use it only after you can explain why borrowing is not enough.
+</Step>
+</Steps>
+
+---
+
+## Common Failure Modes
+
+<Callout type="warn">
+### Returning an owned `String` when a slice would do
+
+If you only need to point at part of existing string data, return `&str` instead of allocating a new `String`.
+</Callout>
+
+<Callout type="warn">
+### Using `&String` where `&str` is better
+
+For read-only string input, `&str` is usually the cleaner and more flexible function signature.
+</Callout>
+
+<Callout type="warn">
+### Using `clone()` to hide confusion
+
+A clone may compile, but that does not mean it was the right ownership choice.
+
+First ask whether borrowing already solves the problem.
+</Callout>
+
+---
+
+## Summary
+
+These exercises were built to make ownership concrete.
+
+If you worked through them honestly, you now have hands-on practice with:
+
+- immutable borrowing
+- mutable borrowing
+- slices
+- move errors
+- the difference between borrowing, moving, and cloning
+
+That is the practical core of this lesson.
+
+The next lesson moves into structs and methods, where these same ownership decisions start showing up inside real data models instead of tiny standalone examples.

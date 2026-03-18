@@ -1,0 +1,414 @@
+---
+title: "Wallet Ledger Build"
+description: "Combine ownership, structs, methods, and basic CLI input in one guided wallet ledger build before moving deeper into the curriculum."
+type: project
+module: "Rust Foundations"
+keywords: ["wallet ledger", "ownership", "structs", "methods", "cli", "rust build"]
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This page should not feel like a marketplace of ideas.
+
+It should feel like a focused build.
+
+By now, you have already covered:
+
+- basic Rust syntax
+- ownership and borrowing
+- structs and methods
+
+So the right next move is not choosing between five different app ideas.
+
+The right next move is building one small program that forces those ideas to work together.
+
+That is what this page does.
+
+<Callout type="info">
+The goal is not to build something impressive.
+
+The goal is to prove that you can model data, attach behavior to it, and keep ownership decisions clear while the program grows slightly beyond toy snippets.
+</Callout>
+
+---
+
+## The Project
+
+Build a wallet ledger CLI.
+
+The program should let you:
+
+- create a wallet
+- deposit lamports
+- withdraw lamports
+- record a short history of actions
+- print a readable summary
+
+This is a good build because it forces you to use the exact skills from the first half of this section:
+
+- structs for `Wallet` and `LedgerEntry`
+- methods for wallet behavior
+- `String` ownership inside structs
+- `&self` and `&mut self` in the right places
+- simple terminal input with `std::io`
+
+---
+
+## What You Are Proving
+
+If you finish this honestly, you should be able to prove that you can:
+
+- model related data as named types
+- make methods match actual behavior
+- mutate state through clear APIs instead of random field writes everywhere
+- read and update a small Rust program without losing track of ownership
+
+That is the real outcome.
+
+---
+
+## Project Shape
+
+Use one file first.
+
+Do not over-engineer modules yet.
+
+Create a new Cargo project:
+
+```bash
+cargo new wallet_ledger
+cd wallet_ledger
+```
+
+You will build everything in `src/main.rs`.
+
+That keeps your attention on the Rust concepts instead of file organization.
+
+---
+
+## Step 1: Define The Data Model
+
+Start by defining the two core types.
+
+```rust title="src/main.rs"
+#[derive(Debug, Clone)]
+struct LedgerEntry {
+    action: String,
+    amount: u64,
+}
+
+#[derive(Debug)]
+struct Wallet {
+    owner: String,
+    balance: u64,
+    frozen: bool,
+    history: Vec<LedgerEntry>,
+}
+```
+
+### Why this shape works
+
+- `Wallet` stores the long-lived state
+- `LedgerEntry` stores one event in the wallet history
+- `Vec<LedgerEntry>` gives the wallet a growing transaction log
+
+This is already more realistic than loose variables.
+
+The types describe the program clearly.
+
+---
+
+## Step 2: Add A Constructor
+
+Now add an associated function that creates a clean wallet.
+
+```rust
+impl Wallet {
+    fn new(owner: String) -> Self {
+        Self {
+            owner,
+            balance: 0,
+            frozen: false,
+            history: Vec::new(),
+        }
+    }
+}
+```
+
+This matters because it gives the type a stable way to start in a valid state.
+
+You do not want every caller manually remembering the default balance, frozen flag, and empty history.
+
+---
+
+## Step 3: Add Read-Only And Mutable Methods
+
+Now give the wallet behavior.
+
+```rust
+impl Wallet {
+    fn summary(&self) -> String {
+        format!(
+            "owner: {} | balance: {} | frozen: {} | entries: {}",
+            self.owner,
+            self.balance,
+            self.frozen,
+            self.history.len()
+        )
+    }
+
+    fn deposit(&mut self, amount: u64) {
+        self.balance += amount;
+        self.history.push(LedgerEntry {
+            action: String::from("deposit"),
+            amount,
+        });
+    }
+
+    fn withdraw(&mut self, amount: u64) -> Result<(), String> {
+        if self.frozen {
+            return Err(String::from("wallet is frozen"));
+        }
+
+        if amount > self.balance {
+            return Err(String::from("insufficient balance"));
+        }
+
+        self.balance -= amount;
+        self.history.push(LedgerEntry {
+            action: String::from("withdraw"),
+            amount,
+        });
+
+        Ok(())
+    }
+
+    fn freeze(&mut self) {
+        self.frozen = true;
+    }
+}
+```
+
+### What this teaches
+
+- `summary(&self)` only reads state
+- `deposit(&mut self)` changes state
+- `withdraw(&mut self)` changes state and may fail
+- `freeze(&mut self)` changes state without returning anything
+
+This is where the earlier `&self` vs `&mut self` lesson becomes real.
+
+---
+
+## Step 4: Run A Simple Hardcoded Flow First
+
+Before adding user input, prove that the data model works.
+
+```rust
+fn main() {
+    let mut wallet = Wallet::new(String::from("alice"));
+
+    println!("{}", wallet.summary());
+
+    wallet.deposit(1_000_000);
+    println!("{}", wallet.summary());
+
+    wallet.withdraw(250_000).unwrap();
+    println!("{}", wallet.summary());
+
+    wallet.freeze();
+    println!("{}", wallet.summary());
+}
+```
+
+Run it:
+
+```bash
+cargo run
+```
+
+Do not skip this phase.
+
+If the hardcoded version is not solid, the interactive version will only hide the real problem.
+
+---
+
+## Step 5: Add Simple CLI Input
+
+Once the hardcoded flow works, add a small menu loop.
+
+Use this as the shape:
+
+```rust
+use std::io::{self, Write};
+
+fn main() {
+    let mut wallet = Wallet::new(String::from("alice"));
+
+    loop {
+        println!("\n=== Wallet Ledger ===");
+        println!("1. Deposit");
+        println!("2. Withdraw");
+        println!("3. Freeze wallet");
+        println!("4. View summary");
+        println!("5. Exit");
+        print!("Choose an option: ");
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        match input.trim() {
+            "1" => {
+                let amount = read_u64("Enter deposit amount: ");
+                wallet.deposit(amount);
+            }
+            "2" => {
+                let amount = read_u64("Enter withdrawal amount: ");
+                match wallet.withdraw(amount) {
+                    Ok(()) => println!("Withdrawal recorded."),
+                    Err(err) => println!("Withdrawal failed: {}", err),
+                }
+            }
+            "3" => {
+                wallet.freeze();
+                println!("Wallet frozen.");
+            }
+            "4" => {
+                println!("{}", wallet.summary());
+                print_history(&wallet);
+            }
+            "5" => break,
+            _ => println!("Invalid option."),
+        }
+    }
+}
+```
+
+Then add two helpers:
+
+```rust
+fn read_u64(prompt: &str) -> u64 {
+    loop {
+        print!("{}", prompt);
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        match input.trim().parse::<u64>() {
+            Ok(value) => return value,
+            Err(_) => println!("Please enter a valid unsigned integer."),
+        }
+    }
+}
+
+fn print_history(wallet: &Wallet) {
+    if wallet.history.is_empty() {
+        println!("No ledger entries yet.");
+        return;
+    }
+
+    for (index, entry) in wallet.history.iter().enumerate() {
+        println!("{}. {} {}", index + 1, entry.action, entry.amount);
+    }
+}
+```
+
+### Why this is the right amount of CLI
+
+This adds enough complexity to feel real, but not so much that the build turns into a UI exercise.
+
+You are still practicing Rust fundamentals, not menu design.
+
+---
+
+## Step 6: Test The Failure Paths On Purpose
+
+Do not only test the happy path.
+
+Try these cases deliberately:
+
+1. withdraw more than the current balance
+2. freeze the wallet, then try to withdraw
+3. enter invalid input like `abc`
+4. view the summary after several actions and confirm history length is correct
+
+This is where your methods prove whether they actually encode the business rules clearly.
+
+---
+
+## What A Good Finished Version Should Feel Like
+
+A good result should have these properties:
+
+- the types are easy to name and understand
+- methods are short and clearly scoped
+- the wallet state changes in predictable places
+- `summary` and `print_history` do not mutate anything
+- deposits and withdrawals always record history consistently
+
+If your code feels tangled, it usually means one of three things:
+
+- the struct shape is weak
+- the methods are doing too much
+- mutation is happening in the wrong place
+
+---
+
+## Optional Extensions
+
+Only do these after the base version is solid.
+
+1. add an `unfreeze` method
+2. add a `can_withdraw(&self, amount: u64) -> bool` method
+3. store a short text note in each `LedgerEntry`
+4. add a consuming method like `close(self) -> String`
+
+That last one is especially useful because it forces you to think about whether a method should borrow or consume the whole wallet.
+
+---
+
+## Common Failure Modes
+
+<Callout type="warn">
+### Putting too much logic in `main`
+
+If most of the business rules live in `main` instead of `impl Wallet`, the build is missing the point.
+
+The point is to let the type own its behavior.
+</Callout>
+
+<Callout type="warn">
+### Using field writes everywhere instead of methods
+
+If you keep writing directly to `wallet.balance` or `wallet.history` from many places, the API is not doing enough work.
+
+Let the methods own the state transitions.
+</Callout>
+
+<Callout type="warn">
+### Reaching for extra abstractions too early
+
+You do not need modules, traits, generics, or multiple files yet.
+
+This build is about fundamentals being solid, not architecture being fancy.
+</Callout>
+
+---
+
+## Summary
+
+This build exists to prove that the first half of this section is working.
+
+If you can build this wallet ledger cleanly, you are no longer just reading Rust syntax.
+
+You are:
+
+- modeling data with structs
+- attaching behavior with methods
+- making ownership and mutability decisions deliberately
+- handling basic CLI input without losing control of the program
+
+That is the capability you should have before moving into enums, pattern matching, and richer data handling later in the week.

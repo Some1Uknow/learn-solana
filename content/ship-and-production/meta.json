@@ -1,6 +1,6 @@
 {
-   "title": "Capstone",
-  "description": "Build and Ship a Full-Stack Solana Application",
+  "title": "Ship and Production",
+  "description": "Turn your Solana application into something stable, testable, deployable, and portfolio-ready.",
   "icon": "Solana",
   "root": true,
   "pages": [

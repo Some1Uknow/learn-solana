@@ -1,6 +1,6 @@
 {
-  "title": "Solana Kit Client-Side",
-  "description": "Build a Solana client with @solana/kit: connect a wallet, read accounts, and send transactions.",
+  "title": "Solana Kit Clients",
+  "description": "Build modern Solana clients with @solana/kit, wallet-standard, account reads, and transaction flows.",
   "icon": "SolanaKit",
   "root": true,
   "pages": [

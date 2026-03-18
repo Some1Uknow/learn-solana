@@ -30,6 +30,136 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: "/learn/week-1",
+        destination: "/learn/solana-foundations",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-1/:path*",
+        destination: "/learn/solana-foundations/:path*",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2",
+        destination: "/learn/rust-foundations",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/:path*",
+        destination: "/learn/rust-foundations/:path*",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-1-rust-fundamentals",
+        destination: "/learn/rust-foundations/rust-setup-and-core-syntax",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-1-challenges",
+        destination: "/learn/rust-foundations/rust-syntax-practice",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-2-ownership-system",
+        destination: "/learn/rust-foundations/ownership-and-borrowing",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-2-challenges",
+        destination: "/learn/rust-foundations/ownership-and-borrowing-practice",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-3-data-structures",
+        destination: "/learn/rust-foundations/structs-and-methods",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-3-challenges",
+        destination: "/learn/rust-foundations/structs-and-methods-practice",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/mid-course-projects",
+        destination: "/learn/rust-foundations/wallet-ledger-build",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-4-enums-pattern-matching",
+        destination: "/learn/rust-foundations/enums-and-pattern-matching",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-4-challenges",
+        destination: "/learn/rust-foundations/enums-and-pattern-matching-practice",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-5-collections-strings",
+        destination: "/learn/rust-foundations/collections-and-string-handling",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-2/day-5-challenges",
+        destination: "/learn/rust-foundations/collections-and-string-handling-practice",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-3",
+        destination: "/learn/anchor-programs",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-3/:path*",
+        destination: "/learn/anchor-programs/:path*",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-4",
+        destination: "/learn/solana-kit-clients",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-4/:path*",
+        destination: "/learn/solana-kit-clients/:path*",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-5",
+        destination: "/learn/ship-and-production",
+        permanent: true,
+      },
+      {
+        source: "/learn/week-5/:path*",
+        destination: "/learn/ship-and-production/:path*",
+        permanent: true,
+      },
+      {
+        source: "/modules/week-1",
+        destination: "/modules/solana-foundations",
+        permanent: true,
+      },
+      {
+        source: "/modules/week-2",
+        destination: "/modules/rust-foundations",
+        permanent: true,
+      },
+      {
+        source: "/modules/week-3",
+        destination: "/modules/anchor-programs",
+        permanent: true,
+      },
+      {
+        source: "/modules/week-4",
+        destination: "/modules/solana-kit-clients",
+        permanent: true,
+      },
+      {
+        source: "/modules/week-5",
+        destination: "/modules/ship-and-production",
+        permanent: true,
+      },
       // Redirect any trailing slash URLs to non-trailing slash versions
       // This ensures consistent URLs and prevents duplicate content
       {
@@ -51,7 +181,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    // Allow rendering local SVGs via next/image (we use public/solana-kit.svg for Week 4).
+    // Allow rendering local SVGs via next/image (we use public/solana-kit.svg for the Solana Kit Clients section).
     dangerouslyAllowSVG: true,
     domains: [
       "docs.solana.com",

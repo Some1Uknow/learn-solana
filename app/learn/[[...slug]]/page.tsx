@@ -33,7 +33,7 @@ export default async function Page(props: {
     { name: "Curriculum", url: "/modules" },
   ];
   
-  // Add intermediate paths (e.g., week-1)
+  // Add intermediate paths (for example, solana-foundations)
   let currentPath = "/learn";
   for (let i = 0; i < slugParts.length - 1; i++) {
     currentPath += `/${slugParts[i]}`;

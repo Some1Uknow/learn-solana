@@ -1,7 +1,7 @@
 ---
-title: "Rust Enums and Pattern Matching (Option, Result, match)"
+title: "Enums and Pattern Matching in Rust"
 description: "Learn Rust enums and pattern matching with practical examples, from variant data to real-world use of match, Option, and Result widely used in Solana code."
-module: "🦀 Rust for Solana"
+module: "Rust Foundations"
 keywords: ["rust enums", "pattern matching", "match", "option", "result"]
 ---
 
@@ -14,7 +14,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 Learn Rust's most powerful feature for handling different types of data safely. Enums and pattern matching are everywhere in Solana development - from account types to transaction results.
 </Callout>
 
-## 🎲 Understanding Enums in Rust
+## Understanding Enums in Rust
 
 Enums allow you to define types that can be one of several variants. They're much more powerful than enums in other languages.
 
@@ -110,7 +110,7 @@ fn main() {
 
 ---
 
-## 🛡️ The Option&lt;T&gt; Enum
+## The Option&lt;T&gt; Enum
 
 The `Option<T>` enum handles the concept of "something or nothing" safely.
 
@@ -214,7 +214,7 @@ fn demonstrate_option_methods() {
 
 ---
 
-## ⚡ The Result&lt;T, E&gt; Enum
+## The Result&lt;T, E&gt; Enum
 
 `Result<T, E>` handles operations that can succeed or fail.
 
@@ -318,7 +318,7 @@ fn calculator_operation(op: &str, a: i32, b: i32) -> Result<i32, CalculatorError
 
 ---
 
-## 🎯 Pattern Matching with match
+## Pattern Matching with match
 
 The `match` expression is Rust's most powerful control flow construct.
 
@@ -444,7 +444,7 @@ fn main() {
 
 ---
 
-## 🎈 Control Flow with if let
+## Control Flow with if let
 
 `if let` provides a concise way to handle specific patterns.
 
@@ -496,7 +496,7 @@ fn main() {
 
 ---
 
-## 🔧 Practical Example: Token Management System
+## Practical Example: Token Management System
 
 Let's build a token management system that demonstrates all enum concepts:
 
@@ -797,7 +797,7 @@ fn main() {
 
 ---
 
-## 🎯 Day 4 Practice Exercises
+## Practice Exercises
 
 ### Exercise 1: Traffic Light System
 Create a traffic light controller with states and transitions:
@@ -874,15 +874,15 @@ fn calculate(op: Operation) -> Result<f64, CalculatorError> {
 
 ---
 
-## 🚀 What's Next?
+## What's Next?
 
 You've now mastered:
 
-- ✅ **Enum definitions and variants**
-- ✅ **Option&lt;T&gt; and Result&lt;T, E&gt; handling**
-- ✅ **Pattern matching with match**
-- ✅ **Control flow with if let and while let**
-- ✅ **Custom error types**
+- **Enum definitions and variants**
+- **Option&lt;T&gt; and Result&lt;T, E&gt; handling**
+- **Pattern matching with match**
+- **Control flow with if let and while let**
+- **Custom error types**
 
 Tomorrow we'll dive into **Collections and String Handling** - the tools you need to manage data efficiently in Solana programs!
 
