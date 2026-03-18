@@ -1,36 +1,67 @@
 ---
-title: "Client-Side with @solana/kit"
-description: "A beginner-to-intermediate path for modern Solana client development using @solana/kit, @solana/client, and @solana/react-hooks."
+title: "Solana Kit Clients"
+description: "Learn the modern Solana client stack with @solana/client, @solana/react-hooks, and @solana/kit so your frontend reads state, manages wallet sessions, and sends transactions cleanly."
 module: "Solana Kit Clients"
 keywords:
   - "solana kit tutorial"
-  - "solana client-side"
+  - "solana client architecture"
   - "@solana/kit"
   - "@solana/client"
   - "@solana/react-hooks"
   - "wallet standard"
-  - "solana transaction ux"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+`@solana/web3.js` is now the legacy path for new frontend work.
 
-`@solana/web3.js` is now deprecated for new projects.
+That does not just change imports.
 
-For this module, we use modern Solana client libraries:
+It changes how the client should be structured.
 
-- `@solana/kit` for core transaction/RPC building blocks
-- `@solana/client` for shared runtime state
-- `@solana/react-hooks` for React-friendly wallet and transaction hooks
+This section teaches the modern stack in the right order:
 
-## What You Will Learn
+- shared runtime first
+- wallet state second
+- account reads next
+- transaction building and delivery after that
+- program actions, UX, and testing only after the foundations are stable
 
-- How to build a clean kit-first client architecture
-- How Wallet Standard connection flows work in practice
-- How to read accounts and build/send transactions correctly
-- How to handle failure paths, retries, and user-facing status
-- How to test client-side Solana code with confidence
+That order matters.
+
+If you start from scattered button handlers and ad hoc RPC helpers, the app will feel fine for one page and collapse as soon as it grows.
+
+## What This Section Is For
+
+This section teaches how to build a client that is explainable.
+
+That means you should be able to answer questions like:
+
+- where does wallet session state live?
+- where are transactions built?
+- where do retries belong?
+- where should Anchor instruction assembly live?
+- what should the UI know, and what should stay in the service layer?
+
+If the codebase cannot answer those questions clearly, it is not ready.
+
+## The Stack We Use Here
+
+The section is built around three packages with different responsibilities:
+
+- `@solana/client` for the shared runtime
+- `@solana/react-hooks` for wallet and transaction hooks in React
+- `@solana/kit` for typed RPC, message, signer, and transaction building blocks
+
+That split is deliberate.
+
+The runtime owns shared state.
+
+The hooks expose it to React.
+
+Kit handles the low-level client mechanics.
 
 ## Learning Path
+
+Follow the section in this order:
 
 1. `kit-foundations`
 2. `wallet-standard-connection-flow`
@@ -43,15 +74,45 @@ For this module, we use modern Solana client libraries:
 9. `client-testing-strategy-lite-unit-and-integration`
 10. `mini-capstone-kit-client-for-anchor-program`
 
-<Callout type="info">
-Each lesson is written step by step. Do not skip ahead. The concepts stack on top of each other.
-</Callout>
+This is not a menu.
+
+It is a dependency chain.
+
+For example:
+
+- transaction UX only makes sense after you understand sending and confirmation
+- Anchor client patterns only make sense after you understand runtime, signing, and transport
+- the capstone only matters if the earlier pieces are real and not mocked
+
+## What You Will Be Able To Do After This Section
+
+By the end, you should be able to:
+
+- create one shared Solana client runtime for a Next.js app
+- connect Wallet Standard wallets honestly
+- read and normalize chain state safely
+- build and sign transaction messages correctly
+- separate submission from confirmation and retries
+- assemble token and Anchor program actions without leaking logic into the UI
+- test the client at the right layers
+
+That is enough to build a serious first Solana frontend.
 
 ## Prerequisites
 
-- Comfortable with TypeScript basics
-- Basic Solana program/account mental model
+You should already be comfortable with:
+
+- TypeScript basics
+- the Solana account and transaction model
+- basic command-line workflow
+
+You should also have:
+
 - Node.js installed
-- A devnet wallet with test SOL
+- a devnet wallet with test SOL
+
+## Where To Start
 
 Start with `kit-foundations`.
+
+That lesson sets up the shared runtime model the rest of the section depends on.
