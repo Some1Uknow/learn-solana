@@ -5,7 +5,7 @@ import { gameProgress } from '@/lib/db/schema/gameProgress';
 import { eq, and } from 'drizzle-orm';
 // server-side mint fallback removed
 import bs58 from 'bs58';
-import { verifyWeb3Auth, deriveWalletFromPayload, isLikelyBase58Address } from '@/lib/auth/verifyWeb3Auth';
+import { verifyWeb3Auth, deriveWalletFromPayload } from '@/lib/auth/verifyWeb3Auth';
 
 // legacy verifyAuth removed (centralized in verifyWeb3Auth)
 
@@ -16,15 +16,11 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
     const body = await req.json().catch(() => ({}));
-  const { gameId, walletAddress: overrideWallet, mintAddress: clientMintAddress, clientMint } = body || {};
+  const { gameId, mintAddress: clientMintAddress, clientMint } = body || {};
     if (!gameId || typeof gameId !== 'string') {
       return new Response(JSON.stringify({ error: 'gameId required'}), { status: 400 });
     }
     let walletAddress = deriveWalletFromPayload(verified.payload);
-    if (!walletAddress && typeof overrideWallet === 'string' && isLikelyBase58Address(overrideWallet)) {
-      // Temporarily allow override without binding for UX; will re-harden later.
-      walletAddress = overrideWallet;
-    }
     if (!walletAddress) return new Response(JSON.stringify({ error: 'walletAddress unresolved'}), { status: 400 });
 
     // Require eligibility to claim

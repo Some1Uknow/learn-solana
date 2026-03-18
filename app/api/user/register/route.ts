@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema/users";
 import { eq } from "drizzle-orm";
-import { extractAndVerifyJWT } from "@/lib/auth/web3auth";
+import { deriveWalletFromPayload, verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
 import { registerSchema } from "@/lib/validation/userRegistration";
 import {
   isValidSolanaAddress,
@@ -31,15 +31,15 @@ export async function POST(req: NextRequest) {
 
     // Social path requires a valid Web3Auth JWT
     if (authType === "social") {
-      const { token, payload } = await extractAndVerifyJWT(req);
-      if (!token || !payload) {
+      const verified = await verifyWeb3Auth(req);
+      if (!verified) {
         return NextResponse.json(
           { error: "Authentication required" },
           { status: 401 }
         );
       }
-      authToken = token;
-      jwtPayload = payload;
+      authToken = verified.raw;
+      jwtPayload = verified.payload;
     }
 
     // wallet address must be present now
@@ -56,11 +56,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If JWT supplied and it contains wallet(s), ensure match (defense-in-depth)
-    if (jwtPayload && jwtPayload.wallets && Array.isArray(jwtPayload.wallets)) {
-      const tokenWallet = (
-        jwtPayload.wallets.find((w: any) => w?.address) || {}
-      ).address;
+    // If JWT supplied and it contains a wallet, ensure it matches the claimed address.
+    if (jwtPayload) {
+      const tokenWallet = deriveWalletFromPayload(jwtPayload);
       if (tokenWallet && tokenWallet !== walletAddress) {
         return NextResponse.json(
           { error: "JWT wallet mismatch" },
@@ -73,20 +71,27 @@ export async function POST(req: NextRequest) {
     let signatureValidated = false;
     if (authType === "external_wallet") {
       const signature = headerSig || body.signature || undefined;
-      if (signature) {
-        const ok = verifyWalletSignature(walletAddress, signature);
-        if (!ok) {
-          return NextResponse.json(
-            { error: "Invalid signature" },
-            { status: 401 }
-          );
-        }
-        signatureValidated = true;
-      } else {
+      if (!signature) {
         debugLog("register", "external wallet signature missing", {
           wallet: walletAddress,
         });
+        return NextResponse.json(
+          {
+            error: "Signature required for external wallet registration",
+            messageToSign: SIGN_MESSAGE_PREFIX + walletAddress,
+          },
+          { status: 401 }
+        );
       }
+
+      const ok = verifyWalletSignature(walletAddress, signature);
+      if (!ok) {
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 401 }
+        );
+      }
+      signatureValidated = true;
     }
 
     // Normalize email

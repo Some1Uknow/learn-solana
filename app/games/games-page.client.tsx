@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 import { authFetch } from "@/lib/auth/authFetch";
 import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
 import { SolanaWallet } from "@web3auth/solana-provider";
@@ -57,8 +56,6 @@ export function GamesPageClient() {
 
   // Wallet
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-
-  useAutoRegisterUser(walletAddress || undefined);
 
   // Fetch total players stat
   React.useEffect(() => {

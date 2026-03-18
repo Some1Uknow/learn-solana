@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Wallet, X, Lock } from "lucide-react";
 import { useWeb3Auth } from "@/hooks/use-web3-auth";
-import { BlurFade } from "@/components/ui/blur-fade";
 
 interface LoginRequiredModalProps {
     open: boolean;
@@ -21,15 +20,25 @@ export function LoginRequiredModal({
     description = "Please connect your wallet to access this feature.",
 }: LoginRequiredModalProps) {
     const { login } = useWeb3Auth();
+    const [isConnecting, setIsConnecting] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null);
+
     const handleLogin = async () => {
-        // Close our modal first to avoid z-index/focus conflicts with Web3Auth modal
-        onOpenChange(false);
+        setIsConnecting(true);
+        setLoginError(null);
+
         try {
             await login();
+            onOpenChange(false);
         } catch (error) {
             console.error("Login failed:", error);
-            // Re-open if login failed/cancelled?
-            // onOpenChange(true); 
+            setLoginError(
+                error instanceof Error
+                    ? error.message
+                    : "Wallet login failed. Try again, or disable Brave Shields for this site if the wallet modal appears blank."
+            );
+        } finally {
+            setIsConnecting(false);
         }
     };
 
@@ -65,13 +74,20 @@ export function LoginRequiredModal({
                     </DialogDescription>
 
                     <div className="flex flex-col gap-3 w-full">
+                        {loginError && (
+                            <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-left text-sm text-amber-200">
+                                {loginError}
+                            </div>
+                        )}
+
                         <Button
                             onClick={handleLogin}
+                            disabled={isConnecting}
                             className="w-full h-11 relative overflow-hidden group bg-white text-black hover:bg-zinc-200 transition-all font-medium rounded-xl"
                         >
                             <div className="flex items-center justify-center gap-2">
                                 <Wallet className="w-4 h-4" />
-                                <span>Connect Wallet</span>
+                                <span>{isConnecting ? "Opening Wallet..." : "Connect Wallet"}</span>
                             </div>
                         </Button>
 

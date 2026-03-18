@@ -16,9 +16,9 @@ import {
   useWeb3AuthDisconnect,
   useWeb3Auth,
 } from "@web3auth/modal/react";
-import { useAutoRegisterUser } from "@/hooks/use-auto-register-user";
 import { SolanaWallet } from "@web3auth/solana-provider";
 import { registerUserAfterLogin } from "@/lib/auth/registerUserAfterLogin";
+import { clearClientAuthState } from "@/lib/auth/session";
 
 interface NavbarWalletButtonProps {
   isMobile?: boolean;
@@ -38,11 +38,6 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const { connect, isConnected, loading: connectLoading } = useWeb3AuthConnect();
   const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
   const { provider, web3Auth } = useWeb3Auth();
-
-  // Backup: Auto register as a fallback when we have address (only if direct registration failed)
-  useAutoRegisterUser(userAddress || undefined, {
-    skipIfAlreadyAttempted: registrationAttemptedRef.current
-  });
 
   const isLoading = connectLoading || disconnectLoading;
 
@@ -110,6 +105,15 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
       if (isConnected) {
         // Disconnect flow
         await disconnect();
+        clearClientAuthState();
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+        } catch (logoutError) {
+          console.warn("[WalletButton] logout cleanup failed", logoutError);
+        }
         registrationAttemptedRef.current = false; // Reset for next login
         return;
       }

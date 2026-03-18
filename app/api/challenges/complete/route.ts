@@ -5,7 +5,6 @@ import { eq, and } from "drizzle-orm";
 import {
   verifyWeb3Auth,
   deriveWalletFromPayload,
-  isLikelyBase58Address,
 } from "@/lib/auth/verifyWeb3Auth";
 
 export async function POST(req: NextRequest) {
@@ -13,24 +12,16 @@ export async function POST(req: NextRequest) {
     // Clone request so we can read body even if verifyWeb3Auth consumes it
     const clonedReq = req.clone();
     const body = await clonedReq.json().catch(() => ({}));
-    const { track, challengeId, code, walletAddress: overrideWallet } = body;
+    const { track, challengeId, code } = body;
 
-    // Try JWT auth first (for social logins)
     const verified = await verifyWeb3Auth(req);
-    
-    // Determine wallet address from JWT or request body
-    let walletAddress: string | null = null;
-    
-    if (verified) {
-      // JWT auth succeeded - derive wallet from token
-      walletAddress = deriveWalletFromPayload(verified.payload);
+    if (!verified) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
     }
-    
-    // Fallback: Accept wallet from request body for external wallet users
-    // External wallets (Phantom, etc.) don't get Web3Auth JWTs
-    if (!walletAddress && typeof overrideWallet === "string" && isLikelyBase58Address(overrideWallet)) {
-      walletAddress = overrideWallet;
-    }
+
+    const walletAddress = deriveWalletFromPayload(verified.payload);
 
     if (!track || typeof track !== "string") {
       return new Response(JSON.stringify({ error: "track required" }), {

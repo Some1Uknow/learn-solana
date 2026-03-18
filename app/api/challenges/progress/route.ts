@@ -5,14 +5,12 @@ import { eq, and } from "drizzle-orm";
 import {
   verifyWeb3Auth,
   deriveWalletFromPayload,
-  isLikelyBase58Address,
 } from "@/lib/auth/verifyWeb3Auth";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const track = searchParams.get("track");
-    const overrideWallet = searchParams.get("wallet");
 
     if (!track) {
       return new Response(JSON.stringify({ error: "track query param required" }), {
@@ -20,22 +18,14 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Try JWT auth first (for social logins)
     const verified = await verifyWeb3Auth(req);
-    
-    // Determine wallet address from JWT or query param
-    let walletAddress: string | null = null;
-    
-    if (verified) {
-      // JWT auth succeeded - derive wallet from token
-      walletAddress = deriveWalletFromPayload(verified.payload);
+    if (!verified) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
     }
-    
-    // Fallback: Accept wallet from query param for external wallet users
-    // External wallets (Phantom, etc.) don't get Web3Auth JWTs
-    if (!walletAddress && typeof overrideWallet === "string" && isLikelyBase58Address(overrideWallet)) {
-      walletAddress = overrideWallet;
-    }
+
+    const walletAddress = deriveWalletFromPayload(verified.payload);
 
     if (!walletAddress) {
       return new Response(

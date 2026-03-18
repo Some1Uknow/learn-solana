@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { gameProgress } from '@/lib/db/schema/gameProgress';
 import { eq, and } from 'drizzle-orm';
-import { verifyWeb3Auth, deriveWalletFromPayload, isLikelyBase58Address } from '@/lib/auth/verifyWeb3Auth';
+import { verifyWeb3Auth, deriveWalletFromPayload } from '@/lib/auth/verifyWeb3Auth';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,18 +12,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const { gameId, walletAddress: overrideWallet } = body;
+    const { gameId } = body;
     if (!gameId || typeof gameId !== 'string') {
       return new Response(JSON.stringify({ error: 'gameId required' }), { status: 400 });
     }
 
     let walletAddress = deriveWalletFromPayload(verified.payload);
-    if (!walletAddress && typeof overrideWallet === 'string' && isLikelyBase58Address(overrideWallet)) {
-      // Temporarily trust override (will reintroduce binding requirement after UX fix)
-      walletAddress = overrideWallet;
-    }
     if (!walletAddress) {
-      return new Response(JSON.stringify({ error: 'Wallet address missing (supply walletAddress override with base58)'}), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Wallet address missing'}), { status: 400 });
     }
 
     // Fetch existing progress

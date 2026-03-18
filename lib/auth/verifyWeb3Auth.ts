@@ -1,45 +1,74 @@
-import * as jose from 'jose';
+import * as jose from "jose";
 
-const JWKS_URL = 'https://api-auth.web3auth.io/.well-known/jwks.json';
+const JWKS_URL = "https://api-auth.web3auth.io/.well-known/jwks.json";
 const jwks = jose.createRemoteJWKSet(new URL(JWKS_URL));
+const WEB3AUTH_EXPECTED_AUD = process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID;
+const WEB3AUTH_EXPECTED_ISS = "https://api-auth.web3auth.io";
 
 export interface VerifiedWeb3AuthToken {
   raw: string;
-  payload: any; // refine later
+  payload: any;
+}
+
+function parseCookieHeader(cookieHeader: string | null): Record<string, string> {
+  if (!cookieHeader) return {};
+
+  return Object.fromEntries(
+    cookieHeader
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const index = part.indexOf("=");
+        if (index === -1) return [part, ""];
+        return [part.slice(0, index), part.slice(index + 1)];
+      })
+  );
 }
 
 export async function extractBearerOrCookie(req: Request): Promise<string | null> {
-  const authHeader = req.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) return authHeader.split(' ')[1] || null;
-  const cookieHeader = req.headers.get('cookie');
-  if (cookieHeader) {
-    const cookies = Object.fromEntries(cookieHeader.split(';').map(p => p.trim().split('=')));
-    if (cookies.web3auth_token) return cookies.web3auth_token;
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice("Bearer ".length) || null;
   }
-  return null;
+
+  const cookies = parseCookieHeader(req.headers.get("cookie"));
+  return cookies.web3auth_token || null;
 }
 
 export async function verifyWeb3Auth(req: Request): Promise<VerifiedWeb3AuthToken | null> {
   try {
     const token = await extractBearerOrCookie(req);
     if (!token) return null;
-    const { payload } = await jose.jwtVerify(token, jwks, { algorithms: ['ES256'] });
+
+    const { payload } = await jose.jwtVerify(token, jwks, {
+      algorithms: ["ES256"],
+      issuer: WEB3AUTH_EXPECTED_ISS,
+      audience: WEB3AUTH_EXPECTED_AUD || undefined,
+    });
+
     return { raw: token, payload };
-  } catch (e) {
+  } catch {
     return null;
   }
 }
 
 export function deriveWalletFromPayload(payload: any): string | null {
-  // Different Web3Auth networks / verifiers structure wallet info variably.
-  // Try common shapes; DO NOT treat sub as a Solana address unless it matches base58 length heuristics.
-  const fromArray = payload?.wallets?.[0]?.address;
-  if (typeof fromArray === 'string' && fromArray.length >= 32 && fromArray.length <= 44) return fromArray;
+  const fromWallets = payload?.wallets?.find((wallet: any) => typeof wallet?.address === "string")?.address;
+  if (typeof fromWallets === "string" && isLikelyBase58Address(fromWallets)) {
+    return fromWallets;
+  }
+
   const direct = payload?.walletAddress;
-  if (typeof direct === 'string' && direct.length >= 32 && direct.length <= 44) return direct;
-  // Accept sub only if plausible base58 (basic char whitelist & length) to reduce false positives.
+  if (typeof direct === "string" && isLikelyBase58Address(direct)) {
+    return direct;
+  }
+
   const sub = payload?.sub;
-  if (typeof sub === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sub)) return sub;
+  if (typeof sub === "string" && isLikelyBase58Address(sub)) {
+    return sub;
+  }
+
   return null;
 }
 
