@@ -1,6 +1,6 @@
 ---
-title: "RPC Reads & Account Decoding with Kit"
-description: "Fetch and decode accounts with a clean helper-first pattern using @solana/kit."
+title: "RPC Reads and Account Decoding with Kit"
+description: "Fetch accounts safely with @solana/kit, normalize the result for UI code, and decode account data only after you know what you fetched."
 module: "Solana Kit Clients"
 keywords:
   - "fetchEncodedAccount"
@@ -9,51 +9,57 @@ keywords:
   - "@solana/kit"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+Reading Solana state looks simple until the client starts guessing.
 
-## Step 1: 0-to-1 Theory
+A string that is not a real address gets passed through the UI.
 
-### Primitives
+A missing account is treated like a crash.
 
-- `Address`: typed account identifier
-- `MaybeEncodedAccount`: account that may or may not exist
-- `exists` invariant: always check before decode/use
+Raw bytes get decoded before you even know which program owns them.
 
-### Mental Model
+That is how read paths become brittle.
 
-On Solana, “state” lives inside accounts. An account is just:
+The correct model is:
 
-- `lamports` (SOL balance)
-- `owner` (which program owns the data layout)
-- `data` (raw bytes)
+- fetch first
+- check existence
+- inspect ownership and shape
+- decode only when you know what you are looking at
 
-RPC reads return raw facts. Your client job is to normalize those facts into a UI-safe shape.
+That order matters.
 
-### Invariants
+## What A Read Path Actually Returns
 
-1. A missing account is a valid state, not a runtime surprise.
-2. Fetch and decode are two separate responsibilities.
-3. UI consumes normalized outputs, not raw RPC blobs.
+At the RPC layer, an account is just facts:
 
-### Quick Checks
+- address
+- lamports
+- owner
+- executable flag
+- raw data bytes
 
-1. Why does `exists` matter before decoding?
-2. What bug appears if UI parses raw RPC output directly?
+Those facts are useful on their own.
 
-## Step 2: Real-World Implementation (Code Solution)
+Decoding is a second step.
+
+Do not merge them too early.
+
+## Step 1: Fetch One Account In A Unified Shape
+
+The Kit docs recommend `fetchEncodedAccount(...)` when you want one consistent account shape instead of juggling raw RPC return variants.
 
 Create `lib/solana/rpc.ts`:
 
 ```ts
 import {
   address,
+  assertAccountExists,
   createSolanaRpc,
   fetchEncodedAccount,
   type Address,
 } from "@solana/kit";
 import { SOLANA_RPC } from "@/lib/solana/config";
 
-// Create one RPC client pointing at your configured endpoint (devnet by default).
 const rpc = createSolanaRpc(SOLANA_RPC);
 
 export type AccountView =
@@ -62,52 +68,89 @@ export type AccountView =
       exists: true;
       address: string;
       lamports: string;
-      executable: boolean;
       owner: string;
+      executable: boolean;
       dataLength: number;
     };
 
 export async function fetchAccountView(input: string): Promise<AccountView> {
-  // Convert a string into a strongly typed Address (throws if invalid).
-  const addr = address(input) as Address;
-  // Fetch raw account facts from the RPC endpoint.
-  const account = await fetchEncodedAccount(rpc, addr);
+  const accountAddress = address(input.trim()) as Address;
+  const account = await fetchEncodedAccount(rpc, accountAddress);
 
   if (!account.exists) {
-    // Missing account is a valid result: wrong cluster or account never created.
-    return { exists: false, address: input };
+    return {
+      exists: false,
+      address: input.trim(),
+    };
   }
 
   return {
     exists: true,
-    address: input,
-    // Keep values UI-friendly: convert bigints to strings.
+    address: account.address,
     lamports: account.lamports.toString(),
+    owner: account.owner,
     executable: account.executable,
-    owner: account.owner.toString(),
     dataLength: account.data.length,
   };
 }
+
+export async function fetchExistingEncodedAccount(input: string) {
+  const accountAddress = address(input.trim()) as Address;
+  const account = await fetchEncodedAccount(rpc, accountAddress);
+  assertAccountExists(account);
+  return account;
+}
 ```
 
-Create `components/solana/AccountInspector.tsx`:
+This file teaches the main split:
+
+- `fetchAccountView(...)` is for UI-safe inspection
+- `fetchExistingEncodedAccount(...)` is for flows where missing data should be treated as a real error
+
+That is already a much stronger model than returning raw RPC blobs everywhere.
+
+## Why `exists` Matters
+
+Kit returns a `MaybeEncodedAccount` shape on purpose.
+
+That is not ceremony.
+
+A missing account is normal on Solana.
+
+Examples:
+
+- wrong cluster
+- address copied incorrectly
+- account not created yet
+- PDA derived correctly but not initialized yet
+
+That should not explode your UI by default.
+
+## Step 2: Show The Read Result Without Guessing
+
+Now create `components/solana/AccountInspector.tsx`:
 
 ```tsx
 "use client";
 
 import React, { useState } from "react";
-import { fetchAccountView } from "@/lib/solana/rpc";
+import { fetchAccountView, type AccountView } from "@/lib/solana/rpc";
 
 export function AccountInspector() {
-  const [pubkey, setPubkey] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<AccountView | null>(null);
+  const [error, setError] = useState("");
 
   const onFetch = async () => {
     setLoading(true);
+    setError("");
+
     try {
-      // Trim whitespace so copy/pasted addresses work reliably.
-      setResult(await fetchAccountView(pubkey.trim()));
+      setResult(await fetchAccountView(input));
+    } catch (e: any) {
+      setResult(null);
+      setError(String(e?.message ?? e));
     } finally {
       setLoading(false);
     }
@@ -115,29 +158,106 @@ export function AccountInspector() {
 
   return (
     <div className="space-y-3">
-      <input value={pubkey} onChange={(e) => setPubkey(e.target.value)} className="w-full px-3 py-2 rounded bg-zinc-900" placeholder="Account address" />
-      <button onClick={onFetch} disabled={loading} className="px-3 py-2 rounded bg-cyan-600 text-white">
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        className="w-full px-3 py-2 rounded bg-zinc-900"
+        placeholder="Account address"
+      />
+
+      <button
+        onClick={onFetch}
+        disabled={loading}
+        className="px-3 py-2 rounded bg-cyan-600 text-white"
+      >
         {loading ? "Loading..." : "Fetch account"}
       </button>
-      {/* Show raw JSON so beginners can see what the chain returned. */}
-      {result && <pre className="text-xs bg-zinc-950 p-3 rounded">{JSON.stringify(result, null, 2)}</pre>}
+
+      {error ? <div className="text-xs text-red-300">{error}</div> : null}
+      {result ? (
+        <pre className="text-xs bg-zinc-950 p-3 rounded">
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      ) : null}
     </div>
   );
 }
 ```
 
-Expected result:
+This component is honest.
 
-- existing account returns structured fields
-- unknown account returns `{ exists: false }`
+It does not pretend every lookup succeeds.
 
-## Step 3: Mastery Test
+It does not decode program data blindly.
 
-- Easy: why is `exists: false` better than throwing by default?
-- Medium: how do you batch-fetch many accounts without losing mapping clarity?
-- Hard: how would you cache account reads and invalidate them safely after writes?
+It just shows the chain facts cleanly.
+
+That is the correct first read tool.
+
+## Step 3: Decode Only After You Know The Program
+
+Once you know an account exists and belongs to the program you expect, then decoding makes sense.
+
+For program-specific accounts, the Kit docs and program clients make this easier.
+
+Example with the token program:
+
+```ts
+import { decodeMint } from "@solana-program/token";
+import { fetchExistingEncodedAccount } from "@/lib/solana/rpc";
+
+export async function fetchMintSummary(input: string) {
+  const encodedAccount = await fetchExistingEncodedAccount(input);
+  const mintAccount = decodeMint(encodedAccount);
+
+  return {
+    address: mintAccount.address,
+    lamports: mintAccount.lamports.toString(),
+    decimals: mintAccount.data.decimals,
+    supply: mintAccount.data.supply.toString(),
+  };
+}
+```
+
+Read that in order:
+
+1. fetch the encoded account
+2. assert it exists
+3. decode with the program client helper
+4. normalize again for the UI
+
+That is the safe decoding path.
+
+## The Failure Modes To Avoid
+
+### Decoding before checking ownership
+
+If you decode arbitrary bytes with the wrong codec, your client logic becomes nonsense quickly.
+
+The account may exist and still be the wrong thing.
+
+### Throwing on every missing account
+
+That makes ordinary read states feel like fatal errors.
+
+Use missing-account behavior deliberately.
+
+### Passing raw RPC data straight to components
+
+That leaks transport details into UI code.
+
+Normalize first.
+
+Always.
+
+## What You Can Do After This
+
+You can fetch account data with a stable Kit helper, distinguish missing accounts from real failures, and decode program data only after the read path proves you are looking at the right account.
+
+That is the right base for the transaction-building lessons that come next.
 
 ## Sources
 
 - https://www.solanakit.com/docs/getting-started/fetch-account
+- https://www.solanakit.com/api/functions/fetchEncodedAccount
 - https://solana.com/docs/references/rpc-api
