@@ -1,900 +1,372 @@
 ---
 title: "Collections and String Handling Practice"
-description: "Build an NFT metadata manager and a DEX order book using Rust collections and string processing to practice production patterns common in Solana apps."
+description: "Practice vectors, hash maps, strings, and parsing by building one transaction log analyzer in Rust."
 type: challenge
 module: "Rust Foundations"
-keywords: ["nft metadata", "dex order book", "collections", "string processing", "solana apps"]
+keywords: ["collections", "strings", "hashmap", "vector", "parsing", "rust practice"]
 ---
 
-import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 import { Callout } from 'fumadocs-ui/components/callout';
 
+This practice page should not split your attention across multiple projects.
+
+It should give you one realistic program that forces the collections lesson to become usable.
+
+That is what this page does.
+
 <Callout type="info">
-**Challenge Mission: Real-World Applications**
+The project is small on purpose.
 
-Build two production-ready systems that showcase advanced collection and string handling: an NFT metadata manager for digital assets and a DEX order book for trading operations. These challenges mirror real Solana dApp requirements!
+If you can store records, parse input, group totals, and answer simple queries without getting lost, then this section is doing its job.
 </Callout>
 
----
+## The Project
 
-## Challenge 1: NFT Metadata Manager
+Build a transaction log analyzer.
 
-Build a comprehensive NFT metadata management system that can process, validate, and organize NFT collections.
+The program will read a small list of text commands like these:
 
-<MermaidWithZoom 
-  chart={`
-graph TD
-    A[NFTMetadataManager] --> B[collections: HashMap String Collection]
-    A --> C[nfts: HashMap String NFTMetadata]
-    A --> D[attributes: HashMap String Vec String]
-    A --> E[rarity_scores: BTreeMap String f64]
-    
-    F[Collection] --> G[name: String]
-    F --> H[symbol: String]
-    F --> I[description: String]
-    F --> J[total_supply: u32]
-    F --> K[floor_price: Option u64]
-    
-    L[NFTMetadata] --> M[name: String]
-    L --> N[description: String]
-    L --> O[image_url: String]
-    L --> P[attributes: Vec Attribute]
-    L --> Q[collection_id: String]
-    L --> R[mint_address: String]
-    
-    S[Attribute] --> T[trait_type: String]
-    S --> U[value: String]
-    S --> V[rarity_percentage: Option f64]
-    
-    style A fill:#e1f5fe
-    style F fill:#f3e5f5
-    style L fill:#e8f5e8
-    style S fill:#fff3e0
-  `}
-  title="NFT Metadata Manager Architecture"
-/>
-
-### Core Data Structures
-
-```rust
-use std::collections::{HashMap, BTreeMap, HashSet};
-
-#[derive(Debug, Clone)]
-struct Attribute {
-    trait_type: String,
-    value: String,
-    rarity_percentage: Option<f64>,
-}
-
-#[derive(Debug, Clone)]
-struct NFTMetadata {
-    name: String,
-    description: String,
-    image_url: String,
-    external_url: Option<String>,
-    attributes: Vec<Attribute>,
-    collection_id: String,
-    mint_address: String,
-    creator: String,
-    created_at: u64,
-}
-
-#[derive(Debug, Clone)]
-struct Collection {
-    id: String,
-    name: String,
-    symbol: String,
-    description: String,
-    image_url: String,
-    total_supply: u32,
-    floor_price: Option<u64>,
-    creator: String,
-    verified: bool,
-}
-
-#[derive(Debug)]
-enum MetadataError {
-    CollectionNotFound(String),
-    NFTNotFound(String),
-    InvalidImageUrl(String),
-    DuplicateMint(String),
-    InvalidAttribute(String),
-    ParsingError(String),
-}
-
-#[derive(Debug)]
-struct RarityAnalysis {
-    total_nfts: u32,
-    attribute_counts: HashMap<String, HashMap<String, u32>>,
-    rarity_scores: HashMap<String, f64>,
-}
-
-struct NFTMetadataManager {
-    collections: HashMap<String, Collection>,
-    nfts: HashMap<String, NFTMetadata>, // mint_address -> metadata
-    collection_nfts: HashMap<String, Vec<String>>, // collection_id -> mint_addresses
-    attribute_index: HashMap<String, HashMap<String, Vec<String>>>, // trait_type -> value -> mint_addresses
-}
+```text
+send alice bob 500
+send bob carol 200
+send alice dave 300
+send carol alice 100
 ```
 
-### Implementation Requirements
+Then it will:
+
+- parse each line
+- store every valid transfer in a `Vec<Transfer>`
+- calculate per-wallet totals with `HashMap<String, u64>`
+- print a readable summary
+
+This is the right project for this lesson because it uses the exact skills you just learned:
+
+- `Vec<T>` for ordered history
+- `HashMap<K, V>` for lookup and aggregation
+- `String` for owned stored data
+- `&str` for borrowed parsing input
+- `split_whitespace`, `parse`, and `trim` for text processing
+
+## What You Are Proving
+
+By the end, you should be able to explain:
+
+- why the transfer history belongs in a vector
+- why per-wallet totals belong in a hash map
+- why parsed input starts as `&str` and later becomes `String`
+- where ownership is required and where borrowing is enough
+
+If you cannot explain those four things, the code is not the real win yet.
+
+## Step 1: Define The Core Type
+
+Start with one struct.
 
 ```rust
-impl NFTMetadataManager {
-    fn new() -> Self {
-        // TODO: Initialize all data structures
-        todo!()
-    }
-    
-    // === Collection Management ===
-    
-    fn create_collection(&mut self, collection: Collection) -> Result<(), MetadataError> {
-        // TODO: Add collection with validation
-        // - Check for duplicate collection IDs
-        // - Validate required fields
-        todo!()
-    }
-    
-    fn get_collection(&self, collection_id: &str) -> Result<&Collection, MetadataError> {
-        // TODO: Retrieve collection by ID
-        todo!()
-    }
-    
-    fn update_collection_floor_price(&mut self, collection_id: &str, price: u64) -> Result<(), MetadataError> {
-        // TODO: Update floor price for collection
-        todo!()
-    }
-    
-    // === NFT Management ===
-    
-    fn add_nft(&mut self, nft: NFTMetadata) -> Result<(), MetadataError> {
-        // TODO: Add NFT with comprehensive validation
-        // - Validate mint address format
-        // - Check collection exists
-        // - Validate image URL format
-        // - Check for duplicate mint addresses
-        // - Update indices
-        todo!()
-    }
-    
-    fn get_nft(&self, mint_address: &str) -> Result<&NFTMetadata, MetadataError> {
-        // TODO: Retrieve NFT by mint address
-        todo!()
-    }
-    
-    fn update_nft_metadata(&mut self, mint_address: &str, new_metadata: NFTMetadata) -> Result<(), MetadataError> {
-        // TODO: Update existing NFT metadata
-        // - Rebuild indices if attributes changed
-        todo!()
-    }
-    
-    fn delete_nft(&mut self, mint_address: &str) -> Result<NFTMetadata, MetadataError> {
-        // TODO: Remove NFT and clean up indices
-        todo!()
-    }
-    
-    // === Search and Filter Operations ===
-    
-    fn get_nfts_by_collection(&self, collection_id: &str) -> Result<Vec<&NFTMetadata>, MetadataError> {
-        // TODO: Get all NFTs in a collection
-        todo!()
-    }
-    
-    fn search_nfts_by_name(&self, query: &str) -> Vec<&NFTMetadata> {
-        // TODO: Search NFTs by name (case-insensitive, partial match)
-        todo!()
-    }
-    
-    fn filter_by_attributes(&self, filters: Vec<(&str, &str)>) -> Vec<&NFTMetadata> {
-        // TODO: Filter NFTs by multiple attributes
-        // Example: [("Background", "Blue"), ("Eyes", "Laser")]
-        todo!()
-    }
-    
-    fn get_nfts_by_creator(&self, creator: &str) -> Vec<&NFTMetadata> {
-        // TODO: Get all NFTs by creator
-        todo!()
-    }
-    
-    fn get_nfts_with_trait(&self, trait_type: &str, value: &str) -> Vec<&NFTMetadata> {
-        // TODO: Get NFTs with specific trait value
-        todo!()
-    }
-    
-    // === Rarity Analysis ===
-    
-    fn calculate_rarity_scores(&mut self, collection_id: &str) -> Result<RarityAnalysis, MetadataError> {
-        // TODO: Calculate rarity scores for all NFTs in collection
-        // - Count frequency of each attribute value
-        // - Calculate rarity percentage for each attribute
-        // - Compute overall rarity score for each NFT
-        todo!()
-    }
-    
-    fn get_rarest_nfts(&self, collection_id: &str, limit: usize) -> Result<Vec<&NFTMetadata>, MetadataError> {
-        // TODO: Get the rarest NFTs in collection (requires rarity calculation first)
-        todo!()
-    }
-    
-    fn get_attribute_distribution(&self, collection_id: &str, trait_type: &str) -> Result<HashMap<String, u32>, MetadataError> {
-        // TODO: Get distribution of values for a specific trait type
-        todo!()
-    }
-    
-    // === Metadata Processing ===
-    
-    fn parse_metadata_json(&self, json_str: &str) -> Result<NFTMetadata, MetadataError> {
-        // TODO: Parse NFT metadata from JSON string
-        // Handle various JSON formats and validate required fields
-        todo!()
-    }
-    
-    fn validate_image_url(&self, url: &str) -> Result<(), MetadataError> {
-        // TODO: Validate image URL format and accessibility
-        // Check for common image extensions and valid URL format
-        todo!()
-    }
-    
-    fn sanitize_attribute_value(&self, value: &str) -> String {
-        // TODO: Clean and normalize attribute values
-        // - Trim whitespace
-        // - Convert to consistent case
-        // - Remove special characters if needed
-        todo!()
-    }
-    
-    // === Batch Operations ===
-    
-    fn bulk_import_collection(&mut self, collection: Collection, metadata_list: Vec<NFTMetadata>) -> Result<(u32, Vec<String>), MetadataError> {
-        // TODO: Import entire collection with batch processing
-        // Return (successful_count, error_messages)
-        todo!()
-    }
-    
-    fn export_collection_metadata(&self, collection_id: &str) -> Result<String, MetadataError> {
-        // TODO: Export collection metadata as JSON
-        todo!()
-    }
-    
-    // === Statistics and Analytics ===
-    
-    fn get_collection_stats(&self, collection_id: &str) -> Result<CollectionStats, MetadataError> {
-        // TODO: Generate comprehensive collection statistics
-        todo!()
-    }
-    
-    fn find_incomplete_metadata(&self) -> Vec<&NFTMetadata> {
-        // TODO: Find NFTs with missing or incomplete metadata
-        // Check for missing descriptions, invalid URLs, empty attributes
-        todo!()
-    }
-    
-    fn get_top_attributes(&self, collection_id: &str, limit: usize) -> Result<Vec<(String, u32)>, MetadataError> {
-        // TODO: Get most common trait types in collection
-        todo!()
-    }
-}
-
-#[derive(Debug)]
-struct CollectionStats {
-    total_nfts: u32,
-    unique_attributes: u32,
-    most_common_trait: (String, String, u32), // trait_type, value, count
-    rarest_trait: (String, String, u32),
-    average_attribute_count: f64,
-    creators_count: u32,
-}
-```
-
----
-
-## Challenge 2: DEX Order Book
-
-Build a decentralized exchange order book system for managing trading pairs and orders.
-
-<MermaidWithZoom 
-  chart={`
-graph TD
-    A[DEXOrderBook] --> B[trading_pairs: HashMap String TradingPair]
-    A --> C[orders: HashMap String Order]
-    A --> D[user_orders: HashMap String Vec String]
-    A --> E[order_history: Vec Trade]
-    
-    F[TradingPair] --> G[base_token: String]
-    F --> H[quote_token: String]
-    F --> I[buy_orders: BTreeMap u64 Vec String]
-    F --> J[sell_orders: BTreeMap u64 Vec String]
-    F --> K[last_price: Option u64]
-    F --> L[volume_24h: u64]
-    
-    M[Order] --> N[id: String]
-    M --> O[user: String]
-    M --> P[pair: String]
-    M --> Q[side: OrderSide]
-    M --> R[amount: u64]
-    M --> S[price: u64]
-    M --> T[status: OrderStatus]
-    
-    U[Trade] --> V[buy_order_id: String]
-    U --> W[sell_order_id: String]
-    U --> X[amount: u64]
-    U --> Y[price: u64]
-    U --> Z[timestamp: u64]
-    
-    style A fill:#e1f5fe
-    style F fill:#f3e5f5
-    style M fill:#e8f5e8
-    style U fill:#fff3e0
-  `}
-  title="DEX Order Book Architecture"
-/>
-
-### Core Data Structures
-
-```rust
-use std::collections::{HashMap, BTreeMap, VecDeque};
-
-#[derive(Debug, Clone, PartialEq)]
-enum OrderSide {
-    Buy,
-    Sell,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-enum OrderStatus {
-    Open,
-    PartiallyFilled { filled_amount: u64 },
-    Filled,
-    Cancelled,
-    Expired,
-}
-
 #[derive(Debug, Clone)]
-struct Order {
-    id: String,
-    user: String,
-    trading_pair: String,
-    side: OrderSide,
+struct Transfer {
+    from: String,
+    to: String,
     amount: u64,
-    price: u64, // Price in smallest unit (like lamports)
-    filled_amount: u64,
-    status: OrderStatus,
-    created_at: u64,
-    expires_at: Option<u64>,
-}
-
-#[derive(Debug, Clone)]
-struct Trade {
-    id: String,
-    trading_pair: String,
-    buy_order_id: String,
-    sell_order_id: String,
-    amount: u64,
-    price: u64,
-    buyer: String,
-    seller: String,
-    timestamp: u64,
-}
-
-#[derive(Debug)]
-struct TradingPair {
-    base_token: String,
-    quote_token: String,
-    // Price-sorted order books (price -> order_ids)
-    buy_orders: BTreeMap<u64, Vec<String>>,  // Highest price first
-    sell_orders: BTreeMap<u64, Vec<String>>, // Lowest price first
-    last_price: Option<u64>,
-    volume_24h: u64,
-    high_24h: Option<u64>,
-    low_24h: Option<u64>,
-}
-
-#[derive(Debug)]
-enum OrderBookError {
-    TradingPairNotFound(String),
-    OrderNotFound(String),
-    InsufficientBalance,
-    InvalidPrice,
-    InvalidAmount,
-    OrderExpired,
-    UnauthorizedOperation,
-    DuplicateOrder(String),
-}
-
-#[derive(Debug)]
-struct MarketData {
-    price: u64,
-    volume_24h: u64,
-    price_change_24h: i64, // Can be negative
-    high_24h: u64,
-    low_24h: u64,
-    trades_count_24h: u32,
-}
-
-struct DEXOrderBook {
-    trading_pairs: HashMap<String, TradingPair>,
-    orders: HashMap<String, Order>,
-    user_orders: HashMap<String, Vec<String>>, // user -> order_ids
-    trade_history: Vec<Trade>,
-    user_balances: HashMap<String, HashMap<String, u64>>, // user -> token -> balance
-    current_timestamp: u64,
 }
 ```
 
-### Implementation Requirements
+This struct is intentionally small.
+
+You do not need timestamps, memo fields, signatures, token metadata, or network state.
+
+Those would only distract from the collections lesson.
+
+## Step 2: Parse One Line Correctly
+
+Write one function that turns a command line into a `Transfer`.
 
 ```rust
-impl DEXOrderBook {
-    fn new() -> Self {
-        // TODO: Initialize all data structures
-        todo!()
-    }
-    
-    // === Trading Pair Management ===
-    
-    fn create_trading_pair(&mut self, base_token: String, quote_token: String) -> Result<String, OrderBookError> {
-        // TODO: Create new trading pair
-        // - Generate pair ID (e.g., "SOL/USDC")
-        // - Validate token symbols
-        // - Check for duplicates
-        todo!()
-    }
-    
-    fn get_trading_pairs(&self) -> Vec<&String> {
-        // TODO: Get all available trading pairs
-        todo!()
-    }
-    
-    fn get_market_data(&self, pair: &str) -> Result<MarketData, OrderBookError> {
-        // TODO: Calculate and return market data for trading pair
-        todo!()
-    }
-    
-    // === Order Management ===
-    
-    fn place_order(&mut self, user: String, pair: String, side: OrderSide, amount: u64, price: u64) -> Result<String, OrderBookError> {
-        // TODO: Place new order with comprehensive validation
-        // - Validate trading pair exists
-        // - Check user balance
-        // - Generate unique order ID
-        // - Add to order book
-        // - Try to match immediately
-        // - Return order ID
-        todo!()
-    }
-    
-    fn cancel_order(&mut self, order_id: &str, user: &str) -> Result<Order, OrderBookError> {
-        // TODO: Cancel order with authorization check
-        // - Verify user owns the order
-        // - Remove from order book
-        // - Update status
-        // - Refund any reserved balance
-        todo!()
-    }
-    
-    fn get_order(&self, order_id: &str) -> Result<&Order, OrderBookError> {
-        // TODO: Retrieve order by ID
-        todo!()
-    }
-    
-    fn get_user_orders(&self, user: &str) -> Vec<&Order> {
-        // TODO: Get all orders for a user
-        todo!()
-    }
-    
-    fn get_open_orders(&self, user: &str) -> Vec<&Order> {
-        // TODO: Get only open orders for a user
-        todo!()
-    }
-    
-    // === Order Book Operations ===
-    
-    fn get_order_book(&self, pair: &str, depth: usize) -> Result<(Vec<(u64, u64)>, Vec<(u64, u64)>), OrderBookError> {
-        // TODO: Get order book depth
-        // Returns (buy_orders, sell_orders) as (price, total_amount) pairs
-        // Sorted by best prices first
-        todo!()
-    }
-    
-    fn get_best_bid(&self, pair: &str) -> Result<Option<u64>, OrderBookError> {
-        // TODO: Get highest buy price
-        todo!()
-    }
-    
-    fn get_best_ask(&self, pair: &str) -> Result<Option<u64>, OrderBookError> {
-        // TODO: Get lowest sell price
-        todo!()
-    }
-    
-    fn get_spread(&self, pair: &str) -> Result<Option<u64>, OrderBookError> {
-        // TODO: Calculate bid-ask spread
-        todo!()
-    }
-    
-    // === Matching Engine ===
-    
-    fn match_orders(&mut self, pair: &str) -> Result<Vec<Trade>, OrderBookError> {
-        // TODO: Implement order matching algorithm
-        // - Match buy orders with sell orders
-        // - Execute trades at appropriate prices
-        // - Update order statuses
-        // - Generate trade records
-        // - Update balances
-        todo!()
-    }
-    
-    fn execute_trade(&mut self, buy_order_id: &str, sell_order_id: &str, amount: u64, price: u64) -> Result<Trade, OrderBookError> {
-        // TODO: Execute a single trade between two orders
-        // - Update order filled amounts
-        // - Update order statuses
-        // - Transfer balances
-        // - Create trade record
-        todo!()
-    }
-    
-    // === Balance Management ===
-    
-    fn deposit(&mut self, user: String, token: String, amount: u64) -> Result<(), OrderBookError> {
-        // TODO: Add tokens to user balance
-        todo!()
-    }
-    
-    fn withdraw(&mut self, user: &str, token: &str, amount: u64) -> Result<(), OrderBookError> {
-        // TODO: Remove tokens from user balance
-        // - Check sufficient balance
-        // - Account for reserved amounts in open orders
-        todo!()
-    }
-    
-    fn get_balance(&self, user: &str, token: &str) -> u64 {
-        // TODO: Get user's available balance for token
-        todo!()
-    }
-    
-    fn get_reserved_balance(&self, user: &str, token: &str) -> u64 {
-        // TODO: Get user's reserved balance (in open orders)
-        todo!()
-    }
-    
-    // === Market Analysis ===
-    
-    fn get_price_history(&self, pair: &str, hours: u64) -> Result<Vec<(u64, u64)>, OrderBookError> {
-        // TODO: Get price history as (timestamp, price) pairs
-        todo!()
-    }
-    
-    fn get_volume_analysis(&self, pair: &str) -> Result<VolumeAnalysis, OrderBookError> {
-        // TODO: Analyze trading volume patterns
-        todo!()
-    }
-    
-    fn get_trade_history(&self, pair: &str, limit: usize) -> Result<Vec<&Trade>, OrderBookError> {
-        // TODO: Get recent trades for pair
-        todo!()
-    }
-    
-    fn get_user_trade_history(&self, user: &str, limit: usize) -> Vec<&Trade> {
-        // TODO: Get user's trade history
-        todo!()
-    }
-    
-    // === Order Book Maintenance ===
-    
-    fn expire_orders(&mut self) -> u32 {
-        // TODO: Remove expired orders
-        // - Check all orders against current timestamp
-        // - Cancel expired orders
-        // - Refund balances
-        // - Return count of expired orders
-        todo!()
-    }
-    
-    fn cleanup_filled_orders(&mut self, older_than_hours: u64) -> u32 {
-        // TODO: Archive old filled orders
-        todo!()
-    }
-    
-    fn advance_time(&mut self, new_timestamp: u64) {
-        // TODO: Update current timestamp and expire orders
-        self.current_timestamp = new_timestamp;
-        self.expire_orders();
-    }
-    
-    // === Analytics and Reporting ===
-    
-    fn generate_market_summary(&self) -> MarketSummary {
-        // TODO: Generate comprehensive market summary
-        todo!()
-    }
-    
-    fn get_top_traders(&self, limit: usize) -> Vec<(String, u64)> {
-        // TODO: Get users with highest trading volume
-        todo!()
-    }
-    
-    fn calculate_liquidity(&self, pair: &str) -> Result<LiquidityMetrics, OrderBookError> {
-        // TODO: Calculate liquidity metrics for trading pair
-        todo!()
-    }
-}
+fn parse_transfer(line: &str) -> Result<Transfer, String> {
+    let parts: Vec<&str> = line.split_whitespace().collect();
 
-#[derive(Debug)]
-struct VolumeAnalysis {
-    total_volume_24h: u64,
-    buy_volume_24h: u64,
-    sell_volume_24h: u64,
-    trades_count_24h: u32,
-    average_trade_size: u64,
-    largest_trade_24h: u64,
-}
+    if parts.len() != 4 {
+        return Err(String::from("expected format: send <from> <to> <amount>"));
+    }
 
-#[derive(Debug)]
-struct MarketSummary {
-    total_trading_pairs: usize,
-    total_orders: usize,
-    total_trades_24h: usize,
-    total_volume_24h: u64,
-    most_active_pair: String,
-    total_users: usize,
-}
+    if parts[0] != "send" {
+        return Err(String::from("command must start with 'send'"));
+    }
 
-#[derive(Debug)]
-struct LiquidityMetrics {
-    bid_liquidity: u64,     // Total buy order value
-    ask_liquidity: u64,     // Total sell order value
-    spread_percentage: f64,
-    depth_10_percent: u64,  // Liquidity within 10% of best price
+    let amount = parts[3]
+        .parse::<u64>()
+        .map_err(|_| String::from("amount must be a positive integer"))?;
+
+    Ok(Transfer {
+        from: parts[1].to_string(),
+        to: parts[2].to_string(),
+        amount,
+    })
 }
 ```
 
----
+### What this step teaches
 
-## Testing Your Implementations
+- `line` is borrowed as `&str` because parsing does not require ownership of the whole input
+- `parts` becomes `Vec<&str>` because `split_whitespace` borrows slices from the original line
+- `from` and `to` become `String` because the `Transfer` struct needs to own them after parsing finishes
 
-### NFT Metadata Manager Test
+That ownership shift matters.
+
+It is the main string-handling idea in this practice.
+
+## Step 3: Store Every Parsed Transfer In A Vector
+
+Now use a vector as the ordered history.
 
 ```rust
-fn test_nft_metadata_manager() {
-    let mut manager = NFTMetadataManager::new();
-    
-    // Test 1: Create collection
-    let collection = Collection {
-        id: "solana_monkeys".to_string(),
-        name: "Solana Monkeys".to_string(),
-        symbol: "SMB".to_string(),
-        description: "A collection of unique monkey NFTs on Solana".to_string(),
-        image_url: "https://example.com/collection.png".to_string(),
-        total_supply: 10000,
-        floor_price: Some(1000000), // 1 SOL in lamports
-        creator: "creator_wallet_address".to_string(),
-        verified: true,
-    };
-    
-    manager.create_collection(collection).expect("Failed to create collection");
-    
-    // Test 2: Add NFTs
-    for i in 1..=5 {
-        let nft = NFTMetadata {
-            name: format!("Monkey #{}", i),
-            description: format!("A unique monkey #{}", i),
-            image_url: format!("https://example.com/monkey_{}.png", i),
-            external_url: Some("https://solanmonkeys.com".to_string()),
-            attributes: vec![
-                Attribute {
-                    trait_type: "Background".to_string(),
-                    value: if i % 2 == 0 { "Blue".to_string() } else { "Red".to_string() },
-                    rarity_percentage: None,
-                },
-                Attribute {
-                    trait_type: "Eyes".to_string(),
-                    value: if i <= 2 { "Laser".to_string() } else { "Normal".to_string() },
-                    rarity_percentage: None,
-                },
-            ],
-            collection_id: "solana_monkeys".to_string(),
-            mint_address: format!("monkey_mint_{}", i),
-            creator: "creator_wallet_address".to_string(),
-            created_at: 1640000000 + i as u64,
-        };
-        
-        manager.add_nft(nft).expect("Failed to add NFT");
+fn main() {
+    let input = vec![
+        "send alice bob 500",
+        "send bob carol 200",
+        "send alice dave 300",
+        "send carol alice 100",
+    ];
+
+    let mut transfers: Vec<Transfer> = Vec::new();
+
+    for line in input {
+        match parse_transfer(line) {
+            Ok(transfer) => transfers.push(transfer),
+            Err(error) => println!("skipping line: {} | {}", line, error),
+        }
     }
-    
-    // Test 3: Search and filter
-    let laser_eyes = manager.get_nfts_with_trait("Eyes", "Laser");
-    println!("NFTs with laser eyes: {}", laser_eyes.len());
-    
-    let blue_background = manager.filter_by_attributes(vec![("Background", "Blue")]);
-    println!("NFTs with blue background: {}", blue_background.len());
-    
-    // Test 4: Rarity analysis
-    let rarity_analysis = manager.calculate_rarity_scores("solana_monkeys")
-        .expect("Failed to calculate rarity");
-    println!("Rarity analysis: {:#?}", rarity_analysis);
-    
-    // Test 5: Collection stats
-    let stats = manager.get_collection_stats("solana_monkeys")
-        .expect("Failed to get collection stats");
-    println!("Collection stats: {:#?}", stats);
+
+    println!("parsed transfers: {:?}", transfers);
 }
 ```
 
-### DEX Order Book Test
+A vector is the right tool here because:
+
+- order matters
+- you want to keep every record
+- you want to iterate through the whole history later
+
+## Step 4: Build A Hash Map For Totals Sent
+
+Now aggregate the transfers by sender.
 
 ```rust
-fn test_dex_order_book() {
-    let mut dex = DEXOrderBook::new();
-    
-    // Test 1: Create trading pair
-    let pair_id = dex.create_trading_pair("SOL".to_string(), "USDC".to_string())
-        .expect("Failed to create trading pair");
-    println!("Created trading pair: {}", pair_id);
-    
-    // Test 2: Add user balances
-    dex.deposit("alice".to_string(), "SOL".to_string(), 10_000_000_000) // 10 SOL
-        .expect("Failed to deposit SOL for Alice");
-    dex.deposit("bob".to_string(), "USDC".to_string(), 1000_000_000) // 1000 USDC
-        .expect("Failed to deposit USDC for Bob");
-    
-    // Test 3: Place orders
-    let buy_order = dex.place_order(
-        "bob".to_string(),
-        pair_id.clone(),
-        OrderSide::Buy,
-        1_000_000_000, // 1 SOL
-        95_000_000,    // 95 USDC
-    ).expect("Failed to place buy order");
-    
-    let sell_order = dex.place_order(
-        "alice".to_string(),
-        pair_id.clone(),
-        OrderSide::Sell,
-        1_000_000_000, // 1 SOL
-        100_000_000,   // 100 USDC
-    ).expect("Failed to place sell order");
-    
-    println!("Placed buy order: {}", buy_order);
-    println!("Placed sell order: {}", sell_order);
-    
-    // Test 4: Check order book
-    let (bids, asks) = dex.get_order_book(&pair_id, 10)
-        .expect("Failed to get order book");
-    
-    println!("Order book bids: {:?}", bids);
-    println!("Order book asks: {:?}", asks);
-    
-    // Test 5: Place matching order
-    let matching_buy = dex.place_order(
-        "bob".to_string(),
-        pair_id.clone(),
-        OrderSide::Buy,
-        500_000_000,  // 0.5 SOL
-        100_000_000,  // 100 USDC (matches Alice's ask)
-    ).expect("Failed to place matching buy order");
-    
-    // Test 6: Check if trade occurred
-    let trades = dex.get_trade_history(&pair_id, 10)
-        .expect("Failed to get trade history");
-    
-    println!("Recent trades: {:#?}", trades);
-    
-    // Test 7: Check updated balances
-    println!("Alice SOL balance: {}", dex.get_balance("alice", "SOL"));
-    println!("Alice USDC balance: {}", dex.get_balance("alice", "USDC"));
-    println!("Bob SOL balance: {}", dex.get_balance("bob", "SOL"));
-    println!("Bob USDC balance: {}", dex.get_balance("bob", "USDC"));
-    
-    // Test 8: Market data
-    let market_data = dex.get_market_data(&pair_id)
-        .expect("Failed to get market data");
-    println!("Market data: {:#?}", market_data);
+use std::collections::HashMap;
+
+fn totals_sent(transfers: &[Transfer]) -> HashMap<String, u64> {
+    let mut totals = HashMap::new();
+
+    for transfer in transfers {
+        *totals.entry(transfer.from.clone()).or_insert(0) += transfer.amount;
+    }
+
+    totals
 }
 ```
 
----
+### Why the hash map belongs here
 
-## Success Criteria
+A vector is good for the raw history.
 
-Your implementations should demonstrate:
+A hash map is better for questions like:
 
-### NFT Metadata Manager
-- **Efficient searching and filtering** using HashMap and BTreeMap indices
-- **Comprehensive rarity analysis** with statistical calculations
-- **Robust metadata validation** and parsing
-- **Batch operations** for large collections
-- **String processing excellence** for attribute normalization
+- how much did Alice send in total
+- how much did Bob send in total
 
-### DEX Order Book
-- **Real-time order matching** with price-time priority
-- **Accurate balance management** with reservation system
-- **Market data calculations** including spreads and volume
-- **Order book depth** with efficient price sorting
-- **Trade execution** with proper balance updates
+That is keyed lookup.
 
-### Both Systems
-- **Memory efficiency** with optimal collection usage
-- **Error handling** with comprehensive error types
-- **Thread safety considerations** (bonus: make it thread-safe)
-- **Performance optimization** for large datasets
-- **Clean API design** with intuitive method names
+That is what `HashMap` is for.
 
----
+## Step 5: Build A Hash Map For Totals Received
 
-## Bonus Challenges
+Do the same thing for recipients.
 
-### Bonus 1: Cross-Platform Integration
 ```rust
-// Add JSON import/export for both systems
-impl NFTMetadataManager {
-    fn import_opensea_collection(&mut self, json_data: &str) -> Result<String, MetadataError> {
-        // Parse OpenSea API format
-        todo!()
-    }
-    
-    fn export_to_arweave_format(&self, collection_id: &str) -> Result<String, MetadataError> {
-        // Export in Arweave metadata standard
-        todo!()
-    }
-}
+use std::collections::HashMap;
 
-impl DEXOrderBook {
-    fn import_jupiter_liquidity(&mut self, pair: &str, data: &str) -> Result<(), OrderBookError> {
-        // Import liquidity data from Jupiter aggregator format
-        todo!()
+fn totals_received(transfers: &[Transfer]) -> HashMap<String, u64> {
+    let mut totals = HashMap::new();
+
+    for transfer in transfers {
+        *totals.entry(transfer.to.clone()).or_insert(0) += transfer.amount;
     }
+
+    totals
 }
 ```
 
-### Bonus 2: Advanced Analytics
+This is a good checkpoint.
+
+You now have:
+
+- one vector for the full history
+- one hash map for sent totals
+- one hash map for received totals
+
+That is exactly the kind of separation a real program needs.
+
+## Step 6: Print A Useful Summary
+
+Now make the program produce something readable.
+
 ```rust
-// Add sophisticated analysis features
-impl NFTMetadataManager {
-    fn predict_rarity_trends(&self, collection_id: &str) -> RarityTrends {
-        // Analyze rarity distribution patterns
-        todo!()
-    }
-    
-    fn find_similar_nfts(&self, mint_address: &str, threshold: f64) -> Vec<&NFTMetadata> {
-        // Find NFTs with similar attribute combinations
-        todo!()
-    }
-}
+fn main() {
+    let input = vec![
+        "send alice bob 500",
+        "send bob carol 200",
+        "send alice dave 300",
+        "send carol alice 100",
+    ];
 
-impl DEXOrderBook {
-    fn calculate_market_maker_metrics(&self, user: &str) -> MarketMakerMetrics {
-        // Analyze user's market making performance
-        todo!()
+    let mut transfers: Vec<Transfer> = Vec::new();
+
+    for line in input {
+        match parse_transfer(line) {
+            Ok(transfer) => transfers.push(transfer),
+            Err(error) => println!("skipping line: {} | {}", line, error),
+        }
     }
-    
-    fn detect_arbitrage_opportunities(&self) -> Vec<ArbitrageOpportunity> {
-        // Find price discrepancies across pairs
-        todo!()
-    }
+
+    let sent = totals_sent(&transfers);
+    let received = totals_received(&transfers);
+
+    println!("transfers parsed: {}", transfers.len());
+    println!("totals sent: {:?}", sent);
+    println!("totals received: {:?}", received);
 }
 ```
 
-### Bonus 3: Performance Optimization
+You can improve the formatting later.
+
+At this stage, correctness matters more than pretty output.
+
+## Step 7: Add One Real Query Function
+
+Make one helper that answers a practical question.
+
 ```rust
-// Add caching and optimization layers
-use std::collections::LRU;
-
-struct OptimizedNFTManager {
-    manager: NFTMetadataManager,
-    search_cache: LRU<String, Vec<String>>, // query -> results
-    rarity_cache: LRU<String, RarityAnalysis>,
-}
-
-struct OptimizedDEX {
-    dex: DEXOrderBook,
-    price_cache: LRU<String, MarketData>,
-    order_book_cache: LRU<String, (Vec<(u64, u64)>, Vec<(u64, u64)>)>,
+fn transfers_for_wallet<'a>(transfers: &'a [Transfer], wallet: &str) -> Vec<&'a Transfer> {
+    transfers
+        .iter()
+        .filter(|transfer| transfer.from == wallet || transfer.to == wallet)
+        .collect()
 }
 ```
 
-<Callout type="success">
-**Production-Ready Skills!**
+This proves another useful distinction:
 
-These challenges mirror real-world Solana applications. NFT metadata management is crucial for marketplace dApps, while DEX order books power trading platforms. Mastering these patterns prepares you for building production Solana applications!
-</Callout>
+- the history vector owns `Transfer` values
+- the query result can return `&Transfer` references because it only borrows from the history
 
-**Ready for the next phase?** Tomorrow we'll cover **Error Handling and Code Organization** - the keys to building maintainable Solana programs!
+That is a good ownership decision.
+
+You do not need to clone the whole history just to answer one query.
+
+## Step 8: Handle Bad Input On Purpose
+
+A practice project is weak if every line is valid.
+
+Add bad input and make sure your parser behaves correctly.
+
+```rust
+let input = vec![
+    "send alice bob 500",
+    "send bob carol two_hundred",
+    "deposit alice 400",
+    "send carol alice 100",
+];
+```
+
+What should happen:
+
+- valid `send` commands become `Transfer` records
+- invalid lines do not panic the program
+- invalid lines report a clear reason and get skipped
+
+That is a much stronger exercise than just parsing the happy path.
+
+## Suggested Build Order
+
+Use this order and do not rush it:
+
+1. write `Transfer`
+2. write `parse_transfer`
+3. parse a few valid lines into `Vec<Transfer>`
+4. add one invalid line and verify the error path
+5. write `totals_sent`
+6. write `totals_received`
+7. write `transfers_for_wallet`
+8. print one full summary
+
+That order keeps the difficulty under control.
+
+## Common Mistakes
+
+### Mistake 1: using a hash map for the raw history
+
+If you store the transaction log itself in a hash map, you lose the simple ordered record list.
+
+The history is a vector.
+
+The summary lookups are hash maps.
+
+### Mistake 2: converting everything to `String` too early
+
+When parsing, borrowed `&str` pieces are fine for temporary work.
+
+Only convert to `String` when the final stored struct needs ownership.
+
+### Mistake 3: cloning more than necessary
+
+If a function only needs to read transfers, borrow `&[Transfer]`.
+
+Do not clone the whole vector just because borrowing feels harder.
+
+### Mistake 4: mixing parsing logic with summary logic too early
+
+First parse the input.
+
+Then aggregate.
+
+Then print results.
+
+If all three happen in one tangled block, the lesson gets harder than it needs to be.
+
+## What A Good Finished Version Looks Like
+
+By the end, your program should:
+
+- parse a list of transfer commands
+- skip invalid lines safely
+- store valid transfers in order
+- compute total sent per wallet
+- compute total received per wallet
+- answer at least one query for a specific wallet
+
+That is enough.
+
+If you can do that cleanly, you understand the point of this lesson.
+
+## Optional Extension
+
+Only add this after the main version is clean.
+
+Add a function that builds a net balance change per wallet:
+
+- sent amount subtracts from the wallet
+- received amount adds to the wallet
+
+That is a good extension because it still uses the same core tools:
+
+- vectors
+- hash maps
+- string parsing
+- careful ownership
+
+## What Comes Next
+
+After Rust Foundations, the next layers of the curriculum start asking you to use these same ideas in more realistic Solana code.
+
+That only works if collections and strings now feel normal instead of magical.

@@ -131,8 +131,8 @@ export const contentsData = {
         },
         {
           id: "enums-and-pattern-matching-practice",
-          title: "Wallet Manager Practice",
-          description: "Practice state modeling with enums and pattern matching through a small wallet-style exercise.",
+          title: "Enums and Pattern Matching Practice",
+          description: "Practice enums and pattern matching through a small wallet manager exercise.",
           type: "challenge",
           url: "/learn/rust-foundations/enums-and-pattern-matching-practice",
         },
