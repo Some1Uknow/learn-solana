@@ -1,7 +1,7 @@
 ---
 title: "Mini Capstone: Kit Client for an Anchor Program"
-description: "Ship a full 0-to-1 client slice: connect wallet, read state, submit action, confirm, and verify outcome."
-module: "🧑‍💻 Client-Side & Full-Stack"
+description: "Ship one real client slice: connect a wallet, read state, send a real transaction, submit a real program action, and verify the outcome."
+module: "Solana Kit Clients"
 keywords:
   - "mini capstone"
   - "kit client"
@@ -9,41 +9,41 @@ keywords:
   - "solana client project"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+This capstone should feel smaller than a full product and more real than a toy.
 
-## Step 1: 0-to-1 Theory
+That is the right target.
 
-### Primitives
+You are not building ten pages.
 
-- `connect`: acquire signer capability
-- `read`: fetch current state
-- `write`: submit state change
-- `verify`: read-back after confirm
+You are building one vertical slice that proves your client architecture is sound.
 
-### Mental Model
+A good vertical slice does four things cleanly:
 
-The capstone is one “vertical slice” of a real dApp.
+- acquires signer access
+- reads chain state
+- submits a real transaction
+- proves the result after the write path finishes
 
-Vertical slice means: one UI path that is fully correct end to end, including failures.
+If one of those is fake, the slice is incomplete.
 
-If you can ship one vertical slice cleanly, shipping ten slices becomes mostly repetition.
+## What You Are Building
 
-### Invariants
+Build one page that composes the pieces from the earlier lessons:
 
-1. Every write flow must include post-confirm read-back.
-2. Every user action must expose status and recovery path.
-3. Every successful write should return and display signature.
+- wallet connection
+- account inspection
+- one real SOL transfer card
+- one real Anchor program action button
 
-### Quick Checks
+That is enough.
 
-1. Why is read-back mandatory after writes?
-2. Why should capstone scope stay small?
+Do not add tabs, dashboards, or multi-program routing.
 
-## Step 2: Real-World Implementation (Code Solution)
+The point is correctness, not surface area.
 
-Build a single page that composes previous lessons.
+## Step 1: Put The Capstone On A Semantic Route
 
-Create `app/week4-capstone/page.tsx`:
+Create `app/kit-client-capstone/page.tsx`:
 
 ```tsx
 "use client";
@@ -54,58 +54,107 @@ import { AccountInspector } from "@/components/solana/AccountInspector";
 import { TxActionCard } from "@/components/solana/TxActionCard";
 import { CounterActionButton } from "@/components/solana/CounterActionButton";
 
-export default function Week4CapstonePage() {
+const DEMO_TRANSFER_DESTINATION = "ENTER_A_REAL_DEVNET_ADDRESS_HERE";
+const COUNTER_ACCOUNT = "ENTER_YOUR_COUNTER_ACCOUNT_ADDRESS_HERE";
+
+export default function KitClientCapstonePage() {
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Kit Client Mini Capstone</h1>
+      <h1 className="text-2xl font-bold">Kit Client Capstone</h1>
 
       <section>
-        <h2 className="text-lg font-semibold mb-2">1. Wallet</h2>
-        {/* Connect/disconnect and show explicit wallet status. */}
+        <h2 className="text-lg font-semibold mb-2">Wallet</h2>
         <WalletPanel />
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-2">2. Read</h2>
-        {/* Fetch an account by address and show normalized JSON output. */}
+        <h2 className="text-lg font-semibold mb-2">Read Chain State</h2>
         <AccountInspector />
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-2">3. Write + Status</h2>
-        {/* Demonstrate a status machine UX (idle -> confirming -> confirmed/failed). */}
-        <TxActionCard />
+        <h2 className="text-lg font-semibold mb-2">Send A Real Transaction</h2>
+        <TxActionCard destination={DEMO_TRANSFER_DESTINATION} />
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold mb-2">4. Program Action Service Pattern</h2>
-        {/* Demonstrate the service-layer pattern for program actions. */}
-        <CounterActionButton />
+        <h2 className="text-lg font-semibold mb-2">Submit A Real Program Action</h2>
+        <CounterActionButton counterAddress={COUNTER_ACCOUNT} />
       </section>
     </main>
   );
 }
 ```
 
-Deliverables checklist:
+This route name matters.
 
-- wallet connect/disconnect works
-- read panel fetches account data
-- transaction status card shows deterministic states
-- program action button returns normalized result and signature
+The curriculum is not week-based anymore.
 
-## Step 3: Mastery Test
+Your app structure should stop pretending it is.
 
-- Easy: what single invariant ties all four parts together?
-- Medium: where would you place analytics for transaction failures?
-- Hard (senior): how would you split this into feature modules for a 6-person team?
+## Step 2: Replace Placeholder Values Before Testing
 
-<Callout type="info">
-If you can explain every state transition and every failure path in this page, you are ready for a larger real dApp client.
-</Callout>
+Two values in this page must become real before the capstone means anything:
+
+- `DEMO_TRANSFER_DESTINATION`
+- `COUNTER_ACCOUNT`
+
+Why:
+
+- the SOL transfer card should send to a real devnet address you control or can inspect
+- the program action button should target a real counter account created by your Anchor program flow
+
+If those values stay fake, the capstone becomes another mock.
+
+## Step 3: Verify The Slice End To End
+
+A successful capstone run should let you prove all of these:
+
+1. the wallet panel shows a real connected session
+2. the account inspector fetches a real account from the configured cluster
+3. the transaction card returns a real signature after sending SOL
+4. the program action button returns a real signature for the Anchor instruction
+5. you can inspect both signatures in Explorer
+
+That is the real checkpoint.
+
+Not whether the page "looks complete".
+
+## The Main Failure Modes
+
+### The wallet connects but writes still fail
+
+That usually means one of these:
+
+- wrong cluster
+- wrong destination address
+- not enough devnet SOL
+- the counter account does not exist on the cluster you are using
+
+### The read panel works but the program action fails
+
+That usually means your generated instruction builder or account wiring is wrong.
+
+This is exactly why the service layer exists.
+
+The failure should be isolated to the program action path, not spread through the page.
+
+### The signatures appear but you never verify them
+
+Then the capstone is incomplete.
+
+A real client flow ends with verification.
+
+Use Explorer or your own read-back path and confirm that the state change actually happened.
+
+## What You Can Do After This
+
+You can build one real client page that combines wallet access, reads, writes, program actions, and verification without collapsing into ad hoc code.
+
+That is enough foundation to start a larger Solana frontend responsibly.
 
 ## Sources
 
 - https://solana.com/docs/frontend/client
 - https://solana.com/docs/frontend/react-hooks
-- https://www.solanakit.com/docs
+- https://www.anchor-lang.com/docs/clients/typescript

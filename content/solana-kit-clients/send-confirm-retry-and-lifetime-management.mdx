@@ -1,7 +1,7 @@
 ---
 title: "Send, Confirm, Retry & Lifetime Management"
 description: "Handle transaction delivery robustly with explicit confirmation strategy and retry policy."
-module: "🧑‍💻 Client-Side & Full-Stack"
+module: "Solana Kit Clients"
 keywords:
   - "sendAndConfirm"
   - "transaction retry"
@@ -63,6 +63,7 @@ import { getTransferSolInstruction } from "@solana-program/system";
 
 // Use local validator for predictable learning and quick iteration.
 const RPC_URL = "http://127.0.0.1:8899";
+const RPC_WS_URL = "ws://127.0.0.1:8900";
 
 async function buildAndSign() {
   const rpc = createSolanaRpc(RPC_URL);
@@ -90,8 +91,8 @@ async function buildAndSign() {
 
 async function main() {
   const rpc = createSolanaRpc(RPC_URL);
-  // Subscriptions typically use WebSocket. For local validator, ws is the same host/port.
-  const subs = createSolanaRpcSubscriptions(RPC_URL.replace("http", "ws"));
+  // Local validator uses RPC on 8899 and PubSub WebSocket on 8900.
+  const subs = createSolanaRpcSubscriptions(RPC_WS_URL);
   // This helper sends bytes and waits for confirmation.
   const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions: subs });
 

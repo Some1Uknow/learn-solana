@@ -1,72 +1,85 @@
 ---
 title: "Frontend Transaction UX: Status, Errors, Recovery"
-description: "Implement a strict transaction UX state machine so users always know what is happening and what to do next."
-module: "🧑‍💻 Client-Side & Full-Stack"
+description: "Wrap a real kit-based send flow in a strict UI state machine so users always know what happened and what to do next."
+module: "Solana Kit Clients"
 keywords:
   - "transaction ux"
   - "error recovery"
+  - "useSendTransaction"
   - "solana ui state machine"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+Transactions do not fail in only one way.
 
-## Step 1: 0-to-1 Theory
+Users reject signatures.
 
-### Primitives
+RPC requests time out.
 
-- `status machine`: controlled UI states for tx lifecycle
-- `error category`: actionable error bucket
-- `recovery action`: explicit next step users can take
+Blockhashes expire.
 
-### Mental Model
+Programs reject invalid inputs.
 
-Good transaction UX behaves like a checkout flow:
+If your UI treats all of that as one generic red error banner, the product feels broken even when the chain is behaving normally.
 
-- it never double-charges
-- it always shows where you are
-- it always tells you what to do if something fails
+The right model is simple.
 
-That is exactly what a simple state machine gives you.
+A transaction UI is a state machine.
 
-### Invariants
+It should always tell the user:
 
-1. Every failure state must expose one next action.
-2. In-flight actions must disable duplicate submission.
-3. Success must show signature.
+- what phase they are in
+- whether they can act again
+- what the next safe action is
 
-### Quick Checks
-
-1. Why is a state machine better than random booleans?
-2. Why should success always include signature?
-
-## Step 2: Real-World Implementation (Code Solution)
+## Step 1: Normalize Errors Before They Reach The UI
 
 Create `lib/solana/uiTxState.ts`:
 
 ```ts
-// Keep status values small and explicit so the UI cannot drift.
 export type TxStatus =
   | "idle"
   | "preparing"
   | "awaiting-signature"
-  | "broadcasting"
-  | "confirming"
+  | "sending"
   | "confirmed"
   | "failed";
 
-// Error kinds are user-facing categories. The raw error stays in logs.
 export type TxErrorKind = "user-rejected" | "network" | "expired" | "program" | "unknown";
 
 export function classifyTxError(err: string): TxErrorKind {
-  const e = err.toLowerCase();
-  // The goal is not perfect parsing. The goal is actionable UX.
-  if (e.includes("reject")) return "user-rejected";
-  if (e.includes("blockhash")) return "expired";
-  if (e.includes("timeout") || e.includes("network")) return "network";
-  if (e.includes("instruction") || e.includes("program")) return "program";
+  const message = err.toLowerCase();
+
+  if (message.includes("reject")) return "user-rejected";
+  if (message.includes("blockhash") || message.includes("expired")) return "expired";
+  if (message.includes("timeout") || message.includes("network")) return "network";
+  if (message.includes("instruction") || message.includes("program")) return "program";
+
   return "unknown";
 }
+
+export function getRecoveryHint(kind: TxErrorKind) {
+  switch (kind) {
+    case "user-rejected":
+      return "Review the transaction and sign again when you are ready.";
+    case "expired":
+      return "Rebuild the transaction with a fresh blockhash and retry.";
+    case "network":
+      return "Retry after checking RPC health and wallet connection.";
+    case "program":
+      return "Check the inputs and on-chain account state before retrying.";
+    default:
+      return "Inspect logs, then retry only after you understand the failure.";
+  }
+}
 ```
+
+This file does one job.
+
+It turns messy raw failures into a small set of UI decisions.
+
+That is what makes the component predictable.
+
+## Step 2: Wrap A Real Send Flow In Explicit Status States
 
 Create `components/solana/TxActionCard.tsx`:
 
@@ -74,61 +87,132 @@ Create `components/solana/TxActionCard.tsx`:
 "use client";
 
 import React, { useState } from "react";
-import { classifyTxError, type TxStatus } from "@/lib/solana/uiTxState";
+import { address, lamports } from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+import { useSendTransaction, useWallet } from "@solana/react-hooks";
+import { classifyTxError, getRecoveryHint, type TxStatus } from "@/lib/solana/uiTxState";
 
-export function TxActionCard() {
-  // Keep tx UI state in a single place so it is impossible to show conflicting statuses.
+type TxActionCardProps = {
+  destination: string;
+};
+
+export function TxActionCard({ destination }: TxActionCardProps) {
+  const wallet = useWallet();
+  const { send, isSending, signature } = useSendTransaction();
   const [status, setStatus] = useState<TxStatus>("idle");
-  const [signature, setSignature] = useState("");
   const [error, setError] = useState("");
 
   const run = async () => {
-    // Clear previous attempt output.
     setError("");
-    setSignature("");
+
+    if (wallet.status !== "connected") {
+      setStatus("failed");
+      setError("Connect a wallet before sending a transaction.");
+      return;
+    }
 
     try {
-      // These status transitions are the UX contract.
       setStatus("preparing");
+
+      const instruction = getTransferSolInstruction({
+        source: wallet.session.account,
+        destination: address(destination),
+        amount: lamports(100_000n),
+      });
+
       setStatus("awaiting-signature");
-      setStatus("broadcasting");
-      setStatus("confirming");
-      // Replace with real service call:
-      const fakeSig = "3Ab...demo-signature";
-      setSignature(fakeSig);
+      setStatus("sending");
+
+      await send({ instructions: [instruction] });
       setStatus("confirmed");
     } catch (e: any) {
       const kind = classifyTxError(String(e?.message ?? e));
-      // Always show a next action to the user.
-      setError(`Failed (${kind}). Suggested action: retry or rebuild.`);
       setStatus("failed");
+      setError(`Failed (${kind}). ${getRecoveryHint(kind)}`);
     }
   };
 
   return (
     <div className="rounded-xl border border-zinc-700 p-4 space-y-2">
       <div className="text-sm">Status: {status}</div>
-      <button onClick={run} disabled={status !== "idle" && status !== "failed" && status !== "confirmed"} className="px-3 py-2 rounded bg-cyan-700 text-white">
-        Run Transaction
+
+      <button
+        onClick={run}
+        disabled={wallet.status !== "connected" || isSending}
+        className="px-3 py-2 rounded bg-cyan-700 text-white"
+      >
+        {isSending ? "Sending..." : "Send 0.0001 SOL"}
       </button>
-      {signature && <div className="text-xs">Signature: {signature}</div>}
-      {error && <div className="text-xs text-red-300">{error}</div>}
+
+      {signature ? <div className="text-xs">Signature: {signature}</div> : null}
+      {error ? <div className="text-xs text-red-300">{error}</div> : null}
     </div>
   );
 }
 ```
 
-Expected result:
+This is a real transaction path.
 
-- deterministic status progression and actionable error output.
+The button is not faking a signature anymore.
 
-## Step 3: Mastery Test
+It builds a real system transfer instruction and sends it through the shared wallet-aware transport.
 
-- Easy: where do we prevent double-submit?
-- Medium: how do we map raw errors to actionable categories?
-- Hard: how would you persist tx status across route navigation?
+## Read The State Machine In Order
+
+### `preparing`
+
+The UI is building the instruction and validating local prerequisites.
+
+This is where missing wallet state or bad destination input should fail early.
+
+### `awaiting-signature`
+
+The wallet is about to ask the user for approval.
+
+This phase matters because rejection here is not a network outage.
+
+It is a user decision.
+
+### `sending`
+
+The signed transaction is moving through the transport pipeline.
+
+At this point, the UI must stay locked.
+
+Double-submit bugs happen when the interface ignores this phase.
+
+### `confirmed`
+
+The send flow completed successfully and you have a real signature to show.
+
+That signature is not decoration.
+
+It is how the user verifies the outcome in Explorer.
+
+## The Failure Mode To Avoid
+
+Do not collapse all failures into one bucket like `Something went wrong`.
+
+That hides the next safe action.
+
+A user rejection should not look like a broken RPC.
+
+An expired blockhash should not look like a program bug.
+
+Your UI does not need perfect error parsing.
+
+It does need useful recovery behavior.
+
+## What You Can Do After This
+
+You can build a transaction card that sends a real instruction, exposes real state, and gives the user a recovery path instead of a dead end.
+
+That is the baseline for every serious Solana frontend.
+
+The next lesson uses the same discipline inside the final capstone page.
 
 ## Sources
 
-- https://solana.com/docs/core/transactions
 - https://solana.com/docs/frontend/react-hooks
+- https://solana.com/docs/core/transactions
+- https://solana.com/docs/frontend/client

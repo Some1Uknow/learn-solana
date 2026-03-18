@@ -1,115 +1,200 @@
 ---
 title: "Anchor Client Patterns with Kit"
-description: "Connect Anchor-style program actions to a kit-first client service layer with explicit responsibilities."
-module: "🧑‍💻 Client-Side & Full-Stack"
+description: "Build one real program action flow by keeping instruction building in a service layer and transport in the shared client pipeline."
+module: "Solana Kit Clients"
 keywords:
   - "anchor client"
-  - "kit service layer"
-  - "program actions"
+  - "solana kit service layer"
+  - "program action service"
+  - "useSendTransaction"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+The main client-side mistake with Anchor is simple.
 
-## Step 1: 0-to-1 Theory
+People let React components assemble raw program calls directly.
 
-### Primitives
+That feels fast on day one.
 
-- `program action service`: one place where program-specific calls live
-- `ui action`: button/form that calls service
-- `transport`: send/confirm pipeline shared across app
+It becomes a mess as soon as the app has two buttons, three account types, and one real failure path.
 
-### Mental Model
+The correct model is:
 
-Think of an on-chain program as an API server that only understands:
+- the service layer knows how to build program instructions
+- the shared client transport knows how to send them
+- the UI only gathers input, triggers the action, and renders status
 
-- instruction bytes
-- account lists (read/write/sign)
+That split is what keeps a Solana app explainable.
 
-Your client is responsible for building the instruction call, gathering accounts, then using the same send/confirm pipeline every time.
+## What This Lesson Owns
 
-### Invariants
+This lesson is not about generating an SDK.
 
-1. UI does not own program call internals.
-2. Program service returns normalized app-level results.
-3. Transaction lifecycle remains shared and reusable.
+It is about using one correctly.
 
-### Quick Checks
+Assume your Anchor program already exposes a generated instruction builder for the `increment` instruction.
 
-1. Why is "service layer first" important for scaling dApps?
-2. Why avoid raw program errors in UI?
+That builder can come from your IDL generation step.
 
-## Step 2: Real-World Implementation (Code Solution)
+The important point is where you use it.
+
+## Step 1: Build The Program Action In One Place
 
 Create `lib/solana/programs/counterService.ts`:
 
 ```ts
-// Normalize results so UI logic stays simple and predictable.
-export type ActionResult =
-  | { ok: true; signature: string }
-  | { ok: false; error: string };
+import { address, type Address } from "@solana/kit";
+import { getIncrementInstruction } from "@/lib/generated/counter";
 
-export async function incrementCounterAction(): Promise<ActionResult> {
-  try {
-    // In your full app, this calls your transaction helper + program instruction builder.
-    // Keep this file as the only place where counter-program action logic is defined.
-    // For now, return a fake signature to demonstrate the pattern.
-    const fakeSignature = "5kK...demo-signature";
-    return { ok: true, signature: fakeSignature };
-  } catch (e: any) {
-    // Always stringify unknown error shapes before returning to UI.
-    return { ok: false, error: String(e?.message ?? e) };
-  }
+export type BuildIncrementCounterInput = {
+  counterAddress: string;
+  authorityAddress: string;
+};
+
+export function buildIncrementCounterAction(input: BuildIncrementCounterInput) {
+  const counter = address(input.counterAddress) as Address;
+  const authority = address(input.authorityAddress) as Address;
+
+  return {
+    instructions: [
+      getIncrementInstruction({
+        counter,
+        authority,
+      }),
+    ],
+  };
 }
 ```
 
-Create `components/solana/CounterActionButton.tsx`:
+What this file is doing:
+
+- converting loose UI strings into typed addresses
+- calling the generated instruction builder
+- returning a transport-ready instruction list
+
+What it is not doing:
+
+- rendering UI
+- opening wallet prompts
+- deciding button state
+
+That boundary matters.
+
+If instruction assembly lives inside the component, every future program action will duplicate logic badly.
+
+## Step 2: Send Through The Shared Client Transport
+
+Now create `components/solana/CounterActionButton.tsx`:
 
 ```tsx
 "use client";
 
 import React, { useState } from "react";
-import { incrementCounterAction } from "@/lib/solana/programs/counterService";
+import { useSendTransaction, useWallet } from "@solana/react-hooks";
+import { buildIncrementCounterAction } from "@/lib/solana/programs/counterService";
 
-export function CounterActionButton() {
-  // Explicit states make it harder to accidentally double-submit.
-  const [state, setState] = useState<"idle" | "working" | "ok" | "error">("idle");
+type CounterActionButtonProps = {
+  counterAddress: string;
+};
+
+export function CounterActionButton({ counterAddress }: CounterActionButtonProps) {
+  const wallet = useWallet();
+  const { send, isSending, signature, error } = useSendTransaction();
   const [message, setMessage] = useState("");
 
   const onClick = async () => {
-    setState("working");
-    const result = await incrementCounterAction();
-    if (result.ok) {
-      setState("ok");
-      // Always show signature on success so users can verify in an explorer.
-      setMessage(`Signature: ${result.signature}`);
-    } else {
-      setState("error");
-      setMessage(result.error);
+    setMessage("");
+
+    if (wallet.status !== "connected") {
+      setMessage("Connect a wallet before submitting a program action.");
+      return;
+    }
+
+    try {
+      const action = buildIncrementCounterAction({
+        counterAddress,
+        authorityAddress: wallet.session.account.address,
+      });
+
+      await send({ instructions: action.instructions });
+      setMessage("Counter increment submitted successfully.");
+    } catch (e: any) {
+      setMessage(String(e?.message ?? e));
     }
   };
 
   return (
     <div className="space-y-2">
-      <button onClick={onClick} disabled={state === "working"} className="px-3 py-2 rounded bg-emerald-700 text-white">
-        {state === "working" ? "Submitting..." : "Increment Counter"}
+      <button
+        onClick={onClick}
+        disabled={wallet.status !== "connected" || isSending}
+        className="px-3 py-2 rounded bg-emerald-700 text-white"
+      >
+        {isSending ? "Submitting..." : "Increment Counter"}
       </button>
-      {message && <p className="text-xs text-zinc-300">{message}</p>}
+
+      {message ? <p className="text-xs text-zinc-300">{message}</p> : null}
+      {signature ? <p className="text-xs text-zinc-300">Signature: {signature}</p> : null}
+      {error ? <p className="text-xs text-red-300">{String(error)}</p> : null}
     </div>
   );
 }
 ```
 
-Expected result:
+Read the responsibility split carefully:
 
-- program action logic is isolated and UI stays simple.
+- `buildIncrementCounterAction(...)` knows the program accounts and instruction shape
+- `useSendTransaction()` knows how to push those instructions through the wallet-aware client transport
+- the component knows when to disable itself and what to show the user
 
-## Step 3: Mastery Test
+That is the architecture you want.
 
-- Easy: what does normalized return shape solve?
-- Medium: where should retries live: UI or service layer?
-- Hard: how would you test service logic without rendering components?
+## Why This Pattern Scales
+
+When the next instruction arrives, you do not rewrite the whole stack.
+
+You add another service function.
+
+Examples:
+
+- `buildCreateProfileAction(...)`
+- `buildCloseEscrowAction(...)`
+- `buildClaimRewardsAction(...)`
+
+The transport stays shared.
+
+The UI state pattern stays shared.
+
+Only the program-specific instruction builder changes.
+
+That is how client code stops collapsing into copy-paste logic.
+
+## The Failure Mode To Avoid
+
+Do not do this inside a component:
+
+- parse addresses
+- build instruction accounts
+- compute PDA inputs
+- choose instruction builder
+- send transaction
+- map raw errors
+
+That is too much responsibility for one button.
+
+You will lose testability first.
+
+Then you will lose correctness.
+
+## What You Can Do After This
+
+You can keep Anchor program specifics in one service layer while still using a kit-first transport and hook-based wallet flow.
+
+That is the bridge between on-chain program logic and a maintainable client.
+
+The next lesson builds on that by making transaction status and recovery behavior explicit in the UI.
 
 ## Sources
 
-- https://solana.com/docs/core/programs
+- https://solana.com/docs/frontend/react-hooks
+- https://solana.com/docs/frontend/client
 - https://www.anchor-lang.com/docs/clients/typescript
