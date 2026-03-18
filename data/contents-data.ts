@@ -171,26 +171,26 @@ export const contentsData = {
           url: "/learn/anchor-programs/anchor-local-setup",
         },
         {
-          id: "anchor-core-concepts",
-          title: "Anchor Core Concepts",
-          description:
-            "Understand instructions, accounts, signers, and constraints before writing CRUD logic.",
-          type: "theory",
-          url: "/learn/anchor-programs/anchor-core-concepts",
-        },
-        {
           id: "anchor-program-anatomy",
           title: "Anchor Program Anatomy",
           description:
-            "Learn project structure, IDL output, test flow, and how client calls become on-chain state changes.",
+            "Learn what each file in an Anchor workspace does and how a method call becomes an on-chain state change.",
           type: "theory",
           url: "/learn/anchor-programs/anchor-program-anatomy",
+        },
+        {
+          id: "anchor-core-concepts",
+          title: "Anchor Core Concepts",
+          description:
+            "Understand instructions, accounts, signers, and constraints before writing your first real program.",
+          type: "theory",
+          url: "/learn/anchor-programs/anchor-core-concepts",
         },
         {
           id: "first-anchor-program",
           title: "First Anchor Program",
           description:
-            "Build initialize, increment, decrement, and reset instructions one step at a time with tests.",
+            "Build a small stateful program one instruction at a time and verify each step with tests.",
           type: "exercise",
           url: "/learn/anchor-programs/first-anchor-program",
         },
@@ -198,7 +198,7 @@ export const contentsData = {
           id: "pda-seed-derivation",
           title: "PDAs and Seed Derivation",
           description:
-            "Use deterministic account addresses safely with clear seed design and bump handling.",
+            "Use deterministic account addresses safely with clear seed design, bumps, and update rules.",
           type: "theory",
           url: "/learn/anchor-programs/pda-seed-derivation",
         },
@@ -206,15 +206,23 @@ export const contentsData = {
           id: "spl-token-integration",
           title: "SPL Token Integration with Anchor",
           description:
-            "Create mints, token accounts, and safe transfer flows across Token and Token-2022.",
+            "Work with mints, token accounts, and safer token constraints across Token and Token-2022.",
           type: "theory",
           url: "/learn/anchor-programs/spl-token-integration",
+        },
+        {
+          id: "cpi-cross-program",
+          title: "Cross-Program Invocations",
+          description:
+            "Call other programs safely and reason about CPI contexts, signer seeds, and delegated authority.",
+          type: "theory",
+          url: "/learn/anchor-programs/cpi-cross-program",
         },
         {
           id: "token-minting-project",
           title: "Token Minting and Supply Control",
           description:
-            "Implement PDA mint authority, supply caps, and admin-controlled minting rules.",
+            "Combine PDAs, token CPI, and supply rules in one guided Anchor build.",
           type: "project",
           url: "/learn/anchor-programs/token-minting-project",
         },
@@ -222,23 +230,15 @@ export const contentsData = {
           id: "escrow-mechanism-project",
           title: "Escrow with a PDA Vault",
           description:
-            "Build escrow state transitions with vault PDAs, cancellation paths, and release guardrails.",
+            "Build a stronger state machine with a vault PDA, release rules, and failure-path testing.",
           type: "project",
           url: "/learn/anchor-programs/escrow-mechanism-project",
-        },
-        {
-          id: "cpi-cross-program",
-          title: "Cross-Program Invocations",
-          description:
-            "Call other programs, build CPI contexts, and reason about authority delegation and composition.",
-          type: "theory",
-          url: "/learn/anchor-programs/cpi-cross-program",
         },
         {
           id: "anchor-ergonomics",
           title: "Anchor Development Ergonomics",
           description:
-            "Use constraints, custom errors, events, and testing strategy to keep programs maintainable.",
+            "Make programs easier to trust with better constraints, errors, events, and testing habits.",
           type: "theory",
           url: "/learn/anchor-programs/anchor-ergonomics",
         },
@@ -246,7 +246,7 @@ export const contentsData = {
           id: "defi-integration-challenge",
           title: "DeFi Integration Challenge",
           description:
-            "Combine CPI flows with strict validation, state machines, and failure-path tests in a capstone challenge.",
+            "Use the full Anchor toolchain in an optional capstone once the main path feels solid.",
           type: "challenge",
           url: "/learn/anchor-programs/defi-integration-challenge",
         },

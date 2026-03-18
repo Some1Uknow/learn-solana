@@ -1,171 +1,87 @@
 ---
-title: "First Anchor Program: Counter CRUD (Step by Step)"
-description: "Build your first Anchor CRUD program slowly: define state, write contexts, add instructions one by one, and verify each step with tests."
-module: "⚓ Anchor Framework"
+title: "First Anchor Program"
+description: "Build a small counter program in Anchor one step at a time, understand every account in the instruction context, and verify the behavior with tests."
+module: "Anchor Programs"
 keywords:
-  - "anchor crud tutorial"
-  - "anchor counter step by step"
-  - "anchor first project"
-  - "anchor contexts"
-  - "anchor tests beginner"
-  - "solana anchor walkthrough"
-  - "rust anchor crud"
+  - "anchor first program"
+  - "anchor counter"
+  - "anchor initialize"
+  - "anchor tests"
+  - "anchor accounts"
+  - "anchor tutorial"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-This lesson is intentionally slow.
+This is the lesson where Anchor stops being abstract.
 
-You will not paste one giant file and hope it works. You will build in small stages and test each stage.
+You are going to build one small program, read every part of it, and test it properly.
+
+The program is intentionally simple.
+
+That is a feature, not a limitation.
+
+A first Anchor program should teach the model clearly:
+
+- one state account
+- one authority
+- one initialization path
+- one update path
+- one test loop
 
 ## What You Are Building
 
-A simple `Counter` app with four instructions:
+You will build a counter program with two instructions:
 
-1. `initialize` - create counter account
-2. `increment` - add 1
-3. `decrement` - subtract 1
-4. `reset` - set to 0
+1. `initialize` creates a counter account
+2. `increment` increases the stored value by 1
 
-## Before You Start
+That is enough for the first real build.
 
-In your Anchor workspace:
+You do not need decrement, reset, PDA seeds, or token logic yet.
+
+The point is to understand the full path from account validation to state change.
+
+## Before You Touch The Code
+
+Start from a fresh Anchor workspace that already passes:
 
 ```bash
 anchor build
 anchor test
 ```
 
-Confirm the starter project works first.
+If the default workspace still does not pass, stop here and fix setup first.
 
-<Callout type="info">
-If the starter tests fail, fix environment issues before continuing.
-</Callout>
+Do not layer program logic on top of a broken environment.
 
-## Step 1: Define the Counter State
+## Step 1: Understand The Job Of This Program
 
-Open `programs/<your_program>/src/lib.rs` and add this state struct near the bottom.
+This program stores two pieces of state:
 
-```rust
-#[account]
-#[derive(InitSpace)]
-pub struct Counter {
-    pub authority: Pubkey,
-    pub count: u64,
-}
-```
+- `authority`: who controls the counter
+- `count`: the current numeric value
 
-Why this exists:
+That gives us one simple rule:
 
-- `authority`: who is allowed to modify this counter
-- `count`: the numeric value
+only the stored authority should be allowed to increment the counter.
 
-## Step 2: Define Account Contexts
+Everything in the code will support that rule.
 
-Add two contexts: one for creation and one for updates.
+## Step 2: Replace The Generated Program With A Minimal Counter
+
+Open:
+
+- `programs/<your-program-name>/src/lib.rs`
+
+Replace the generated example with this structure.
 
 ```rust
-#[derive(Accounts)]
-pub struct Initialize<'info> {
-    #[account(mut)]
-    pub authority: Signer<'info>,
-
-    #[account(
-        init,
-        payer = authority,
-        space = 8 + Counter::INIT_SPACE,
-    )]
-    pub counter: Account<'info, Counter>,
-
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct Update<'info> {
-    pub authority: Signer<'info>,
-
-    #[account(mut, has_one = authority)]
-    pub counter: Account<'info, Counter>,
-}
-```
-
-What to notice:
-
-- `init` creates a new account
-- `payer = authority` means signer pays rent
-- `has_one = authority` enforces access control
-
-## Step 3: Add Only `initialize` First
-
-Inside `#[program]`, start with one instruction only:
-
-```rust
-pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-    let counter = &mut ctx.accounts.counter;
-    counter.authority = ctx.accounts.authority.key();
-    counter.count = 0;
-    Ok(())
-}
-```
-
-Run a quick compile check:
-
-```bash
-anchor build
-```
-
-If this fails, fix now before adding more instructions.
-
-## Step 4: Add Increment/Decrement/Reset
-
-Now add the remaining handlers.
-
-```rust
-pub fn increment(ctx: Context<Update>) -> Result<()> {
-    let counter = &mut ctx.accounts.counter;
-    counter.count = counter.count.checked_add(1).ok_or(ErrorCode::Overflow)?;
-    Ok(())
-}
-
-pub fn decrement(ctx: Context<Update>) -> Result<()> {
-    let counter = &mut ctx.accounts.counter;
-    counter.count = counter.count.checked_sub(1).ok_or(ErrorCode::Underflow)?;
-    Ok(())
-}
-
-pub fn reset(ctx: Context<Update>) -> Result<()> {
-    let counter = &mut ctx.accounts.counter;
-    counter.count = 0;
-    Ok(())
-}
-```
-
-Add custom errors:
-
-```rust
-#[error_code]
-pub enum ErrorCode {
-    #[msg("Counter overflow")]
-    Overflow,
-    #[msg("Counter underflow")]
-    Underflow,
-}
-```
-
-Why checked math matters:
-
-- Prevents silent wraparound bugs
-- Gives predictable failures
-
-## Step 5: Full Reference Program File
-
-If you want to compare your file with a known-good structure, use this full version:
-
-```rust title="programs/counter/src/lib.rs"
 use anchor_lang::prelude::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWxTWqkY4fJYb7g6R8L3M6vR9y8V");
+// Keep the generated program ID from your own workspace here.
+declare_id!("<your-generated-program-id>");
 
 #[program]
 pub mod counter {
@@ -178,21 +94,12 @@ pub mod counter {
         Ok(())
     }
 
-    pub fn increment(ctx: Context<Update>) -> Result<()> {
+    pub fn increment(ctx: Context<Increment>) -> Result<()> {
         let counter = &mut ctx.accounts.counter;
-        counter.count = counter.count.checked_add(1).ok_or(ErrorCode::Overflow)?;
-        Ok(())
-    }
-
-    pub fn decrement(ctx: Context<Update>) -> Result<()> {
-        let counter = &mut ctx.accounts.counter;
-        counter.count = counter.count.checked_sub(1).ok_or(ErrorCode::Underflow)?;
-        Ok(())
-    }
-
-    pub fn reset(ctx: Context<Update>) -> Result<()> {
-        let counter = &mut ctx.accounts.counter;
-        counter.count = 0;
+        counter.count = counter
+            .count
+            .checked_add(1)
+            .ok_or(CounterError::Overflow)?;
         Ok(())
     }
 }
@@ -213,7 +120,7 @@ pub struct Initialize<'info> {
 }
 
 #[derive(Accounts)]
-pub struct Update<'info> {
+pub struct Increment<'info> {
     pub authority: Signer<'info>,
 
     #[account(mut, has_one = authority)]
@@ -228,20 +135,176 @@ pub struct Counter {
 }
 
 #[error_code]
-pub enum ErrorCode {
+pub enum CounterError {
     #[msg("Counter overflow")]
     Overflow,
-
-    #[msg("Counter underflow")]
-    Underflow,
 }
 ```
 
-## Step 6: Write Tests One Behavior at a Time
+<Callout type="info">
+Keep the `declare_id!` value aligned with the program ID generated in your workspace.
 
-Create or replace `tests/counter.ts`.
+Do not paste a fake ID and assume Anchor will sort it out later.
+</Callout>
 
-### Test A: Initialize
+## Step 3: Read The Program In The Right Order
+
+Most beginners read the file top to bottom and still miss the model.
+
+Read it in this order instead:
+
+1. `Counter` state struct
+2. `Initialize` account context
+3. `Increment` account context
+4. `initialize` handler
+5. `increment` handler
+
+That order makes the logic easier to parse.
+
+### First, the state
+
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct Counter {
+    pub authority: Pubkey,
+    pub count: u64,
+}
+```
+
+This is the account data that will live on-chain.
+
+Why each field exists:
+
+- `authority` stores who is allowed to control this counter later
+- `count` stores the actual value
+
+### Then, the initialization context
+
+```rust
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + Counter::INIT_SPACE,
+    )]
+    pub counter: Account<'info, Counter>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+This context is doing a lot of real work.
+
+What each piece means:
+
+- `authority: Signer<'info>` means the caller must sign
+- `#[account(mut)]` means Anchor may debit lamports from that signer to fund account creation
+- `init` means create the new `counter` account
+- `payer = authority` means the signer pays rent for that new account
+- `space = 8 + Counter::INIT_SPACE` allocates enough bytes for the discriminator plus the stored data
+- `system_program` is required because account creation happens through the system program
+
+That is one of the core Anchor ideas again.
+
+The account context expresses the setup and validation before your business logic runs.
+
+### Then, the update context
+
+```rust
+#[derive(Accounts)]
+pub struct Increment<'info> {
+    pub authority: Signer<'info>,
+
+    #[account(mut, has_one = authority)]
+    pub counter: Account<'info, Counter>,
+}
+```
+
+This is the security rule for the whole program.
+
+What it means:
+
+- the caller must sign
+- the counter account can be mutated
+- the stored `counter.authority` must match the provided signer
+
+If that `has_one` rule fails, `increment` never runs.
+
+That is exactly what you want.
+
+## Step 4: Understand The Handlers
+
+### `initialize`
+
+```rust
+pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+    let counter = &mut ctx.accounts.counter;
+    counter.authority = ctx.accounts.authority.key();
+    counter.count = 0;
+    Ok(())
+}
+```
+
+This handler does not do much.
+
+That is good.
+
+The context already handled the heavy setup work.
+
+The handler only needs to write the initial state.
+
+### `increment`
+
+```rust
+pub fn increment(ctx: Context<Increment>) -> Result<()> {
+    let counter = &mut ctx.accounts.counter;
+    counter.count = counter
+        .count
+        .checked_add(1)
+        .ok_or(CounterError::Overflow)?;
+    Ok(())
+}
+```
+
+Two important details here:
+
+- the handler only runs after the account checks pass
+- it uses `checked_add` instead of assuming overflow never matters
+
+That second point is small, but it is the right habit.
+
+Even a toy program should not silently wrap numeric state.
+
+## Step 5: Build Before You Write Tests
+
+Run:
+
+```bash
+anchor build
+```
+
+Do this now, before touching the test file.
+
+If the program does not compile, the test layer will only make the problem noisier.
+
+What you should check after the build:
+
+- the build succeeds
+- the IDL in `target/idl/` updates
+- no errors appear around missing derives, account space, or type mismatches
+
+## Step 6: Replace The Default Test With A Counter Test
+
+Open:
+
+- `tests/<your-program-name>.ts`
+
+Replace the generated test with this version.
 
 ```ts
 import * as anchor from "@coral-xyz/anchor";
@@ -254,7 +317,7 @@ describe("counter", () => {
   const program = anchor.workspace.Counter as Program;
   const counter = anchor.web3.Keypair.generate();
 
-  it("initializes counter to 0", async () => {
+  it("initializes the counter", async () => {
     await program.methods
       .initialize()
       .accounts({
@@ -266,14 +329,17 @@ describe("counter", () => {
       .rpc();
 
     const account = await program.account.counter.fetch(counter.publicKey);
-    if (account.count.toNumber() !== 0) throw new Error("expected count = 0");
+
+    if (!account.authority.equals(provider.wallet.publicKey)) {
+      throw new Error("expected authority to match provider wallet");
+    }
+
+    if (account.count.toNumber() !== 0) {
+      throw new Error("expected count to start at 0");
+    }
   });
-```
 
-### Test B: Increment
-
-```ts
-  it("increments once", async () => {
+  it("increments the counter", async () => {
     await program.methods
       .increment()
       .accounts({
@@ -283,89 +349,140 @@ describe("counter", () => {
       .rpc();
 
     const account = await program.account.counter.fetch(counter.publicKey);
-    if (account.count.toNumber() !== 1) throw new Error("expected count = 1");
-  });
-```
 
-### Test C: Decrement + Reset
-
-```ts
-  it("decrements and resets", async () => {
-    await program.methods
-      .decrement()
-      .accounts({
-        authority: provider.wallet.publicKey,
-        counter: counter.publicKey,
-      })
-      .rpc();
-
-    let account = await program.account.counter.fetch(counter.publicKey);
-    if (account.count.toNumber() !== 0) throw new Error("expected count = 0");
-
-    await program.methods
-      .increment()
-      .accounts({
-        authority: provider.wallet.publicKey,
-        counter: counter.publicKey,
-      })
-      .rpc();
-
-    await program.methods
-      .reset()
-      .accounts({
-        authority: provider.wallet.publicKey,
-        counter: counter.publicKey,
-      })
-      .rpc();
-
-    account = await program.account.counter.fetch(counter.publicKey);
-    if (account.count.toNumber() !== 0) throw new Error("expected reset to 0");
+    if (account.count.toNumber() !== 1) {
+      throw new Error("expected count to be 1 after increment");
+    }
   });
 });
 ```
 
-## Step 7: Run and Verify
+## Step 7: Read The Test Like A Client Flow
+
+Do not treat the test file as magic either.
+
+It is just a client calling your program.
+
+### What happens in the initialize test
+
+```ts
+await program.methods
+  .initialize()
+  .accounts({
+    authority: provider.wallet.publicKey,
+    counter: counter.publicKey,
+    systemProgram: anchor.web3.SystemProgram.programId,
+  })
+  .signers([counter])
+  .rpc();
+```
+
+This is the client saying:
+
+- call the `initialize` instruction
+- pass the authority signer
+- pass the new counter account public key
+- pass the system program
+- sign with the newly created counter keypair because the account is being created
+
+That last line matters.
+
+If you forget `signers([counter])`, account creation will fail because the new account keypair is not participating correctly in the transaction.
+
+### What happens after the instruction runs
+
+```ts
+const account = await program.account.counter.fetch(counter.publicKey);
+```
+
+This fetches the on-chain counter account and lets the test inspect the stored state.
+
+That is how you prove the handler actually changed data.
+
+## Step 8: Run The Full Loop
+
+Now run:
 
 ```bash
-anchor build
 anchor test
 ```
 
-You should see all tests pass.
+If everything is wired correctly, the test flow should:
 
-## Debug Checklist If Tests Fail
+- build the program
+- deploy it to localnet
+- run both tests
+- show success for initialize and increment
 
-1. Program id mismatch between `declare_id!` and config
-2. Missing `signers([counter])` in initialize
-3. Wrong account name in `.accounts({ ... })`
-4. Forgot `mut` or `has_one` in `Update` context
+That is your first full Anchor loop.
+
+## Common Failures In This Lesson
+
+### Program name mismatch in the test
+
+This line depends on the generated workspace name:
+
+```ts
+const program = anchor.workspace.Counter as Program;
+```
+
+If your actual program name is different, update it.
+
+The test has to match your workspace, not a copied tutorial name.
+
+### Wrong `declare_id!`
+
+If `declare_id!` is out of sync with the workspace configuration, build or deploy steps can fail in confusing ways.
+
+Keep the generated program ID consistent.
+
+### Missing `signers([counter])`
+
+The initialize path creates a new account.
+
+If the new keypair does not sign, initialization fails.
+
+### Missing `mut` on the counter account
+
+If the counter will be written to, the account context must mark it mutable.
+
+### Forgetting `has_one = authority`
+
+If you remove this, anyone who can provide the account could increment it.
+
+That is exactly the kind of access-control bug Anchor is meant to help you avoid.
 
 ## Why This Lesson Matters
 
-You just practiced the full Anchor loop:
+This one small program teaches the full Anchor pattern:
 
-- Design state
-- Add validation contexts
-- Write instruction logic
-- Prove behavior with tests
+- define state
+- define account contexts
+- express security rules in constraints
+- write thin handlers
+- prove the behavior with tests
 
-That is the same pattern you will use for PDAs, tokens, escrow, and CPI.
+That pattern is the foundation for everything later:
 
-## Try This Next
+- PDAs
+- token flows
+- CPI
+- escrow
 
-<Steps>
-<Step>
-### Add `set_count(value: u64)`
-Allow authority to set a direct value.
-</Step>
+## One Good Extension, Not Five
 
-<Step>
-### Add Unauthorized Test
-Try using a second wallet and assert failure.
-</Step>
+If you want one extra exercise after this lesson, add:
 
-<Step>
-### Add a PDA-Based Counter
-Convert the counter account into a PDA. You are now ready for the PDA lesson.
-</Step>
-</Steps>
+- `set_count(value: u64)`
+
+That extension is useful because it forces you to repeat the exact same pattern with one instruction argument.
+
+Do not add five more features yet.
+
+The point of the first program is clarity.
+
+## What Comes Next
+
+The next lesson changes one major thing.
+
+Instead of letting accounts live at arbitrary keypairs, you will derive them deterministically with PDAs.

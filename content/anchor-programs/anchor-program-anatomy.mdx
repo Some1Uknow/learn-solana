@@ -1,121 +1,299 @@
 ---
-title: "Anchor Program Anatomy (What Each File Does)"
-description: "Learn how an Anchor project is organized: programs, tests, IDL, migrations, and how a client call becomes an on-chain state change."
-module: "⚓ Anchor Framework"
+title: "Anchor Program Anatomy"
+description: "Understand what each file in an Anchor workspace does, how build artifacts are generated, and how a client call becomes an on-chain state change."
+module: "Anchor Programs"
 keywords:
-  - "anchor project structure"
+  - "anchor workspace structure"
   - "anchor toml"
   - "anchor idl"
-  - "anchor tests"
-  - "anchor workspace anatomy"
-  - "solana anchor files"
-  - "anchor beginner guide"
+  - "anchor build"
+  - "anchor test"
+  - "anchor project files"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-This lesson answers a common beginner question:
+After `anchor init`, most beginners see the file tree and immediately lose the thread.
 
-"I ran `anchor init`... now what are all these files?"
+That is normal.
 
-## Standard Anchor Workspace Layout
+Anchor generates several files at once, and if you do not know what each one is for, every later lesson feels more complicated than it really is.
+
+This lesson fixes that.
+
+## The Mental Model
+
+An Anchor workspace is not one thing.
+
+It is a small system with four separate jobs:
+
+- program code in Rust
+- workspace configuration
+- test code
+- generated build artifacts
+
+If you keep those four buckets clear in your head, the file tree stops looking random.
+
+## What `anchor init` Creates
+
+A default Anchor workspace includes files like these:
 
 ```txt
 anchor_starter/
   Anchor.toml
+  Cargo.toml
+  package.json
   programs/
-    anchor_starter/src/lib.rs
+    anchor_starter/
+      src/
+        lib.rs
+  migrations/
   tests/
     anchor_starter.ts
-  migrations/
   target/
 ```
 
-## What Each Part Is For
+You may also see additional generated folders such as `.anchor/` after running tests.
 
-### `Anchor.toml`
+The exact contents can grow over time, but the important parts stay the same.
 
-Project config:
+## Start With `Anchor.toml`
 
-- Program addresses by cluster
-- Provider wallet path
-- Script aliases
+`Anchor.toml` is the workspace control file.
 
-### `programs/<name>/src/lib.rs`
+It tells Anchor things like:
 
-Your on-chain program logic:
+- which cluster to use
+- which wallet to use
+- which program addresses belong to the workspace
+- which script should run during `anchor test`
 
-- Instructions
-- Account contexts
-- State structs
-- Error codes
+A typical shape looks like this:
 
-### `tests/*.ts`
+```toml
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
 
-Your local integration tests:
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
-- Build transactions
-- Call program methods
-- Assert account state changes
+[programs.localnet]
+anchor_starter = "YourProgramPubkeyHere"
+```
 
-### `target/idl/*.json`
+Why this file matters:
 
-Generated IDL (interface definition):
+- `anchor build` and `anchor test` both depend on it
+- cluster mistakes often start here
+- test behavior is partly controlled here
+- local program addresses are recorded here
 
-- Instruction names
-- Required accounts
-- Argument types
+If something feels wrong at the workspace level, open `Anchor.toml` first.
 
-Clients use this to call your program safely.
+## The `programs/` Directory
 
-<Callout type="info">
-When instruction signatures change, regenerate artifacts with `anchor build` so IDL stays in sync.
-</Callout>
+This is where your on-chain code lives.
 
-## End-to-End Request Flow
+For a normal project, you will spend most of your time in:
 
-<Steps>
-<Step>
-### Step 1: Client creates instruction data
-Your script/front end builds a method call.
-</Step>
+- `programs/<program-name>/src/lib.rs`
 
-<Step>
-### Step 2: Transaction includes required accounts
-Client attaches signer, program id, and all account metas.
-</Step>
+That file usually contains:
 
-<Step>
-### Step 3: Program executes account validation
-Anchor enforces account constraints first.
-</Step>
+- your instruction handlers inside `#[program]`
+- account validation structs with `#[derive(Accounts)]`
+- state structs with `#[account]`
+- custom errors
+- helper logic
 
-<Step>
-### Step 4: Handler updates account data
-Business logic runs and writes back state.
-</Step>
+This is the security-critical part of the workspace.
 
-<Step>
-### Step 5: Client reads updated account
-Tests/UI fetch account and verify expected changes.
-</Step>
-</Steps>
+If you want to understand what a program really does, start here, not in the frontend and not in the tests.
 
-## Two Files You Should Open Every Time
+## The Root `Cargo.toml`
 
-1. `programs/<name>/src/lib.rs` -> source of truth for security and logic
-2. `tests/<name>.ts` -> source of truth for expected behavior
+Do not confuse the workspace `Cargo.toml` with the program crate's `Cargo.toml`.
 
-## Solana-Dev Note (Client Layer)
+At the root, `Cargo.toml` describes the Rust workspace itself.
 
-Anchor TS tests are fine for onboarding. For new production client/scripts, prefer `@solana/kit` flows and keep any web3-based compatibility code isolated.
+Inside `programs/<program-name>/Cargo.toml`, you configure the actual program crate.
 
-## Quick Practice
+That distinction matters because Anchor workspaces can contain more than one program.
 
-1. Run `anchor build`.
-2. Open `target/idl/<program>.json`.
-3. Match one IDL instruction to its Rust handler.
-4. Match that same instruction to one test case.
+## The `tests/` Directory
 
-If you can do this mapping, you are ready for CRUD.
+This is where the integration tests live.
+
+In a default setup, Anchor creates a TypeScript test file such as:
+
+- `tests/anchor_starter.ts`
+
+That file does not replace program logic.
+
+It does something different.
+
+It proves that the program behaves correctly when called through real transactions.
+
+In other words:
+
+- Rust program code defines behavior
+- tests prove that behavior from the outside
+
+That separation matters.
+
+You should not treat tests as decoration.
+
+## The `migrations/` Directory
+
+This directory is for deployment scripting.
+
+Most beginners do not need to spend much time here yet.
+
+But you should know why it exists.
+
+As your project grows, deployment stops being just one command.
+
+You may need scripts that coordinate program deploys, account initialization, or environment-specific setup.
+
+That is the role this folder grows into.
+
+## The `target/` Directory
+
+This is generated output.
+
+Do not confuse it with source code.
+
+The most important subfolders are:
+
+- `target/deploy/`
+- `target/idl/`
+- `target/types/`
+
+### `target/deploy/`
+
+This contains build artifacts such as the compiled program binary and deployment keypair material.
+
+### `target/idl/`
+
+This contains the program IDL JSON.
+
+Anchor generates that file during `anchor build`.
+
+The official docs describe the IDL as the standardized description of your program's instructions and accounts.
+
+That matters because clients use it to understand:
+
+- instruction names
+- required accounts
+- argument types
+- account data layouts
+
+### `target/types/`
+
+This contains generated TypeScript types for the IDL.
+
+These are useful for TypeScript tooling and client-side integration.
+
+## What `anchor build` Actually Changes
+
+When you run:
+
+```bash
+anchor build
+```
+
+Anchor does more than compile Rust.
+
+It also:
+
+- emits the IDL into `target/idl/`
+- updates generated TypeScript types in `target/types/`
+- prepares deploy artifacts in `target/deploy/`
+
+That is why build output matters beyond just “did the compiler pass.”
+
+If your instruction signatures changed, the generated artifacts should change too.
+
+## How A Client Call Becomes A State Change
+
+Now connect the files together.
+
+When a client calls your program, the flow looks like this:
+
+1. the client uses the program interface and account list
+2. the transaction is sent with the required accounts and signers
+3. Anchor validates the account context in your Rust program
+4. your instruction handler runs
+5. account data is written back on-chain
+6. the client or test fetches the updated state
+
+That is the whole system.
+
+The workspace exists to support that path.
+
+## One Concrete Mapping Exercise
+
+Open these three files at the same time:
+
+- `programs/<program-name>/src/lib.rs`
+- `tests/<program-name>.ts`
+- `target/idl/<program-name>.json`
+
+Then pick one instruction and answer:
+
+1. where is the Rust handler?
+2. where is the test that calls it?
+3. where is that instruction represented in the IDL?
+
+If you can map one instruction across those three files, you are no longer guessing how the workspace fits together.
+
+## Common Confusions
+
+### Confusion 1: `target/` is source code
+
+It is not.
+
+It is generated output.
+
+Read it when useful, but do not treat it as the place where program logic should be edited.
+
+### Confusion 2: the IDL is optional trivia
+
+It is not.
+
+The IDL is one of the key contracts between your program and the code that calls it.
+
+### Confusion 3: `Anchor.toml` is only for deployment
+
+It is not.
+
+It affects provider settings, test scripts, and local program addresses too.
+
+### Confusion 4: the tests folder is separate from the real program
+
+The tests are separate code, but not separate behavior.
+
+They are how you prove the real behavior from the outside.
+
+## What You Should Know Before Moving On
+
+Before the next lesson, you should be able to explain:
+
+- what `Anchor.toml` controls
+- where the Rust program actually lives
+- what the IDL is for
+- why `target/` is generated output, not source code
+- how one instruction shows up in program code, tests, and the IDL
+
+If those answers are still fuzzy, open the file tree again and trace one instruction manually.
+
+## What Comes Next
+
+Now that the workspace layout is clear, the next lesson can focus on the core Anchor model itself:
+
+- instructions
+- accounts
+- signers
+- constraints

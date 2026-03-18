@@ -1,155 +1,295 @@
 ---
-title: "Anchor Local Setup (Your First Working Workspace)"
-description: "Set up Solana, Rust, and Anchor; create an Anchor workspace; run local validator tests; and verify your environment end to end."
-module: "⚓ Anchor Framework"
+title: "Anchor Local Setup"
+description: "Install the current Anchor toolchain, create a workspace, and get to one clean local build-and-test loop before writing program logic."
+module: "Anchor Programs"
 keywords:
   - "anchor setup"
-  - "solana local validator"
+  - "anchor installation"
+  - "avm anchor"
   - "anchor init"
   - "anchor test"
-  - "solana rust setup"
+  - "solana local validator"
   - "anchor workspace"
-  - "beginner anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-This lesson gives you one goal: **a clean Anchor workspace that builds and tests locally**.
+This lesson has one job.
 
-If you skip this and jump to advanced lessons, you will waste hours on environment issues.
+Get you to a working Anchor workspace that builds and tests locally without mystery.
 
-## What You Will Learn
+If this part is shaky, every later lesson turns into environment debugging.
 
-- Which tools Anchor needs
-- How to initialize a workspace
-- How to run tests against local validator
-- How to debug common setup failures
+## The Goal
 
-## Tooling Checklist
+By the end of this lesson, you should be able to:
 
-Install and verify these tools:
+- verify that Rust, Solana CLI, and Anchor CLI are installed
+- create a new Anchor workspace
+- run `anchor build`
+- run `anchor test`
+- explain what those two commands actually do
 
-1. Rust (`rustc --version`)
-2. Solana CLI (`solana --version`)
-3. Anchor CLI (`anchor --version`)
-4. Node.js (`node --version`)
+That is enough for the first step.
+
+## The Current Installation Path
+
+The official Solana docs now provide a one-command installer that sets up the standard local toolchain.
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
+```
+
+That is the fastest way to get the full environment onto your machine.
+
+After the install finishes, restart your terminal.
+
+Then verify the tools actually exist:
+
+```bash
+rustc --version
+solana --version
+anchor --version
+node --version
+yarn --version
+```
+
+Why this matters:
+
+- Rust compiles your program
+- Solana CLI manages wallets, clusters, and validator commands
+- Anchor CLI creates, builds, deploys, and tests Anchor workspaces
+- Node and Yarn are needed for the default TypeScript test template created by `anchor init`
 
 <Callout type="info">
-Use AVM (Anchor Version Manager) if you need to switch Anchor versions across projects.
+The official Anchor docs still recommend AVM, the Anchor Version Manager, when you need to manage multiple Anchor versions across projects.
+
+That matters once you start working across repos or need reproducible builds.
 </Callout>
 
-```bash title="optional-avm-install"
-cargo install --git https://github.com/coral-xyz/anchor avm --locked
+## When To Use AVM
+
+If you only want a fast first setup, the installer above is enough.
+
+If you expect to work across multiple Anchor projects, install AVM as well.
+
+```bash
+cargo install --git https://github.com/coral-xyz/anchor avm --force
+avm --version
 avm install latest
 avm use latest
 anchor --version
 ```
 
-## Create Your First Anchor Workspace
+What AVM changes:
 
-```bash title="create-workspace"
+- you can pin a specific Anchor version per machine workflow
+- switching Anchor versions stops being manual
+- reproducing an older project becomes much easier
+
+You do not need to overthink this yet.
+
+Just remember the rule: if version drift becomes a problem, use AVM.
+
+## Create Your First Workspace
+
+Now create a project.
+
+```bash
 anchor init anchor_starter
 cd anchor_starter
 ```
 
-You should now see folders like:
+This gives you a default Anchor workspace with:
 
-- `programs/`
-- `tests/`
-- `migrations/`
-- `Anchor.toml`
+- `Anchor.toml` for project configuration
+- `programs/` for on-chain Rust code
+- `tests/` for integration tests
+- `migrations/` for deployment scripting
+- `target/` after builds
 
-## Configure Local Validator Workflow
-
-Make sure your CLI is pointed to localnet while testing:
-
-```bash
-solana config set --url http://127.0.0.1:8899
-solana config get
-```
-
-Run an airdrop to your local wallet once validator is running:
+If you want Rust-based tests instead of the default TypeScript template, Anchor now supports that directly at project creation time:
 
 ```bash
-solana airdrop 10
-solana balance
+anchor init --test-template rust anchor_starter_rust
 ```
 
-## Run the Default Program Test
+For this curriculum, the default test template is fine for the first setup pass.
+
+The goal right now is not to choose the perfect test stack.
+
+The goal is to get one clean loop working.
+
+## Look At `Anchor.toml` Before You Run Anything
+
+Open `Anchor.toml` once.
+
+You are looking for one thing first: the cluster configuration.
+
+In a new local project, you generally want to stay on `localnet` while learning.
+
+That matters because `anchor test` behaves differently depending on the configured cluster.
+
+When the workspace is set to localnet, Anchor can:
+
+- start a local validator
+- deploy your program into that local validator
+- run your tests
+- shut the validator down after the test run
+
+That is your main learning loop.
+
+## Run `anchor build` First
+
+Do not jump straight to tests.
+
+Build first.
 
 ```bash
 anchor build
+```
+
+What this does:
+
+- compiles your Rust program
+- generates build artifacts in `target/`
+- updates the IDL output for your program
+
+If `anchor build` fails, that usually means one of these is wrong:
+
+- Rust toolchain
+- Anchor installation
+- local dependency setup
+- workspace configuration
+
+Fix build issues before you move to tests.
+
+## Run `anchor test`
+
+Once the build works, run:
+
+```bash
 anchor test
 ```
 
-If this passes, your setup is ready.
+What this does in the normal local workflow:
 
-<Callout type="tip">
-`anchor test` starts a local validator automatically for the test flow. Use it as your default inner loop when learning.
-</Callout>
+- builds the workspace
+- starts localnet if needed
+- deploys your program locally
+- runs the generated integration tests
 
-## Common Setup Errors (And Fast Fixes)
+If this passes, your setup is good enough for the rest of the section.
 
-### Error: `anchor: command not found`
+That is the baseline you want.
 
-- Confirm AVM install path is in `PATH`
-- Restart terminal
-- Re-run `avm use latest`
+## What Success Looks Like
 
-### Error: Rust toolchain mismatch
+A successful setup means all of these are true:
+
+- `anchor --version` works
+- `anchor init` created the workspace without errors
+- `anchor build` finishes successfully
+- `anchor test` finishes successfully
+- you understand where the program code and tests live
+
+If one of those is missing, you are not fully set up yet.
+
+## Common Failures And The Real Cause
+
+### `anchor: command not found`
+
+Your shell cannot find the Anchor binary.
+
+Check:
 
 ```bash
-rustup update
-rustup default stable
+anchor --version
+avm --version
 ```
 
-### Error: Solana keypair missing
+If AVM is installed but `anchor` is missing, restart your terminal and run:
+
+```bash
+avm use latest
+```
+
+### `could not exec the linker cc`
+
+The Anchor docs call this out on Linux and WSL.
+
+This usually means system build dependencies are missing or not available to the Rust toolchain.
+
+The right fix is not random cargo commands.
+
+The right fix is to install the missing Linux dependencies and then retry the Anchor install.
+
+### `anchor test` fails before tests run
+
+Do not assume your program logic is wrong.
+
+Very often the problem is one of these:
+
+- another local validator is already running
+- Node or Yarn is missing for the default test template
+- the workspace did not build cleanly first
+
+The official CLI docs note that `anchor test` can fail if another local validator is already running.
+
+If that happens, shut it down and rerun the test.
+
+### Wallet or keypair problems
+
+If Solana CLI is installed but your keypair setup is missing, create one:
 
 ```bash
 solana-keygen new
 solana address
 ```
 
-### Error: Build fails after upgrading tools
+You do not need devnet SOL for the local test flow.
+
+For localnet, the validator controls the test environment.
+
+## What To Check In The Generated Project
+
+Before moving on, open these files once:
+
+- `Anchor.toml`
+- `programs/<project-name>/src/lib.rs`
+- `tests/<project-name>.ts`
+
+You are not studying the code deeply yet.
+
+You are just building a map of the workspace.
+
+That will matter in the next lesson.
+
+## Fast Verification Checklist
+
+Run this sequence in order:
 
 ```bash
-cargo clean
+anchor --version
+anchor init anchor_starter
+cd anchor_starter
 anchor build
+anchor test
 ```
 
-## Solana-Dev Best Practice Notes
+If those commands all work, your local setup is ready.
 
-- Keep cluster explicit in commands (`localnet`, `devnet`, `mainnet`)
-- Keep `web3.js` usage at boundaries if legacy dependencies force it
-- Prefer `@solana/kit` for new scripts and clients outside legacy Anchor TS flows
+## What You Should Know Before Moving On
 
-## Verify End-to-End In 4 Steps
+Before leaving this lesson, you should be able to answer these two questions clearly:
 
-<Steps>
-<Step>
-### Step 1: Build
-Run `anchor build` with zero warnings you do not understand.
-</Step>
+1. What is the difference between `anchor build` and `anchor test`?
+2. Why is localnet the safest place to learn first?
 
-<Step>
-### Step 2: Test
-Run `anchor test` and confirm all default tests pass.
-</Step>
+If those answers are still fuzzy, rerun the workflow once more.
 
-<Step>
-### Step 3: Inspect Program ID
-Open `target/idl/*.json` and verify a program address exists.
-</Step>
+## What Comes Next
 
-<Step>
-### Step 4: Record Baseline
-Save versions of Solana, Rust, and Anchor in your notes for reproducibility.
-</Step>
-</Steps>
+The next lesson is not more setup.
 
-## Try This Next
-
-1. Rename the default program and run tests again.
-2. Change one instruction name and regenerate IDL.
-3. Commit this working baseline before adding new logic.
+It is learning what the generated Anchor workspace actually contains, and why those files exist.

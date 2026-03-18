@@ -1,19 +1,19 @@
 {
   "title": "Anchor Programs",
-  "description": "Learn Anchor step by step, from setup and program anatomy to PDAs, CPIs, and guided projects.",
+  "description": "Learn Anchor from workspace setup and program anatomy through PDAs, token flows, CPI, and guided program builds.",
   "icon": "Anchor",
   "root": true,
   "pages": [
     "index",
     "anchor-local-setup",
-    "anchor-core-concepts",
     "anchor-program-anatomy",
+    "anchor-core-concepts",
     "first-anchor-program",
     "pda-seed-derivation",
     "spl-token-integration",
+    "cpi-cross-program",
     "token-minting-project",
     "escrow-mechanism-project",
-    "cpi-cross-program",
     "anchor-ergonomics",
     "defi-integration-challenge"
   ]
