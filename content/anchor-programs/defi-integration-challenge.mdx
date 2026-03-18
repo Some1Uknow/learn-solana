@@ -1,101 +1,343 @@
 ---
-title: "Challenge: DeFi Integration with Anchor CPI"
-description: "Capstone challenge for this module: integrate an Anchor program with external protocol-like flows using CPI, strict account validation, and realistic test scenarios."
-module: "⚓ Anchor Framework"
+title: "DeFi Integration Capstone"
+description: "Build one optional Anchor capstone that routes token settlement through a program-controlled vault, enforces a clear authority model, and proves the full flow with failure-path tests."
+module: "Anchor Programs"
 keywords:
-  - "anchor defi challenge"
-  - "cpi capstone"
-  - "solana defi integration"
+  - "anchor defi capstone"
+  - "anchor cpi capstone"
+  - "vault settlement"
   - "anchor protocol integration"
-  - "token swap challenge"
-  - "anchor intermediate project"
-  - "solana smart contract challenge"
+  - "token settlement anchor"
+  - "anchor pda authority"
+  - "solana anchor"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
-import { Steps, Step } from 'fumadocs-ui/components/steps';
 
-This is your intermediate checkpoint.
+This page should not be treated like the main teaching spine.
 
-You now know enough to design a small protocol integration safely.
+It is an optional capstone.
 
-## Challenge Brief
+That means it assumes the rest of the Anchor section already feels normal:
 
-Build an Anchor program that performs one of these actions through CPI:
+- PDA design
+- token account wiring
+- CPI
+- signer seeds
+- state transitions
+- failure-path testing
 
-1. Route a token transfer through a vault before settlement
-2. Execute a controlled swap-like flow (simulated or protocol test environment)
-3. Distribute yield/rewards with on-chain accounting
+If those still feel shaky, go back and strengthen them first.
 
-Pick one and implement end-to-end.
+## The One Project
 
-## Required Capabilities
+Build a vault-routed settlement module.
 
-- At least one PDA authority signer
-- At least one CPI to token/system/external program
-- State machine with 2+ states
-- 6+ tests including failure paths
+The flow is simple:
 
-## Suggested Scope (4 Milestones)
+1. a payer deposits tokens into a program-controlled vault
+2. the program records a settlement agreement on-chain
+3. an authorized settlement step releases tokens to a recipient
+4. an optional fee cut is routed to a treasury token account
+5. the settlement cannot be executed twice
 
-<Steps>
-<Step>
-### Milestone 1: State and Accounts
-Define account model, seed formulas, and authority model.
-</Step>
+That is the only project in this capstone.
 
-<Step>
-### Milestone 2: Happy Path
-Implement main business instruction and make it pass in tests.
-</Step>
+No menu. No branching options.
 
-<Step>
-### Milestone 3: Abuse Tests
-Add wrong-authority, wrong-mint, wrong-state, and replay-style tests.
-</Step>
+## Why This Is The Right Capstone
 
-<Step>
-### Milestone 4: Client Script
-Add a small client flow (prefer `@solana/kit` for new script code) to execute the path end to end.
-</Step>
-</Steps>
+This project forces you to combine the exact ideas the section was building toward:
 
-## Acceptance Criteria
+- PDA state
+- PDA authority
+- token CPI
+- explicit settlement states
+- one real trust boundary
 
-Your challenge is complete when:
+It also feels closer to a real protocol module than the earlier training projects.
 
-- Program logic enforces all critical rules on-chain
-- CPI accounts are fully validated
-- Tests cover both success and failure behaviors
-- README explains architecture and trust assumptions
+You are no longer just teaching one token mint or one escrow.
 
-## Risk Review (Must Answer)
+You are teaching controlled settlement logic.
 
-1. Who can move funds, and how is that authority enforced?
-2. Which accounts are mutable, and why?
-3. What happens if instruction is called twice?
-4. What assumptions do you make about external program behavior?
-5. How will you safely upgrade this logic later?
+## What The Program Must Guarantee
+
+At minimum, your program should enforce these rules on-chain:
+
+- only the intended payer can fund the vault
+- only the expected recipient can receive settlement proceeds
+- settlement can only happen once
+- fee routing, if present, must use the exact expected treasury account
+- token accounts must match the intended mint
+- PDA signer seeds must match the vault authority derivation rule exactly
+
+If those rules are not enforced on-chain, the capstone is weak.
+
+## The Core Architecture
+
+Use four main pieces:
+
+1. a `Settlement` PDA for business state
+2. a `vault-authority` PDA tied to that settlement
+3. a vault token account owned by the vault-authority PDA
+4. one settlement instruction that performs the token CPI and updates state
+
+This should look familiar by now.
+
+That is intentional.
+
+A capstone should combine the earlier patterns, not invent a totally different mental model.
+
+## Suggested Settlement State
+
+Keep the first version compact.
+
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct Settlement {
+    pub payer: Pubkey,
+    pub recipient: Pubkey,
+    pub treasury: Pubkey,
+    pub mint: Pubkey,
+    pub amount: u64,
+    pub fee_bps: u16,
+    pub status: SettlementStatus,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, PartialEq, Eq, InitSpace)]
+pub enum SettlementStatus {
+    Initialized,
+    Funded,
+    Settled,
+    Cancelled,
+}
+```
+
+Why this is enough:
+
+- `payer` defines who supplies the tokens
+- `recipient` defines who should receive the main proceeds
+- `treasury` defines where the fee goes
+- `mint` fixes the asset being settled
+- `amount` fixes the gross settlement amount
+- `fee_bps` lets you compute one protocol fee deterministically
+- `status` prevents replay and invalid transitions
+
+That is already a real authority model.
+
+## PDA Rules
+
+Use deterministic rules and keep them boring.
+
+### Settlement PDA
+
+```rust
+seeds = [b"settlement", payer.key().as_ref(), settlement_id.as_ref()]
+```
+
+### Vault authority PDA
+
+```rust
+seeds = [b"vault-authority", settlement.key().as_ref()]
+```
+
+Those two formulas are enough.
+
+Do not get clever here.
+
+The harder the logic becomes, the more important predictable seeds become.
+
+## Step 1: Initialize The Settlement
+
+The initialize instruction should only write the agreement.
+
+It should not move tokens yet.
+
+That separation matters.
+
+```rust
+#[derive(Accounts)]
+#[instruction(settlement_id: [u8; 8])]
+pub struct InitializeSettlement<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    pub recipient: UncheckedAccount<'info>,
+    pub treasury: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + Settlement::INIT_SPACE,
+        seeds = [b"settlement", payer.key().as_ref(), &settlement_id],
+        bump,
+    )]
+    pub settlement: Account<'info, Settlement>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+The handler should only store the state terms and mark the settlement as `Initialized`.
+
+That is enough for the first step.
+
+## Step 2: Fund The Vault
+
+The payer should move tokens into a vault token account owned by the vault-authority PDA.
+
+That is the same custody pattern you already saw in escrow.
+
+The important point is not novelty.
+
+The important point is reuse of a correct authority pattern.
+
+At the funding step, validate all of these:
+
+- settlement status is `Initialized`
+- payer matches the stored settlement payer
+- payer token account matches the expected mint
+- vault token account is derived for the vault-authority PDA and the correct mint
+
+Then use `transfer_checked` to move the amount into the vault.
+
+After the transfer, set the settlement status to `Funded`.
+
+## Step 3: Settle Through The Vault Authority PDA
+
+This is the heart of the capstone.
+
+The settlement instruction should:
+
+- require the settlement to be `Funded`
+- compute the fee amount from `fee_bps`
+- compute the recipient amount as `amount - fee`
+- transfer the fee from the vault to the treasury token account
+- transfer the remainder from the vault to the recipient token account
+- mark the settlement as `Settled`
+
+The critical CPI pattern looks like this:
+
+```rust
+let signer_seeds: &[&[&[u8]]] = &[&[
+    b"vault-authority",
+    settlement.key().as_ref(),
+    &[ctx.bumps.vault_authority],
+]];
+
+let cpi_context = CpiContext::new(
+    ctx.accounts.token_program.to_account_info(),
+    cpi_accounts,
+)
+.with_signer(signer_seeds);
+```
+
+That is the same signer rule you already learned.
+
+Now it is doing real settlement work.
+
+## Step 4: Make The Fee Rule Explicit
+
+Do not hide the fee logic in the client.
+
+Do not treat treasury routing as a UI detail.
+
+If the protocol takes a fee, the program should compute and enforce it.
+
+A clear pattern is:
+
+```rust
+let fee_amount = settlement
+    .amount
+    .checked_mul(settlement.fee_bps as u64)
+    .ok_or(ErrorCode::Overflow)?
+    / 10_000;
+
+let recipient_amount = settlement
+    .amount
+    .checked_sub(fee_amount)
+    .ok_or(ErrorCode::Overflow)?;
+```
+
+That makes the settlement math visible and testable.
+
+## Step 5: Block Replay By Updating State Last
+
+This is a small but important discipline point.
+
+You should update the final status only after the CPI steps succeed.
+
+```rust
+settlement.status = SettlementStatus::Settled;
+```
+
+That preserves a clean rule:
+
+- unfinished CPI means unfinished settlement
+- finished CPI means final state transition
+
+That rule makes both reasoning and testing cleaner.
+
+## Required Failure Paths
+
+A capstone is not complete if it only works once on the happy path.
+
+At minimum, test all of these:
+
+1. funding succeeds for the correct payer
+2. funding fails for the wrong payer
+3. settlement succeeds for the correct state and accounts
+4. settlement fails if the vault authority seeds are wrong
+5. settlement fails if the mint is wrong
+6. settlement fails if the treasury token account is not the expected one
+7. settlement fails on second execution because the status is no longer `Funded`
+
+That is the minimum serious matrix.
+
+## Risk Review
+
+Before you call this capstone done, answer these clearly:
+
+1. who can move tokens at each step?
+2. which PDA actually controls the vault?
+3. what prevents double settlement?
+4. what guarantees the fee goes to the intended treasury?
+5. what guarantees the wrong mint cannot slip into the flow?
+
+If your answers are vague, the implementation is still weak.
+
+## What A Good Submission Looks Like
+
+A good capstone is not the one with the most features.
+
+It is the one where:
+
+- the account model is easy to explain
+- the authority model is easy to explain
+- the seed formulas are stable
+- the fee logic is explicit
+- the failure-path tests prove the trust boundary
+
+That is the real standard.
 
 <Callout type="warn">
-If you cannot explain your authority model clearly, your design is not ready.
+If you cannot explain exactly why the vault authority PDA is allowed to sign, do not call the design finished.
+
+That is the center of the whole module.
 </Callout>
 
-## Submission Template (Use This)
+## One Good Extension
 
-- Problem statement
-- Account model diagram
-- Instruction list and required signers
-- Test matrix (happy + failure)
-- Known limitations and future hardening
+If the core capstone works, add exactly one improvement:
 
-## What “Good” Looks Like
+- add an expiry timestamp that lets the payer cancel if settlement never occurs
 
-A strong submission is not the longest one. It is the one with:
+That extension deepens the state machine without changing the core authority model.
 
-- Clear account constraints
-- Minimal trust assumptions
-- Thoughtful failure testing
-- Explicit upgrade and security notes
+## What Comes Next
 
-When you finish this challenge, you are ready to start building production-style Anchor modules.
+This is the end of the optional Anchor capstone path.
+
+If you can build this cleanly and explain the authority model without hand-waving, the Anchor section has done its job.
