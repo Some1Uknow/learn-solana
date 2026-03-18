@@ -1,126 +1,422 @@
 ---
-title: "PDAs & Seed Derivation (Beginner Friendly)"
-description: "Learn Program Derived Addresses with Anchor: deterministic account addresses, seed design, bumps, and safe PDA-based account creation patterns."
-module: "⚓ Anchor Framework"
+title: "PDAs and Seed Derivation"
+description: "Learn how Anchor uses seeds and bumps to derive deterministic program-controlled addresses, and how to design PDA state safely."
+module: "Anchor Programs"
 keywords:
-  - "solana pda"
   - "anchor pda"
-  - "seed derivation"
-  - "anchor bump"
   - "program derived address"
-  - "solana deterministic accounts"
   - "anchor seeds"
+  - "anchor bump"
+  - "solana pda"
+  - "anchor deterministic accounts"
+  - "seed derivation"
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-PDAs are one of the most important Solana patterns.
+The last lesson used a normal keypair-backed account for the counter.
 
-If normal keypairs are user-controlled addresses, PDAs are **program-controlled addresses** derived from predictable seeds.
+That is useful for learning, but it is not how many real Solana programs organize state.
 
-## Why PDAs Exist
+Real programs often need addresses they can derive again later.
 
-You use PDAs when you need predictable addresses for state.
+That is where PDAs come in.
 
-Examples:
+## The Core Idea
 
-- One profile per user
-- One review per `(movie, user)`
-- One vault per escrow deal
+A PDA is a deterministic address derived from:
 
-With PDAs, you can always re-derive the same address from the same seed inputs.
+- seed bytes
+- a program ID
+- a bump
 
-## PDA Mental Model
+In practice, that means your program can decide what an address should be before the account exists.
 
-A PDA is derived from:
+That is the real power.
 
-- Seed bytes (`b"review"`, user pubkey, etc.)
-- Program ID
-- Bump (single byte Anchor finds for a valid curve-off address)
+You are not waiting for a random keypair anymore.
 
-Anchor makes this practical through account constraints.
+You are defining the address from the business rule itself.
 
-## Example: Movie Review PDA
+## Why Programs Need PDAs
 
-```rust title="review PDA account"
+A normal keypair account is fine when a client can create any arbitrary account and hand it to the program.
+
+A PDA is better when the program needs a predictable rule like:
+
+- one profile per user
+- one review per `(reviewer, movie)` pair
+- one config account for the whole program
+- one vault authority for one escrow
+
+Those are not random accounts.
+
+They are accounts with a deterministic relationship to your program state.
+
+## The Right Mental Model
+
+If a normal keypair is user-chosen state, a PDA is program-chosen state.
+
+That does not mean the program magically owns everything about it.
+
+It means the address is derived from rules your program can reproduce.
+
+That is why PDAs are so useful for:
+
+- unique records
+- namespaced state
+- authority accounts
+- vault patterns
+
+## What Anchor Adds
+
+The official Anchor PDA docs emphasize that you usually define PDAs directly in the account constraints.
+
+That means the PDA derivation rule also becomes a validation rule.
+
+This is the main pattern:
+
+```rust
+#[account(
+    seeds = [b"profile", authority.key().as_ref()],
+    bump,
+)]
+pub profile: Account<'info, Profile>,
+```
+
+Two important things are happening here at once:
+
+- Anchor derives the expected PDA from those seeds
+- Anchor checks that the provided account matches that expected address
+
+That is why PDAs are not just an address trick.
+
+They are part of your validation model.
+
+## `seeds` and `bump` Belong Together
+
+The official account constraints reference is explicit here:
+
+- `seeds` defines the PDA inputs
+- `bump` is used with those seeds to derive a valid PDA
+
+You should think of them as a pair.
+
+```rust
+#[account(
+    seeds = [b"profile", authority.key().as_ref()],
+    bump,
+)]
+pub profile: Account<'info, Profile>,
+```
+
+Anchor supports:
+
+- static seeds like `b"profile"`
+- dynamic seeds like `authority.key().as_ref()`
+- combinations of both
+
+That is how you move from vague state to deterministic state.
+
+## Your First Useful PDA Example
+
+Start with a profile account.
+
+The business rule is simple:
+
+one profile per user.
+
+That rule maps directly to a PDA formula.
+
+```rust
+#[account]
+#[derive(InitSpace)]
+pub struct UserProfile {
+    pub authority: Pubkey,
+    #[max_len(32)]
+    pub username: String,
+}
+```
+
+Now define the creation context.
+
+```rust
 #[derive(Accounts)]
-#[instruction(movie: String)]
-pub struct AddReview<'info> {
+pub struct CreateProfile<'info> {
     #[account(mut)]
-    pub reviewer: Signer<'info>,
+    pub authority: Signer<'info>,
 
     #[account(
         init,
-        payer = reviewer,
-        space = 8 + MovieReview::INIT_SPACE,
-        seeds = [b"review", reviewer.key().as_ref(), movie.as_bytes()],
+        payer = authority,
+        space = 8 + UserProfile::INIT_SPACE,
+        seeds = [b"profile", authority.key().as_ref()],
         bump,
     )]
-    pub review: Account<'info, MovieReview>,
+    pub profile: Account<'info, UserProfile>,
 
     pub system_program: Program<'info, System>,
 }
 ```
 
-```rust title="state"
-#[account]
-#[derive(InitSpace)]
-pub struct MovieReview {
-    pub reviewer: Pubkey,
-    #[max_len(50)]
-    pub movie: String,
-    #[max_len(280)]
-    pub text: String,
-    pub rating: u8,
-}
+Read that rule in plain language:
+
+- namespace this account under `b"profile"`
+- tie it to one authority public key
+- derive one deterministic address from those inputs
+- create the account there
+
+That means the same user cannot create ten different profile accounts under this rule.
+
+The seed formula defines uniqueness.
+
+## Why The Namespace Seed Matters
+
+Do not start your PDA design with only dynamic values.
+
+Start with a namespace seed.
+
+Good:
+
+```rust
+seeds = [b"profile", authority.key().as_ref()]
 ```
 
-<Callout type="tip">
-Seed order matters. `review + user + movie` is different from `review + movie + user`.
-</Callout>
+Weak:
 
-## Updating a PDA Account
+```rust
+seeds = [authority.key().as_ref()]
+```
 
-Use the same seed formula in update/delete contexts.
+The namespace seed does three things:
+
+- it makes the PDA purpose obvious
+- it avoids collisions with other PDA types in your program
+- it makes the design easier to review later
+
+This is a small habit, but it matters a lot once programs grow.
+
+## Updating The Same PDA Later
+
+The next important rule is simple:
+
+if you create a PDA with one seed formula, you must validate it with the same seed formula later.
+
+Here is an update context:
 
 ```rust
 #[derive(Accounts)]
-#[instruction(movie: String)]
-pub struct UpdateReview<'info> {
-    pub reviewer: Signer<'info>,
+pub struct UpdateProfile<'info> {
+    pub authority: Signer<'info>,
 
     #[account(
         mut,
-        seeds = [b"review", reviewer.key().as_ref(), movie.as_bytes()],
+        seeds = [b"profile", authority.key().as_ref()],
         bump,
-        has_one = reviewer,
+        has_one = authority,
     )]
-    pub review: Account<'info, MovieReview>,
+    pub profile: Account<'info, UserProfile>,
 }
 ```
 
-## Seed Design Rules
+This gives you two layers of protection:
 
-1. Include a namespace seed first (example: `b"review"`)
-2. Include identity keys when you need per-user separation
-3. Include business keys only if they are stable enough
-4. Keep seed count and size reasonable
+- the account must be the correct PDA for that authority
+- the stored authority field must still match the signer
+
+That combination is stronger than signer checks alone.
+
+## Seed Order Is Part Of The Address
+
+This is one of the easiest mistakes to make.
+
+These are not the same:
+
+```rust
+seeds = [b"review", reviewer.key().as_ref(), movie.as_bytes()]
+```
+
+```rust
+seeds = [b"review", movie.as_bytes(), reviewer.key().as_ref()]
+```
+
+Changing seed order changes the derived address.
+
+That means seed order is part of your state model.
+
+Pick the rule once, document it, and keep it consistent everywhere.
+
+<Callout type="tip">
+If you ever have to ask “does seed order matter?”, the answer is yes.
+
+Treat the seed formula like a schema, not like a casual helper expression.
+</Callout>
+
+## Do Not Put Unstable Data In Seeds Without Thinking
+
+A seed should usually be based on data that is stable enough to derive again later.
+
+Good seed candidates:
+
+- fixed namespace bytes
+- public keys
+- stable IDs
+- immutable labels
+
+Risky seed candidates:
+
+- editable usernames
+- mutable titles
+- arbitrary text you may want to change later
+
+If a value can change, and you use it as a seed, your addressing scheme gets harder to reason about.
+
+That does not always mean “never do it.”
+
+It means “do it intentionally.”
+
+## PDA Creation Versus PDA Validation
+
+These are related, but not identical.
+
+During creation, you usually have something like:
+
+```rust
+#[account(
+    init,
+    payer = authority,
+    space = 8 + UserProfile::INIT_SPACE,
+    seeds = [b"profile", authority.key().as_ref()],
+    bump,
+)]
+pub profile: Account<'info, UserProfile>,
+```
+
+Later, when the account already exists, you remove `init` and keep the validation rule:
+
+```rust
+#[account(
+    mut,
+    seeds = [b"profile", authority.key().as_ref()],
+    bump,
+    has_one = authority,
+)]
+pub profile: Account<'info, UserProfile>,
+```
+
+That pattern matters.
+
+Creation is one moment.
+
+Validation is every moment after that.
+
+## PDA Seeds In The IDL
+
+The official Anchor PDA docs point out an important detail:
+
+PDA seed information defined in account constraints is included in the program IDL.
+
+Why that matters:
+
+- clients can understand more of the account derivation rule
+- account resolution can be more structured
+- the program interface becomes less opaque
+
+That does not remove the need to understand the seeds yourself.
+
+But it does make the program contract richer and easier to work with.
+
+## One Small Full Example
+
+Here is the minimal shape for a profile creation instruction.
+
+```rust
+use anchor_lang::prelude::*;
+
+#[program]
+pub mod profiles {
+    use super::*;
+
+    pub fn create_profile(ctx: Context<CreateProfile>, username: String) -> Result<()> {
+        let profile = &mut ctx.accounts.profile;
+        profile.authority = ctx.accounts.authority.key();
+        profile.username = username;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateProfile<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    #[account(
+        init,
+        payer = authority,
+        space = 8 + UserProfile::INIT_SPACE,
+        seeds = [b"profile", authority.key().as_ref()],
+        bump,
+    )]
+    pub profile: Account<'info, UserProfile>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct UserProfile {
+    pub authority: Pubkey,
+    #[max_len(32)]
+    pub username: String,
+}
+```
+
+If you understand why that address is deterministic, and why the seed rule belongs in the account context, you understand the heart of PDA usage.
 
 ## Common PDA Mistakes
 
-- Using mutable text as a seed when the value can change later
-- Forgetting to reuse the same seed formula in later instructions
-- Missing `has_one` checks and trusting only signer presence
-- Storing data in one PDA but validating another seed set
+### Mistake 1: treating PDAs like random addresses
 
-## Security Checklist (PDA Edition)
+They are not random.
 
-- Is every PDA derived from deterministic, intentional seeds?
-- Does every mutating instruction validate ownership (`has_one`, signer)?
-- Do tests include wrong-seed and wrong-authority attempts?
+Their value comes from being reproducible.
 
-## Try This Next
+### Mistake 2: changing the seed formula between instructions
 
-1. Build a `UserProfile` PDA with seed `b"profile" + user_pubkey`.
-2. Add `close` instruction to reclaim rent when a profile is deleted.
-3. Write a failing test for wrong PDA seed order and confirm rejection.
+If creation uses one formula and update uses another, your validation model is broken.
+
+### Mistake 3: relying only on the signer and ignoring stored authority
+
+A signer check alone is often not enough.
+
+Use the PDA rule and the stored authority rule together when the business logic requires both.
+
+### Mistake 4: using mutable business data as a seed casually
+
+If a seed can change, your addressing model gets harder to preserve and review.
+
+### Mistake 5: forgetting what the bump is doing
+
+The bump is part of deriving a valid PDA.
+
+Do not treat it like random syntax noise.
+
+## One Good Practice Exercise
+
+Add a `UserProfile` PDA to a fresh Anchor workspace with this rule:
+
+- namespace: `b"profile"`
+- identity: `authority.key()`
+
+Then write two tests:
+
+1. the correct authority can create the PDA-backed profile
+2. a mismatched PDA address is rejected
+
+That is a much better PDA exercise than jumping straight into a large escrow or vault design.
+
+## What Comes Next
+
+The next lesson moves from deterministic state to token-aware state.
+
+That is where PDAs start getting used for real authority flows, not just profile-style records.

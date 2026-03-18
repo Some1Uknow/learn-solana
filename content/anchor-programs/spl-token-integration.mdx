@@ -1,10 +1,10 @@
 ---
 title: "SPL Token Integration with Anchor"
-description: "Integrate SPL tokens in Anchor programs: create mints, create token accounts, mint tokens, transfer safely, and understand Token vs Token-2022 boundaries."
-module: "⚓ Anchor Framework"
+description: "Learn how Anchor works with token mints, token accounts, and token CPIs using the modern token_interface types for Token and Token-2022."
+module: "Anchor Programs"
 keywords:
   - "anchor spl"
-  - "spl token anchor"
+  - "anchor token interface"
   - "token-2022 anchor"
   - "mint_to anchor"
   - "transfer_checked anchor"
@@ -14,25 +14,88 @@ keywords:
 
 import { Callout } from 'fumadocs-ui/components/callout';
 
-After PDAs, token integration is the next skill that unlocks real apps.
+After PDAs, token integration is the next big step.
 
-This lesson focuses on **correct token account wiring** and **safe instruction constraints**.
+This is where Solana programs stop looking like generic state machines and start handling real balances, real authorities, and real asset movement.
 
-## Core Accounts You Need To Know
+The mistake beginners make here is trying to memorize token APIs before the account model is clear.
 
-- Mint account: token definition (decimals, authorities)
-- Token account (ATA usually): balance holder for an owner + mint
-- Token program: SPL Token or Token-2022 program
+Do not do that.
+
+First understand the accounts.
+
+Then the CPI code becomes much easier to read.
+
+## The Three Token Accounts You Must Understand
+
+At the first-pass level, token integration revolves around three things:
+
+- the mint account
+- the token account
+- the token program
+
+### The mint account
+
+The mint defines the token itself.
+
+It stores rules like:
+
+- decimals
+- mint authority
+- optional freeze authority
+
+If you do not know which mint is involved, you do not really know what asset your program is touching.
+
+### The token account
+
+A token account holds a balance of one mint for one owner.
+
+In most app flows, this is often an ATA, an associated token account.
+
+The important idea is simpler than the name:
+
+- a mint defines the asset
+- a token account holds some quantity of that asset
+
+### The token program
+
+This is the program that actually implements token logic.
+
+Today, that may be:
+
+- the classic SPL Token program
+- Token-2022
+
+That distinction matters.
+
+The current Anchor docs push you toward `token_interface` types so one account model can work across both token programs.
 
 <Callout type="info">
-Always be explicit about which token program you support. Do not assume legacy SPL token program only.
+Do not hardcode your lesson mental model around the old idea that there is only one token program.
+
+The modern Anchor pattern is to be explicit about which token program is being used.
 </Callout>
 
-## Anchor Example: Mint Tokens
+## Why `token_interface` Is The Right Default
 
-```rust title="mint tokens with anchor_spl"
+The current Anchor token docs use:
+
+- `InterfaceAccount<'info, Mint>`
+- `InterfaceAccount<'info, TokenAccount>`
+- `Interface<'info, TokenInterface>`
+
+That is the right default because it lets your instruction accept accounts from either Token or Token-2022, as long as the account shape is compatible.
+
+That is much better than teaching a narrow legacy path first and fixing it later.
+
+## Start With One Mint Instruction
+
+Here is the smallest useful minting example.
+
+```rust
+use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{
-    Mint, MintTo, TokenAccount, TokenInterface, mint_to,
+    mint_to, Mint, MintTo, TokenAccount, TokenInterface,
 };
 
 #[derive(Accounts)]
@@ -66,12 +129,118 @@ pub fn mint_rewards(ctx: Context<MintRewards>, amount: u64) -> Result<()> {
 }
 ```
 
-## Transfer With Decimal Checks
+## Read That Example Slowly
 
-Use checked transfer patterns to avoid decimal mismatch bugs.
+### `mint: InterfaceAccount<'info, Mint>`
+
+This is the mint account.
+
+It tells Anchor to deserialize the account as mint data, regardless of whether the mint came from the classic token program or Token-2022.
+
+### `destination: InterfaceAccount<'info, TokenAccount>`
+
+This is the balance-holding account that will receive the minted tokens.
+
+That account is tied to:
+
+- one mint
+- one owner
+
+### `token_program: Interface<'info, TokenInterface>`
+
+This is the token program Anchor will call during CPI.
+
+That explicit account is important.
+
+Your instruction should not be vague about which token program is actually being trusted to execute the token logic.
+
+### `MintTo`
+
+This is the CPI account struct for the token minting operation.
+
+You are building the account set the token program expects.
+
+### `CpiContext::new(...)`
+
+This packages:
+
+- the target program
+- the CPI accounts
+
+Then `mint_to(...)` performs the actual token CPI.
+
+That is the pattern you will see over and over in Anchor token code.
+
+## What This Example Still Does Not Validate
+
+The example above teaches the CPI shape, but it is not the full security story yet.
+
+Before you trust a minting flow in a real app, you still need to answer questions like:
+
+- is this the mint we intended to use?
+- is the destination token account for that same mint?
+- is the signer actually the authority that should be allowed to mint?
+- should the authority be a wallet signer or a PDA signer?
+
+That is why token integration is mostly an account-validation problem, not just a CPI syntax problem.
+
+## Create A Mint With Anchor Constraints
+
+The current Anchor docs also support mint creation directly through account constraints.
+
+Here is the modern shape:
 
 ```rust
-use anchor_spl::token_interface::{TransferChecked, transfer_checked};
+use anchor_spl::token_interface::{Mint, TokenInterface};
+
+#[derive(Accounts)]
+pub struct CreateMint<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(
+        init,
+        payer = signer,
+        mint::decimals = 6,
+        mint::authority = signer.key(),
+        mint::freeze_authority = signer.key(),
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+This is worth reading carefully.
+
+Anchor is not just creating a generic account here.
+
+It is creating and initializing a mint account with token-specific rules.
+
+That is why the `mint::...` constraints matter.
+
+## Token Transfers Should Usually Be Checked
+
+For transfers, the safer default is `transfer_checked`.
+
+```rust
+use anchor_spl::token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked};
+
+#[derive(Accounts)]
+pub struct TransferPoints<'info> {
+    pub owner: Signer<'info>,
+
+    pub mint: InterfaceAccount<'info, Mint>,
+
+    #[account(mut)]
+    pub from_ata: InterfaceAccount<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub to_ata: InterfaceAccount<'info, TokenAccount>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+}
 
 pub fn transfer_points(ctx: Context<TransferPoints>, amount: u64, decimals: u8) -> Result<()> {
     let cpi_accounts = TransferChecked {
@@ -91,26 +260,115 @@ pub fn transfer_points(ctx: Context<TransferPoints>, amount: u64, decimals: u8) 
 }
 ```
 
-## Token Integration Guardrails
+## Why `transfer_checked` Is Better Than Hand-Waving
 
-- Validate account mint matches your expected mint
-- Validate token account owner where required
-- Do not trust client-provided decimals blindly
-- Enforce authority checks before mint/burn flows
+The important beginner idea is not just “use this function because docs say so.”
+
+The real reason is that token amounts and decimals are part of the asset definition.
+
+A checked transfer forces the transfer logic to stay aligned with the mint’s decimal configuration.
+
+That is one more place where explicitness reduces bugs.
+
+## The Real Validation Questions For Token Flows
+
+Whenever you read or write an Anchor token instruction, ask these questions:
+
+1. which mint is this instruction supposed to work with?
+2. do both token accounts belong to that mint?
+3. who is the real authority over the action?
+4. which token program is actually being called?
+5. if a PDA is involved, where do the signer seeds come from?
+
+Those five questions matter more than memorizing CPI helper names.
+
+## A Better Beginner Guardrail List
+
+For token flows, the first serious guardrails are:
+
+- validate that the token accounts match the expected mint
+- validate that the authority is who your business logic expects
+- do not assume the client passed the correct token program by accident
+- prefer explicit checked operations when the token API offers them
+- keep minting rules and supply rules on-chain, not only in the frontend
+
+## Where PDAs Usually Enter Token Logic
+
+The lesson before this one taught PDA state.
+
+In token flows, PDAs often become:
+
+- mint authorities
+- vault authorities
+- claim record accounts
+- escrow state accounts
+
+That is why this lesson comes after PDAs.
+
+The PDA mental model is what makes token authority flows understandable.
+
+## One Good Beginner Example To Keep In Mind
+
+A strong first token design usually looks like this:
+
+- one mint
+- one clearly defined authority model
+- one mint instruction or one transfer instruction
+- one or two failure-path tests
+
+A weak first token design tries to include:
+
+- staking
+- rewards
+- vesting
+- freeze logic
+- metadata
+- multiple mints
+- custom economics
+
+all at once.
+
+Do not do that.
 
 ## Suggested Test Cases
 
-1. Mint succeeds with valid authority
-2. Mint fails with wrong authority
-3. Transfer fails when source mint mismatches
-4. Transfer succeeds for correct token program
+If you are building token instructions, test these before moving on:
 
-## Solana-Dev Client Note
+1. mint succeeds with the expected authority
+2. mint fails with the wrong authority
+3. transfer fails when the token accounts do not match the expected mint
+4. transfer succeeds when the mint, accounts, and authority all line up
 
-For new off-chain scripts, prefer `@solana/kit` for transaction construction and confirmation logic. If existing Anchor TS/web3 flows are already in place, isolate legacy types at adapter boundaries.
+Those tests teach much more than a giant happy-path-only example.
 
-## Try This Next
+## Common Beginner Mistakes
 
-1. Add an instruction that mints a fixed daily reward per user.
-2. Prevent double-claim with a PDA claim record.
-3. Add tests for both SPL Token and Token-2022 if your app supports both.
+### Mistake 1: treating token accounts like generic accounts
+
+They are not generic state bags.
+
+They carry mint-specific balance state governed by the token program.
+
+### Mistake 2: ignoring the token program account
+
+If the token program is part of the instruction, it is part of the trust boundary.
+
+Treat it that way.
+
+### Mistake 3: trusting client-provided decimals blindly
+
+If the operation depends on mint decimals, the mint itself matters.
+
+Do not treat decimals as casual UI metadata.
+
+### Mistake 4: focusing only on CPI syntax
+
+Most token bugs are validation bugs.
+
+The CPI helper call is often the easiest part.
+
+## What Comes Next
+
+The next lesson is where token flows and PDAs meet directly through signed CPI.
+
+That is the point where authority delegation becomes the main idea, not just token account wiring.
