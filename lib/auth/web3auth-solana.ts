@@ -1,5 +1,6 @@
 import type { IProvider } from "@web3auth/modal";
 import { Transaction, VersionedTransaction } from "@solana/web3.js";
+import { SolanaWallet } from "@web3auth/solana-provider";
 import bs58 from "bs58";
 
 const SOLANA_METHODS = {
@@ -46,27 +47,38 @@ function serializeTransaction(
   ).toString("base64");
 }
 
-export async function getSolanaAccounts(
-  provider: IProvider
-): Promise<string[]> {
-  const methods = [
-    SOLANA_METHODS.GET_ACCOUNTS,
-    SOLANA_METHODS.REQUEST_ACCOUNTS,
-  ] as const;
+function normalizeAccounts(result: unknown): string[] {
+  if (Array.isArray(result)) {
+    return result.filter((account): account is string => typeof account === "string");
+  }
+  if (typeof result === "string" && result.length > 0) {
+    return [result];
+  }
+  return [];
+}
 
-  for (const method of methods) {
+export async function getSolanaAccounts(provider: IProvider): Promise<string[]> {
+  const wallet = new SolanaWallet(provider as any);
+
+  for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      const result = await provider.request<unknown, unknown>({
-        method,
-      });
-      if (Array.isArray(result)) {
-        return result.filter((account): account is string => typeof account === "string");
-      }
-      if (typeof result === "string" && result.length > 0) {
-        return [result];
-      }
+      const requested = normalizeAccounts(await wallet.requestAccounts());
+      if (requested.length > 0) return requested;
     } catch {
-      // Try the next method.
+      // Fall through to getAccounts on the same attempt.
+    }
+
+    try {
+      const existing = normalizeAccounts(await wallet.request({
+        method: SOLANA_METHODS.GET_ACCOUNTS,
+      }));
+      if (existing.length > 0) return existing;
+    } catch {
+      // Retry after a short delay.
+    }
+
+    if (attempt < 3) {
+      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
     }
   }
 
@@ -83,15 +95,10 @@ export async function getPrimarySolanaAccount(
 export async function signSolanaMessage(
   provider: IProvider,
   message: string,
-  walletAddress?: string | null
+  _walletAddress?: string | null
 ): Promise<string | null> {
-  const result = await provider.request<unknown, unknown>({
-    method: SOLANA_METHODS.SIGN_MESSAGE,
-    params: {
-      data: new TextEncoder().encode(message),
-      from: walletAddress ?? undefined,
-    },
-  });
+  const wallet = new SolanaWallet(provider as any);
+  const result = await wallet.signMessage(new TextEncoder().encode(message));
 
   return serializeSignature(result as SignatureLike);
 }
