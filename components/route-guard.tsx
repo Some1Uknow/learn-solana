@@ -109,8 +109,9 @@ export function RouteGuard({ children }: RouteGuardProps) {
     router.push("/");
   };
 
-  // Loading state
-  if (isLoading) {
+  // Only block bootstrap on protected routes. Public pages can render immediately
+  // and let auth reconcile in the background.
+  if (isProtectedRoute && isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
         {/* Dark background matching main page */}
