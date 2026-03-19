@@ -6,6 +6,41 @@ import { BlurFade } from "@/components/ui/blur-fade";
 import { ArrowRight } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
 
+const toolSuite = [
+  {
+    name: "Visual Solana Builder",
+    description:
+      "Drag-and-drop program blocks to map how instructions and accounts connect. Export Anchor starter code.",
+    href: "/tools/visual-builder",
+    badge: "Beta",
+    tags: ["No-code", "Anchor", "Visual"],
+  },
+  {
+    name: "Program Simulator",
+    description:
+      "Step through Anchor instruction execution with account checks, PDAs, logs, and failure reasons.",
+    href: "/tools/program-simulator",
+    badge: "New",
+    tags: ["Runner", "Constraints", "Debug"],
+  },
+  {
+    name: "Transaction Visualizer",
+    description:
+      "Reorder instructions, inspect signers and compute cost, and learn transaction atomicity.",
+    href: "/tools/transaction-visualizer",
+    badge: "New",
+    tags: ["Transactions", "Fees", "Ordering"],
+  },
+  {
+    name: "Account Explorer",
+    description:
+      "Beginner-friendly account inspector with plain-language explanations for every field.",
+    href: "/tools/account-explorer",
+    badge: "New",
+    tags: ["Accounts", "Owners", "Data"],
+  },
+];
+
 // Breadcrumb items for structured data
 const breadcrumbItems = [
   { name: "Home", url: "/" },
@@ -55,7 +90,7 @@ export function ToolsPageClient() {
                 Essential Solana Developer Tools
               </h1>
               <p className="mt-4 text-lg text-zinc-400 max-w-2xl">
-                Discover the best infrastructure, wallets, and development tools for building on Solana.
+                Explore LearnSol’s interactive tooling built to make Solana concepts visual, guided, and hands-on.
               </p>
             </div>
           </BlurFade>
@@ -101,6 +136,50 @@ export function ToolsPageClient() {
                   Try Visual Builder
                   <ArrowRight className="w-4 h-4" />
                 </Link>
+              </div>
+            </section>
+          </BlurFade>
+
+          {/* Tooling Suite */}
+          <BlurFade delay={0.22} inView>
+            <section className="mb-12">
+              <div className="mb-6">
+                <div className="text-xs tracking-[0.25em] text-[#14f195] uppercase font-medium">
+                  [LEARN.SOL TOOLING]
+                </div>
+                <h2 className="mt-3 text-2xl font-semibold text-white">Interactive Learning Tools</h2>
+                <p className="mt-2 text-sm text-zinc-400 max-w-2xl">
+                  Purpose-built tools that make Solana concepts visual, guided, and hands-on for beginners.
+                </p>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                {toolSuite.map((tool) => (
+                  <Link
+                    key={tool.name}
+                    href={tool.href}
+                    className="group rounded-3xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-[#14f195]/40 hover:shadow-[0_0_40px_rgba(20,241,149,0.12)]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-white">{tool.name}</h3>
+                      <span className="rounded-full border border-[#14f195]/30 bg-[#14f195]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#14f195]">
+                        {tool.badge}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm text-zinc-300">{tool.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-white/50">
+                      {tool.tags.map((tag) => (
+                        <span key={tag} className="rounded-full border border-white/10 px-2 py-1">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[#14f195]">
+                      Open tool
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </div>
+                  </Link>
+                ))}
               </div>
             </section>
           </BlurFade>

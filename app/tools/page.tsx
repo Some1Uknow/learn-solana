@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import ToolsPageClient from "./tools-page.client";
 import { createCanonical } from "@/lib/seo";
 
-const title = "Solana Developer Tools & Infrastructure";
+const title = "Interactive Solana Learning Tools | LearnSol";
 const description =
-  "Essential tools and infrastructure for Solana developers. Discover RPCs, wallets, explorers, dev tools, and more to build on Solana.";
+  "Explore LearnSol’s interactive, beginner-friendly tools for understanding Solana programs, accounts, and transactions.";
 
 const toolsKeywords = [
-  "solana developer tools",
-  "solana rpc providers",
-  "solana wallets",
-  "solana infrastructure",
-  "solana dev tools",
-  "blockchain developer tools",
-  "web3 development tools",
+  "solana learning tools",
+  "solana visual builder",
+  "anchor simulator",
+  "solana transaction visualizer",
+  "solana account explorer",
+  "blockchain learning tools",
+  "web3 education tools",
 ];
 
 export const metadata: Metadata = {
