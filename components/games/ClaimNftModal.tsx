@@ -2,6 +2,7 @@
 
 import React from "react";
 import { authFetch } from "@/lib/auth/authFetch";
+import { createWeb3AuthSolanaWallet } from "@/lib/auth/web3auth-solana";
 
 export interface ClaimNftModalProps {
   open: boolean;
@@ -186,8 +187,7 @@ export default function ClaimNftModal({
                     (window as any).web3authSolanaWallet;
                   if (!solanaWallet && provider) {
                     try {
-                      const mod = await import("@web3auth/solana-provider");
-                      solanaWallet = new (mod as any).SolanaWallet(provider);
+                      solanaWallet = createWeb3AuthSolanaWallet(provider);
                       (window as any).web3authSolanaWallet = solanaWallet;
                     } catch {}
                   }

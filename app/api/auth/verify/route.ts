@@ -1,33 +1,27 @@
-import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
 
 export async function GET(req: NextRequest) {
   try {
-    // Extract JWT token from Authorization header or cookies
-    const cookieStore = await cookies();
-    const authHeader = req.headers.get("authorization");
-    let idToken = authHeader?.split(" ")[1];
-    
-    // Fallback to cookies if no header
-    if (!idToken) {
-      idToken = cookieStore.get("web3auth_token")?.value;
+    const verified = await verifyWeb3Auth(req);
+    if (!verified) {
+      return NextResponse.json(
+        { authenticated: false, user: null, expires: null },
+        { status: 200 }
+      );
     }
 
-    if (!idToken) {
-      return NextResponse.json({ error: "No token provided" }, { status: 401 });
-    }
-
-    // Verify JWT using Web3Auth JWKS
-    const jwks = jose.createRemoteJWKSet(new URL("https://api-auth.web3auth.io/.well-known/jwks.json"));
-    const { payload } = await jose.jwtVerify(idToken, jwks, { algorithms: ["ES256"] });
+    const { payload, source } = verified;
 
     // Extract user information from JWT
     const userInfo = {
       sub: payload.sub,
+      walletAddress: payload.walletAddress,
       email: payload.email,
       name: payload.name,
       profileImage: payload.profileImage,
+      authMethod: payload.authMethod,
+      source,
       verifier: payload.verifier,
       verifierId: payload.verifierId,
       aggregateVerifier: payload.aggregateVerifier,
@@ -43,8 +37,10 @@ export async function GET(req: NextRequest) {
     console.error("JWT verification error:", error);
     return NextResponse.json({ 
       error: "Invalid token",
-      authenticated: false 
-    }, { status: 401 });
+      authenticated: false,
+      user: null,
+      expires: null,
+    }, { status: 200 });
   }
 }
 
@@ -56,9 +52,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No token provided" }, { status: 401 });
     }
 
-    // Verify JWT using Web3Auth JWKS
-    const jwks = jose.createRemoteJWKSet(new URL("https://api-auth.web3auth.io/.well-known/jwks.json"));
-    const { payload } = await jose.jwtVerify(idToken, jwks, { algorithms: ["ES256"] });
+    const forwardedRequest = new Request(req.url, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${idToken}`,
+      },
+    });
+    const verified = await verifyWeb3Auth(forwardedRequest);
+    if (!verified) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+    const { payload } = verified;
 
     if (appPubKey) {
       // Find matching wallet in JWT for social login

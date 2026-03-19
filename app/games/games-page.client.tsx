@@ -6,8 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { authFetch } from "@/lib/auth/authFetch";
-import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
-import { SolanaWallet } from "@web3auth/solana-provider";
+import { useWeb3Auth } from "@/hooks/use-web3-auth";
 import { Connection } from "@solana/web3.js";
 import { fetchManyNftMetadata } from "@/lib/solana/fetchNftMetadata";
 import GameCard from "@/components/games/GameCard";
@@ -20,6 +19,7 @@ import { GAME_REGISTRY, type GameDefinition } from "@/lib/games/registry";
 import type { UserGameStates, NftMetadata, MintedNft, UserStateResponse } from "@/lib/games/types";
 import { Search, Trophy } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
+import { createWeb3AuthSolanaWallet } from "@/lib/auth/web3auth-solana";
 
 // Breadcrumb items for structured data
 const breadcrumbItems = [
@@ -28,8 +28,7 @@ const breadcrumbItems = [
 ];
 
 export function GamesPageClient() {
-  const { userInfo } = useWeb3AuthUser();
-  const { provider, isConnected } = useWeb3Auth();
+  const { provider, isConnected, walletAddress, userInfo } = useWeb3Auth();
   const { requireLogin, showModal, setShowModal } = useLoginGate();
 
   // UI State
@@ -54,9 +53,6 @@ export function GamesPageClient() {
   const [mintStatus, setMintStatus] = useState<"idle" | "minting" | "success" | "error">("idle");
   const [mintError, setMintError] = useState<string | null>(null);
 
-  // Wallet
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-
   // Fetch total players stat
   React.useEffect(() => {
     fetch("/api/stats")
@@ -67,31 +63,13 @@ export function GamesPageClient() {
 
   // Initialize wallet
   React.useEffect(() => {
-    let cancelled = false;
-    async function fetchAddress() {
-      if (!provider || !isConnected) return;
-      try {
-        const accounts = await provider.request({ method: "getAccounts" });
-        if (cancelled) return;
-        if (Array.isArray(accounts) && accounts.length > 0) {
-          setWalletAddress(accounts[0] as string);
-          if (typeof window !== "undefined") {
-            try {
-              const wallet = new SolanaWallet(provider);
-              (window as any).web3authSolanaWallet = wallet;
-            } catch (e) {
-              console.warn("[games] failed to init SolanaWallet", e);
-            }
-          }
-        }
-      } catch (e) {
-        console.error("[games] wallet init error", e);
-      }
+    if (!provider || !isConnected || typeof window === "undefined") return;
+    try {
+      (window as any).web3authSolanaWallet =
+        createWeb3AuthSolanaWallet(provider);
+    } catch (error) {
+      console.warn("[games] failed to init Solana wallet adapter", error);
     }
-    fetchAddress();
-    return () => {
-      cancelled = true;
-    };
   }, [provider, isConnected]);
 
   // Single unified API call to fetch all game states + NFTs

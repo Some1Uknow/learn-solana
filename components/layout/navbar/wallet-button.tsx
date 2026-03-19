@@ -9,90 +9,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useState } from "react";
 import { LogOut, Copy, ExternalLink, UserPlus, Wallet, Check } from "lucide-react";
-import {
-  useWeb3AuthConnect,
-  useWeb3AuthDisconnect,
-  useWeb3Auth,
-} from "@web3auth/modal/react";
-import { SolanaWallet } from "@web3auth/solana-provider";
-import { registerUserAfterLogin } from "@/lib/auth/registerUserAfterLogin";
-import { clearClientAuthState } from "@/lib/auth/session";
+import { useWeb3Auth } from "@/hooks/use-web3-auth";
+import { LoginRequiredModal } from "@/components/ui/login-required-modal";
 
 interface NavbarWalletButtonProps {
   isMobile?: boolean;
 }
 
 export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps) {
-  const [userAddress, setUserAddress] = useState<string>("");
+  const {
+    logout,
+    isConnected,
+    isLoading,
+    walletAddress,
+    userInfo,
+    authMethod,
+    authSource,
+    getUserInfo,
+  } = useWeb3Auth();
   const [isClient, setIsClient] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [dropdownUserInfo, setDropdownUserInfo] = useState<any>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
-  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [copied, setCopied] = useState(false);
-  
-  // Track if registration was already attempted in this session
-  const registrationAttemptedRef = useRef(false);
 
-  // Web3Auth hooks
-  const { connect, isConnected, loading: connectLoading } = useWeb3AuthConnect();
-  const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
-  const { provider, web3Auth } = useWeb3Auth();
-
-  const isLoading = connectLoading || disconnectLoading || isResolvingAddress;
-
-  // Handle client-side hydration
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Get address when connected
   useEffect(() => {
-    if (isConnected && provider && !userAddress) {
-      getAddress();
-    } else if (!isConnected) {
-      setUserAddress("");
+    if (!isConnected) {
       setDropdownUserInfo(null);
+    } else if (userInfo) {
+      setDropdownUserInfo(userInfo);
     }
-  }, [isConnected, provider, userAddress]);
+  }, [isConnected, userInfo]);
 
-  const getAddress = async (): Promise<string | null> => {
-    try {
-      if (!provider) return null;
-      setIsResolvingAddress(true);
-      let address: string | undefined;
-      try {
-        // Prefer SolanaWallet API
-        const wallet = new SolanaWallet(provider as any);
-        const accounts = await wallet.requestAccounts();
-        address = Array.isArray(accounts) ? accounts[0] : accounts;
-      } catch (e) {
-        // Fallback to generic provider request
-        const accounts = await (provider as any).request?.({ method: "getAccounts", params: {} });
-        address = Array.isArray(accounts) ? accounts[0] : accounts;
-      }
-      if (address) {
-        setUserAddress(address);
-        return address;
-      }
-      return null;
-    } catch (error) {
-      console.error("Failed to get address:", error);
-      return null;
-    } finally {
-      setIsResolvingAddress(false);
-    }
-  };
-
-  // Fetch user info only when dropdown opens
   const fetchUserInfoForDropdown = async () => {
-    if (!web3Auth || dropdownUserInfo || isLoadingUserInfo) return;
-    
+    if (dropdownUserInfo || isLoadingUserInfo) return;
     setIsLoadingUserInfo(true);
     try {
-      const userInfo = await web3Auth.getUserInfo();
-      setDropdownUserInfo(userInfo);
+      const nextUserInfo = await getUserInfo?.();
+      if (nextUserInfo) {
+        setDropdownUserInfo(nextUserInfo);
+      }
     } catch (error) {
       console.error("Failed to get user info:", error);
     } finally {
@@ -100,92 +62,39 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   };
 
-  /**
-   * Handle connect/disconnect with immediate registration on success.
-   * This solves the Web3Auth v10+ hook state timing issues by:
-   * 1. Calling connect() and waiting for the provider
-   * 2. Immediately registering the user with the returned provider
-   * 3. Not relying on hook state updates (isConnected, userInfo, etc.)
-   */
-  const handleLogout = useCallback(async () => {
+  const handleConnect = async () => {
+    setShowAuthModal(true);
+  };
+
+  const handleLogout = async () => {
     try {
-      await disconnect({ cleanup: true });
-      clearClientAuthState();
-      setUserAddress("");
-      setDropdownUserInfo(null);
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-      } catch (logoutError) {
-        console.warn("[WalletButton] logout cleanup failed", logoutError);
-      }
-      registrationAttemptedRef.current = false;
-    } catch (e) {
-      console.error("[WalletButton] logout error", e);
+      await logout();
+    } catch (error) {
+      console.error("[WalletButton] logout error", error);
     }
-  }, [disconnect]);
+  };
 
-  const handleConnect = useCallback(async () => {
-    try {
-      console.log('[WalletButton] click: isConnected=', isConnected, 'provider?', !!provider);
-
-      if (isConnected && !userAddress) {
-        const recoveredAddress = await getAddress();
-        if (recoveredAddress) {
-          return;
-        }
-
-        // The SDK still thinks we are connected, but we cannot recover the address.
-        // Clear the stale session first, then continue with a fresh connect attempt.
-        await handleLogout();
-      }
-
-      // Connect flow - get provider directly from connect()
-      const newProvider = await connect();
-      
-      if (newProvider && web3Auth) {
-        console.log('[WalletButton] Connected! Registering user immediately...');
-        registrationAttemptedRef.current = true;
-        
-        // Register user immediately after connect using the returned provider
-        // This bypasses the hook state timing issues
-        const result = await registerUserAfterLogin(
-          newProvider as any,
-          web3Auth as any,
-          (user) => {
-            console.log('[WalletButton] User registered successfully:', user?.walletAddress);
-          }
-        );
-        
-        if (!result.success) {
-          console.warn('[WalletButton] Direct registration failed, backup hook will retry:', result.error);
-          registrationAttemptedRef.current = false; // Allow backup hook to try
-        }
-      }
-    } catch (e) {
-      console.error('[WalletButton] connect/disconnect error', e);
-    }
-  }, [isConnected, userAddress, provider, web3Auth, connect, handleLogout]);
-  
   const copyAddress = () => {
-    navigator.clipboard.writeText(userAddress);
+    if (!walletAddress) return;
+    navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
-  const openExplorer = () => 
-    window.open(`https://explorer.solana.com/address/${userAddress}?cluster=devnet`, "_blank");
 
-  const truncateAddress = (addr: string) => 
+  const openExplorer = () => {
+    if (!walletAddress) return;
+    window.open(
+      `https://explorer.solana.com/address/${walletAddress}?cluster=devnet`,
+      "_blank"
+    );
+  };
+
+  const truncateAddress = (addr: string) =>
     addr ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : "";
 
-  // Don't render until client-side
   if (!isClient) return null;
 
-  // Loading state
-  if (isLoading) {
+  if (isLoading || (isConnected && !walletAddress)) {
     return (
       <Button disabled className={`bg-yellow-500 text-black ${isMobile ? "w-full" : ""}`}>
         <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent mr-2" />
@@ -194,8 +103,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     );
   }
 
-  // Connected state
-  if (isConnected && userAddress) {
+  if (isConnected && walletAddress) {
     if (isMobile) {
       return (
         <div className="space-y-2">
@@ -206,7 +114,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded">
-                {truncateAddress(userAddress)}
+                {truncateAddress(walletAddress)}
               </span>
               <Button size="sm" variant="ghost" onClick={copyAddress} className="h-6 w-6 p-0">
                 {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -230,14 +138,15 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
 
     return (
-      <DropdownMenu onOpenChange={(open) => open && fetchUserInfoForDropdown()}>
-        <DropdownMenuTrigger asChild>
-          <Button className="bg-green-500 hover:bg-green-600 text-white">
-            <Wallet size={18} className="mr-2" />
-            {truncateAddress(userAddress)}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" align="end">
+      <>
+        <DropdownMenu onOpenChange={(open) => open && fetchUserInfoForDropdown()}>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-green-500 hover:bg-green-600 text-white">
+              <Wallet size={18} className="mr-2" />
+              {truncateAddress(walletAddress)}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="end">
           {isLoadingUserInfo ? (
             <DropdownMenuLabel className="flex items-center gap-2">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent" />
@@ -254,22 +163,28 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
               ) : (
                 <Wallet size={16} />
               )}
-              <div>
+                <div>
                 <div className="text-sm">
                   {dropdownUserInfo?.email || dropdownUserInfo?.name || "Wallet User"}
                 </div>
-                <div className="text-xs text-gray-400">Web3Auth</div>
+                <div className="text-xs text-gray-400">
+                  {authMethod === "native_wallet"
+                    ? "Standard Wallet"
+                    : authSource === "web3auth"
+                      ? "Web3Auth"
+                      : "Authenticated"}
+                </div>
               </div>
             </DropdownMenuLabel>
           )}
-          
+
           <DropdownMenuSeparator />
-          
+
           <div className="px-2 py-1">
             <div className="text-xs text-gray-400 mb-1">Address</div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono bg-gray-800 px-2 py-1 rounded flex-1 truncate text-gray-200">
-                {userAddress}
+                {walletAddress}
               </span>
               <Button size="sm" variant="ghost" onClick={copyAddress} className="h-6 w-6 p-0">
                 {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -288,20 +203,34 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             <LogOut size={16} className="mr-2" />
             Logout
           </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <LoginRequiredModal
+          open={showAuthModal}
+          onOpenChange={setShowAuthModal}
+          title="Login"
+          description="Choose how you want to authenticate."
+        />
+      </>
     );
   }
 
-  // Disconnected state
   return (
-    <Button
-      onClick={handleConnect}
-      disabled={isLoading}
-      className={`bg-[#14F195] hover:bg-[#12d182] text-black ${isMobile ? "w-full" : ""}`}
-    >
-      <UserPlus size={18} className="mr-2" />
-     Login
-    </Button>
+    <>
+      <Button
+        onClick={handleConnect}
+        disabled={isLoading}
+        className={`bg-[#14F195] hover:bg-[#12d182] text-black ${isMobile ? "w-full" : ""}`}
+      >
+        <UserPlus size={18} className="mr-2" />
+        Login
+      </Button>
+      <LoginRequiredModal
+        open={showAuthModal}
+        onOpenChange={setShowAuthModal}
+        title="Login"
+        description="Choose how you want to authenticate."
+      />
+    </>
   );
 }

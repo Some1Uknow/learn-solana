@@ -1,183 +1,243 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Wallet, X, Lock } from "lucide-react";
 import { useWeb3Auth } from "@/hooks/use-web3-auth";
 
+function GoogleIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.3-1.9 3l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.1 0-.7-.1-1.5-.2-2.2H12Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 22c2.6 0 4.8-.9 6.4-2.5l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.3-4H3.5v2.5A10 10 0 0 0 12 22Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M6.7 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.5H3.5A10 10 0 0 0 2.4 12c0 1.6.4 3.1 1.1 4.5L6.7 14Z"
+      />
+      <path
+        fill="#4285F4"
+        d="M12 6c1.4 0 2.7.5 3.7 1.4l2.8-2.8C16.8 3 14.6 2 12 2a10 10 0 0 0-8.5 5.5L6.7 10c.7-2.3 2.8-4 5.3-4Z"
+      />
+    </svg>
+  );
+}
+
+function WalletIcon({
+  name,
+  icon,
+}: {
+  name: string;
+  icon?: string;
+}) {
+  if (icon) {
+    return (
+      <img
+        src={icon}
+        alt=""
+        className="h-5 w-5 rounded-sm object-contain"
+      />
+    );
+  }
+
+  const label = name.slice(0, 2).toUpperCase();
+
+  return (
+    <div className="flex h-5 w-5 items-center justify-center rounded-sm bg-white/10 text-[10px] font-medium text-zinc-300">
+      {label}
+    </div>
+  );
+}
+
 interface LoginRequiredModalProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    title?: string;
-    description?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  description?: string;
 }
 
 export function LoginRequiredModal({
-    open,
-    onOpenChange,
-    title = "Authentication Required",
-    description = "Please connect your wallet to access this feature.",
+  open,
+  onOpenChange,
+  title = "Sign in",
+  description = "Choose how you want to continue.",
 }: LoginRequiredModalProps) {
-    const { login, loginWithAuthConnection, logout } = useWeb3Auth();
-    const [isConnecting, setIsConnecting] = useState(false);
-    const [loginError, setLoginError] = useState<string | null>(null);
-    const [isBrave, setIsBrave] = useState(false);
+  const {
+    loginWithAuthConnection,
+    loginWithNativeWallet,
+    logout,
+    browserWallets,
+    refreshBrowserWallets,
+  } = useWeb3Auth();
 
-    React.useEffect(() => {
-        if (typeof navigator === "undefined") return;
-        const ua = navigator.userAgent || "";
-        const brave =
-            /\bBrave\b/i.test(ua) ||
-            typeof (navigator as any).brave !== "undefined";
-        setIsBrave(brave);
-    }, []);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [pendingWalletId, setPendingWalletId] = useState<string | null>(null);
 
-    const handleLogin = async () => {
-        setIsConnecting(true);
-        setLoginError(null);
+  React.useEffect(() => {
+    if (open) {
+      refreshBrowserWallets();
+      setLoginError(null);
+      setPendingWalletId(null);
+      setIsConnecting(false);
+    }
+  }, [open, refreshBrowserWallets]);
 
-        try {
-            await login();
-            onOpenChange(false);
-        } catch (error) {
-            console.error("Login failed:", error);
-            setLoginError(
-                error instanceof Error
-                    ? error.message
-                    : "Wallet login failed. Try again, or disable Brave Shields for this site if the wallet modal appears blank."
-            );
-        } finally {
-            setIsConnecting(false);
-        }
-    };
+  const handleGoogleLogin = async () => {
+    setIsConnecting(true);
+    setLoginError(null);
 
-    const handleDirectAuthLogin = async (authConnection: string) => {
-        setIsConnecting(true);
-        setLoginError(null);
+    try {
+      await loginWithAuthConnection("google");
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Google login failed:", error);
+      setLoginError("Google sign-in did not finish. Try again.");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
-        try {
-            await loginWithAuthConnection(authConnection);
-            onOpenChange(false);
-        } catch (error) {
-            console.error(`Direct ${authConnection} login failed:`, error);
-            setLoginError(
-                error instanceof Error
-                    ? error.message
-                    : "Direct login failed. Try again or use Chrome for now."
-            );
-        } finally {
-            setIsConnecting(false);
-        }
-    };
+  const handleNativeWalletLogin = async (walletId: string) => {
+    setIsConnecting(true);
+    setPendingWalletId(walletId);
+    setLoginError(null);
 
-    const handleResetSession = async () => {
-        setIsConnecting(true);
-        setLoginError(null);
-        try {
-            await logout();
-        } catch (error) {
-            console.error("Session reset failed:", error);
-        } finally {
-            setIsConnecting(false);
-        }
-    };
+    try {
+      await loginWithNativeWallet(walletId);
+      onOpenChange(false);
+    } catch (error) {
+      console.error(`Native wallet login failed for ${walletId}:`, error);
+      setLoginError("Wallet sign-in did not finish. Try again.");
+    } finally {
+      setIsConnecting(false);
+      setPendingWalletId(null);
+    }
+  };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-4 border border-white/10 bg-black/80 backdrop-blur-xl p-0 shadow-2xl duration-200 sm:rounded-2xl overflow-hidden">
-                {/* Animated Gradient Border Effect */}
-                <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-2xl">
-                    <div className="absolute -inset-[100%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,transparent_140deg,rgba(20,241,149,0.5)_160deg,rgba(153,69,255,0.5)_200deg,transparent_220deg,transparent_360deg)] opacity-60" />
+  const handleResetSession = async () => {
+    setIsConnecting(true);
+    setLoginError(null);
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Session reset failed:", error);
+      setLoginError("Session reset failed. Refresh and try again.");
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="fixed left-[50%] top-[50%] z-50 w-[calc(100%-1.5rem)] max-w-xl translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-2xl border border-white/10 bg-[#080a0d] p-0 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-none duration-200">
+        <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+          <div className="pr-10">
+            <DialogTitle className="text-left text-[1.05rem] font-semibold tracking-tight text-white sm:text-lg">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-left text-sm text-zinc-400">
+              {description}
+            </DialogDescription>
+          </div>
+        </div>
+
+        <div className="px-5 py-5 sm:px-6 sm:py-6">
+          {loginError && (
+            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              {loginError}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <section className="rounded-xl border border-white/10 bg-[#0d1014] p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-white">Google</h3>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    Fastest setup. Good if you just want to get started.
+                  </p>
                 </div>
+              </div>
 
-                {/* Inner Content Background - slightly smaller to show border */}
-                <div className="absolute inset-[1px] z-0 bg-[#07090c] rounded-[15px]" />
+              <Button
+                onClick={handleGoogleLogin}
+                disabled={isConnecting}
+                variant="outline"
+                className="mt-4 h-11 w-full justify-center rounded-lg border-white/10 bg-white text-black hover:bg-zinc-100 hover:text-black"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <GoogleIcon />
+                  {isConnecting && !pendingWalletId ? "Opening Google..." : "Continue with Google"}
+                </span>
+              </Button>
+            </section>
 
-                {/* Diagonal Light Effects */}
-                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_50%_50%,rgba(20,241,149,0.05),transparent_50%)]" />
-                    <div className="absolute bottom-[-50%] right-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_50%_50%,rgba(153,69,255,0.05),transparent_50%)]" />
+            <section className="rounded-xl border border-white/10 bg-[#0d1014] p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-medium text-white">Wallet</h3>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    Sign in with your Solana wallet directly.
+                  </p>
                 </div>
-
-                <div className="relative z-10 flex flex-col p-6 items-center text-center">
-                    <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-5 shrink-0 relative group">
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#14f195]/20 to-[#9945ff]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <Lock className="w-6 h-6 text-zinc-400 group-hover:text-white transition-colors" />
-                    </div>
-
-                    <DialogTitle className="text-xl font-bold bg-gradient-to-br from-white via-white to-zinc-400 bg-clip-text text-transparent mb-2">
-                        {title}
-                    </DialogTitle>
-
-                    <DialogDescription className="text-zinc-400 text-sm mb-8 max-w-[90%]">
-                        {description}
-                    </DialogDescription>
-
-                    <div className="flex flex-col gap-3 w-full">
-                        {loginError && (
-                            <div className="rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-left text-sm text-amber-200">
-                                {loginError}
-                            </div>
-                        )}
-
-                        {isBrave && (
-                            <div className="rounded-xl border border-blue-400/20 bg-blue-500/10 px-4 py-3 text-left text-sm text-blue-100">
-                                Brave is intermittently breaking the Web3Auth modal UI. Use the direct sign-in option below if the modal opens blank.
-                            </div>
-                        )}
-
-                        <Button
-                            onClick={handleLogin}
-                            disabled={isConnecting}
-                            className="w-full h-11 relative overflow-hidden group bg-white text-black hover:bg-zinc-200 transition-all font-medium rounded-xl"
-                        >
-                            <div className="flex items-center justify-center gap-2">
-                                <Wallet className="w-4 h-4" />
-                                <span>{isConnecting ? "Opening Wallet..." : "Connect Wallet"}</span>
-                            </div>
-                        </Button>
-
-                        {isBrave && (
-                            <Button
-                                onClick={() => handleDirectAuthLogin("google")}
-                                disabled={isConnecting}
-                                variant="outline"
-                                className="w-full h-11 rounded-xl border-white/15 bg-white/5 text-white hover:bg-white/10"
-                            >
-                                Continue with Google
-                            </Button>
-                        )}
-
-                        {isBrave && (
-                            <Button
-                                onClick={handleResetSession}
-                                disabled={isConnecting}
-                                variant="ghost"
-                                className="w-full h-11 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
-                            >
-                                Reset Wallet Session
-                            </Button>
-                        )}
-
-                        <Button
-                            onClick={() => onOpenChange(false)}
-                            variant="ghost"
-                            className="w-full h-11 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
-                        >
-                            Maybe later
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Close Button */}
                 <button
-                    onClick={() => onOpenChange(false)}
-                    className="absolute right-4 top-4 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-colors z-20"
+                  type="button"
+                  onClick={handleResetSession}
+                  disabled={isConnecting}
+                  className="shrink-0 text-xs text-zinc-500 transition-colors hover:text-zinc-300 disabled:opacity-50"
                 >
-                    <X className="w-4 h-4" />
+                  Reset
                 </button>
-            </DialogContent>
-        </Dialog>
-    );
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {browserWallets.length > 0 ? (
+                  browserWallets.map((wallet) => {
+                    const isPending = pendingWalletId === wallet.id;
+                    return (
+                      <Button
+                        key={wallet.id}
+                        onClick={() => handleNativeWalletLogin(wallet.id)}
+                        disabled={isConnecting}
+                        variant="outline"
+                        className="h-11 justify-between rounded-lg border-white/10 bg-transparent px-4 text-white hover:bg-white/5"
+                      >
+                        <span className="flex min-w-0 items-center gap-3">
+                          <WalletIcon name={wallet.name} icon={wallet.icon} />
+                          <span className="truncate">{wallet.name}</span>
+                        </span>
+                        <span className="text-xs text-zinc-500">
+                          {isPending ? "..." : "Open"}
+                        </span>
+                      </Button>
+                    );
+                  })
+                ) : (
+                  <div className="sm:col-span-2 rounded-lg border border-white/10 bg-[#0a0d11] px-4 py-3 text-sm text-zinc-400">
+                    No wallet detected in this browser.
+                  </div>
+                )}
+              </div>
+
+              {pendingWalletId && (
+                <p className="mt-3 text-sm text-zinc-500">Waiting for wallet approval...</p>
+              )}
+            </section>
+          </div>
+        </div>
+
+      </DialogContent>
+    </Dialog>
+  );
 }

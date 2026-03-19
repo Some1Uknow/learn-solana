@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clearAppSessionCookie } from "@/lib/auth/appSession";
 
 export async function POST() {
   const response = NextResponse.json({ ok: true }, { status: 200 });
@@ -22,6 +23,8 @@ export async function POST() {
     maxAge: 0,
     secure: process.env.NODE_ENV !== "development",
   });
+
+  clearAppSessionCookie(response);
 
   return response;
 }

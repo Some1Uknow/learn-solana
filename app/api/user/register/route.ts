@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema/users";
-import { eq } from "drizzle-orm";
 import { deriveWalletFromPayload, verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
 import { registerSchema } from "@/lib/validation/userRegistration";
+import { canIssueAppSession, setAppSessionCookie } from "@/lib/auth/appSession";
+import { upsertUserByWallet } from "@/lib/auth/upsertUser";
 import {
   isValidSolanaAddress,
   verifyWalletSignature,
@@ -29,17 +28,18 @@ export async function POST(req: NextRequest) {
     let authToken: string | undefined;
     let jwtPayload: any;
 
-    // Social path requires a valid Web3Auth JWT
-    if (authType === "social") {
-      const verified = await verifyWeb3Auth(req);
-      if (!verified) {
-        return NextResponse.json(
-          { error: "Authentication required" },
-          { status: 401 }
-        );
-      }
+    // Verify Web3Auth JWT whenever one is supplied.
+    // Social login requires it. External wallets can also provide it, which
+    // lets the rest of the app keep using JWT-backed authenticated routes.
+    const verified = await verifyWeb3Auth(req);
+    if (verified) {
       authToken = verified.raw;
       jwtPayload = verified.payload;
+    } else if (authType === "social") {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // wallet address must be present now
@@ -94,53 +94,12 @@ export async function POST(req: NextRequest) {
       signatureValidated = true;
     }
 
-    // Normalize email
-    const email = body.email ? body.email.toLowerCase() : undefined;
-    const { name, profileImage } = body;
-
-    // We intentionally ignore other token fields for minimal schema
-
-    // Registration semantics:
-    // - If user with wallet exists: return it unchanged (idempotent)
-    // - Optionally enrich ONLY blank (null/undefined) fields if caller supplies them
-    // - If user doesn't exist: insert new record
-    const existing = await db.query.users.findFirst({
-      where: eq(users.walletAddress, walletAddress),
+    const { user: saved, created, enrichedFields } = await upsertUserByWallet({
+      walletAddress,
+      email: body.email,
+      name: body.name,
+      profileImage: body.profileImage,
     });
-    let saved;
-    let created = false;
-    const enrichedFields: string[] = [];
-
-    if (existing) {
-      const updates: Record<string, any> = {};
-      // Only fill missing fields (null or undefined) — never overwrite existing non-null data
-      if (existing.email == null && email) {
-        updates.email = email;
-        enrichedFields.push("email");
-      }
-      if (existing.name == null && name) {
-        updates.name = name;
-        enrichedFields.push("name");
-      }
-      if (existing.profileImage == null && profileImage) {
-        updates.profileImage = profileImage;
-        enrichedFields.push("profileImage");
-      }
-      if (Object.keys(updates).length > 0) {
-        updates.updatedAt = new Date();
-        await db.update(users).set(updates).where(eq(users.id, existing.id));
-        saved = { ...existing, ...updates };
-      } else {
-        saved = existing; // pure no-op
-      }
-    } else {
-      const inserted = await db
-        .insert(users)
-        .values({ walletAddress, email, name, profileImage })
-        .returning();
-      saved = inserted[0];
-      created = true;
-    }
 
     // Sanitize user object (exclude nothing for now but keep explicit)
     const {
@@ -185,6 +144,15 @@ export async function POST(req: NextRequest) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
         secure: process.env.NODE_ENV !== "development",
+      });
+    }
+    if (canIssueAppSession()) {
+      await setAppSessionCookie(response, {
+        walletAddress: wa,
+        authMethod,
+        email: em,
+        name: nm,
+        profileImage: pi,
       });
     }
 

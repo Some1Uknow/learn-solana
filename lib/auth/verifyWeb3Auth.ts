@@ -1,4 +1,5 @@
 import * as jose from "jose";
+import { APP_SESSION_COOKIE, verifyAppSessionToken } from "@/lib/auth/appSession";
 
 const JWKS_URL = "https://api-auth.web3auth.io/.well-known/jwks.json";
 const jwks = jose.createRemoteJWKSet(new URL(JWKS_URL));
@@ -8,6 +9,7 @@ const WEB3AUTH_EXPECTED_ISS = "https://api-auth.web3auth.io";
 export interface VerifiedWeb3AuthToken {
   raw: string;
   payload: any;
+  source: "app_session" | "web3auth";
 }
 
 function parseCookieHeader(cookieHeader: string | null): Record<string, string> {
@@ -38,7 +40,30 @@ export async function extractBearerOrCookie(req: Request): Promise<string | null
 
 export async function verifyWeb3Auth(req: Request): Promise<VerifiedWeb3AuthToken | null> {
   try {
-    const token = await extractBearerOrCookie(req);
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice("Bearer ".length) || null;
+      if (!token) return null;
+
+      const { payload } = await jose.jwtVerify(token, jwks, {
+        algorithms: ["ES256"],
+        issuer: WEB3AUTH_EXPECTED_ISS,
+        audience: WEB3AUTH_EXPECTED_AUD || undefined,
+      });
+
+      return { raw: token, payload, source: "web3auth" };
+    }
+
+    const cookies = parseCookieHeader(req.headers.get("cookie"));
+    const appSessionToken = cookies[APP_SESSION_COOKIE];
+    if (appSessionToken) {
+      const payload = await verifyAppSessionToken(appSessionToken);
+      if (payload) {
+        return { raw: appSessionToken, payload, source: "app_session" };
+      }
+    }
+
+    const token = cookies.web3auth_token || null;
     if (!token) return null;
 
     const { payload } = await jose.jwtVerify(token, jwks, {
@@ -47,7 +72,7 @@ export async function verifyWeb3Auth(req: Request): Promise<VerifiedWeb3AuthToke
       audience: WEB3AUTH_EXPECTED_AUD || undefined,
     });
 
-    return { raw: token, payload };
+    return { raw: token, payload, source: "web3auth" };
   } catch {
     return null;
   }
