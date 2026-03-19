@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useWeb3Auth } from "@web3auth/modal/react";
+import { useWeb3Auth } from "@/hooks/use-web3-auth";
 import { authFetch } from "@/lib/auth/authFetch";
 import { Progress } from "@/components/ui/progress";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -33,8 +33,7 @@ export default function TrackChallengesClient({
 }: Props) {
   const router = useRouter();
   const { requireLogin, showModal, setShowModal } = useLoginGate();
-  const { provider, isConnected } = useWeb3Auth();
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const { isConnected, walletAddress, sessionReady } = useWeb3Auth();
   const [progress, setProgress] = useState<ProgressMap>({});
   const [completedCount, setCompletedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,30 +60,10 @@ export default function TrackChallengesClient({
     }
   }, [track]);
 
-  // Fetch wallet address from Web3Auth provider
   useEffect(() => {
-    let cancelled = false;
-    async function fetchAddress() {
-      if (!provider || !isConnected) {
-        setWalletAddress(null);
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const accounts = await provider.request({
-          method: "getAccounts",
-          params: {},
-        });
-        const addr = Array.isArray(accounts) ? accounts[0] : accounts;
-        if (!cancelled && addr) setWalletAddress(addr);
-      } catch (e) {
-        console.error("Failed to get wallet address:", e);
-      }
-      if (!cancelled) setIsLoading(false);
-    }
-    fetchAddress();
-    return () => { cancelled = true; };
-  }, [provider, isConnected]);
+    if (!sessionReady) return;
+    setIsLoading(false);
+  }, [sessionReady]);
 
   // Fetch progress when wallet is available
   useEffect(() => {
@@ -99,7 +78,9 @@ export default function TrackChallengesClient({
 
     const fetchProgress = async () => {
       try {
-        const res = await authFetch(`/api/challenges/progress?track=${track}&wallet=${walletAddress}`);
+        const res = await authFetch(`/api/challenges/progress?track=${track}`, {
+          walletAddress,
+        });
         if (res.ok) {
           const data = await res.json();
           const newProgress = data.progress || {};

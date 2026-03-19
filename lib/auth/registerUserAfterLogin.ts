@@ -1,15 +1,20 @@
 "use client";
 
 import { IProvider } from "@web3auth/modal";
+import { SolanaWallet } from "@web3auth/solana-provider";
 import { getPrimarySolanaAccount } from "@/lib/auth/web3auth-solana";
 import { persistClientAuthToken } from "@/lib/auth/session";
 
 interface Web3AuthInstance {
+  idToken?: string | null;
+  authenticateUser?: () => Promise<{ idToken?: string; token?: string } | string>;
   getIdentityToken?: () => Promise<{ idToken?: string } | null>;
   getUserInfo?: () => Promise<{
     email?: string;
     name?: string;
     profileImage?: string;
+    idToken?: string;
+    token?: string;
   }>;
   connectedConnectorName?: string | null;
 }
@@ -24,28 +29,97 @@ interface RegisterResult {
  * Gets the wallet address from the provider synchronously after connect.
  */
 async function getWalletAddress(provider: IProvider): Promise<string | null> {
+  try {
+    const wallet = new SolanaWallet(provider as any);
+    const accounts = await wallet.requestAccounts();
+    const resolved = Array.isArray(accounts) ? accounts[0] : accounts;
+    if (typeof resolved === "string" && resolved.length > 0) {
+      return resolved;
+    }
+  } catch {
+    // Fall through to older provider methods.
+  }
+
+  try {
+    const accounts = await (provider as any).request?.({
+      method: "getAccounts",
+      params: {},
+    });
+    const resolved = Array.isArray(accounts) ? accounts[0] : accounts;
+    if (typeof resolved === "string" && resolved.length > 0) {
+      return resolved;
+    }
+  } catch {
+    // Fall through to the shared helper.
+  }
+
   return getPrimarySolanaAccount(provider);
 }
 
+async function resolveWalletAddress(
+  provider: IProvider,
+  maxRetries: number,
+  resolvedWalletAddress?: string | null
+): Promise<string | null> {
+  if (resolvedWalletAddress && resolvedWalletAddress.length > 0) {
+    return resolvedWalletAddress;
+  }
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const walletAddress = await getWalletAddress(provider);
+    if (walletAddress) {
+      return walletAddress;
+    }
+
+    if (attempt < maxRetries - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+    }
+  }
+
+  return null;
+}
+
 /**
- * Gets the Web3Auth identity token using the current v10 API.
+ * Gets the Web3Auth identity token, preferring the older direct API that
+ * matched the previously working social flow.
  */
 async function getIdentityToken(
   web3Auth: Web3AuthInstance
 ): Promise<string | undefined> {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  if (web3Auth.idToken) {
+    return web3Auth.idToken;
+  }
+
+  try {
+    const tokenResult = await web3Auth.authenticateUser?.();
+    const resolved =
+      typeof tokenResult === "string"
+        ? tokenResult
+        : tokenResult?.idToken || tokenResult?.token;
+    if (resolved) {
+      return resolved;
+    }
+  } catch (error) {
+    console.warn("[registerUserAfterLogin] authenticateUser failed", error);
+  }
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (web3Auth.idToken) {
+      return web3Auth.idToken;
+    }
+
     try {
       const tokenInfo = await web3Auth.getIdentityToken?.();
       if (tokenInfo?.idToken) {
         return tokenInfo.idToken;
       }
     } catch (error) {
-      if (attempt === 2) {
+      if (attempt === 5) {
         console.warn("[registerUserAfterLogin] getIdentityToken failed", error);
       }
     }
 
-    if (attempt < 2) {
+    if (attempt < 5) {
       await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
     }
   }
@@ -65,6 +139,7 @@ async function registerWalletSession(
 
   const res = await fetch("/api/user/register", {
     method: "POST",
+    credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
       ...registrationPayload.headers,
@@ -105,12 +180,13 @@ async function buildRegistrationPayload(
       }) ?? Promise.resolve({}),
   ]);
 
-  if (idToken) {
-    persistClientAuthToken(idToken);
-    headers.Authorization = `Bearer ${idToken}`;
-  }
-
   const userInfo: any = userInfoResult || {};
+  const resolvedToken = idToken || userInfo.idToken || userInfo.token;
+
+  if (resolvedToken) {
+    persistClientAuthToken(resolvedToken);
+    headers.Authorization = `Bearer ${resolvedToken}`;
+  }
 
   body.email = userInfo.email ?? null;
   body.name = userInfo.name ?? null;
@@ -132,12 +208,17 @@ export async function registerUserAfterLogin(
   provider: IProvider,
   web3Auth: Web3AuthInstance,
   onSuccess?: (user: any) => void,
-  maxRetries: number = 3
+  maxRetries: number = 3,
+  resolvedWalletAddress?: string | null
 ): Promise<RegisterResult> {
   console.log("[registerUserAfterLogin] Starting registration...");
 
   // Step 1: Get wallet address from provider
-  const walletAddress = await getWalletAddress(provider);
+  const walletAddress = await resolveWalletAddress(
+    provider,
+    Math.max(maxRetries, 3),
+    resolvedWalletAddress
+  );
   if (!walletAddress) {
     console.error("[registerUserAfterLogin] Could not get wallet address");
     return { success: false, error: "Could not get wallet address" };

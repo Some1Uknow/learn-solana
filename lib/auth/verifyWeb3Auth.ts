@@ -12,6 +12,11 @@ export interface VerifiedWeb3AuthToken {
   source: "app_session" | "web3auth";
 }
 
+export interface ResolvedAuthenticatedWallet {
+  walletAddress: string | null;
+  error: "wallet_mismatch" | "invalid_wallet" | null;
+}
+
 function parseCookieHeader(cookieHeader: string | null): Record<string, string> {
   if (!cookieHeader) return {};
 
@@ -95,6 +100,46 @@ export function deriveWalletFromPayload(payload: any): string | null {
   }
 
   return null;
+}
+
+export function extractWalletFromRequest(req: Request): string | null {
+  const headerWallet = req.headers.get("x-wallet-address")?.trim();
+  if (headerWallet) {
+    return headerWallet;
+  }
+
+  try {
+    const requestUrl = new URL(req.url);
+    const queryWallet = requestUrl.searchParams.get("walletAddress")?.trim();
+    if (queryWallet) {
+      return queryWallet;
+    }
+  } catch {
+    // Ignore invalid or relative URLs in non-Next contexts.
+  }
+
+  return null;
+}
+
+export function resolveAuthenticatedWallet(
+  req: Request,
+  payload: any
+): ResolvedAuthenticatedWallet {
+  const tokenWallet = deriveWalletFromPayload(payload);
+  const requestWallet = extractWalletFromRequest(req);
+
+  if (requestWallet && !isLikelyBase58Address(requestWallet)) {
+    return { walletAddress: null, error: "invalid_wallet" };
+  }
+
+  if (requestWallet && tokenWallet && requestWallet !== tokenWallet) {
+    return { walletAddress: null, error: "wallet_mismatch" };
+  }
+
+  return {
+    walletAddress: requestWallet ?? tokenWallet,
+    error: null,
+  };
 }
 
 export function isLikelyBase58Address(str: string | null | undefined): boolean {

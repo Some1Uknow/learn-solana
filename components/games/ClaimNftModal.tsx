@@ -459,6 +459,7 @@ export default function ClaimNftModal({
 
                   const res = await authFetch("/api/mint-game-nft", {
                     method: "POST",
+                    walletAddress,
                     body: JSON.stringify({
                       gameId,
                       walletAddress,

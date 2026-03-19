@@ -11,10 +11,12 @@ import {
 import { useSolanaWallet } from '@web3auth/modal/react/solana';
 import { WALLET_CONNECTORS } from '@web3auth/modal';
 import { registerUserAfterLogin } from '@/lib/auth/registerUserAfterLogin';
+import { authFetch } from '@/lib/auth/authFetch';
 import {
   clearClientAuthState,
   persistClientAuthToken,
 } from '@/lib/auth/session';
+import { getPrimarySolanaAccount } from '@/lib/auth/web3auth-solana';
 import {
   connectBrowserWallet,
   getNativeWalletSession,
@@ -36,6 +38,8 @@ interface SessionUserInfo {
   source?: string | null;
 }
 
+type AuthPhase = 'idle' | 'connecting' | 'social_finalizing' | 'signing_out';
+
 interface AuthStoreSnapshot {
   sessionUser: SessionUserInfo | null;
   sessionReady: boolean;
@@ -43,6 +47,7 @@ interface AuthStoreSnapshot {
   nativeLoginLoading: boolean;
   browserWallets: BrowserWalletOption[];
   globalAuthLoading: boolean;
+  authPhase: AuthPhase;
 }
 
 const authStoreListeners = new Set<() => void>();
@@ -53,8 +58,11 @@ let authStoreSnapshot: AuthStoreSnapshot = {
   nativeLoginLoading: false,
   browserWallets: [],
   globalAuthLoading: false,
+  authPhase: 'idle',
 };
 let sessionLoadPromise: Promise<SessionUserInfo | null> | null = null;
+let pendingSocialProvider: unknown | null = null;
+let socialFinalizePromise: Promise<unknown> | null = null;
 
 function subscribeAuthStore(listener: () => void) {
   authStoreListeners.add(listener);
@@ -98,6 +106,7 @@ export function useWeb3Auth() {
     nativeLoginLoading,
     browserWallets,
     globalAuthLoading,
+    authPhase,
   } = authState;
 
   const walletAddress =
@@ -134,7 +143,9 @@ export function useWeb3Auth() {
   const loadSession = useCallback(async () => {
     let nextUser: SessionUserInfo | null = null;
     try {
-      const res = await fetch('/api/auth/verify', { cache: 'no-store' });
+      const res = await authFetch('/api/auth/verify', {
+        cache: 'no-store',
+      });
       if (!res.ok) {
         updateAuthStore({ sessionUser: null, sessionReady: true });
         return null;
@@ -196,7 +207,10 @@ export function useWeb3Auth() {
     }
   }, [loadSession]);
 
-  const finalizeLogin = async (connectedProvider: unknown) => {
+  const finalizeLogin = useCallback(async (
+    connectedProvider: unknown,
+    resolvedWalletAddress?: string | null
+  ) => {
     if (!connectedProvider || !web3Auth) {
       throw (
         error ??
@@ -207,27 +221,64 @@ export function useWeb3Auth() {
     }
 
     try {
-      const result = await registerUserAfterLogin(connectedProvider as any, web3Auth as any);
-      if (result.success && result.user) {
-        const nextUser = {
-          walletAddress: result.user.walletAddress ?? null,
-          email: result.user.email ?? null,
-          name: result.user.name ?? null,
-          profileImage: result.user.profileImage ?? null,
-          authMethod: connectorName ?? 'social',
-          source: 'web3auth',
-        };
-        updateAuthStore({ sessionUser: nextUser, sessionReady: true });
-        await loadSession();
-      } else if (!result.success) {
-        console.warn('[useWeb3Auth] post-login registration failed:', result.error);
+      const result = await registerUserAfterLogin(
+        connectedProvider as any,
+        web3Auth as any,
+        undefined,
+        8,
+        resolvedWalletAddress
+      );
+      if (result.success && result.user?.walletAddress) {
+        const syncedUser = await loadSession();
+        const nextUser = syncedUser?.walletAddress
+          ? syncedUser
+          : {
+              walletAddress: result.user.walletAddress ?? null,
+              email: result.user.email ?? null,
+              name: result.user.name ?? null,
+              profileImage: result.user.profileImage ?? null,
+              authMethod: connectorName ?? 'social',
+              source: 'web3auth',
+            };
+        updateAuthStore({
+          sessionUser: nextUser,
+          sessionReady: true,
+          authPhase: 'idle',
+        });
+        pendingSocialProvider = null;
+      } else {
+        throw new Error(result.error || 'Post-login registration did not complete.');
       }
     } catch (registrationError) {
       console.warn('[useWeb3Auth] post-login registration error:', registrationError);
+      updateAuthStore({ authPhase: 'idle' });
+      pendingSocialProvider = null;
+      throw registrationError;
     }
 
     return connectedProvider;
-  };
+  }, [error, web3Auth, connectorName]);
+
+  useEffect(() => {
+    if (
+      authPhase !== 'social_finalizing' ||
+      !pendingSocialProvider ||
+      sessionUser?.walletAddress ||
+      socialFinalizePromise
+    ) {
+      return;
+    }
+
+    socialFinalizePromise = (async () => {
+      const resolvedWalletAddress =
+        accounts?.[0] ??
+        await getPrimarySolanaAccount(pendingSocialProvider as any);
+
+      await finalizeLogin(pendingSocialProvider, resolvedWalletAddress);
+    })().finally(() => {
+      socialFinalizePromise = null;
+    });
+  }, [accounts, authPhase, finalizeLogin, sessionUser?.walletAddress]);
 
   const login = async () => loginWithAuthConnection('google');
 
@@ -236,26 +287,37 @@ export function useWeb3Auth() {
       throw new Error('Web3Auth is not initialized yet.');
     }
 
-    updateAuthStore({ globalAuthLoading: true });
+    updateAuthStore({ globalAuthLoading: true, authPhase: 'connecting' });
 
     try {
       const connectedProvider = await connectTo(WALLET_CONNECTORS.AUTH, {
         authConnection: authConnection as any,
       });
 
-      void finalizeLogin(connectedProvider).finally(() => {
-        updateAuthStore({ globalAuthLoading: false });
+      pendingSocialProvider = connectedProvider;
+      updateAuthStore({ authPhase: 'social_finalizing' });
+      socialFinalizePromise = finalizeLogin(
+        connectedProvider,
+        accounts?.[0] ?? null
+      ).finally(() => {
+        socialFinalizePromise = null;
       });
+      await socialFinalizePromise;
+      updateAuthStore({ globalAuthLoading: false });
 
       return connectedProvider;
     } catch (loginError) {
-      updateAuthStore({ globalAuthLoading: false });
+      updateAuthStore({ globalAuthLoading: false, authPhase: 'idle' });
       throw loginError;
     }
   };
 
   const loginWithNativeWallet = async (walletId: string) => {
-    updateAuthStore({ nativeLoginLoading: true, globalAuthLoading: true });
+    updateAuthStore({
+      nativeLoginLoading: true,
+      globalAuthLoading: true,
+      authPhase: 'connecting',
+    });
     try {
       const previewWallets = listBrowserWallets();
       const selectedWallet = previewWallets.find((wallet) => wallet.id === walletId);
@@ -313,21 +375,31 @@ export function useWeb3Auth() {
         authMethod: 'native_wallet',
         source: 'app_session',
       };
-      updateAuthStore({ sessionUser: nextUser, sessionReady: true });
+      updateAuthStore({
+        sessionUser: nextUser,
+        sessionReady: true,
+        authPhase: 'idle',
+      });
       await loadSession();
       return connected.provider;
     } finally {
-      updateAuthStore({ nativeLoginLoading: false, globalAuthLoading: false });
+      updateAuthStore({
+        nativeLoginLoading: false,
+        globalAuthLoading: false,
+        authPhase: 'idle',
+      });
     }
   };
 
   const logout = async () => {
-    updateAuthStore({ globalAuthLoading: true });
+    updateAuthStore({ globalAuthLoading: true, authPhase: 'signing_out' });
     try {
       if (web3Auth && isConnected) {
         await disconnect({ cleanup: true });
       }
     } finally {
+      pendingSocialProvider = null;
+      socialFinalizePromise = null;
       persistNativeWalletSession(null);
       updateAuthStore({
         nativeWalletSession: null,
@@ -346,7 +418,7 @@ export function useWeb3Auth() {
         console.warn('[useWeb3Auth] logout cleanup request failed:', cleanupError);
       }
       await loadSession();
-      updateAuthStore({ globalAuthLoading: false });
+      updateAuthStore({ globalAuthLoading: false, authPhase: 'idle' });
     }
   };
 
@@ -364,6 +436,7 @@ export function useWeb3Auth() {
     isInitializing,
     sessionReady,
     isLoading: loading || disconnectLoading || nativeLoginLoading || globalAuthLoading,
+    authPhase,
     error,
     initError,
     provider: resolvedProvider,

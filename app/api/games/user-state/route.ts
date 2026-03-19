@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { gameProgress } from '@/lib/db/schema/gameProgress';
 import { mintedNfts } from '@/lib/db/schema/mintedNfts';
 import { eq } from 'drizzle-orm';
-import { verifyWeb3Auth, deriveWalletFromPayload } from '@/lib/auth/verifyWeb3Auth';
+import { verifyWeb3Auth, resolveAuthenticatedWallet } from '@/lib/auth/verifyWeb3Auth';
 
 /**
  * Single unified API endpoint that returns complete game state for a user.
@@ -16,7 +16,14 @@ export async function GET(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
-    let walletAddress = deriveWalletFromPayload(verified.payload);
+    const { walletAddress, error } = resolveAuthenticatedWallet(
+      req,
+      verified.payload
+    );
+
+    if (error === 'wallet_mismatch') {
+      return new Response(JSON.stringify({ error: 'Wallet mismatch' }), { status: 403 });
+    }
 
     if (!walletAddress) {
       return new Response(JSON.stringify({ error: 'Wallet address missing' }), { status: 400 });

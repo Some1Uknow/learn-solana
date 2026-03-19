@@ -4,7 +4,7 @@ import { challengeProgress } from "@/lib/db/schema/challengeProgress";
 import { eq, and } from "drizzle-orm";
 import {
   verifyWeb3Auth,
-  deriveWalletFromPayload,
+  resolveAuthenticatedWallet,
 } from "@/lib/auth/verifyWeb3Auth";
 
 export async function GET(req: NextRequest) {
@@ -25,7 +25,16 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const walletAddress = deriveWalletFromPayload(verified.payload);
+    const { walletAddress, error } = resolveAuthenticatedWallet(
+      req,
+      verified.payload
+    );
+
+    if (error === "wallet_mismatch") {
+      return new Response(JSON.stringify({ error: "Wallet mismatch" }), {
+        status: 403,
+      });
+    }
 
     if (!walletAddress) {
       return new Response(

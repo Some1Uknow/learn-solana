@@ -2,6 +2,8 @@
 export interface AuthFetchOptions extends RequestInit {
   retryOn401?: boolean;
   waitForTokenMs?: number;
+  attachBearerToken?: boolean;
+  walletAddress?: string | null;
 }
 
 function getTokenSync(): string | null {
@@ -19,22 +21,40 @@ async function waitForToken(timeoutMs: number): Promise<string | null> {
 }
 
 export async function authFetch(input: string, init: AuthFetchOptions = {}) {
-  const { retryOn401 = true, waitForTokenMs = 4000, headers, ...rest } = init;
-  let token = getTokenSync() || await waitForToken(waitForTokenMs);
+  const {
+    retryOn401 = true,
+    waitForTokenMs = 4000,
+    attachBearerToken = true,
+    walletAddress,
+    headers,
+    ...rest
+  } = init;
+  let token = attachBearerToken ? getTokenSync() || await waitForToken(waitForTokenMs) : null;
   const mergedHeaders: Record<string,string> = {
     'Content-Type': 'application/json',
     ...(headers as any || {})
   };
+  if (walletAddress) {
+    mergedHeaders['X-Wallet-Address'] = walletAddress;
+  }
   if (token && !('authorization' in Object.keys(mergedHeaders).reduce((a,k)=>{a[k.toLowerCase()]=k;return a;},{} as Record<string,string>))) {
     mergedHeaders['Authorization'] = `Bearer ${token}`;
   }
-  let res = await fetch(input, { ...rest, headers: mergedHeaders });
+  let res = await fetch(input, {
+    credentials: 'same-origin',
+    ...rest,
+    headers: mergedHeaders,
+  });
   if (res.status === 401 && retryOn401) {
     // Force another wait & attempt (token may have just appeared)
-    token = await waitForToken(2000);
+    token = attachBearerToken ? await waitForToken(2000) : null;
     if (token) {
       mergedHeaders['Authorization'] = `Bearer ${token}`;
-      res = await fetch(input, { ...rest, headers: mergedHeaders });
+      res = await fetch(input, {
+        credentials: 'same-origin',
+        ...rest,
+        headers: mergedHeaders,
+      });
     }
   }
   return res;

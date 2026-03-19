@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
+import { deriveWalletFromPayload, verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,11 +12,12 @@ export async function GET(req: NextRequest) {
     }
 
     const { payload, source } = verified;
+    const walletAddress = deriveWalletFromPayload(payload);
 
     // Extract user information from JWT
     const userInfo = {
       sub: payload.sub,
-      walletAddress: payload.walletAddress,
+      walletAddress,
       email: payload.email,
       name: payload.name,
       profileImage: payload.profileImage,

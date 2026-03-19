@@ -4,7 +4,7 @@ import { challengeProgress } from "@/lib/db/schema/challengeProgress";
 import { eq, and } from "drizzle-orm";
 import {
   verifyWeb3Auth,
-  deriveWalletFromPayload,
+  resolveAuthenticatedWallet,
 } from "@/lib/auth/verifyWeb3Auth";
 
 export async function POST(req: NextRequest) {
@@ -21,7 +21,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const walletAddress = deriveWalletFromPayload(verified.payload);
+    const { walletAddress, error } = resolveAuthenticatedWallet(
+      req,
+      verified.payload
+    );
 
     if (!track || typeof track !== "string") {
       return new Response(JSON.stringify({ error: "track required" }), {
@@ -32,6 +35,12 @@ export async function POST(req: NextRequest) {
     if (!challengeId || typeof challengeId !== "number") {
       return new Response(JSON.stringify({ error: "challengeId required" }), {
         status: 400,
+      });
+    }
+
+    if (error === "wallet_mismatch") {
+      return new Response(JSON.stringify({ error: "Wallet mismatch" }), {
+        status: 403,
       });
     }
 

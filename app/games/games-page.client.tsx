@@ -28,7 +28,14 @@ const breadcrumbItems = [
 ];
 
 export function GamesPageClient() {
-  const { provider, isConnected, walletAddress, userInfo } = useWeb3Auth();
+  const {
+    provider,
+    isConnected,
+    walletAddress,
+    userInfo,
+    sessionReady,
+    authPhase,
+  } = useWeb3Auth();
   const { requireLogin, showModal, setShowModal } = useLoginGate();
 
   // UI State
@@ -74,7 +81,7 @@ export function GamesPageClient() {
 
   // Single unified API call to fetch all game states + NFTs
   React.useEffect(() => {
-    if (!walletAddress) return;
+    if (!sessionReady || authPhase !== "idle" || !walletAddress) return;
 
     let cancelled = false;
     setIsLoadingStates(true);
@@ -82,8 +89,8 @@ export function GamesPageClient() {
     (async () => {
       try {
         const res = await authFetch(
-          `/api/games/user-state?walletAddress=${walletAddress}`,
-          { method: "GET" }
+          `/api/games/user-state`,
+          { method: "GET", walletAddress }
         );
 
         if (!res.ok) {
@@ -136,13 +143,14 @@ export function GamesPageClient() {
     return () => {
       cancelled = true;
     };
-  }, [walletAddress]);
+  }, [authPhase, sessionReady, walletAddress]);
 
   const markCompleted = useCallback(
     async (gameId: string) => {
       try {
         const res = await authFetch("/api/games/complete", {
           method: "POST",
+          walletAddress,
           body: JSON.stringify({ gameId, walletAddress }),
         });
         if (!res.ok) {

@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
     if (canIssueAppSession()) {
       await setAppSessionCookie(response, {
         walletAddress: wa,
-        authMethod,
+        authMethod: authType === "external_wallet" ? "external_wallet" : "social",
         email: em,
         name: nm,
         profileImage: pi,

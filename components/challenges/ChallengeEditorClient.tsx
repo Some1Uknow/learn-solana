@@ -9,8 +9,8 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Link from "next/link";
-import { useWeb3AuthUser, useWeb3Auth } from "@web3auth/modal/react";
 import { authFetch } from "@/lib/auth/authFetch";
+import { useWeb3Auth } from "@/hooks/use-web3-auth";
 
 const MIN_OUTPUT_HEIGHT = 150;
 const MIN_EDITOR_HEIGHT = 220;
@@ -39,9 +39,7 @@ export default function ChallengeEditorClient({
   challengeId?: number;
   canExecute?: boolean;
 }) {
-  const { userInfo } = useWeb3AuthUser();
-  const { provider, isConnected } = useWeb3Auth();
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const { walletAddress } = useWeb3Auth();
   const [code, setCode] = useState(
     starterCode ||
       '// Write your Rust solution here\nfn main() {\n    println!("Hello, Rustacean!");\n}\n'
@@ -54,29 +52,6 @@ export default function ChallengeEditorClient({
   const [outputHeight, setOutputHeight] = useState(INITIAL_OUTPUT_HEIGHT);
   const [isResizing, setIsResizing] = useState(false);
 
-  // Fetch wallet address from Web3Auth provider
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchAddress() {
-      if (!provider || !isConnected) {
-        setWalletAddress(null);
-        return;
-      }
-      try {
-        const accounts = await provider.request({
-          method: "getAccounts",
-          params: {},
-        });
-        const addr = Array.isArray(accounts) ? accounts[0] : accounts;
-        if (!cancelled && addr) setWalletAddress(addr);
-      } catch (e) {
-        console.error("Failed to get wallet address:", e);
-      }
-    }
-    fetchAddress();
-    return () => { cancelled = true; };
-  }, [provider, isConnected]);
-
   // Fetch existing progress to check if already solved
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +61,9 @@ export default function ChallengeEditorClient({
         return;
       }
       try {
-        const res = await authFetch(`/api/challenges/progress?track=${track}&wallet=${walletAddress}`);
+        const res = await authFetch(`/api/challenges/progress?track=${track}`, {
+          walletAddress,
+        });
         if (res.ok && !cancelled) {
           const data = await res.json();
           const progressMap = data.progress || {};
@@ -256,6 +233,7 @@ export default function ChallengeEditorClient({
         try {
           await authFetch("/api/challenges/complete", {
             method: "POST",
+            walletAddress,
             body: JSON.stringify({
               track,
               challengeId,

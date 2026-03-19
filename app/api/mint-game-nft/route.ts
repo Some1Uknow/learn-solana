@@ -5,7 +5,7 @@ import { gameProgress } from '@/lib/db/schema/gameProgress';
 import { eq, and } from 'drizzle-orm';
 // server-side mint fallback removed
 import bs58 from 'bs58';
-import { verifyWeb3Auth, deriveWalletFromPayload } from '@/lib/auth/verifyWeb3Auth';
+import { verifyWeb3Auth, resolveAuthenticatedWallet } from '@/lib/auth/verifyWeb3Auth';
 
 // legacy verifyAuth removed (centralized in verifyWeb3Auth)
 
@@ -20,7 +20,13 @@ export async function POST(req: NextRequest) {
     if (!gameId || typeof gameId !== 'string') {
       return new Response(JSON.stringify({ error: 'gameId required'}), { status: 400 });
     }
-    let walletAddress = deriveWalletFromPayload(verified.payload);
+    const { walletAddress, error } = resolveAuthenticatedWallet(
+      req,
+      verified.payload
+    );
+    if (error === 'wallet_mismatch') {
+      return new Response(JSON.stringify({ error: 'Wallet mismatch'}), { status: 403 });
+    }
     if (!walletAddress) return new Response(JSON.stringify({ error: 'walletAddress unresolved'}), { status: 400 });
 
     // Require eligibility to claim
