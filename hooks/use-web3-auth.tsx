@@ -123,6 +123,9 @@ export function useWeb3Auth() {
     !nativeWalletSession &&
     (isConnected || status === 'connecting' || status === 'connected' || isInitializing) &&
     (!sessionReady || !hasFinalizedSocialSession);
+  const isBlockingSocialSession =
+    authPhase === 'social_finalizing' ||
+    (isRecoveringSocialSession && !sessionReady);
   const effectiveAuthPhase =
     authPhase === 'idle' && isRecoveringSocialSession
       ? 'social_finalizing'
@@ -132,7 +135,7 @@ export function useWeb3Auth() {
     disconnectLoading ||
     nativeLoginLoading ||
     globalAuthLoading ||
-    isRecoveringSocialSession;
+    isBlockingSocialSession;
 
   const resolvedUserInfo = useMemo(() => {
     if (web3AuthUserInfo) return web3AuthUserInfo;
