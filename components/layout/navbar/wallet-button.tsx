@@ -106,20 +106,10 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   if (!isClient) return null;
 
   if (isLoading || isBootstrappingAuth) {
-    const loadingLabel =
-      authPhase === "connecting"
-        ? "Opening sign-in..."
-        : authPhase === "social_finalizing"
-          ? "Finishing sign-in..."
-          : authPhase === "signing_out"
-            ? "Signing out..."
-          : isConnected && !walletAddress
-            ? "Loading wallet..."
-            : "Signing in...";
     return (
       <Button disabled className={`bg-yellow-500 text-black ${isMobile ? "w-full" : ""}`}>
         <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent mr-2" />
-        {loadingLabel}
+        Loading...
       </Button>
     );
   }

@@ -119,23 +119,19 @@ export function useWeb3Auth() {
   const hasFinalizedSocialSession =
     sessionUser?.source === 'app_session' && sessionUser?.authMethod === 'social';
   const isRecoveringSocialSession =
+    sessionReady &&
     connectedSocialConnector &&
     !nativeWalletSession &&
-    (isConnected || status === 'connecting' || status === 'connected' || isInitializing) &&
-    (!sessionReady || !hasFinalizedSocialSession);
-  const isBlockingSocialSession =
-    authPhase === 'social_finalizing' ||
-    (isRecoveringSocialSession && !sessionReady);
-  const effectiveAuthPhase =
-    authPhase === 'idle' && isRecoveringSocialSession
-      ? 'social_finalizing'
-      : authPhase;
+    resolvedProvider &&
+    authPhase === 'idle' &&
+    !socialFinalizePromise &&
+    !hasFinalizedSocialSession;
   const combinedLoading =
     loading ||
     disconnectLoading ||
     nativeLoginLoading ||
     globalAuthLoading ||
-    isBlockingSocialSession;
+    !sessionReady;
 
   const resolvedUserInfo = useMemo(() => {
     if (web3AuthUserInfo) return web3AuthUserInfo;
@@ -311,13 +307,7 @@ export function useWeb3Auth() {
 
   useEffect(() => {
     if (
-      !sessionReady ||
-      !connectedSocialConnector ||
-      !resolvedProvider ||
-      nativeWalletSession ||
-      authPhase !== 'idle' ||
-      socialFinalizePromise ||
-      hasFinalizedSocialSession
+      !isRecoveringSocialSession
     ) {
       return;
     }
@@ -333,11 +323,6 @@ export function useWeb3Auth() {
     }
 
     socialRecoveryAttemptKey = recoveryKey;
-    pendingSocialProvider = resolvedProvider;
-    updateAuthStore({
-      globalAuthLoading: true,
-      authPhase: 'social_finalizing',
-    });
 
     socialFinalizePromise = (async () => {
       try {
@@ -351,19 +336,14 @@ export function useWeb3Auth() {
         console.warn('[useWeb3Auth] recovered social finalize failed:', error);
       } finally {
         socialFinalizePromise = null;
-        updateAuthStore({ globalAuthLoading: false });
       }
     })();
   }, [
     accounts,
-    authPhase,
     connectorName,
     finalizeLogin,
-    nativeWalletSession,
+    isRecoveringSocialSession,
     resolvedProvider,
-    sessionReady,
-    sessionUser?.authMethod,
-    sessionUser?.source,
     sessionUser?.walletAddress,
     web3Auth?.connectedConnectorName,
   ]);
@@ -525,7 +505,7 @@ export function useWeb3Auth() {
     isInitializing,
     sessionReady,
     isLoading: combinedLoading,
-    authPhase: effectiveAuthPhase,
+    authPhase,
     error,
     initError,
     provider: resolvedProvider,
