@@ -63,6 +63,7 @@ let authStoreSnapshot: AuthStoreSnapshot = {
 let sessionLoadPromise: Promise<SessionUserInfo | null> | null = null;
 let pendingSocialProvider: unknown | null = null;
 let socialFinalizePromise: Promise<unknown> | null = null;
+let socialRecoveryAttemptKey: string | null = null;
 
 function subscribeAuthStore(listener: () => void) {
   authStoreListeners.add(listener);
@@ -280,6 +281,76 @@ export function useWeb3Auth() {
     });
   }, [accounts, authPhase, finalizeLogin, sessionUser?.walletAddress]);
 
+  useEffect(() => {
+    if (!resolvedConnected) {
+      socialRecoveryAttemptKey = null;
+    }
+  }, [resolvedConnected]);
+
+  useEffect(() => {
+    const connectedSocialConnector =
+      (web3Auth?.connectedConnectorName ?? connectorName) === WALLET_CONNECTORS.AUTH;
+    const hasFinalizedSocialSession =
+      sessionUser?.source === 'app_session' && sessionUser?.authMethod === 'social';
+
+    if (
+      !sessionReady ||
+      !connectedSocialConnector ||
+      !resolvedProvider ||
+      nativeWalletSession ||
+      authPhase !== 'idle' ||
+      socialFinalizePromise ||
+      hasFinalizedSocialSession
+    ) {
+      return;
+    }
+
+    const recoveryWalletAddress =
+      accounts?.[0] ?? sessionUser?.walletAddress ?? null;
+    const recoveryKey = `${web3Auth?.connectedConnectorName ?? connectorName ?? 'auth'}:${
+      recoveryWalletAddress ?? 'pending'
+    }`;
+
+    if (socialRecoveryAttemptKey === recoveryKey) {
+      return;
+    }
+
+    socialRecoveryAttemptKey = recoveryKey;
+    pendingSocialProvider = resolvedProvider;
+    updateAuthStore({
+      globalAuthLoading: true,
+      authPhase: 'social_finalizing',
+    });
+
+    socialFinalizePromise = (async () => {
+      try {
+        const nextWalletAddress =
+          recoveryWalletAddress ??
+          (await getPrimarySolanaAccount(resolvedProvider as any));
+
+        await finalizeLogin(resolvedProvider, nextWalletAddress);
+      } catch (error) {
+        socialRecoveryAttemptKey = null;
+        console.warn('[useWeb3Auth] recovered social finalize failed:', error);
+      } finally {
+        socialFinalizePromise = null;
+        updateAuthStore({ globalAuthLoading: false });
+      }
+    })();
+  }, [
+    accounts,
+    authPhase,
+    connectorName,
+    finalizeLogin,
+    nativeWalletSession,
+    resolvedProvider,
+    sessionReady,
+    sessionUser?.authMethod,
+    sessionUser?.source,
+    sessionUser?.walletAddress,
+    web3Auth?.connectedConnectorName,
+  ]);
+
   const login = async () => loginWithAuthConnection('google');
 
   const loginWithAuthConnection = async (authConnection: string) => {
@@ -400,6 +471,7 @@ export function useWeb3Auth() {
     } finally {
       pendingSocialProvider = null;
       socialFinalizePromise = null;
+      socialRecoveryAttemptKey = null;
       persistNativeWalletSession(null);
       updateAuthStore({
         nativeWalletSession: null,
