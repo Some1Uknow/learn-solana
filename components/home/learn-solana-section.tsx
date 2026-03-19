@@ -95,7 +95,6 @@ export default function LearnSolanaSection() {
                     </div>
                   )}
                   description={tile.description}
-                  href={tile.href}
                   cta="Learn more"
                 />
               </Link>

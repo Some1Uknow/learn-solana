@@ -5,21 +5,16 @@ import {
   useWeb3AuthDisconnect,
   useWeb3Auth as useWeb3AuthCore,
 } from "@web3auth/modal/react";
+import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { registerUserAfterLogin } from "@/lib/auth/registerUserAfterLogin";
 import { clearClientAuthState } from "@/lib/auth/session";
 
 export function useWeb3Auth() {
-  const { connect, isConnected, loading, error } = useWeb3AuthConnect();
+  const { connect, connectTo, isConnected, loading, error } = useWeb3AuthConnect();
   const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
   const { web3Auth } = useWeb3AuthCore();
 
-  const login = async () => {
-    if (!web3Auth) {
-      throw new Error("Web3Auth is not initialized yet.");
-    }
-
-    const provider = await connect();
-
+  const finalizeLogin = async (provider: unknown) => {
     if (!provider) {
       throw (
         error ??
@@ -41,9 +36,30 @@ export function useWeb3Auth() {
     return provider;
   };
 
+  const login = async () => {
+    if (!web3Auth) {
+      throw new Error("Web3Auth is not initialized yet.");
+    }
+
+    const provider = await connect();
+    return finalizeLogin(provider);
+  };
+
+  const loginWithAuthConnection = async (authConnection: string) => {
+    if (!web3Auth) {
+      throw new Error("Web3Auth is not initialized yet.");
+    }
+
+    const provider = await connectTo(WALLET_CONNECTORS.AUTH, {
+      authConnection: authConnection as any,
+    });
+
+    return finalizeLogin(provider);
+  };
+
   const logout = async () => {
     try {
-      await disconnect();
+      await disconnect({ cleanup: true });
     } finally {
       clearClientAuthState();
       try {
@@ -61,6 +77,7 @@ export function useWeb3Auth() {
 
   return {
     login,
+    loginWithAuthConnection,
     logout,
     isLoggedIn: isConnected,
     isLoading: loading || disconnectLoading,

@@ -19,9 +19,19 @@ export function LoginRequiredModal({
     title = "Authentication Required",
     description = "Please connect your wallet to access this feature.",
 }: LoginRequiredModalProps) {
-    const { login } = useWeb3Auth();
+    const { login, loginWithAuthConnection, logout } = useWeb3Auth();
     const [isConnecting, setIsConnecting] = useState(false);
     const [loginError, setLoginError] = useState<string | null>(null);
+    const [isBrave, setIsBrave] = useState(false);
+
+    React.useEffect(() => {
+        if (typeof navigator === "undefined") return;
+        const ua = navigator.userAgent || "";
+        const brave =
+            /\bBrave\b/i.test(ua) ||
+            typeof (navigator as any).brave !== "undefined";
+        setIsBrave(brave);
+    }, []);
 
     const handleLogin = async () => {
         setIsConnecting(true);
@@ -37,6 +47,37 @@ export function LoginRequiredModal({
                     ? error.message
                     : "Wallet login failed. Try again, or disable Brave Shields for this site if the wallet modal appears blank."
             );
+        } finally {
+            setIsConnecting(false);
+        }
+    };
+
+    const handleDirectAuthLogin = async (authConnection: string) => {
+        setIsConnecting(true);
+        setLoginError(null);
+
+        try {
+            await loginWithAuthConnection(authConnection);
+            onOpenChange(false);
+        } catch (error) {
+            console.error(`Direct ${authConnection} login failed:`, error);
+            setLoginError(
+                error instanceof Error
+                    ? error.message
+                    : "Direct login failed. Try again or use Chrome for now."
+            );
+        } finally {
+            setIsConnecting(false);
+        }
+    };
+
+    const handleResetSession = async () => {
+        setIsConnecting(true);
+        setLoginError(null);
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Session reset failed:", error);
         } finally {
             setIsConnecting(false);
         }
@@ -80,6 +121,12 @@ export function LoginRequiredModal({
                             </div>
                         )}
 
+                        {isBrave && (
+                            <div className="rounded-xl border border-blue-400/20 bg-blue-500/10 px-4 py-3 text-left text-sm text-blue-100">
+                                Brave is intermittently breaking the Web3Auth modal UI. Use the direct sign-in option below if the modal opens blank.
+                            </div>
+                        )}
+
                         <Button
                             onClick={handleLogin}
                             disabled={isConnecting}
@@ -90,6 +137,28 @@ export function LoginRequiredModal({
                                 <span>{isConnecting ? "Opening Wallet..." : "Connect Wallet"}</span>
                             </div>
                         </Button>
+
+                        {isBrave && (
+                            <Button
+                                onClick={() => handleDirectAuthLogin("google")}
+                                disabled={isConnecting}
+                                variant="outline"
+                                className="w-full h-11 rounded-xl border-white/15 bg-white/5 text-white hover:bg-white/10"
+                            >
+                                Continue with Google
+                            </Button>
+                        )}
+
+                        {isBrave && (
+                            <Button
+                                onClick={handleResetSession}
+                                disabled={isConnecting}
+                                variant="ghost"
+                                className="w-full h-11 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                            >
+                                Reset Wallet Session
+                            </Button>
+                        )}
 
                         <Button
                             onClick={() => onOpenChange(false)}

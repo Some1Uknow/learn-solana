@@ -129,7 +129,6 @@ export default function ModuleDetailPageClient({
                         </div>
                       )}
                       description={part.description}
-                      href={part.href}
                       cta="Start lesson"
                     />
                   </Link>

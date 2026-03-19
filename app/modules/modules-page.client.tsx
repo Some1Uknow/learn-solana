@@ -136,7 +136,6 @@ export function ModulesPageClient() {
                       </div>
                     )}
                     description={module.description}
-                    href={`/modules/${module.id}`}
                     cta={`${module.topics.length} lessons`}
                   />
                 </Link>

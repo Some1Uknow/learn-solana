@@ -15,7 +15,6 @@ interface BentoCardProps extends ComponentPropsWithoutRef<"div"> {
   background: ReactNode
   Icon: React.ElementType
   description: string
-  href: string
   cta: string
 }
 
@@ -39,7 +38,6 @@ const BentoCard = ({
   background,
   Icon,
   description,
-  href,
   cta,
   ...props
 }: BentoCardProps) => (
@@ -70,16 +68,11 @@ const BentoCard = ({
           "pointer-events-none flex w-full translate-y-0 transform-gpu flex-row items-center transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:hidden"
         )}
       >
-        <Button
-          variant="link"
-          asChild
-          size="sm"
-          className="pointer-events-auto p-0"
-        >
-          <a href={href}>
+        <Button variant="link" size="sm" className="pointer-events-none p-0">
+          <span className="inline-flex items-center">
             {cta}
             <ArrowRightIcon className="ms-2 h-4 w-4 rtl:rotate-180" />
-          </a>
+          </span>
         </Button>
       </div>
     </div>
@@ -89,16 +82,11 @@ const BentoCard = ({
         "pointer-events-none absolute bottom-0 hidden w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:flex"
       )}
     >
-      <Button
-        variant="link"
-        asChild
-        size="sm"
-        className="pointer-events-auto p-0"
-      >
-        <a href={href}>
+      <Button variant="link" size="sm" className="pointer-events-none p-0">
+        <span className="inline-flex items-center">
           {cta}
           <ArrowRightIcon className="ms-2 h-4 w-4 rtl:rotate-180" />
-        </a>
+        </span>
       </Button>
     </div>
 

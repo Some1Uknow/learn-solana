@@ -29,6 +29,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const [isClient, setIsClient] = useState(false);
   const [dropdownUserInfo, setDropdownUserInfo] = useState<any>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
+  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [copied, setCopied] = useState(false);
   
   // Track if registration was already attempted in this session
@@ -39,7 +40,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const { disconnect, loading: disconnectLoading } = useWeb3AuthDisconnect();
   const { provider, web3Auth } = useWeb3Auth();
 
-  const isLoading = connectLoading || disconnectLoading;
+  const isLoading = connectLoading || disconnectLoading || isResolvingAddress;
 
   // Handle client-side hydration
   useEffect(() => {
@@ -56,9 +57,10 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     }
   }, [isConnected, provider, userAddress]);
 
-  const getAddress = async () => {
+  const getAddress = async (): Promise<string | null> => {
     try {
-      if (!provider) return;
+      if (!provider) return null;
+      setIsResolvingAddress(true);
       let address: string | undefined;
       try {
         // Prefer SolanaWallet API
@@ -70,9 +72,16 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
         const accounts = await (provider as any).request?.({ method: "getAccounts", params: {} });
         address = Array.isArray(accounts) ? accounts[0] : accounts;
       }
-      if (address) setUserAddress(address);
+      if (address) {
+        setUserAddress(address);
+        return address;
+      }
+      return null;
     } catch (error) {
       console.error("Failed to get address:", error);
+      return null;
+    } finally {
+      setIsResolvingAddress(false);
     }
   };
 
@@ -98,26 +107,41 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
    * 2. Immediately registering the user with the returned provider
    * 3. Not relying on hook state updates (isConnected, userInfo, etc.)
    */
+  const handleLogout = useCallback(async () => {
+    try {
+      await disconnect({ cleanup: true });
+      clearClientAuthState();
+      setUserAddress("");
+      setDropdownUserInfo(null);
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (logoutError) {
+        console.warn("[WalletButton] logout cleanup failed", logoutError);
+      }
+      registrationAttemptedRef.current = false;
+    } catch (e) {
+      console.error("[WalletButton] logout error", e);
+    }
+  }, [disconnect]);
+
   const handleConnect = useCallback(async () => {
     try {
       console.log('[WalletButton] click: isConnected=', isConnected, 'provider?', !!provider);
-      
-      if (isConnected) {
-        // Disconnect flow
-        await disconnect();
-        clearClientAuthState();
-        try {
-          await fetch("/api/auth/logout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          });
-        } catch (logoutError) {
-          console.warn("[WalletButton] logout cleanup failed", logoutError);
+
+      if (isConnected && !userAddress) {
+        const recoveredAddress = await getAddress();
+        if (recoveredAddress) {
+          return;
         }
-        registrationAttemptedRef.current = false; // Reset for next login
-        return;
+
+        // The SDK still thinks we are connected, but we cannot recover the address.
+        // Clear the stale session first, then continue with a fresh connect attempt.
+        await handleLogout();
       }
-      
+
       // Connect flow - get provider directly from connect()
       const newProvider = await connect();
       
@@ -143,7 +167,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     } catch (e) {
       console.error('[WalletButton] connect/disconnect error', e);
     }
-  }, [isConnected, provider, web3Auth, connect, disconnect]);
+  }, [isConnected, userAddress, provider, web3Auth, connect, handleLogout]);
   
   const copyAddress = () => {
     navigator.clipboard.writeText(userAddress);
@@ -193,7 +217,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             </div>
           </div>
           <Button
-            onClick={handleConnect}
+            onClick={handleLogout}
             disabled={isLoading}
             variant="outline"
             className="w-full text-red-500 border-red-500/20 hover:bg-red-500/10"
@@ -260,7 +284,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             Explorer
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={handleConnect} className="text-red-600">
+          <DropdownMenuItem onClick={handleLogout} className="text-red-600">
             <LogOut size={16} className="mr-2" />
             Logout
           </DropdownMenuItem>

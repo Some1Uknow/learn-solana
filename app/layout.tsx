@@ -152,9 +152,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const headersList = await headers();
-  const web3authInitialState = parseWeb3AuthStateFromCookie(
-    headersList.get("cookie"),
-  );
+  const secChUa = headersList.get("sec-ch-ua") || "";
+  const userAgent = headersList.get("user-agent") || "";
+  const isBrave =
+    /\bBrave\b/i.test(secChUa) || /\bBrave\b/i.test(userAgent);
+  const web3authInitialState = isBrave
+    ? undefined
+    : parseWeb3AuthStateFromCookie(headersList.get("cookie"));
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (
@@ -213,7 +217,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           enableSystem
           disableTransitionOnChange
         >
-          <Provider web3authInitialState={web3authInitialState}>
+          <Provider web3authInitialState={web3authInitialState} isBrave={isBrave}>
             <RouteGuard>
               <RootProvider>
                 {children}
