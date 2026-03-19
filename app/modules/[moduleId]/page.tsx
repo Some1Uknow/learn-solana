@@ -51,14 +51,6 @@ const moduleKeywordsMap: Record<string, string[]> = {
     "solana dapp",
     "solana client development",
   ],
-  "ship-and-production": [
-    "solana project",
-    "build solana dapp",
-    "solana portfolio",
-    "fullstack solana",
-    "solana deployment",
-    "production solana",
-  ],
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

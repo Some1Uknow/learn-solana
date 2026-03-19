@@ -50,12 +50,6 @@ export const GAME_REGISTRY: GameDefinition[] = [
     },
     tags: ["tokenomics", "platformer", "nft"],
   },
-  // Add future games here:
-  // {
-  //   id: "nft-adventure",
-  //   title: "NFT Adventure",
-  //   ...
-  // },
 ];
 
 /**

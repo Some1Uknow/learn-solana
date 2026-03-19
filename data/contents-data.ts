@@ -344,74 +344,6 @@ export const contentsData = {
         },
       ],
     },
-    {
-      id: "ship-and-production",
-      title: "Ship and Production",
-      description:
-        "Turn your Solana application into something stable, testable, deployable, and portfolio-ready.",
-      goal: "Create a professional portfolio piece that demonstrates engineering quality across integration, testing, deployment, and presentation.",
-      image: "/capstone.png",
-      icon: "capstone",
-      overviewUrl: "/learn/ship-and-production",
-      topics: [
-        {
-          id: "advanced-features-implementation",
-          title: "Advanced Features Implementation",
-          description:
-            "Handle multi-program interactions, richer state management, and more advanced production patterns.",
-          type: "implementation",
-          url: "/learn/ship-and-production/advanced-features-implementation",
-        },
-        {
-          id: "fullstack-integration",
-          title: "Full-Stack Integration",
-          description:
-            "Connect program logic, client flows, and product UX into one coherent application.",
-          type: "implementation",
-          url: "/learn/ship-and-production/fullstack-integration",
-        },
-        {
-          id: "testing-security-audit",
-          title: "Testing and Security Audit",
-          description:
-            "Expand test coverage, inspect failure paths, and apply a stricter security review mindset.",
-          type: "quality-assurance",
-          url: "/learn/ship-and-production/testing-security-audit",
-        },
-        {
-          id: "deployment-production",
-          title: "Production Deployment",
-          description:
-            "Prepare the app for deployment with monitoring, environment management, and release discipline.",
-          type: "deployment",
-          url: "/learn/ship-and-production/deployment-production",
-        },
-        {
-          id: "documentation-polish",
-          title: "Documentation and Professional Polish",
-          description:
-            "Write docs, tighten onboarding, and make the project easier to understand and present.",
-          type: "documentation",
-          url: "/learn/ship-and-production/documentation-polish",
-        },
-        {
-          id: "performance-optimization",
-          title: "Performance Optimization",
-          description:
-            "Improve runtime efficiency, caching strategy, and production responsiveness.",
-          type: "optimization",
-          url: "/learn/ship-and-production/performance-optimization",
-        },
-        {
-          id: "portfolio-presentation",
-          title: "Portfolio Presentation",
-          description:
-            "Package the final work into a clear case study, demo, and hiring-ready showcase.",
-          type: "showcase",
-          url: "/learn/ship-and-production/portfolio-presentation",
-        },
-      ],
-    },
   ],
   learning_progression: {
     solana_foundations_focus:
@@ -422,8 +354,6 @@ export const contentsData = {
       "Use Anchor to build real programs with better structure, safer validation, and realistic project flows.",
     solana_kit_clients_focus:
       "Build modern clients with @solana/kit, wallet-standard, and production-minded transaction UX.",
-    ship_and_production_focus:
-      "Turn a working project into a deployable, testable, well-documented portfolio piece.",
   },
   skill_milestones: {
     solana_foundations:

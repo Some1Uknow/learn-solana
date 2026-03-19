@@ -5,7 +5,6 @@
     "solana-foundations",
     "rust-foundations",
     "anchor-programs",
-    "solana-kit-clients",
-    "ship-and-production"
+    "solana-kit-clients"
   ]
 }

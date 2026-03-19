@@ -126,16 +126,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/learn/week-5",
-        destination: "/learn/ship-and-production",
-        permanent: true,
-      },
-      {
-        source: "/learn/week-5/:path*",
-        destination: "/learn/ship-and-production/:path*",
-        permanent: true,
-      },
-      {
         source: "/modules/week-1",
         destination: "/modules/solana-foundations",
         permanent: true,
@@ -153,11 +143,6 @@ const nextConfig = {
       {
         source: "/modules/week-4",
         destination: "/modules/solana-kit-clients",
-        permanent: true,
-      },
-      {
-        source: "/modules/week-5",
-        destination: "/modules/ship-and-production",
         permanent: true,
       },
       // Redirect any trailing slash URLs to non-trailing slash versions
