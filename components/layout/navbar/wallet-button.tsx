@@ -23,6 +23,9 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     logout,
     isConnected,
     isLoading,
+    isInitializing,
+    sessionReady,
+    authPhase,
     walletAddress,
     userInfo,
     authMethod,
@@ -92,10 +95,27 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   const truncateAddress = (addr: string) =>
     addr ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : "";
 
+  const isBootstrappingAuth =
+    !sessionReady ||
+    isInitializing ||
+    authPhase === "connecting" ||
+    authPhase === "social_finalizing" ||
+    authPhase === "signing_out" ||
+    (isConnected && !walletAddress);
+
   if (!isClient) return null;
 
-  if (isLoading || (isConnected && !walletAddress)) {
-    const loadingLabel = isConnected && !walletAddress ? "Loading wallet..." : "Signing in...";
+  if (isLoading || isBootstrappingAuth) {
+    const loadingLabel =
+      authPhase === "connecting"
+        ? "Opening sign-in..."
+        : authPhase === "social_finalizing"
+          ? "Finishing sign-in..."
+          : authPhase === "signing_out"
+            ? "Signing out..."
+          : isConnected && !walletAddress
+            ? "Loading wallet..."
+            : "Signing in...";
     return (
       <Button disabled className={`bg-yellow-500 text-black ${isMobile ? "w-full" : ""}`}>
         <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent mr-2" />
