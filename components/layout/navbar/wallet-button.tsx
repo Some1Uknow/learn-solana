@@ -95,10 +95,11 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   if (!isClient) return null;
 
   if (isLoading || (isConnected && !walletAddress)) {
+    const loadingLabel = isConnected && !walletAddress ? "Loading wallet..." : "Signing in...";
     return (
       <Button disabled className={`bg-yellow-500 text-black ${isMobile ? "w-full" : ""}`}>
         <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent mr-2" />
-        Loading...
+        {loadingLabel}
       </Button>
     );
   }

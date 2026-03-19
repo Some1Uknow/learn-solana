@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import {
   useIdentityToken,
   useWeb3Auth as useWeb3AuthCore,
@@ -27,9 +27,6 @@ import {
   type BrowserWalletSession,
 } from '@/lib/auth/browserWallet';
 
-const AUTH_STATE_EVENT = 'learnsol:auth-changed';
-const AUTH_PENDING_EVENT = 'learnsol:auth-pending';
-
 interface SessionUserInfo {
   walletAddress: string | null;
   email?: string | null;
@@ -39,14 +36,38 @@ interface SessionUserInfo {
   source?: string | null;
 }
 
-function emitAuthState(user: SessionUserInfo | null) {
-  if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(AUTH_STATE_EVENT, { detail: { user } }));
+interface AuthStoreSnapshot {
+  sessionUser: SessionUserInfo | null;
+  sessionReady: boolean;
+  nativeWalletSession: BrowserWalletSession | null;
+  nativeLoginLoading: boolean;
+  browserWallets: BrowserWalletOption[];
+  globalAuthLoading: boolean;
 }
 
-function emitAuthPending(isPending: boolean) {
-  if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(AUTH_PENDING_EVENT, { detail: { isPending } }));
+const authStoreListeners = new Set<() => void>();
+let authStoreSnapshot: AuthStoreSnapshot = {
+  sessionUser: null,
+  sessionReady: false,
+  nativeWalletSession: null,
+  nativeLoginLoading: false,
+  browserWallets: [],
+  globalAuthLoading: false,
+};
+let sessionLoadPromise: Promise<SessionUserInfo | null> | null = null;
+
+function subscribeAuthStore(listener: () => void) {
+  authStoreListeners.add(listener);
+  return () => authStoreListeners.delete(listener);
+}
+
+function getAuthStoreSnapshot() {
+  return authStoreSnapshot;
+}
+
+function updateAuthStore(partial: Partial<AuthStoreSnapshot>) {
+  authStoreSnapshot = { ...authStoreSnapshot, ...partial };
+  authStoreListeners.forEach((listener) => listener());
 }
 
 export function useWeb3Auth() {
@@ -65,15 +86,19 @@ export function useWeb3Auth() {
   const { userInfo: web3AuthUserInfo, getUserInfo } = useWeb3AuthUser();
   const { token } = useIdentityToken();
   const { accounts } = useSolanaWallet();
-
-  const [sessionUser, setSessionUser] = useState<SessionUserInfo | null>(null);
-  const [sessionReady, setSessionReady] = useState(false);
-  const [nativeWalletSession, setNativeWalletSession] = useState<BrowserWalletSession | null>(
-    () => getNativeWalletSession()
+  const authState = useSyncExternalStore(
+    subscribeAuthStore,
+    getAuthStoreSnapshot,
+    getAuthStoreSnapshot
   );
-  const [nativeLoginLoading, setNativeLoginLoading] = useState(false);
-  const [browserWallets, setBrowserWallets] = useState<BrowserWalletOption[]>([]);
-  const [globalAuthLoading, setGlobalAuthLoading] = useState(false);
+  const {
+    sessionUser,
+    sessionReady,
+    nativeWalletSession,
+    nativeLoginLoading,
+    browserWallets,
+    globalAuthLoading,
+  } = authState;
 
   const walletAddress =
     accounts?.[0] ?? nativeWalletSession?.walletAddress ?? sessionUser?.walletAddress ?? null;
@@ -93,12 +118,12 @@ export function useWeb3Auth() {
   const resolvedConnected = Boolean(isConnected || sessionUser?.walletAddress);
 
   const refreshBrowserWallets = useCallback(() => {
-    setBrowserWallets(listBrowserWallets());
+    updateAuthStore({ browserWallets: listBrowserWallets() });
   }, []);
 
   useEffect(() => {
     refreshBrowserWallets();
-  }, []);
+  }, [refreshBrowserWallets]);
 
   useEffect(() => {
     if (token) {
@@ -111,7 +136,7 @@ export function useWeb3Auth() {
     try {
       const res = await fetch('/api/auth/verify', { cache: 'no-store' });
       if (!res.ok) {
-        setSessionUser(null);
+        updateAuthStore({ sessionUser: null, sessionReady: true });
         return null;
       }
 
@@ -127,12 +152,15 @@ export function useWeb3Auth() {
           }
         : null;
 
-      setSessionUser(nextUser?.walletAddress ? nextUser : null);
+      updateAuthStore({
+        sessionUser: nextUser?.walletAddress ? nextUser : null,
+        sessionReady: true,
+      });
 
       if (nextUser?.authMethod === 'native_wallet' && nextUser.walletAddress) {
         const current = getNativeWalletSession();
         if (current?.walletAddress === nextUser.walletAddress) {
-          setNativeWalletSession(current);
+          updateAuthStore({ nativeWalletSession: current });
         } else {
           const stored = getStoredNativeWalletSelection();
           if (stored?.walletAddress === nextUser.walletAddress) {
@@ -141,64 +169,32 @@ export function useWeb3Auth() {
               stored.walletAddress
             );
             if (restored) {
-              setNativeWalletSession(restored);
+              updateAuthStore({ nativeWalletSession: restored });
             }
           }
         }
+      } else if (!nextUser) {
+        updateAuthStore({ nativeWalletSession: getNativeWalletSession() });
       }
 
       return nextUser;
     } catch {
-      setSessionUser(null);
+      updateAuthStore({ sessionUser: null, sessionReady: true });
       return null;
-    } finally {
-      setSessionReady(true);
     }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function hydrateSession() {
-      try {
-        const nextUser = await loadSession();
-        if (cancelled) {
-          return;
-        }
-        if (!nextUser) {
-          setNativeWalletSession(getNativeWalletSession());
-        }
-      } catch {
-        if (!cancelled) setSessionReady(true);
-      }
+    if (authStoreSnapshot.sessionReady) {
+      return;
     }
 
-    hydrateSession();
-
-    return () => {
-      cancelled = true;
-    };
+    if (!sessionLoadPromise) {
+      sessionLoadPromise = loadSession().finally(() => {
+        sessionLoadPromise = null;
+      });
+    }
   }, [loadSession]);
-
-  useEffect(() => {
-    const listener = (event: Event) => {
-      const detail = (event as CustomEvent<{ user: SessionUserInfo | null }>).detail;
-      setSessionUser(detail?.user ?? null);
-      setNativeWalletSession(getNativeWalletSession());
-    };
-
-    const pendingListener = (event: Event) => {
-      const detail = (event as CustomEvent<{ isPending: boolean }>).detail;
-      setGlobalAuthLoading(Boolean(detail?.isPending));
-    };
-
-    window.addEventListener(AUTH_STATE_EVENT, listener as EventListener);
-    window.addEventListener(AUTH_PENDING_EVENT, pendingListener as EventListener);
-    return () => {
-      window.removeEventListener(AUTH_STATE_EVENT, listener as EventListener);
-      window.removeEventListener(AUTH_PENDING_EVENT, pendingListener as EventListener);
-    };
-  }, []);
 
   const finalizeLogin = async (connectedProvider: unknown) => {
     if (!connectedProvider || !web3Auth) {
@@ -221,8 +217,7 @@ export function useWeb3Auth() {
           authMethod: connectorName ?? 'social',
           source: 'web3auth',
         };
-        setSessionUser(nextUser);
-        emitAuthState(nextUser);
+        updateAuthStore({ sessionUser: nextUser, sessionReady: true });
         await loadSession();
       } else if (!result.success) {
         console.warn('[useWeb3Auth] post-login registration failed:', result.error);
@@ -241,25 +236,26 @@ export function useWeb3Auth() {
       throw new Error('Web3Auth is not initialized yet.');
     }
 
-    setGlobalAuthLoading(true);
-    emitAuthPending(true);
+    updateAuthStore({ globalAuthLoading: true });
 
     try {
       const connectedProvider = await connectTo(WALLET_CONNECTORS.AUTH, {
         authConnection: authConnection as any,
       });
 
-      return await finalizeLogin(connectedProvider);
-    } finally {
-      setGlobalAuthLoading(false);
-      emitAuthPending(false);
+      void finalizeLogin(connectedProvider).finally(() => {
+        updateAuthStore({ globalAuthLoading: false });
+      });
+
+      return connectedProvider;
+    } catch (loginError) {
+      updateAuthStore({ globalAuthLoading: false });
+      throw loginError;
     }
   };
 
   const loginWithNativeWallet = async (walletId: string) => {
-    setNativeLoginLoading(true);
-    setGlobalAuthLoading(true);
-    emitAuthPending(true);
+    updateAuthStore({ nativeLoginLoading: true, globalAuthLoading: true });
     try {
       const previewWallets = listBrowserWallets();
       const selectedWallet = previewWallets.find((wallet) => wallet.id === walletId);
@@ -307,7 +303,7 @@ export function useWeb3Auth() {
         provider: connected.provider,
       };
       persistNativeWalletSession(nativeSession);
-      setNativeWalletSession(nativeSession);
+      updateAuthStore({ nativeWalletSession: nativeSession });
 
       const nextUser = {
         walletAddress: data?.user?.walletAddress ?? connected.walletAddress,
@@ -317,28 +313,27 @@ export function useWeb3Auth() {
         authMethod: 'native_wallet',
         source: 'app_session',
       };
-      setSessionUser(nextUser);
-      emitAuthState(nextUser);
+      updateAuthStore({ sessionUser: nextUser, sessionReady: true });
       await loadSession();
       return connected.provider;
     } finally {
-      setNativeLoginLoading(false);
-      setGlobalAuthLoading(false);
-      emitAuthPending(false);
+      updateAuthStore({ nativeLoginLoading: false, globalAuthLoading: false });
     }
   };
 
   const logout = async () => {
-    setGlobalAuthLoading(true);
-    emitAuthPending(true);
+    updateAuthStore({ globalAuthLoading: true });
     try {
       if (web3Auth && isConnected) {
         await disconnect({ cleanup: true });
       }
     } finally {
       persistNativeWalletSession(null);
-      setNativeWalletSession(null);
-      setSessionUser(null);
+      updateAuthStore({
+        nativeWalletSession: null,
+        sessionUser: null,
+        sessionReady: true,
+      });
       clearClientAuthState();
       try {
         await fetch('/api/auth/logout', {
@@ -350,10 +345,8 @@ export function useWeb3Auth() {
       } catch (cleanupError) {
         console.warn('[useWeb3Auth] logout cleanup request failed:', cleanupError);
       }
-      emitAuthState(null);
       await loadSession();
-      setGlobalAuthLoading(false);
-      emitAuthPending(false);
+      updateAuthStore({ globalAuthLoading: false });
     }
   };
 

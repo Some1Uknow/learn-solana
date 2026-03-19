@@ -95,20 +95,22 @@ async function buildRegistrationPayload(
     "X-Wallet-Address": walletAddress,
   };
   const body: Record<string, unknown> = {};
+  const [idToken, userInfoResult] = await Promise.all([
+    getIdentityToken(web3Auth),
+    web3Auth
+      .getUserInfo?.()
+      .catch((error) => {
+        console.warn("[registerUserAfterLogin] getUserInfo failed", error);
+        return {};
+      }) ?? Promise.resolve({}),
+  ]);
 
-  const idToken = await getIdentityToken(web3Auth);
   if (idToken) {
     persistClientAuthToken(idToken);
     headers.Authorization = `Bearer ${idToken}`;
   }
 
-  let userInfo: any = {};
-
-  try {
-    userInfo = (await web3Auth.getUserInfo?.()) || {};
-  } catch (error) {
-    console.warn("[registerUserAfterLogin] getUserInfo failed", error);
-  }
+  const userInfo: any = userInfoResult || {};
 
   body.email = userInfo.email ?? null;
   body.name = userInfo.name ?? null;
