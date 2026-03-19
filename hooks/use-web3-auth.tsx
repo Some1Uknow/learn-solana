@@ -114,6 +114,25 @@ export function useWeb3Auth() {
     accounts?.[0] ?? nativeWalletSession?.walletAddress ?? sessionUser?.walletAddress ?? null;
 
   const resolvedProvider = web3AuthProvider ?? nativeWalletSession?.provider ?? null;
+  const connectedSocialConnector =
+    (web3Auth?.connectedConnectorName ?? connectorName) === WALLET_CONNECTORS.AUTH;
+  const hasFinalizedSocialSession =
+    sessionUser?.source === 'app_session' && sessionUser?.authMethod === 'social';
+  const isRecoveringSocialSession =
+    connectedSocialConnector &&
+    !nativeWalletSession &&
+    (isConnected || status === 'connecting' || status === 'connected' || isInitializing) &&
+    (!sessionReady || !hasFinalizedSocialSession);
+  const effectiveAuthPhase =
+    authPhase === 'idle' && isRecoveringSocialSession
+      ? 'social_finalizing'
+      : authPhase;
+  const combinedLoading =
+    loading ||
+    disconnectLoading ||
+    nativeLoginLoading ||
+    globalAuthLoading ||
+    isRecoveringSocialSession;
 
   const resolvedUserInfo = useMemo(() => {
     if (web3AuthUserInfo) return web3AuthUserInfo;
@@ -288,11 +307,6 @@ export function useWeb3Auth() {
   }, [resolvedConnected]);
 
   useEffect(() => {
-    const connectedSocialConnector =
-      (web3Auth?.connectedConnectorName ?? connectorName) === WALLET_CONNECTORS.AUTH;
-    const hasFinalizedSocialSession =
-      sessionUser?.source === 'app_session' && sessionUser?.authMethod === 'social';
-
     if (
       !sessionReady ||
       !connectedSocialConnector ||
@@ -507,8 +521,8 @@ export function useWeb3Auth() {
     isInitialized,
     isInitializing,
     sessionReady,
-    isLoading: loading || disconnectLoading || nativeLoginLoading || globalAuthLoading,
-    authPhase,
+    isLoading: combinedLoading,
+    authPhase: effectiveAuthPhase,
     error,
     initError,
     provider: resolvedProvider,
