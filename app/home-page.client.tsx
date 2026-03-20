@@ -106,8 +106,12 @@ export function HomePageClient() {
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                className="flex flex-wrap items-baseline justify-center gap-4 md:gap-8"
+                className="flex flex-col items-center justify-center gap-4 md:gap-5"
               >
+                <div className="text-[11px] sm:text-xs md:text-sm uppercase tracking-[0.28em] text-[#14f195] font-medium opacity-0">
+                  Learn Solana Development
+                </div>
+                <div className="flex flex-wrap items-baseline justify-center gap-4 md:gap-8">
                 <motion.h1
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -138,6 +142,7 @@ export function HomePageClient() {
                     sizes="(max-width: 640px) 40px, (max-width: 768px) 56px, 60px"
                   />
                 </motion.div>
+                </div>
               </motion.div>
               <motion.p
                 initial={{ y: 20, opacity: 0 }}
