@@ -12,6 +12,7 @@ export async function GET() {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "public, max-age=0, must-revalidate",
+      "x-robots-tag": "noindex, nofollow, noarchive",
     },
   });
 }
