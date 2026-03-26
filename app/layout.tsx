@@ -1,7 +1,8 @@
 import type React from "react";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
@@ -18,22 +19,6 @@ import {
   siteUrl,
 } from "@/lib/seo";
 import { parseWeb3AuthStateFromCookie } from "@/lib/web3auth-cookie";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -194,7 +179,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetBrainsMono.variable}`}>
+      <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         {process.env.NODE_ENV === "production" && clarityId && (
           <Script id="clarity-script" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){

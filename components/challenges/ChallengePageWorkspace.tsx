@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { challengesSource } from "@/lib/challenges/source";
 import { getMDXComponents } from "@/mdx-components";
-import { BlurFade } from "@/components/ui/blur-fade";
 import ChallengeEditorClient from "./ChallengeEditorClient";
 import type { ChallengeExecutor } from "@/lib/challenges/registry";
+import { ArrowLeft } from "lucide-react";
 
 export type ChallengeSpec = {
   title: string;
@@ -22,6 +22,19 @@ type Props = ChallengeSpec & {
   backHref?: string;
 };
 
+const getDifficultyStyle = (difficulty: string) => {
+  switch (difficulty) {
+    case "Easy":
+      return "text-[#14f195] bg-[#14f195]/10 border-[#14f195]/20";
+    case "Medium":
+      return "text-amber-400 bg-amber-400/10 border-amber-400/20";
+    case "Hard":
+      return "text-[#9945ff] bg-[#9945ff]/10 border-[#9945ff]/20";
+    default:
+      return "text-neutral-400 bg-neutral-800 border-neutral-700";
+  }
+};
+
 export default function ChallengePageWorkspace({
   title,
   difficulty = "Easy",
@@ -35,14 +48,6 @@ export default function ChallengePageWorkspace({
   track,
   executor,
 }: Props) {
-  const backgroundStyle = `
-    radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.12), transparent 50%),
-    radial-gradient(ellipse 100% 60% at 30% 10%, rgba(0, 255, 255, 0.10), transparent 60%),
-    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(138, 43, 226, 0.14), transparent 65%),
-    radial-gradient(ellipse 110% 50% at 80% 30%, rgba(255, 215, 0, 0.06), transparent 40%),
-    #000000
-  `;
-
   // Resolve MDX for problem statement if provided
   let MDX: React.ComponentType<any> | null = null;
   if (mdxSlug) {
@@ -54,124 +59,81 @@ export default function ChallengePageWorkspace({
 
   return (
     <div
-      className="fixed inset-0 z-[100] w-full overflow-hidden"
-      style={{ background: backgroundStyle, height: "100dvh" }}
+      className="fixed inset-0 z-[100] w-full overflow-hidden bg-black"
+      style={{ height: "100dvh" }}
     >
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,255,255,0.05),transparent_60%)]" />
-
       <div
         className="relative z-10 flex min-h-0 flex-col overflow-hidden"
         style={{ height: "100dvh" }}
       >
-        {/* Warning banner - top */}
-        {/* <div className="w-full overflow-hidden">
-          <div
-            className="py-2 whitespace-nowrap will-change-transform animate-marquee"
-            style={
-              { ["--duration" as any]: "12s", ["--gap" as any]: "2rem" } as any
-            }
-          >
-            {canExecute ? (
-              <span className="mx-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-emerald-300/90 via-cyan-200/80 to-emerald-300/90 font-semibold text-sm drop-shadow-[0_0_16px_rgba(16,185,129,0.6)]">
-                NEW: Rust submissions run securely via the official Rust
-                Playground. Execution is sandboxed and verified against hidden
-                expectations.
-              </span>
-            ) : (
-              <span className="mx-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-[#ff6b6b]/90 via-[#ff4d4f]/80 to-[#ff6b6b]/90 font-semibold text-sm drop-shadow-[0_0_16px_rgba(255,75,75,0.8)]">
-                NOTICE: Execution of code in this editor is not yet supported.
-                The execution infrastructure (WASM sandboxes) is currently under
-                development. Contributions are welcome — please open an issue or
-                submit a pull request to the project repository to help
-                accelerate completion and improve the project.
-              </span>
-            )}
-          </div>
-        </div> */}
-
         {/* Top bar */}
-        <BlurFade delay={0.1} inView>
-          <div className="flex items-center justify-between border-b border-white/10 bg-black/60 px-4 py-3 sm:px-6 shrink-0">
-            <div className="flex items-center gap-3">
-              <Link
-                href={backHref}
-                className="group rounded-md border border-white/10 bg-white/5 p-2 text-zinc-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="transition group-hover:scale-110"
-                >
-                  <path
-                    d="M10 6l-6 6 6 6M4 12h16"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
-              <div className="flex flex-col">
-                <div className="text-sm font-medium text-white">{title}</div>
-                <div className="mt-0.5 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                    {difficulty}
+        <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900/80 px-4 py-3 sm:px-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <Link
+              href={backHref}
+              className="group flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Link>
+            <div className="h-4 w-px bg-neutral-700" />
+            <div className="flex flex-col">
+              <div className="text-sm font-medium text-white">{title}</div>
+              <div className="mt-0.5 flex items-center gap-2 text-xs text-neutral-500">
+                <span className={`px-2 py-0.5 rounded border text-[10px] uppercase tracking-wider font-medium ${getDifficultyStyle(difficulty)}`}>
+                  {difficulty}
+                </span>
+                {tags.slice(0, 2).map((t) => (
+                  <span
+                    key={t}
+                    className="hidden sm:inline text-neutral-500"
+                  >
+                    {t}
                   </span>
-                  {tags.slice(0, 3).map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                  {tags.length > 3 && <span>+{tags.length - 3}</span>}
-                </div>
+                ))}
+                {currentIndex && totalCount && (
+                  <span className="text-neutral-600">
+                    {currentIndex} / {totalCount}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-        </BlurFade>
+        </div>
 
         {/* Content area */}
         <div className="relative min-h-0 grid h-full flex-1 grid-rows-1 overflow-hidden sm:grid-cols-2 sm:gap-0">
           {/* Problem panel */}
-          <BlurFade delay={0.2} inView>
-            <section className="relative flex h-full min-h-0 flex-col border-b border-white/10 sm:border-b-0 sm:border-r sm:border-white/10">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_50%_at_0%_0%,rgba(255,255,255,0.04),transparent_55%)]" />
-              <div className="relative flex-1 overflow-y-auto p-5 sm:p-8">
-                {MDX ? (
-                  <div className="prose prose-invert prose-zinc max-w-none">
-                    <MDX components={getMDXComponents()} />
-                  </div>
-                ) : (
-                  <div className="prose prose-invert prose-zinc max-w-none text-zinc-300">
-                    <h2 className="mb-3 text-lg font-semibold text-white sm:text-xl">
-                      {title}
-                    </h2>
-                    <p className="text-sm leading-relaxed text-zinc-300">
-                      {description}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
-          </BlurFade>
+          <section className="relative flex h-full min-h-0 flex-col border-b border-neutral-800 sm:border-b-0 sm:border-r sm:border-neutral-800 bg-neutral-950">
+            <div className="relative flex-1 overflow-y-auto p-5 sm:p-8">
+              {MDX ? (
+                <div className="prose prose-invert prose-neutral max-w-none prose-headings:font-medium prose-headings:tracking-tight prose-p:text-neutral-400 prose-code:text-[#14f195] prose-pre:bg-neutral-900 prose-pre:border prose-pre:border-neutral-800">
+                  <MDX components={getMDXComponents()} />
+                </div>
+              ) : (
+                <div className="prose prose-invert prose-neutral max-w-none">
+                  <h2 className="mb-3 text-xl font-medium tracking-tight text-white">
+                    {title}
+                  </h2>
+                  <p className="text-neutral-400 leading-relaxed">
+                    {description}
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
 
           {/* Code panel */}
-          <BlurFade delay={0.3} inView>
-            <section className="relative flex h-full min-h-0 flex-col">
-              <ChallengeEditorClient
-                starterCode={starterCode}
-                track={track}
-                currentIndex={currentIndex}
-                totalCount={totalCount}
-                challengeId={currentIndex}
-                canExecute={canExecute}
-              />
-            </section>
-          </BlurFade>
+          <section className="relative flex h-full min-h-0 flex-col bg-neutral-950">
+            <ChallengeEditorClient
+              starterCode={starterCode}
+              track={track}
+              currentIndex={currentIndex}
+              totalCount={totalCount}
+              challengeId={currentIndex}
+              canExecute={canExecute}
+            />
+          </section>
         </div>
       </div>
     </div>

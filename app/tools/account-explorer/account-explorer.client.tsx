@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
-import { BlurFade } from "@/components/ui/blur-fade";
+import { Footer } from "@/components/layout/footer";
 import { BreadcrumbSchema } from "@/components/seo";
 
 const breadcrumbItems = [
@@ -82,177 +82,133 @@ export function AccountExplorerClient() {
   }, [activeId]);
 
   return (
-    <div className="min-h-screen w-full relative text-white">
+    <div className="min-h-screen w-full bg-black text-white">
       <BreadcrumbSchema items={breadcrumbItems} />
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(circle 500px at 40% 10%, rgba(153, 69, 255, 0.12), transparent),
-            radial-gradient(circle 450px at 85% 40%, rgba(34, 211, 238, 0.1), transparent),
-            radial-gradient(circle 400px at 15% 80%, rgba(20, 241, 149, 0.08), transparent),
-            #000000
-          `,
-        }}
-      />
-
       <Navbar />
 
-      <div className="pt-28 pb-16 px-4 sm:px-6 md:px-8">
-        <div className="max-w-6xl mx-auto">
-          <BlurFade delay={0.05} inView>
-            <nav className="text-sm text-zinc-400 mb-8" aria-label="Breadcrumb">
-              <Link href="/" className="hover:text-[#14f195] transition-colors">
-                Home
-              </Link>
-              <span className="mx-2">/</span>
-              <Link href="/tools" className="hover:text-[#14f195] transition-colors">
-                Tools
-              </Link>
-              <span className="mx-2">/</span>
-              <span className="text-white">Account Explorer</span>
-            </nav>
-          </BlurFade>
+      <div className="pt-28 pb-24 px-4 sm:px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          <nav className="text-sm text-neutral-400 mb-8" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <span className="mx-2 text-neutral-600">/</span>
+            <Link href="/tools" className="hover:text-white transition-colors">Tools</Link>
+            <span className="mx-2 text-neutral-600">/</span>
+            <span className="text-white">Account Explorer</span>
+          </nav>
 
-          <BlurFade delay={0.1} inView>
-            <div className="mb-10">
-              <div className="text-xs tracking-[0.25em] text-[#14f195] uppercase font-medium">[BEGINNER MODE]</div>
-              <h1 className="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-                Account Explorer
-              </h1>
-              <p className="mt-4 text-lg text-zinc-300 max-w-3xl">
-                Click through common Solana accounts and learn what each field means in plain language.
-              </p>
-            </div>
-          </BlurFade>
+          <div className="mb-12">
+            <p className="text-xs uppercase tracking-widest text-[#14f195] mb-3">Beginner Mode</p>
+            <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">Account Explorer</h1>
+            <p className="text-lg text-neutral-400 max-w-2xl">
+              Click through common Solana accounts and learn what each field means in plain language.
+            </p>
+          </div>
 
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <BlurFade delay={0.15} inView>
-              <section className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-                <h2 className="text-lg font-semibold text-white">Account Types</h2>
-                <p className="mt-2 text-xs text-zinc-400">Pick an account to explore its fields.</p>
+            <section className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
+              <h2 className="font-medium text-white mb-1">Account Types</h2>
+              <p className="text-sm text-neutral-500 mb-6">Pick an account to explore its fields.</p>
+              <div className="space-y-3">
+                {accounts.map((account) => (
+                  <button
+                    key={account.id}
+                    onClick={() => setActiveId(account.id)}
+                    className={`w-full text-left rounded-lg border p-4 transition ${
+                      account.id === activeId
+                        ? "border-[#14f195]/50 bg-[#14f195]/5"
+                        : "border-neutral-800 bg-neutral-900/50 hover:border-neutral-700"
+                    }`}
+                  >
+                    <span className="text-xs text-neutral-500 uppercase tracking-wider">{account.type}</span>
+                    <h3 className="font-medium text-white mt-1">{account.name}</h3>
+                    <p className="text-sm text-neutral-500 mt-1">{account.description}</p>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-                <div className="mt-6 space-y-3">
-                  {accounts.map((account) => (
-                    <button
-                      key={account.id}
-                      onClick={() => setActiveId(account.id)}
-                      className={`w-full text-left rounded-2xl border px-4 py-4 transition ${
-                        account.id === activeId
-                          ? "border-[#14f195]/50 bg-[#14f195]/10"
-                          : "border-white/10 bg-black/40 hover:border-white/30"
-                      }`}
-                    >
-                      <div className="text-xs uppercase tracking-[0.2em] text-white/50">{account.type}</div>
-                      <div className="mt-1 text-base font-semibold text-white">{account.name}</div>
-                      <p className="mt-2 text-xs text-white/60">{account.description}</p>
-                    </button>
-                  ))}
+            <section className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
+              <h2 className="font-medium text-white mb-1">Account Details</h2>
+              <p className="text-sm text-neutral-500 mb-6">Live breakdown of the selected account.</p>
+
+              <div className="space-y-4">
+                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div>
+                      <span className="text-xs text-neutral-500 uppercase tracking-wider">Account Lens</span>
+                      <h3 className="font-medium text-white mt-1">{activeAccount.name}</h3>
+                      <p className="text-sm text-neutral-500 mt-1">{activeAccount.description}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-neutral-400">{activeAccount.type}</span>
+                      <span className="rounded border border-[#14f195]/30 bg-[#14f195]/10 px-2 py-1 text-[#14f195]">{activeAccount.owner}</span>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
+                      <span className="text-xs text-neutral-500">Lamports</span>
+                      <p className="text-sm text-white mt-1">{activeAccount.lamports}</p>
+                    </div>
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
+                      <span className="text-xs text-neutral-500">Data size</span>
+                      <p className="text-sm text-white mt-1">{activeAccount.dataSize}</p>
+                    </div>
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
+                      <span className="text-xs text-neutral-500">Write access</span>
+                      <p className="text-sm text-white mt-1">Owner controlled</p>
+                    </div>
+                  </div>
                 </div>
-              </section>
-            </BlurFade>
 
-            <BlurFade delay={0.2} inView>
-              <section className="rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-                <h2 className="text-lg font-semibold text-white">Account Details</h2>
-                <p className="mt-2 text-xs text-zinc-400">Live breakdown of the selected account.</p>
-
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-2xl border border-white/10 bg-black/60 px-4 py-4">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <div>
-                        <div className="text-xs uppercase tracking-[0.2em] text-white/50">Account Lens</div>
-                        <div className="mt-2 text-lg font-semibold text-white">{activeAccount.name}</div>
-                        <p className="mt-1 text-xs text-white/60">{activeAccount.description}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-white/50">
-                        <span className="rounded-full border border-white/10 px-2 py-1">{activeAccount.type}</span>
-                        <span className="rounded-full border border-[#14f195]/30 bg-[#14f195]/10 px-2 py-1 text-[#14f195]">
-                          {activeAccount.owner}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-white/10 bg-black/40 px-3 py-3 text-xs text-white/70">
-                        <div className="text-white/50">Lamports</div>
-                        <div className="mt-1 text-sm text-white">{activeAccount.lamports}</div>
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-black/40 px-3 py-3 text-xs text-white/70">
-                        <div className="text-white/50">Data size</div>
-                        <div className="mt-1 text-sm text-white">{activeAccount.dataSize}</div>
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-black/40 px-3 py-3 text-xs text-white/70">
-                        <div className="text-white/50">Write access</div>
-                        <div className="mt-1 text-sm text-white">Owner controlled</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.2em] text-white/50">Field Breakdown</div>
-                    <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-                      <div className="space-y-2">
-                        {activeAccount.fields.map((field, index) => (
-                          <button
-                            key={field.label}
-                            onClick={() => setActiveFieldIndex(index)}
-                            className={`w-full rounded-xl border px-3 py-2 text-left text-xs transition ${
-                              index === activeFieldIndex
-                                ? "border-[#14f195]/60 bg-[#14f195]/10 text-[#14f195]"
-                                : "border-white/10 bg-black/40 text-white/60 hover:border-white/30"
-                            }`}
-                          >
-                            <div className="font-semibold text-white">{field.label}</div>
-                            <div className="text-white/50">{field.value}</div>
-                          </button>
-                        ))}
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-black/60 px-4 py-4 text-xs text-white/70">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-white/50">Selected Field</div>
-                        <div className="mt-2 text-sm text-white">{activeField?.label}</div>
-                        <div className="mt-2 text-white/80">{activeField?.value}</div>
-                        <div className="mt-2 text-white/50">{activeField?.tip}</div>
-                        <div className="mt-4 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
-                          <div className="h-full w-2/3 bg-gradient-to-r from-[#14f195] via-[#38bdf8] to-[#14f195] animate-flow" />
-                        </div>
-                        <div className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
-                          Visual emphasis
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.2em] text-white/50">Data Layout Preview</div>
-                    <p className="mt-2 text-xs text-white/60">
-                      Visualize how bytes are packed inside the account data buffer.
-                    </p>
-                    <div className="mt-4 grid grid-cols-12 gap-1">
-                      {Array.from({ length: 36 }).map((_, index) => (
-                        <div
-                          key={`byte-${index}`}
-                          className={`h-4 rounded-sm ${
-                            index % 5 === 0 ? "bg-[#14f195]/60" : "bg-white/10"
+                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Field Breakdown</span>
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                    <div className="space-y-2">
+                      {activeAccount.fields.map((field, index) => (
+                        <button
+                          key={field.label}
+                          onClick={() => setActiveFieldIndex(index)}
+                          className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
+                            index === activeFieldIndex
+                              ? "border-[#14f195]/50 bg-[#14f195]/5 text-[#14f195]"
+                              : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-700"
                           }`}
-                        />
+                        >
+                          <span className="font-medium text-white">{field.label}</span>
+                          <span className="block text-neutral-500 text-xs mt-0.5">{field.value}</span>
+                        </button>
                       ))}
                     </div>
-                    <div className="mt-3 text-[10px] uppercase tracking-[0.2em] text-white/40">
-                      Highlighted bytes = key fields
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-4">
+                      <span className="text-xs text-neutral-500 uppercase tracking-wider">Selected Field</span>
+                      <h4 className="font-medium text-white mt-2">{activeField?.label}</h4>
+                      <p className="text-sm text-neutral-400 mt-1">{activeField?.value}</p>
+                      <p className="text-sm text-neutral-500 mt-2">{activeField?.tip}</p>
                     </div>
                   </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/50 px-4 py-4 text-xs text-white/70">
-                    Tip: Account owners decide who can write data. If the owner doesn’t match your program, Anchor will
-                    reject the instruction.
-                  </div>
                 </div>
-              </section>
-            </BlurFade>
+
+                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                  <span className="text-xs text-neutral-500 uppercase tracking-wider">Data Layout Preview</span>
+                  <p className="text-sm text-neutral-500 mt-1">Visualize how bytes are packed inside the account data buffer.</p>
+                  <div className="mt-4 grid grid-cols-12 gap-1">
+                    {Array.from({ length: 36 }).map((_, index) => (
+                      <div key={`byte-${index}`} className={`h-3 rounded-sm ${index % 5 === 0 ? "bg-[#14f195]/60" : "bg-neutral-800"}`} />
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-neutral-500">Highlighted bytes = key fields</p>
+                </div>
+
+                <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4 text-sm text-neutral-500">
+                  <strong className="text-neutral-400">Tip:</strong> Account owners decide who can write data. If the owner does not match your program, Anchor will reject the instruction.
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

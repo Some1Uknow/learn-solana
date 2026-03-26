@@ -3,12 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
-import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
-import { BlurFade } from "@/components/ui/blur-fade";
+import { Footer } from "@/components/layout/footer";
 import { ModuleItem } from "@/components/learn/modules-grid";
-import { ArrowLeft, BookOpen, Code, FileText, Rocket } from "lucide-react";
+import { ArrowLeft, BookOpen, Code, FileText, Rocket, ChevronRight } from "lucide-react";
 
 const typeIcons: Record<string, React.ElementType> = {
   overview: BookOpen,
@@ -19,13 +17,20 @@ const typeIcons: Record<string, React.ElementType> = {
   challenge: Code,
 };
 
+const typeLabels: Record<string, string> = {
+  overview: "Overview",
+  theory: "Theory",
+  exercise: "Exercise",
+  project: "Project",
+  setup: "Setup",
+  challenge: "Challenge",
+};
+
 export default function ModuleDetailPageClient({
   module,
 }: {
   module: ModuleItem;
 }) {
-  const router = useRouter();
-
   // Build array of all course parts: Overview + Topics
   const courseParts = [
     {
@@ -45,99 +50,99 @@ export default function ModuleDetailPageClient({
   ];
 
   return (
-    <div className="min-h-screen w-full relative text-white">
-      {/* Fixed gradient background - Learning Journey theme */}
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background: `
-            radial-gradient(circle 450px at 15% 15%, rgba(153, 69, 255, 0.2), transparent),
-            radial-gradient(circle 300px at 80% 30%, rgba(20, 241, 149, 0.1), transparent),
-            radial-gradient(ellipse 80% 40% at 60% 90%, rgba(20, 241, 149, 0.08), transparent),
-            radial-gradient(circle 200px at 30% 70%, rgba(153, 69, 255, 0.06), transparent),
-            #000000
-          `,
-        }}
-      />
-
+    <div className="min-h-screen w-full bg-black text-white">
       <Navbar />
 
-      <div className="pt-28 pb-16 px-4 sm:px-6 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Breadcrumb & Back */}
-          <BlurFade delay={0.05} inView>
-            <div className="flex items-center justify-between mb-8">
-              <nav className="text-sm text-zinc-400">
-                <Link href="/" className="hover:text-[#14f195] transition-colors">
-                  Home
-                </Link>
-                <span className="mx-2">/</span>
-                <Link href="/modules" className="hover:text-[#14f195] transition-colors">
-                  Modules
-                </Link>
-                <span className="mx-2">/</span>
-                <span className="text-white">{module.title}</span>
-              </nav>
-              <button
-                onClick={() => router.push("/modules")}
-                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-            </div>
-          </BlurFade>
+      <div className="pt-28 pb-24 px-4 sm:px-6 md:px-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="text-sm text-neutral-400 mb-8">
+            <Link href="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <span className="mx-2 text-neutral-600">/</span>
+            <Link href="/modules" className="hover:text-white transition-colors">
+              Modules
+            </Link>
+            <span className="mx-2 text-neutral-600">/</span>
+            <span className="text-white">{module.title}</span>
+          </nav>
+
+          {/* Back Link */}
+          <Link
+            href="/modules"
+            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Modules
+          </Link>
 
           {/* Header Section */}
-          <BlurFade delay={0.1} inView>
-            <div className="mb-12">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="relative w-16 h-16 flex-shrink-0">
+          <div className="mb-12">
+            <div className="flex items-start gap-5 mb-4">
+              {module.image && (
+                <div className="relative w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden border border-neutral-800">
                   <Image
-                    src={module.image || "/placeholder.png"}
+                    src={module.image}
                     alt={module.title}
                     fill
                     className="object-contain"
                   />
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+              )}
+              <div>
+                <p className="text-xs uppercase tracking-widest text-[#14f195] mb-2">
+                  Learning Module
+                </p>
+                <h1 className="text-3xl md:text-4xl font-medium tracking-tight">
                   {module.title}
                 </h1>
               </div>
-              <p className="text-lg text-zinc-400 max-w-3xl">
-                {module.description}
-              </p>
             </div>
-          </BlurFade>
+            <p className="text-lg text-neutral-400 max-w-2xl mt-4">
+              {module.description}
+            </p>
+            <div className="flex items-center gap-4 mt-6 text-sm text-neutral-500">
+              <span>{courseParts.length} lessons</span>
+            </div>
+          </div>
 
           {/* Course Grid */}
-          <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-[20rem] gap-5">
-            {courseParts.map((part, index) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {courseParts.map((part) => {
               const IconComponent = typeIcons[part.type.toLowerCase()] || BookOpen;
               return (
-                <BlurFade key={part.key} delay={0.1 + index * 0.04} inView>
-                  <Link href={part.href} className="block h-full group">
-                    <BentoCard
-                      name={part.title}
-                      className="h-full col-span-1 bg-white/[0.02] border-white/[0.06] hover:border-[#14f195]/40 transition-all duration-300 hover:shadow-[0_0_40px_rgba(20,241,149,0.1)]"
-                      background={
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#9945ff]/5 via-transparent to-[#14f195]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      }
-                      Icon={() => (
-                        <div className="w-12 h-12 rounded-xl bg-[#14f195]/10 flex items-center justify-center">
-                          <IconComponent className="w-6 h-6 text-[#14f195]" />
-                        </div>
-                      )}
-                      description={part.description}
-                      cta="Start lesson"
-                    />
-                  </Link>
-                </BlurFade>
+                <Link
+                  key={part.key}
+                  href={part.href}
+                  className="group block rounded-lg border border-neutral-800 bg-neutral-900/30 p-5 transition-all hover:border-neutral-700 hover:bg-neutral-900/50"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-[#14f195]/10 transition-colors">
+                      <IconComponent className="w-5 h-5 text-neutral-400 group-hover:text-[#14f195] transition-colors" />
+                    </div>
+                    <span className="text-xs uppercase tracking-wider text-neutral-500">
+                      {typeLabels[part.type.toLowerCase()] || part.type}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-medium text-white mb-2 group-hover:text-[#14f195] transition-colors">
+                    {part.title}
+                  </h3>
+                  <p className="text-sm text-neutral-500 line-clamp-2 mb-4">
+                    {part.description}
+                  </p>
+                  <div className="flex items-center text-sm text-neutral-500 group-hover:text-[#14f195] transition-colors">
+                    Start lesson
+                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
               );
             })}
-          </BentoGrid>
+          </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export function NavbarBranding() {
       href={logoConfig.href}
       className="flex items-center gap-2 group min-w-[120px]"
     >
-      <span className="text-xl font-bold font-grotesk">
+      <span className="text-xl font-semibold tracking-tight">
         {logoConfig.text}
       </span>
       {logoConfig.showPulse && (

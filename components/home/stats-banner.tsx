@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Users, Clock, Gamepad2, Trophy } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { BlurFade } from "@/components/ui/blur-fade";
 
 interface PlatformStats {
   totalUsers: number;
@@ -32,20 +31,16 @@ export function StatsBanner() {
 
   if (loading || !stats) {
     return (
-      <section className="container relative z-10 py-16 md:py-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl p-8 animate-pulse"
-            >
-              <div className="flex flex-col items-center space-y-4">
-                <div className="h-12 w-12 bg-white/5 rounded-2xl" />
-                <div className="h-12 w-28 bg-white/5 rounded-lg" />
-                <div className="h-4 w-32 bg-white/5 rounded" />
+      <section className="py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-6 animate-pulse">
+                <div className="h-8 w-16 bg-neutral-800 rounded mb-2" />
+                <div className="h-4 w-24 bg-neutral-800 rounded" />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -54,79 +49,54 @@ export function StatsBanner() {
   const statCards = [
     {
       value: stats.totalUsers,
-      label: "Developers Learning",
+      label: "Developers",
       icon: Users,
-      gradient: "from-[#14f195] to-[#9945ff]",
-      iconBg: "bg-[#14f195]/10",
-      iconColor: "text-[#14f195]",
+      color: "text-[#14f195]",
     },
     {
       value: stats.totalTutorialMinutes,
-      label: "Minutes of Learning",
+      label: "Learning Minutes",
       icon: Clock,
-      gradient: "from-[#9945ff] to-[#00c2ff]",
-      iconBg: "bg-[#9945ff]/10",
-      iconColor: "text-[#9945ff]",
+      color: "text-[#9945ff]",
     },
     {
       value: stats.totalGamePlayers,
       label: "Game Players",
       icon: Gamepad2,
-      gradient: "from-[#00c2ff] to-[#14f195]",
-      iconBg: "bg-[#00c2ff]/10",
-      iconColor: "text-[#00c2ff]",
+      color: "text-[#00c2ff]",
     },
     {
       value: stats.rustChallengeParticipants,
-      label: "Challenge Participants",
+      label: "Challengers",
       icon: Trophy,
-      gradient: "from-[#14f195] via-[#00c2ff] to-[#9945ff]",
-      iconBg: "bg-gradient-to-br from-[#14f195]/10 to-[#9945ff]/10",
-      iconColor: "text-[#14f195]",
+      color: "text-[#14f195]",
     },
   ];
 
   return (
-    <section className="container relative z-10 py-16 md:py-20">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-        {statCards.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <BlurFade key={index} delay={0.1 + index * 0.1} inView>
+    <section className="py-20 border-t border-neutral-900">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
               <div
-                className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl transition-all duration-500 hover:border-white/10 hover:shadow-2xl hover:shadow-[#9945ff]/10"
+                key={index}
+                className="group rounded-lg border border-neutral-800 bg-neutral-900/30 p-6 transition-colors hover:border-neutral-700"
               >
-                {/* Glow effect */}
-                <div
-                  className={`absolute -inset-[0.5px] bg-gradient-to-r ${stat.gradient} rounded-2xl opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-20 -z-10`}
-                />
-
-                <div className="relative p-8 flex flex-col items-center text-center space-y-4">
-                  {/* Icon */}
-                  <div
-                    className={`${stat.iconBg} p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110`}
-                  >
-                    <Icon className={`w-6 h-6 ${stat.iconColor}`} strokeWidth={2} />
-                  </div>
-
-                  {/* Number with ticker animation */}
-                  <div className="space-y-1">
-                    <div
-                      className={`text-4xl md:text-5xl font-black bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
-                    >
-                      <NumberTicker value={stat.value} delay={0.2 + index * 0.1} />
-                    </div>
-                  </div>
-
-                  {/* Label */}
-                  <p className="text-sm md:text-base text-zinc-400 font-medium tracking-wide">
+                <div className="flex items-center gap-3 mb-3">
+                  <Icon className={`w-4 h-4 ${stat.color}`} />
+                  <span className="text-xs text-neutral-500 uppercase tracking-wider">
                     {stat.label}
-                  </p>
+                  </span>
+                </div>
+                <div className={`text-3xl md:text-4xl font-semibold tracking-tight ${stat.color}`}>
+                  <NumberTicker value={stat.value} delay={0.1 + index * 0.1} />
                 </div>
               </div>
-            </BlurFade>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );
