@@ -54,7 +54,7 @@ export function HeroSection() {
                   width={160}
                   height={160}
                   priority
-                  className="inline-block h-12 sm:h-14 md:h-16 lg:h-20 w-auto ml-2 sm:ml-3 lg:ml-4 align-middle -mt-1 sm:-mt-2"
+                  className="inline-block h-10 sm:h-10 md:h-12 lg:h-16 w-auto sm:ml-3 lg:ml-4 align-middle -mt-1 sm:-mt-2"
                 />
               </h1>
               
