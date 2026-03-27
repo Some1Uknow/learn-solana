@@ -58,7 +58,8 @@ If you keep those four buckets clear in your head, the file tree stops looking r
   ]}
 />
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Anchor.toml] --> B[anchor build]
     B --> C[target/idl]
@@ -69,7 +70,8 @@ flowchart LR
     H --> B
     H --> I[local validator]
     I --> J[program state changes]
-```
+  `}
+/>
 
 ## What `anchor init` Creates
 

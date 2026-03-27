@@ -91,14 +91,16 @@ The official Anchor CPI docs use exactly that move for a reason.
 
 It lets you see the pattern without extra token complexity.
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Your instruction handler] --> B[Build CPI account struct]
     B --> C[Create CpiContext]
     C --> D[Optional with_signer seeds]
     D --> E[Call callee program]
     E --> F[State changes in callee]
-```
+  `}
+/>
 
 ```rust
 use anchor_lang::prelude::*;

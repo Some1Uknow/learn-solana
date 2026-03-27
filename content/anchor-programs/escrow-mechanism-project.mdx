@@ -82,14 +82,16 @@ Your Anchor program controls when those balances are allowed to move.
   ]}
 />
 
-```mermaid
+<Mermaid
+  chart={`
 stateDiagram-v2
     [*] --> Initialized
     Initialized --> Funded: maker funds vault
     Funded --> Completed: taker completes
     Initialized --> Cancelled: maker cancels
     Funded --> Cancelled: maker cancels before completion
-```
+  `}
+/>
 
 ## Step 1: Define The Escrow State Clearly
 

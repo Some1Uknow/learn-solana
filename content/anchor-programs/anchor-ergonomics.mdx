@@ -61,7 +61,8 @@ That is the standard you want.
   ]}
 />
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Account constraints] --> B[Thin handler]
     B --> C[Specific errors]
@@ -69,7 +70,8 @@ flowchart LR
     C --> E[Failure-path tests]
     D --> E
     E --> F[More reviewable program]
-```
+  `}
+/>
 
 ## 1. Push Validation Into Account Constraints First
 

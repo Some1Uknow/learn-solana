@@ -89,7 +89,8 @@ That is the cleanest way to teach program-controlled minting.
   ]}
 />
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Admin signer] --> B[Config PDA checks]
     B --> C[Projected supply check]
@@ -97,7 +98,8 @@ flowchart LR
     D --> E[Token program mint_to CPI]
     E --> F[Recipient token account]
     E --> G[Config minted_total updates]
-```
+  `}
+/>
 
 ## Step 1: Define The State You Actually Need
 

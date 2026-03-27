@@ -112,7 +112,8 @@ A capstone should combine the earlier patterns, not invent a totally different m
   ]}
 />
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Payer funds vault] --> B[Settlement PDA becomes Funded]
     B --> C[Program computes fee and net amount]
@@ -121,7 +122,8 @@ flowchart LR
     D --> F[Recipient receives proceeds]
     E --> G[Settlement marked Settled]
     F --> G
-```
+  `}
+/>
 
 ## Suggested Settlement State
 

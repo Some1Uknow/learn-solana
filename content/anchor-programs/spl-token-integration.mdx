@@ -111,7 +111,8 @@ That is the right default because it lets your instruction accept accounts from 
 
 That is much better than teaching a narrow legacy path first and fixing it later.
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
     A[Instruction context] --> B[Mint account]
     A --> C[Token account]
@@ -119,7 +120,8 @@ flowchart LR
     B --> E[Asset definition]
     C --> F[Balance storage]
     D --> G[CPI executes mint or transfer]
-```
+  `}
+/>
 
 ## Start With One Mint Instruction
 

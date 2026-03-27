@@ -116,13 +116,15 @@ That is why PDAs are not just an address trick.
 
 They are part of your validation model.
 
-```mermaid
+<Mermaid
+  chart={`
 flowchart LR
-    A["Seeds: b\"profile\" + authority pubkey"] --> B[Find PDA + bump]
+    A["Seeds: b\\"profile\\" + authority pubkey"] --> B[Find PDA + bump]
     B --> C[Create account at deterministic address]
     C --> D[Store authority and profile data]
     D --> E[Later instructions validate same seeds]
-```
+  `}
+/>
 
 ## `seeds` and `bump` Belong Together
 
