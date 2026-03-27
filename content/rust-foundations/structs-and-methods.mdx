@@ -6,7 +6,6 @@ keywords: ["rust structs", "methods", "impl", "associated functions", "self", "d
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 After ownership, the next Rust question is simpler.
 
@@ -20,11 +19,11 @@ A method lets you attach behavior to that type.
 
 That combination is the start of real Rust program design.
 
-<Callout type="info">
+<InfoCallout title="The Mental Shift">
 If ownership answers "who controls this data?", structs answer "what shape does this data have?"
 
 And methods answer "what can this data do?"
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -49,6 +48,42 @@ Then methods let you say:
 - mutating this type should look another way
 
 That is the teaching spine for this lesson.
+
+<ConceptCards concepts={[
+  {
+    term: "Struct",
+    definition: "A named data shape that groups related fields into one value with a clear meaning."
+  },
+  {
+    term: "Method",
+    definition: "Behavior attached to a type through an `impl` block. Methods make state transitions and read operations easier to read."
+  },
+  {
+    term: "Associated Function",
+    definition: "A function inside `impl` that does not take `self`, usually used for constructors like `new`."
+  },
+  {
+    term: "Receiver",
+    definition: "The way a method takes the instance: `&self`, `&mut self`, or `self`. The receiver should match what the method actually does."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Loose variables]
+  B[Struct defines one data shape]
+  C[Methods attach behavior]
+  D[Read-only API with &self]
+  E[Mutable API with &mut self]
+  F[Consuming API with self]
+
+  A --> B --> C
+  C --> D
+  C --> E
+  C --> F
+`}
+/>
 
 ---
 
@@ -502,29 +537,53 @@ That is the point of this lesson.
 
 ## Common Struct Mistakes
 
-<Callout type="warn">
-### Treating structs as only storage and pushing all behavior outside them
-
+<WarningCallout title="Treating structs as only storage and pushing all behavior outside them">
 That usually leads to code where the data shape and the logic drift apart.
 
 If behavior clearly belongs to the type, a method is usually the cleaner choice.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Using `self` when `&self` or `&mut self` is enough
-
+<WarningCallout title="Using `self` when `&self` or `&mut self` is enough">
 If a method consumes the whole value, the caller loses it.
 
 Do that only when ownership transfer is intentional.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Forgetting that struct fields still obey ownership rules
-
+<WarningCallout title="Forgetting that struct fields still obey ownership rules">
 A struct does not erase the ownership lesson that came before it.
 
 It just packages owned values together.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="structs-methods-receiver-choice"
+  question="When should a method take `&mut self`?"
+  options={[
+    "When it needs to change the struct's state",
+    "Whenever the struct contains a `String`",
+    "Whenever the method returns a value",
+    "Whenever you want to be safe and future-proof"
+  ]}
+  correctIndex={0}
+  explanation="The receiver should tell the truth. Use `&mut self` only when the method mutates the instance. If the method only reads, `&self` is the cleaner API."
+/>
+
+<QuickCheck
+  id="structs-methods-associated-function"
+  question="Why is `new` usually written as an associated function instead of a method?"
+  options={[
+    "Because constructors in Rust must use special syntax",
+    "Because `new` creates an instance and does not operate on an existing one",
+    "Because methods cannot return `Self`",
+    "Because associated functions are always faster than methods"
+  ]}
+  correctIndex={1}
+  explanation="`new` does not have an existing instance to borrow or mutate. It builds one, so it belongs in `impl` without taking `self`."
+/>
 
 ---
 
@@ -542,3 +601,13 @@ You now have the core mental model:
 If you can read a struct and explain both its fields and its methods, you are ready for the next level of Rust code.
 
 The next step is practice: designing small types and attaching the right behavior to them without overcomplicating the API.
+
+<UpNextCard
+  nextTitle="Struct and Method Practice"
+  nextDescription="Design small Rust types, add methods, and prove that you can choose `&self`, `&mut self`, and `self` on purpose."
+  nextHref="/learn/rust-foundations/structs-and-methods-practice"
+  nextReadingTime={10}
+  prevTitle="Ownership and Borrowing Practice"
+  prevHref="/learn/rust-foundations/ownership-and-borrowing-practice"
+  moduleName="Rust Foundations"
+/>

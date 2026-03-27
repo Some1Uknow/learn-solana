@@ -7,7 +7,6 @@ keywords: ["wallet ledger", "ownership", "structs", "methods", "cli", "rust buil
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 This page should not feel like a marketplace of ideas.
 
@@ -25,11 +24,11 @@ The right next move is building one small program that forces those ideas to wor
 
 That is what this page does.
 
-<Callout type="info">
+<InfoCallout title="The Goal">
 The goal is not to build something impressive.
 
 The goal is to prove that you can model data, attach behavior to it, and keep ownership decisions clear while the program grows slightly beyond toy snippets.
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -65,6 +64,46 @@ If you finish this honestly, you should be able to prove that you can:
 - read and update a small Rust program without losing track of ownership
 
 That is the real outcome.
+
+<ConceptCards concepts={[
+  {
+    term: "LedgerEntry",
+    definition: "One recorded wallet action, such as a deposit or withdrawal. It turns state changes into visible history."
+  },
+  {
+    term: "Summary Method",
+    definition: "A read-only method that turns the wallet state into a human-readable string without mutating anything."
+  },
+  {
+    term: "Result",
+    definition: "Rust's explicit success-or-failure type. `withdraw` should use it because insufficient balance and frozen state are expected failure paths."
+  },
+  {
+    term: "CLI Loop",
+    definition: "The repeated input-processing cycle that keeps the wallet program interactive without introducing UI complexity."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart TD
+  A[Read menu input]
+  B{Action}
+  C[deposit]
+  D[withdraw]
+  E[freeze]
+  F[summary]
+  G[history]
+  H[wallet state updates]
+
+  A --> B
+  B --> C --> H
+  B --> D --> H
+  B --> E --> H
+  B --> F
+  F --> G
+`}
+/>
 
 ---
 
@@ -372,29 +411,53 @@ That last one is especially useful because it forces you to think about whether 
 
 ## Common Failure Modes
 
-<Callout type="warn">
-### Putting too much logic in `main`
-
+<WarningCallout title="Putting too much logic in `main`">
 If most of the business rules live in `main` instead of `impl Wallet`, the build is missing the point.
 
 The point is to let the type own its behavior.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Using field writes everywhere instead of methods
-
+<WarningCallout title="Using field writes everywhere instead of methods">
 If you keep writing directly to `wallet.balance` or `wallet.history` from many places, the API is not doing enough work.
 
 Let the methods own the state transitions.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Reaching for extra abstractions too early
-
+<WarningCallout title="Reaching for extra abstractions too early">
 You do not need modules, traits, generics, or multiple files yet.
 
 This build is about fundamentals being solid, not architecture being fancy.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="wallet-ledger-withdraw-result"
+  question="Why should `withdraw` return `Result<(), String>` instead of just changing the balance directly?"
+  options={[
+    "Because any method that mutates state must return `Result` in Rust",
+    "Because withdrawal can fail for expected reasons like insufficient balance or a frozen wallet",
+    "Because methods are not allowed to print errors directly",
+    "Because `Result` is required whenever a struct owns a `Vec`"
+  ]}
+  correctIndex={1}
+  explanation="Withdrawal is not guaranteed to succeed. Returning `Result` makes the failure path explicit and keeps the business rules in the wallet API instead of hiding them in `main`."
+/>
+
+<QuickCheck
+  id="wallet-ledger-main-vs-impl"
+  question="What is the main architectural lesson of this build?"
+  options={[
+    "Interactive programs should put all logic inside the input loop",
+    "The data type should own the core state transitions, while `main` coordinates input and output",
+    "All wallet state should stay public so the CLI can edit it freely",
+    "CLI projects only work well if everything lives in one giant function"
+  ]}
+  correctIndex={1}
+  explanation="The build is teaching separation of responsibilities at a beginner-friendly scale. `main` handles the menu flow. `Wallet` owns the business rules and state changes."
+/>
 
 ---
 
@@ -412,3 +475,13 @@ You are:
 - handling basic CLI input without losing control of the program
 
 That is the capability you should have before moving into enums, pattern matching, and richer data handling later in the week.
+
+<UpNextCard
+  nextTitle="Enums and Pattern Matching in Rust"
+  nextDescription="Move from single-struct modeling into state variants, explicit branching, and the enum patterns that show up constantly in real Rust and Solana code."
+  nextHref="/learn/rust-foundations/enums-and-pattern-matching"
+  nextReadingTime={12}
+  prevTitle="Struct and Method Practice"
+  prevHref="/learn/rust-foundations/structs-and-methods-practice"
+  moduleName="Rust Foundations"
+/>

@@ -6,21 +6,19 @@ module: "Rust Foundations"
 keywords: ["enums", "pattern matching", "wallet manager", "transactions", "error handling"]
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 This practice page has one job.
 
 It should prove that you can model state with enums instead of hiding it in booleans and optional fields.
 
 If the previous lesson made sense, this page is where that understanding becomes real.
 
-<Callout type="warn">
+<WarningCallout title="Keep The Scope Tight">
 Do not try to make this bigger than it needs to be.
 
 The goal is not to build a complete wallet product.
 
 The goal is to make enums carry real meaning and then handle them cleanly with `match`.
-</Callout>
+</WarningCallout>
 
 ## What You Are Building
 
@@ -408,3 +406,30 @@ That is a good extension because it reinforces the same lesson instead of introd
 The next lesson moves to collections and strings.
 
 That is the right next step because once your state model is clear, you need better tools for storing, grouping, and transforming more data.
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="enums-practice-wallet-error"
+  question="Why is `WalletError` worth modeling as an enum instead of returning random strings from every branch?"
+  options={[
+    "Because enums make failure reasons explicit and keep the set of expected errors coherent",
+    "Because Rust cannot print string errors from functions",
+    "Because `Result` only works if the error type is an enum",
+    "Because enums automatically log failures to the console"
+  ]}
+  correctIndex={0}
+  explanation="The point is not ceremony. A dedicated error enum names the valid failure reasons and keeps the operation contract honest instead of scattering unrelated strings through the code."
+/>
+
+<UpNextCard
+  nextTitle="Collections and String Handling in Rust"
+  nextDescription="Move from single values and explicit state models into vectors, hash maps, owned strings, borrowed string slices, and basic text parsing."
+  nextHref="/learn/rust-foundations/collections-and-string-handling"
+  nextReadingTime={12}
+  prevTitle="Enums and Pattern Matching in Rust"
+  prevHref="/learn/rust-foundations/enums-and-pattern-matching"
+  moduleName="Rust Foundations"
+/>

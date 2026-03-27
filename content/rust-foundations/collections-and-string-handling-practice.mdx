@@ -6,19 +6,17 @@ module: "Rust Foundations"
 keywords: ["collections", "strings", "hashmap", "vector", "parsing", "rust practice"]
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 This practice page should not split your attention across multiple projects.
 
 It should give you one realistic program that forces the collections lesson to become usable.
 
 That is what this page does.
 
-<Callout type="info">
+<TipCallout title="How To Use This Page">
 The project is small on purpose.
 
 If you can store records, parse input, group totals, and answer simple queries without getting lost, then this section is doing its job.
-</Callout>
+</TipCallout>
 
 ## The Project
 
@@ -370,3 +368,29 @@ That is a good extension because it still uses the same core tools:
 After Rust Foundations, the next layers of the curriculum start asking you to use these same ideas in more realistic Solana code.
 
 That only works if collections and strings now feel normal instead of magical.
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="collections-practice-storage-choice"
+  question="Why does this project use both `Vec<Transfer>` and `HashMap<String, u64>` instead of picking only one collection?"
+  options={[
+    "Because the vector keeps ordered history, while the hash maps answer keyed total queries",
+    "Because Rust requires every project to use at least two collection types",
+    "Because vectors cannot store structs with strings",
+    "Because hash maps cannot contain numeric values"
+  ]}
+  correctIndex={0}
+  explanation="The project is teaching different collection jobs. The history is an ordered record list, so it belongs in a vector. Aggregated totals are keyed lookups, so they belong in hash maps."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Programs"
+  nextDescription="Leave Rust Foundations and start applying these language patterns to real Solana program structure, accounts, instructions, and Anchor workflow."
+  nextHref="/learn/anchor-programs"
+  nextReadingTime={8}
+  prevTitle="Collections and String Handling in Rust"
+  prevHref="/learn/rust-foundations/collections-and-string-handling"
+/>

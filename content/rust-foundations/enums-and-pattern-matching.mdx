@@ -5,8 +5,6 @@ module: "Rust Foundations"
 keywords: ["rust enums", "pattern matching", "match", "option", "result"]
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 People often describe enums as "a value with a few named options."
 
 That is technically true, but it is too weak to be useful.
@@ -21,9 +19,43 @@ They are not just cleaner constants.
 
 They are how Rust models situations where different states carry different data and require different behavior.
 
-<Callout type="info">
+<InfoCallout title="The Mental Model">
 Enums become much more useful once you stop thinking of them as labels and start thinking of them as state shapes.
-</Callout>
+</InfoCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Enum",
+    definition: "A type that can be exactly one of several valid variants at a time, with each variant carrying its own shape."
+  },
+  {
+    term: "Variant",
+    definition: "One possible state inside an enum, such as `Pending` or `Failed { error: String }`."
+  },
+  {
+    term: "Pattern Match",
+    definition: "A control-flow structure that inspects an enum variant and unpacks any data inside it."
+  },
+  {
+    term: "Exhaustiveness",
+    definition: "Rust's guarantee that a `match` must handle every variant, so control flow stays aligned with the data model."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Enum value]
+  B[Pending]
+  C[Confirmed with data]
+  D[Failed with data]
+  E[match forces explicit handling]
+
+  A --> B --> E
+  A --> C --> E
+  A --> D --> E
+`}
+/>
 
 ## Why Enums Exist
 
@@ -437,6 +469,36 @@ The enum prevents invalid combinations.
 
 If the other variants matter to correctness, use `match`.
 
+---
+
+## Quick Check
+
+<QuickCheck
+  id="enums-theory-why-enums"
+  question="Why is an enum often stronger than a struct full of flags and `Option` fields?"
+  options={[
+    "Because an enum prevents invalid state combinations by allowing exactly one variant at a time",
+    "Because enums are always smaller in memory than structs",
+    "Because Rust does not allow methods on structs with optional fields",
+    "Because enums automatically implement error handling"
+  ]}
+  correctIndex={0}
+  explanation="The big win is not style. It is correctness. Enums encode mutually exclusive states directly, so the type system blocks combinations that should never exist together."
+/>
+
+<QuickCheck
+  id="enums-theory-match-vs-if-let"
+  question="When is `match` a better fit than `if let`?"
+  options={[
+    "When every variant matters and you want the compiler to enforce complete handling",
+    "Only when the enum contains named fields",
+    "Only when the enum is generic",
+    "Whenever you need to print a value"
+  ]}
+  correctIndex={0}
+  explanation="Use `if let` when you only care about one case. Use `match` when the full set of states matters to correctness and the compiler should keep you honest."
+/>
+
 ## Practice
 
 Before moving on, make sure you can do these without guessing:
@@ -458,3 +520,13 @@ After this lesson, you should be able to say:
 That is the foundation you need for the next page.
 
 The practice lesson will push this further by making you model accounts, transaction states, and wallet operations with enums instead of vague structs.
+
+<UpNextCard
+  nextTitle="Enums and Pattern Matching Practice"
+  nextDescription="Build a small wallet manager that uses enums for account state, transaction outcomes, and explicit failure reasons instead of vague flags."
+  nextHref="/learn/rust-foundations/enums-and-pattern-matching-practice"
+  nextReadingTime={10}
+  prevTitle="Wallet Ledger Build"
+  prevHref="/learn/rust-foundations/wallet-ledger-build"
+  moduleName="Rust Foundations"
+/>

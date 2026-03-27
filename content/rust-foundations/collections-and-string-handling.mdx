@@ -5,8 +5,6 @@ module: "Rust Foundations"
 keywords: ["vectors", "hashmap", "strings", "str", "collections", "iterators"]
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 Up to this point, most of your Rust examples have been small.
 
 A few variables.
@@ -33,9 +31,44 @@ The mental model is simple:
 - use `String` when you need owned, growable text
 - use `&str` when you only need to borrow text temporarily
 
-<Callout type="info">
+<InfoCallout title="The Core Choice">
 Collections solve storage problems. Strings solve text ownership problems. Most real Rust programs need both at the same time.
-</Callout>
+</InfoCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Vec<T>",
+    definition: "An ordered growable list. Use it when history, sequence, or full iteration matters."
+  },
+  {
+    term: "HashMap<K, V>",
+    definition: "A keyed lookup table. Use it when the main question is 'find the value for this key'."
+  },
+  {
+    term: "String",
+    definition: "Owned, growable text. Use it when the program needs to keep or build text data."
+  },
+  {
+    term: "&str",
+    definition: "A borrowed string slice. Use it for temporary read-only text access and parsing."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Need to store many items]
+  B[Order matters]
+  C[Lookup by key matters]
+  D[Need owned text]
+  E[Need borrowed text]
+
+  A --> B --> F[Vec<T>]
+  A --> C --> G[HashMap<K,V>]
+  D --> H[String]
+  E --> I[&str]
+`}
+/>
 
 ## Start With `Vec<T>`
 
@@ -445,6 +478,36 @@ Before cloning, ask:
 - do I need to own this value here
 - or do I only need to borrow it
 
+---
+
+## Quick Check
+
+<QuickCheck
+  id="collections-theory-vec-vs-hashmap"
+  question="When is `HashMap<String, u64>` a better fit than `Vec<Account>`?"
+  options={[
+    "When keyed lookup by name or address is the main operation",
+    "Whenever the program stores more than three items",
+    "Whenever you need iteration",
+    "Whenever the value type is numeric"
+  ]}
+  correctIndex={0}
+  explanation="The key question is the dominant operation. Use a vector for ordered history and full scans. Use a hash map when fast lookup by key is the real job."
+/>
+
+<QuickCheck
+  id="collections-theory-string-vs-str"
+  question="Why should a read-only parsing function usually take `&str` instead of `String`?"
+  options={[
+    "Because borrowed text is enough when the function does not need ownership",
+    "Because Rust does not allow `String` parameters in parsing functions",
+    "Because `&str` can mutate the original string more easily",
+    "Because `String` cannot be split or trimmed"
+  ]}
+  correctIndex={0}
+  explanation="If the function only inspects text, borrowing is the cleaner contract. That keeps the function easier to call and avoids unnecessary ownership transfer."
+/>
+
 ## Practice
 
 Before moving on, make sure you can do these without guessing:
@@ -467,3 +530,13 @@ After this lesson, you should be able to say:
 That is the foundation you need for the practice page.
 
 The next step is to use these tools in a more realistic exercise where you store, group, and search data without letting the program shape drift out of control.
+
+<UpNextCard
+  nextTitle="Collections and String Handling Practice"
+  nextDescription="Build one transaction log analyzer that forces you to parse text, store ordered history, aggregate with hash maps, and answer simple queries cleanly."
+  nextHref="/learn/rust-foundations/collections-and-string-handling-practice"
+  nextReadingTime={12}
+  prevTitle="Enums and Pattern Matching Practice"
+  prevHref="/learn/rust-foundations/enums-and-pattern-matching-practice"
+  moduleName="Rust Foundations"
+/>

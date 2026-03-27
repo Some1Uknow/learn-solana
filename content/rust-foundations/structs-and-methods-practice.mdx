@@ -7,7 +7,6 @@ keywords: ["rust structs practice", "methods practice", "impl blocks", "self", "
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 This is where Rust starts looking like real program design.
 
@@ -23,11 +22,11 @@ Now you are deciding:
 
 That is what these exercises are testing.
 
-<Callout type="info">
+<TipCallout title="How To Use This Page">
 Do these in order.
 
 The first exercise is about struct shape. The second adds methods. The third forces you to choose the correct receiver type.
-</Callout>
+</TipCallout>
 
 ---
 
@@ -297,29 +296,40 @@ The error message is part of the lesson.
 
 ## Common Failure Modes
 
-<Callout type="warn">
-### Turning every helper into a method
-
+<WarningCallout title="Turning every helper into a method">
 Not every function belongs on the struct.
 
 Put behavior in `impl` only when it clearly belongs to the type.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Using `&mut self` too often
-
+<WarningCallout title="Using `&mut self` too often">
 A method that only reads data should not demand mutable access.
 
 That makes your API harder to use and hides the real behavior.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Forgetting that consuming methods destroy the old value
-
+<WarningCallout title="Forgetting that consuming methods destroy the old value">
 If a method takes `self`, the caller loses that instance afterward.
 
 That is correct when you truly want ownership transfer.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="structs-practice-receiver-honesty"
+  question="What is the best rule for choosing between `&self`, `&mut self`, and `self` in these exercises?"
+  options={[
+    "Use the narrowest receiver that matches what the method actually does",
+    "Use `&mut self` unless the compiler rejects it",
+    "Use `self` for all methods because ownership is more explicit",
+    "Use `&self` for every method unless it returns `Result`"
+  ]}
+  correctIndex={0}
+  explanation="The receiver is part of the API contract. Read-only methods should use `&self`, mutating methods should use `&mut self`, and consuming methods should take `self` only when ownership transfer is intentional."
+/>
 
 ---
 
@@ -338,3 +348,13 @@ If you finished them honestly, you have now practiced:
 That is the core of this lesson.
 
 The next lessons can build on this only if this part is solid.
+
+<UpNextCard
+  nextTitle="Wallet Ledger Build"
+  nextDescription="Combine ownership, structs, methods, and simple CLI input in one guided build that proves the first half of Rust Foundations is actually working."
+  nextHref="/learn/rust-foundations/wallet-ledger-build"
+  nextReadingTime={12}
+  prevTitle="Structs and Methods in Rust"
+  prevHref="/learn/rust-foundations/structs-and-methods"
+  moduleName="Rust Foundations"
+/>

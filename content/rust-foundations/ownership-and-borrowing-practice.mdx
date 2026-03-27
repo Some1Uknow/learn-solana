@@ -7,7 +7,6 @@ keywords: ["ownership practice", "borrowing practice", "rust references", "move 
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 Ownership only becomes real when the compiler starts rejecting code you thought was fine.
 
@@ -19,11 +18,11 @@ Should this value move, be borrowed, or be cloned?
 
 If you can answer that clearly, this lesson did its job.
 
-<Callout type="info">
+<TipCallout title="How To Use This Page">
 Do these in order.
 
 The first exercise is read-only borrowing. The second adds mutation. The third makes you debug ownership decisions directly.
-</Callout>
+</TipCallout>
 
 ---
 
@@ -286,25 +285,36 @@ Use it only after you can explain why borrowing is not enough.
 
 ## Common Failure Modes
 
-<Callout type="warn">
-### Returning an owned `String` when a slice would do
-
+<WarningCallout title="Returning an owned `String` when a slice would do">
 If you only need to point at part of existing string data, return `&str` instead of allocating a new `String`.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Using `&String` where `&str` is better
-
+<WarningCallout title="Using `&String` where `&str` is better">
 For read-only string input, `&str` is usually the cleaner and more flexible function signature.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Using `clone()` to hide confusion
-
+<WarningCallout title="Using `clone()` to hide confusion">
 A clone may compile, but that does not mean it was the right ownership choice.
 
 First ask whether borrowing already solves the problem.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="ownership-practice-clone-check"
+  question="When is reaching for `.clone()` the right first move in these exercises?"
+  options={[
+    "When the compiler complains about ownership and you want the error gone quickly",
+    "Only after you can explain why borrowing is not enough for the behavior you want",
+    "Whenever a function takes a `String`",
+    "Whenever you need to print a value twice"
+  ]}
+  correctIndex={1}
+  explanation="The point of the page is to force the ownership decision into the open. Clone can be correct, but only after you know why a borrow or move does not match the job."
+/>
 
 ---
 
@@ -323,3 +333,13 @@ If you worked through them honestly, you now have hands-on practice with:
 That is the practical core of this lesson.
 
 The next lesson moves into structs and methods, where these same ownership decisions start showing up inside real data models instead of tiny standalone examples.
+
+<UpNextCard
+  nextTitle="Structs and Methods in Rust"
+  nextDescription="Move from standalone ownership decisions into named data types with behavior, where `&self`, `&mut self`, and `self` start shaping your API design."
+  nextHref="/learn/rust-foundations/structs-and-methods"
+  nextReadingTime={12}
+  prevTitle="Understanding Rust Ownership and Borrowing"
+  prevHref="/learn/rust-foundations/ownership-and-borrowing"
+  moduleName="Rust Foundations"
+/>

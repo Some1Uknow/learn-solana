@@ -6,7 +6,6 @@ module: "Rust Foundations"
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 If Solana Foundations taught you how Solana behaves from the outside, Rust Foundations teaches you the language that most Solana programs are written in.
 
@@ -18,9 +17,28 @@ You do not get far by memorizing syntax alone. You need the right mental models 
 
 That is what this module fixes.
 
-<Callout type="info">
+<TipCallout title="Learning Path">
 Follow this section in order. Rust concepts build on each other much more aggressively than many JavaScript or Python learners expect.
-</Callout>
+</TipCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Ownership",
+    definition: "The rule that every value has one owner at a time. Most Rust confusion starts here, so this module keeps returning to it."
+  },
+  {
+    term: "Borrowing",
+    definition: "A way to use data through references without taking ownership. This is how Rust lets you share access while keeping memory rules explicit."
+  },
+  {
+    term: "Struct",
+    definition: "A named data shape that groups related fields together. Structs are how Rust programs stop feeling like loose variables."
+  },
+  {
+    term: "Enum",
+    definition: "A type that can be one of several valid states. Enums are the clean way to model state transitions and fallible outcomes."
+  }
+]} />
 
 ---
 
@@ -59,6 +77,24 @@ This module exists to remove that confusion before you hit real Solana program c
 ---
 
 ## Rust Foundations Roadmap
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Setup and Syntax]
+  B[Syntax Practice]
+  C[Ownership and Borrowing]
+  D[Ownership Practice]
+  E[Structs and Methods]
+  F[Wallet Ledger Build]
+  G[Enums and Matching]
+  H[Enums Practice]
+  I[Collections and Strings]
+  J[Collections Practice]
+
+  A --> B --> C --> D --> E --> F --> G --> H --> I --> J
+`}
+/>
 
 <Steps>
 <Step>
@@ -149,6 +185,36 @@ If you can say that honestly, this module did its job.
 
 ---
 
+## Quick Check
+
+<QuickCheck
+  id="rust-foundations-overview-goal"
+  question="What is the real goal of Rust Foundations?"
+  options={[
+    "Memorize Rust syntax and get past the compiler quickly",
+    "Build the mental models that make later Solana Rust code readable and explainable",
+    "Skip straight to Anchor because the compiler will teach the rest later",
+    "Learn every advanced Rust feature before touching Solana code"
+  ]}
+  correctIndex={1}
+  explanation="This module is not trying to make you encyclopedic. It is trying to make ownership, borrowing, data modeling, and state handling feel clear enough that Solana Rust stops looking hostile."
+/>
+
+<QuickCheck
+  id="rust-foundations-overview-sequence"
+  question="Why should you follow this module in order?"
+  options={[
+    "Because the later lessons depend on mental models built in the earlier ones",
+    "Because Rust syntax only works if files are read sequentially",
+    "Because the practice pages are optional and can be skipped safely",
+    "Because structs are impossible to learn before collections"
+  ]}
+  correctIndex={0}
+  explanation="The sequence is deliberate. Setup and syntax come first, then ownership, then data modeling, then richer state and data handling. Skipping ahead usually creates fake progress."
+/>
+
+---
+
 ## Summary
 
 This section is the Rust foundation layer for the rest of the Solana curriculum.
@@ -162,3 +228,11 @@ It teaches the language patterns that real Solana development depends on:
 - practical data handling
 
 Get these right now, and the later Anchor and program lessons will stop feeling like a wall of unfamiliar syntax.
+
+<UpNextCard
+  nextTitle="Rust Setup and Core Syntax"
+  nextDescription="Install the toolchain, create your first Cargo project, and get comfortable with the syntax loop that every later Rust lesson depends on."
+  nextHref="/learn/rust-foundations/rust-setup-and-core-syntax"
+  nextReadingTime={12}
+  moduleName="Rust Foundations"
+/>

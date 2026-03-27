@@ -6,7 +6,6 @@ keywords: ["ownership", "borrowing", "references", "move semantics", "slices", "
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 Rust does not feel hard because the syntax is strange.
 
@@ -20,7 +19,7 @@ That is what this lesson is about.
 
 This is the lesson where Rust stops feeling like “new syntax” and starts feeling like a different model of programming.
 
-<Callout type="info">
+<InfoCallout title="Why The Compiler Pushes Back">
 When Rust rejects your ownership code, the compiler is not being stubborn.
 
 It is usually preventing one of these bugs:
@@ -28,7 +27,7 @@ It is usually preventing one of these bugs:
 - reading freed memory
 - freeing the same memory twice
 - mutating data while something else is reading it
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -50,6 +49,42 @@ They become questions like these:
 - am I trying to mix incompatible borrows at the same time?
 
 That is the real teaching spine for this lesson.
+
+<ConceptCards concepts={[
+  {
+    term: "Move",
+    definition: "An ownership transfer from one binding or function call to another. After a move, the old binding is no longer valid."
+  },
+  {
+    term: "Borrow",
+    definition: "A temporary reference to data without taking ownership. Borrowing is how Rust lets you use data while keeping ownership clear."
+  },
+  {
+    term: "Mutable Borrow",
+    definition: "A temporary exclusive reference that allows mutation. Rust only allows it when nothing else is reading or mutating the same value."
+  },
+  {
+    term: "Slice",
+    definition: "A borrowed view into part of a collection or string, such as `&str`. Slices let you point at existing data without allocating a new owned value."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Value is created]
+  B[Owned by one binding]
+  C[Moved to new owner]
+  D[Borrowed immutably]
+  E[Borrowed mutably]
+  F[Old binding invalid after move]
+
+  A --> B
+  B --> C --> F
+  B --> D
+  B --> E
+`}
+/>
 
 ---
 
@@ -489,29 +524,53 @@ This is the kind of reasoning you need before structs and methods start feeling 
 
 ## Common Ownership Mistakes
 
-<Callout type="warn">
-### Using a value after it moved
-
+<WarningCallout title="Using a value after it moved">
 If you assign a `String` to a new variable or pass it into a function that takes ownership, the original binding is no longer valid.
 
 Do not fight that rule. Decide whether you actually wanted a borrow instead.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Mixing immutable and mutable borrows carelessly
-
+<WarningCallout title="Mixing immutable and mutable borrows carelessly">
 If one part of the code is reading a value, Rust will not let another part mutate it at the same time.
 
 That restriction prevents inconsistent state and data races.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Cloning when borrowing would be enough
-
+<WarningCallout title="Cloning when borrowing would be enough">
 `.clone()` is not evil, but it is not the default solution either.
 
 If you only need temporary access, borrow the value.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="ownership-borrowing-move-vs-borrow"
+  question="When should a function take `&String` or `&str` instead of `String`?"
+  options={[
+    "When the function only needs to read the text and should not become the owner",
+    "When Rust requires every string parameter to be borrowed",
+    "When you want the function to drop the string automatically",
+    "When the function needs to mutate the string and return it"
+  ]}
+  correctIndex={0}
+  explanation="If the function only needs read-only access, borrowing is usually the right model. That keeps the original owner valid and avoids unnecessary moves or clones."
+/>
+
+<QuickCheck
+  id="ownership-borrowing-exclusive-access"
+  question="Why does Rust reject a mutable borrow while immutable borrows are still active?"
+  options={[
+    "Because mutable borrows are slower than immutable ones",
+    "Because Rust requires mutation to happen only when access is exclusive",
+    "Because immutable borrows always turn into copies",
+    "Because `&mut` is only allowed inside `impl` blocks"
+  ]}
+  correctIndex={1}
+  explanation="Rust uses exclusive mutable access to prevent inconsistent reads and data races. If something is being mutated, nothing else should be reading or mutating that value at the same time."
+/>
 
 ---
 
@@ -532,3 +591,13 @@ If you can trace who owns the data and who is only borrowing it, Rust starts to 
 That is the capability you should leave this lesson with.
 
 The next lesson builds on this by introducing structs and methods, where ownership stops being a toy example and starts shaping real program design.
+
+<UpNextCard
+  nextTitle="Ownership and Borrowing Practice"
+  nextDescription="Work through focused exercises that force you to distinguish copying, moving, immutable borrowing, mutable borrowing, and unnecessary cloning."
+  nextHref="/learn/rust-foundations/ownership-and-borrowing-practice"
+  nextReadingTime={10}
+  prevTitle="Rust Syntax Practice"
+  prevHref="/learn/rust-foundations/rust-syntax-practice"
+  moduleName="Rust Foundations"
+/>

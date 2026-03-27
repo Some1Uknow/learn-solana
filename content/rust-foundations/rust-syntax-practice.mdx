@@ -7,7 +7,6 @@ keywords: ["rust practice", "cargo practice", "rust exercises", "functions", "co
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 The fastest way to forget a syntax lesson is to read it once and move on.
 
@@ -17,11 +16,11 @@ That is what this page is for.
 
 These exercises are not random puzzles. Each one is here to prove that you can use the core building blocks without relying on copy-paste luck.
 
-<Callout type="info">
+<TipCallout title="How To Use This Page">
 Do these in order.
 
 Each exercise adds one more layer of Rust pressure: variables and functions first, then control flow, then simple input handling.
-</Callout>
+</TipCallout>
 
 ---
 
@@ -295,29 +294,40 @@ Read the full message and ask what rule the compiler is enforcing.
 
 ## Common Failure Modes
 
-<Callout type="warn">
-### Using the wrong numeric type
-
+<WarningCallout title="Using the wrong numeric type">
 If a value cannot be negative, defaulting to an unsigned integer like `u64` is usually the cleaner choice.
 
 That is why balances and lamports in these exercises use `u64`.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Forgetting that input is text first
-
+<WarningCallout title="Forgetting that input is text first">
 `read_line` does not magically give you a number.
 
 It gives you a string. Parsing is a separate step.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Reaching for mutation everywhere
-
+<WarningCallout title="Reaching for mutation everywhere">
 Use `mut` only when the value actually changes.
 
 If a value never changes, keep it immutable.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="rust-syntax-practice-loop-choice"
+  question="What is the key difference between the `while` and `for` exercises on this page?"
+  options={[
+    "The `while` loop depends on changing state, while the `for` loop iterates over an existing collection",
+    "The `for` loop is faster, so Rust prefers it for all real code",
+    "The `while` loop can mutate values, but the `for` loop cannot",
+    "They solve the same problem and are interchangeable here"
+  ]}
+  correctIndex={0}
+  explanation="The point is not syntax trivia. `while` is for condition-driven repetition with changing state. `for` is for iterating over a known range or collection."
+/>
 
 ---
 
@@ -341,3 +351,13 @@ That is enough practice to move into the next lesson without the basics being a 
 The next step is ownership and borrowing.
 
 That is where Rust stops feeling like just new syntax and starts feeling like a different way of thinking about memory.
+
+<UpNextCard
+  nextTitle="Understanding Rust Ownership and Borrowing"
+  nextDescription="Move from syntax fluency into the rule that makes Rust feel fundamentally different: ownership, borrowing, moves, and exclusive mutable access."
+  nextHref="/learn/rust-foundations/ownership-and-borrowing"
+  nextReadingTime={12}
+  prevTitle="Rust Setup and Core Syntax"
+  prevHref="/learn/rust-foundations/rust-setup-and-core-syntax"
+  moduleName="Rust Foundations"
+/>

@@ -6,7 +6,6 @@ keywords: ["rust setup", "cargo", "rust syntax", "variables", "functions", "cont
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 A lot of new Solana learners think Rust becomes hard only when ownership starts.
 
@@ -18,11 +17,11 @@ This lesson fixes that.
 
 The goal is simple: get a working Rust environment, write code that compiles, and understand the small language rules that show up in every later Solana lesson.
 
-<Callout type="info">
+<InfoCallout title="The Goal">
 Treat the compiler as part of the lesson.
 
 If Rust rejects your code, that is not friction to ignore. It is the language telling you what rule you just violated.
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -47,6 +46,40 @@ By the end of this lesson, you should be comfortable with:
 - basic scalar types
 - functions and return values
 - `if`, `loop`, `while`, and `for`
+
+<ConceptCards concepts={[
+  {
+    term: "rustup",
+    definition: "The tool that installs and manages Rust toolchains on your machine."
+  },
+  {
+    term: "Cargo",
+    definition: "Rust's project manager and build tool. It creates projects, compiles code, runs binaries, and later manages dependencies."
+  },
+  {
+    term: "mut",
+    definition: "The keyword that makes reassignment explicit. In Rust, variables stay immutable unless you opt into mutation."
+  },
+  {
+    term: "Expression",
+    definition: "A piece of code that produces a value. Rust functions and `if` blocks rely on expressions more heavily than many beginners expect."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Install rustup]
+  B[Verify rustc and cargo]
+  C[cargo new]
+  D[Edit src/main.rs]
+  E[cargo run]
+  F[Read compiler output]
+  G[Adjust code]
+
+  A --> B --> C --> D --> E --> F --> G --> D
+`}
+/>
 
 ---
 
@@ -457,17 +490,13 @@ That is the right way to learn basic Rust syntax: change the program and observe
 
 ## Common Mistakes
 
-<Callout type="warn">
-### Forgetting `mut`
-
+<WarningCallout title="Forgetting `mut`">
 If you try to reassign an immutable variable, Rust will stop you.
 
 That error is correct. Add `mut` only when the value truly changes.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Accidentally returning `()` instead of a value
-
+<WarningCallout title="Accidentally returning `()` instead of a value">
 This fails:
 
 ```rust
@@ -485,15 +514,43 @@ fn add(a: i32, b: i32) -> i32 {
     a + b
 }
 ```
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-### Mixing incompatible numeric types
-
+<WarningCallout title="Mixing incompatible numeric types">
 Rust does not silently smooth over type mismatches for you.
 
 If one value is `u8` and another is `u64`, be explicit about conversions.
-</Callout>
+</WarningCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="rust-setup-cargo-role"
+  question="What is the most important reason to start with `cargo new` instead of a random `.rs` file?"
+  options={[
+    "Cargo gives you the right project structure and the normal Rust build workflow from the start",
+    "Rust code only compiles if Cargo creates the file",
+    "Cargo automatically fixes ownership bugs",
+    "Rust projects cannot contain more than one source file unless Cargo creates them"
+  ]}
+  correctIndex={0}
+  explanation="The lesson is teaching workflow, not just syntax. `cargo new` gives you the normal project structure and makes `cargo run` part of your habit immediately."
+/>
+
+<QuickCheck
+  id="rust-setup-expression-return"
+  question="Why does adding a semicolon to the last line of `calculate_remaining_balance` change the result?"
+  options={[
+    "Because the semicolon makes Rust evaluate the line twice",
+    "Because the semicolon turns the final expression into a statement, so the function stops returning that value",
+    "Because semicolons are only allowed in macros",
+    "Because return types only work on immutable variables"
+  ]}
+  correctIndex={1}
+  explanation="Rust functions can return the final expression implicitly. Add a semicolon, and you no longer return that value. That is one of the first expression-vs-statement rules worth making automatic."
+/>
 
 ---
 
@@ -515,3 +572,13 @@ That is enough to start reading and writing small Rust programs without guessing
 The next lesson goes deeper into the rule that makes Rust feel fundamentally different: ownership and borrowing.
 
 Before you move on, do the practice page while this syntax is still fresh.
+
+<UpNextCard
+  nextTitle="Rust Syntax Practice"
+  nextDescription="Use variables, functions, control flow, loops, and input handling in small exercises before the ownership lesson changes the mental model."
+  nextHref="/learn/rust-foundations/rust-syntax-practice"
+  nextReadingTime={10}
+  prevTitle="Rust for Solana"
+  prevHref="/learn/rust-foundations"
+  moduleName="Rust Foundations"
+/>
