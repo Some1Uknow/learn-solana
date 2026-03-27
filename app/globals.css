@@ -98,6 +98,15 @@
   }
 }
 
+/* 3D Transform utilities */
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@utility backface-hidden {
+  backface-visibility: hidden;
+}
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -714,7 +723,7 @@
   --fd-layout-width: 1440px;
   --fd-page-width: 1360px;
   --fd-sidebar-width: clamp(246px, 17vw, 286px);
-  --fd-toc-width: clamp(252px, 18vw, 320px);
+  --fd-toc-width: 280px;
   --color-fd-background: var(--ls-docs-bg);
   --color-fd-card: var(--ls-docs-surface);
   --color-fd-foreground: var(--ls-docs-foreground);
@@ -851,11 +860,47 @@
   padding-inline-end: calc(var(--fd-toc-width) + clamp(1rem, 1.5vw, 1.5rem));
 }
 
+/* ===== HERO SECTION ===== */
 .ls-docs-hero {
-  margin-bottom: 2rem;
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--ls-docs-border);
+  animation: ls-hero-fade-in 0.6s ease-out;
+}
+
+@keyframes ls-hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Large lesson number watermark */
+.ls-docs-lesson-number {
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: clamp(6rem, 12vw, 10rem);
+  font-weight: 700;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--ls-docs-primary), var(--ls-docs-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.04;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
 }
 
 .ls-docs-breadcrumb {
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -864,6 +909,19 @@
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ls-docs-muted-foreground);
+  z-index: 1;
+  animation: ls-stagger-in 0.5s ease-out 0.1s both;
+}
+
+@keyframes ls-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ls-docs-breadcrumb a {
@@ -884,6 +942,15 @@
   color: var(--ls-docs-foreground);
 }
 
+/* Hero meta row (chip + position) */
+.ls-docs-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  animation: ls-stagger-in 0.5s ease-out 0.15s both;
+}
+
 .ls-docs-lesson-chip {
   display: inline-flex;
   align-items: center;
@@ -891,38 +958,92 @@
   border: 1px solid color-mix(in srgb, var(--ls-docs-primary) 25%, transparent);
   background: var(--ls-docs-accent);
   color: var(--ls-docs-accent-foreground);
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.85rem;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.ls-docs-lesson-chip:hover {
+  border-color: var(--ls-docs-primary);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ls-docs-primary) 20%, transparent);
+}
+
+.ls-docs-lesson-position {
+  font-size: 0.75rem;
+  color: var(--ls-docs-muted-foreground);
+  font-weight: 500;
 }
 
 .ls-docs-title {
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+  position: relative;
+  margin-top: 0.875rem;
+  margin-bottom: 0.875rem;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  font-size: clamp(2rem, 4.5vw, 2.875rem);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   color: var(--ls-docs-foreground);
   text-wrap: balance;
+  z-index: 1;
+  animation: ls-stagger-in 0.5s ease-out 0.2s both;
 }
 
 .ls-docs-description {
   max-width: 60ch;
   margin-bottom: 0;
   font-size: clamp(1rem, 1.8vw, 1.125rem);
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--ls-docs-muted-foreground);
+  animation: ls-stagger-in 0.5s ease-out 0.25s both;
+}
+
+/* Hero footer (reading time + actions) */
+.ls-docs-hero-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  animation: ls-stagger-in 0.5s ease-out 0.3s both;
+}
+
+.ls-docs-reading-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--ls-docs-muted);
+  color: var(--ls-docs-muted-foreground);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.ls-docs-reading-time svg {
+  opacity: 0.7;
 }
 
 .ls-docs-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .ls-docs-hero-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .ls-docs-actions {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
 }
 
 .ls-docs-action-button {
@@ -1030,40 +1151,251 @@
   color: var(--ls-docs-muted-foreground);
 }
 
+/* ===== ENHANCED CODE BLOCKS (Terminal Style) ===== */
 .ls-docs-layout #nd-page article figure.shiki {
-  margin: 1.5rem 0;
-  border-radius: 0.625rem;
+  position: relative;
+  margin: 1.75rem 0;
+  border-radius: 0.75rem;
   border: 1px solid var(--ls-docs-border);
   background: #0a0a0a;
   overflow: hidden;
+  transition: all 0.2s ease;
 }
 
+.ls-docs-layout #nd-page article figure.shiki:hover {
+  border-color: color-mix(in srgb, var(--ls-docs-primary) 25%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--ls-docs-primary) 5%, transparent);
+}
+
+/* Terminal header with traffic lights */
 .ls-docs-layout #nd-page article figure.shiki > div:first-child {
-  min-height: 2.25rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 1rem;
   border-bottom: 1px solid var(--ls-docs-border);
-  background: #171717;
+  background: linear-gradient(to bottom, #1a1a1a, #141414);
 }
 
-.ls-docs-layout #nd-page article figure.shiki pre {
-  border: 0;
-  border-radius: 0;
+/* Traffic light dots */
+.ls-docs-layout #nd-page article figure.shiki > div:first-child::before {
+  content: "";
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 52px;
+  height: 12px;
+  background-image: 
+    radial-gradient(circle at 6px center, #ff5f56 4px, transparent 4px),
+    radial-gradient(circle at 24px center, #ffbd2e 4px, transparent 4px),
+    radial-gradient(circle at 42px center, #27c93f 4px, transparent 4px);
+  background-size: 100% 100%;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
 }
 
-.ls-docs-layout #nd-page article figure.shiki button[aria-label*="Copy"] {
+.ls-docs-layout #nd-page article figure.shiki:hover > div:first-child::before {
+  opacity: 1;
+}
+
+/* Filename badge styling */
+.ls-docs-layout #nd-page article figure.shiki > div:first-child > span:first-child {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ls-docs-muted) 80%, transparent);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
   color: var(--ls-docs-muted-foreground);
-  transition: color 0.15s ease;
+}
+
+/* Copy button enhancement */
+.ls-docs-layout #nd-page article figure.shiki button[aria-label*="Copy"] {
+  position: relative;
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  color: var(--ls-docs-muted-foreground);
+  transition: all 0.2s ease;
 }
 
 .ls-docs-layout #nd-page article figure.shiki button[aria-label*="Copy"]:hover {
   color: var(--ls-docs-foreground);
+  background: var(--ls-docs-muted);
+}
+
+.ls-docs-layout #nd-page article figure.shiki button[aria-label*="Copy"]:active {
+  transform: scale(0.95);
+}
+
+/* Code content area */
+.ls-docs-layout #nd-page article figure.shiki pre {
+  border: 0;
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  background: transparent;
+}
+
+.ls-docs-layout #nd-page article figure.shiki pre code {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* Line number styling */
+.ls-docs-layout #nd-page article figure.shiki pre code .line::before {
+  color: color-mix(in srgb, var(--ls-docs-muted-foreground) 40%, transparent);
+}
+
+/* Highlight on hover for lines */
+.ls-docs-layout #nd-page article figure.shiki pre code .line {
+  display: inline-block;
+  width: 100%;
+  padding-inline: 0.25rem;
+  margin-inline: -0.25rem;
+  border-radius: 0.125rem;
+  transition: background-color 0.15s ease;
+}
+
+.ls-docs-layout #nd-page article figure.shiki pre code .line:hover {
+  background: color-mix(in srgb, var(--ls-docs-muted) 50%, transparent);
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-shell {
+  position: relative;
+  margin: 2rem 0;
+  overflow: hidden;
+  border: 1px solid var(--ls-docs-border);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--ls-docs-primary) 9%, transparent) 0%, transparent 34%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ls-docs-surface) 96%, transparent) 0%,
+      color-mix(in srgb, var(--ls-docs-muted) 86%, var(--ls-docs-surface)) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--ls-docs-surface) 75%, transparent),
+    0 18px 48px -36px color-mix(in srgb, var(--ls-docs-foreground) 28%, transparent);
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 1.25rem;
+  width: 5rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ls-docs-primary), transparent);
+  opacity: 0.65;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-frame {
+  overflow-x: auto;
+  padding: clamp(1rem, 2.2vw, 1.5rem);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ls-docs-muted-foreground) 35%, transparent) transparent;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-frame::-webkit-scrollbar {
+  height: 8px;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-frame::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ls-docs-muted-foreground) 30%, transparent);
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram {
+  display: flex;
+  justify-content: center;
+  min-width: max-content;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram svg {
+  display: block;
+  height: auto;
+  max-width: none;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram :is(text, tspan) {
+  fill: var(--ls-docs-foreground);
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .edgeLabel {
+  background: transparent;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .edgeLabel rect,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .labelBkg {
+  fill: var(--ls-docs-surface) !important;
+  stroke: var(--ls-docs-border) !important;
+}
+
+.dark .ls-docs-layout #nd-page article .ls-mermaid-diagram .edgeLabel rect,
+.dark .ls-docs-layout #nd-page article .ls-mermaid-diagram .labelBkg {
+  fill: #09090b !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .cluster rect {
+  fill: color-mix(in srgb, var(--ls-docs-muted) 85%, var(--ls-docs-surface)) !important;
+  stroke: var(--ls-docs-border) !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node :is(rect, circle, ellipse, polygon, path),
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .actor {
+  stroke: var(--ls-docs-border) !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node.default :is(rect, circle, ellipse, polygon, path),
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node :is(rect, circle, ellipse, polygon) {
+  fill: color-mix(in srgb, var(--ls-docs-surface) 92%, var(--ls-docs-muted)) !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node.current :is(rect, circle, ellipse, polygon, path),
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node.active :is(rect, circle, ellipse, polygon, path),
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node.terminal :is(rect, circle, ellipse, polygon, path),
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .node[class*="accent"] :is(rect, circle, ellipse, polygon, path) {
+  fill: color-mix(in srgb, var(--ls-docs-primary) 11%, var(--ls-docs-surface)) !important;
+  stroke: color-mix(in srgb, var(--ls-docs-primary) 28%, var(--ls-docs-border)) !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .flowchart-link,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .edgePath .path,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .messageLine0,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .messageLine1,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .loopLine,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .pieOuterCircle,
+.ls-docs-layout #nd-page article .ls-mermaid-diagram .pieCircle {
+  stroke: color-mix(in srgb, var(--ls-docs-muted-foreground) 55%, transparent) !important;
+}
+
+.ls-docs-layout #nd-page article .ls-mermaid-diagram marker path {
+  fill: color-mix(in srgb, var(--ls-docs-muted-foreground) 60%, transparent) !important;
+  stroke: none !important;
 }
 
 .ls-docs-layout #nd-toc {
   transform: none;
+  width: var(--fd-toc-width);
+  min-width: var(--fd-toc-width);
+  max-width: var(--fd-toc-width);
 }
 
 .ls-docs-toc-rail > div {
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
   padding-top: 1rem;
+}
+
+.ls-docs-layout #nd-toc .flex.flex-col.border-s {
+  border-inline-start-width: 0;
 }
 
 .ls-docs-toc-heading {
@@ -1082,10 +1414,18 @@
 }
 
 .ls-docs-layout #nd-toc a {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   border-radius: 0.25rem;
   padding-block: calc(0.1875rem + 1px);
   padding-inline-end: 0.9rem;
   margin-left: calc(-0.5rem + 1px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+  line-height: 1.45;
   transition:
     color 0.15s ease,
     background-color 0.15s ease;
@@ -1214,7 +1554,7 @@
 @media (max-width: 1400px) and (min-width: 1280px) {
   .ls-docs-layout {
     --fd-sidebar-width: 248px;
-    --fd-toc-width: 260px;
+    --fd-toc-width: 280px;
   }
 
   .ls-docs-layout #nd-page article {

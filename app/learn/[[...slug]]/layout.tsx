@@ -5,6 +5,7 @@ import { source } from "@/lib/source";
 import DocsBackground from "@/components/docs-background";
 import { ChatProvider } from "@/components/chat-context";
 import ChatLayout from "@/components/chat-layout";
+import { ReadingProgress } from "@/components/learn/reading-progress";
 
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
@@ -32,6 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <ChatLayout>
         <DocsLayout {...docsOptions}>
           <DocsBackground />
+          <ReadingProgress />
           {children}
         </DocsLayout>
       </ChatLayout>

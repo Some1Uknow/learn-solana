@@ -7,13 +7,48 @@ import { createCanonical, siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import { BreadcrumbSchema, LearningResourceSchema } from "@/components/seo";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Clock } from "lucide-react";
 import { LearnPageActions } from "@/components/learn/page-actions";
 
 function toTitleCase(input: string) {
   return input
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+// Get lesson position within a module
+function getLessonPosition(slugParts: string[], pageTree: any): { current: number; total: number } | null {
+  if (slugParts.length < 2) return null;
+  
+  const moduleName = slugParts[0];
+  const lessonSlug = slugParts[slugParts.length - 1];
+  
+  // Find the module in the page tree
+  const moduleNode = pageTree.children?.find((child: any) => 
+    child.name?.toLowerCase().replace(/\s+/g, '-') === moduleName ||
+    child.$ref?.file?.includes(moduleName)
+  );
+  
+  if (!moduleNode?.children) return null;
+  
+  // Get lesson pages (filter out non-page items)
+  const lessons = moduleNode.children.filter((child: any) => child.type === 'page');
+  const currentIndex = lessons.findIndex((lesson: any) => 
+    lesson.url?.endsWith(lessonSlug) || lesson.name?.toLowerCase().replace(/\s+/g, '-') === lessonSlug
+  );
+  
+  if (currentIndex === -1) return null;
+  
+  return {
+    current: currentIndex + 1,
+    total: lessons.length
+  };
+}
+
+// Estimate reading time from MDX content
+function estimateReadingTime(content: string): number {
+  const words = content.split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 200)); // 200 wpm average
 }
 
 export default async function Page(props: {
@@ -60,6 +95,14 @@ export default async function Page(props: {
     : "Curriculum";
   const markdownPath = `${page.url}.mdx`;
 
+  // Get lesson position
+  const lessonPosition = getLessonPosition(slugParts, source.pageTree);
+  const lessonNumber = lessonPosition?.current?.toString().padStart(2, '0') || null;
+  
+  // Estimate reading time (rough estimate based on content length)
+  const rawContent = typeof page.data.body === 'function' ? '' : String(page.data.body || '');
+  const readingTime = Math.max(5, Math.ceil(rawContent.length / 1000)); // Rough estimate
+
   return (
     <>
       {/* Structured Data for SEO */}
@@ -89,6 +132,13 @@ export default async function Page(props: {
         }}
       >
         <header className="ls-docs-hero">
+          {/* Large lesson number watermark */}
+          {lessonNumber && (
+            <div className="ls-docs-lesson-number" aria-hidden="true">
+              {lessonNumber}
+            </div>
+          )}
+          
           <nav className="ls-docs-breadcrumb" aria-label="Breadcrumb">
             <Link href="/modules">Curriculum</Link>
             {slugParts.slice(0, -1).map((part, index) => {
@@ -105,16 +155,32 @@ export default async function Page(props: {
               <span>{page.data.title}</span>
             </span>
           </nav>
-          <div className="ls-docs-lesson-chip">{lessonChip}</div>
+          
+          <div className="ls-docs-hero-meta">
+            <div className="ls-docs-lesson-chip">{lessonChip}</div>
+            {lessonPosition && (
+              <span className="ls-docs-lesson-position">
+                Lesson {lessonPosition.current} of {lessonPosition.total}
+              </span>
+            )}
+          </div>
+          
           <DocsTitle className="ls-docs-title">{page.data.title}</DocsTitle>
           <DocsDescription className="ls-docs-description">
             {page.data.description}
           </DocsDescription>
-          <LearnPageActions
-            title={page.data.title}
-            pagePath={page.url}
-            markdownPath={markdownPath}
-          />
+          
+          <div className="ls-docs-hero-footer">
+            <div className="ls-docs-reading-time">
+              <Clock className="size-4" />
+              <span>{readingTime} min read</span>
+            </div>
+            <LearnPageActions
+              title={page.data.title}
+              pagePath={page.url}
+              markdownPath={markdownPath}
+            />
+          </div>
         </header>
         <DocsBody>
           <MDX components={getMDXComponents()} />

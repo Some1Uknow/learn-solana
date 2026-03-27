@@ -6,6 +6,11 @@ import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import { Mermaid } from '@/components/fumadocs/mermaid';
 import { MermaidWithZoom } from '@/components/fumadocs/mermaid-with-zoom';
 import * as TabsComponents from 'fumadocs-ui/components/tabs';
+// Phase 6: Premium learning components
+import { Callout, InfoCallout, WarningCallout, TipCallout, DeepDive } from '@/components/learn/callouts';
+import { QuickCheck } from '@/components/learn/quick-check';
+import { ConceptCard, ConceptCardGrid, ConceptCards } from '@/components/learn/concept-card';
+import { UpNextCard } from '@/components/learn/up-next';
 
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
@@ -16,6 +21,17 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Alert,
     TabsComponents,
     InteractiveButton,
+    // Phase 6: Premium learning components
+    Callout,
+    InfoCallout,
+    WarningCallout,
+    TipCallout,
+    DeepDive,
+    QuickCheck,
+    ConceptCard,
+    ConceptCardGrid,
+    ConceptCards,
+    UpNextCard,
     pre: ({ ref: _ref, ...props }) => (
       <CodeBlock {...props}>
         <Pre>{props.children}</Pre>
