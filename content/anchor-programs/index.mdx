@@ -12,19 +12,36 @@ keywords:
   - "solana smart contract"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 Anchor is the framework most Solana teams use to build programs without hand-writing every low-level check.
 
 It does not remove Solana's rules. It gives you a better way to express them.
 
 This section is about learning that model properly.
 
-<Callout type="info">
+<InfoCallout title="The Goal">
 The goal is not to memorize macros.
 
 The goal is to understand how Anchor turns account validation, signer checks, and state transitions into code you can reason about.
-</Callout>
+</InfoCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Instruction Context",
+    definition: "The Anchor account context that describes which accounts must be present, which ones must sign, and which rules must hold before handler logic runs."
+  },
+  {
+    term: "Constraint",
+    definition: "A rule like `mut`, `init`, `has_one`, or `seeds` that Anchor enforces before your instruction handler executes."
+  },
+  {
+    term: "PDA",
+    definition: "A program-derived address used for deterministic program-owned state and signer authority."
+  },
+  {
+    term: "CPI",
+    definition: "A cross-program invocation, where one program calls another Solana program and must reason about delegated authority safely."
+  }
+]} />
 
 ## What This Section Covers
 
@@ -52,6 +69,22 @@ That is why this path stays strict:
 5. advanced composition after that
 
 ## Learning Path
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Local Setup]
+  B[Program Anatomy]
+  C[Core Concepts]
+  D[First Program]
+  E[PDAs]
+  F[Token Integration]
+  G[CPI]
+  H[Projects and Ergonomics]
+
+  A --> B --> C --> D --> E --> F --> G --> H
+`}
+/>
 
 1. `anchor-local-setup` - install the toolchain, create a workspace, and run your first local tests
 2. `anchor-program-anatomy` - understand what `Anchor.toml`, `programs/`, `tests/`, and the IDL are doing
@@ -93,14 +126,39 @@ If those still feel shaky, go back to Rust Foundations or Solana Foundations fir
 - keep notes on every error you hit and how you fixed it
 - do not skip the smaller lessons just to jump into escrow or tokens
 
-<Callout type="tip">
+<TipCallout title="Anchor Mental Model">
 A good Anchor mental model is simple: every instruction is account validation plus a state transition.
 
 When that idea becomes natural, the rest of the framework stops feeling mysterious.
-</Callout>
+</TipCallout>
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-programs-overview-goal"
+  question="What is the real goal of this Anchor module?"
+  options={[
+    "Memorize Anchor macros and copy patterns until they compile",
+    "Understand how Anchor expresses validation, authority, and state transitions clearly",
+    "Skip straight to escrow and token projects because the setup lessons are optional",
+    "Treat Anchor as a way to avoid learning the Solana account model"
+  ]}
+  correctIndex={1}
+  explanation="This module is about the Anchor model, not macro trivia. If you can explain account validation, signers, constraints, PDAs, and state transitions, the framework stops feeling magical."
+/>
 
 ## Outcome
 
 When you finish this section, you should be able to read an Anchor instruction, explain its authority model, trace its account constraints, and test both the happy path and the abuse path.
 
 Start with: **`anchor-local-setup`**.
+
+<UpNextCard
+  nextTitle="Anchor Local Setup"
+  nextDescription="Install the toolchain, create a workspace, and get to one clean local build-and-test loop before touching program logic."
+  nextHref="/learn/anchor-programs/anchor-local-setup"
+  nextReadingTime={10}
+  moduleName="Anchor Programs"
+/>

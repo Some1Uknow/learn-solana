@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 This is the first Anchor project in this section where multiple earlier ideas finally meet in one build:
 
 - PDA design
@@ -65,6 +63,41 @@ This project uses three main pieces:
 - a mint instruction that performs a token CPI only after your own checks pass
 
 That is the cleanest way to teach program-controlled minting.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "Config PDA",
+      definition:
+        "The business-state account that stores who is allowed to mint and how much has already been minted.",
+    },
+    {
+      term: "Mint Authority PDA",
+      definition:
+        "The PDA that the token program recognizes as the authority allowed to mint new tokens.",
+    },
+    {
+      term: "Supply Cap",
+      definition:
+        "An on-chain rule that limits minting regardless of what the client asks for.",
+    },
+    {
+      term: "Mint CPI",
+      definition:
+        "The token-program call that actually creates new tokens after your own program's checks pass.",
+    },
+  ]}
+/>
+
+```mermaid
+flowchart LR
+    A[Admin signer] --> B[Config PDA checks]
+    B --> C[Projected supply check]
+    C --> D[Mint PDA signer seeds]
+    D --> E[Token program mint_to CPI]
+    E --> F[Recipient token account]
+    E --> G[Config minted_total updates]
+```
 
 ## Step 1: Define The State You Actually Need
 
@@ -409,3 +442,41 @@ That is a good extension because it deepens the same mental model:
 The next project should take the same ideas and make the state machine more complex.
 
 That is where escrow becomes useful.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-token-project-real-rule"
+  question="Why does this project need both a mint account and a separate `Config` account?"
+  options={[
+    "Because the token program handles balances, while your program needs its own business state to enforce the supply rule",
+    "Because Anchor cannot read mint decimals without a second PDA",
+    "Because the config account is where token balances are actually stored",
+    "Because `mint_to` only works when a config PDA is present",
+  ]}
+  correctIndex={0}
+  explanation="The mint defines the asset. Your `Config` account defines the business rule for when minting is allowed."
+/>
+
+<QuickCheck
+  id="anchor-token-project-mint-pda"
+  question='Why do the signer seeds in `mint_rewards` need to match `seeds = [b"mint"]`?'
+  options={[
+    "Because the token CPI only treats the mint PDA as the authority if the runtime can verify the same derivation rule",
+    "Because Anchor converts every mint account into a signer automatically",
+    "Because the client has to prove mint ownership in JavaScript first",
+    "Because supply caps are stored inside the mint PDA bump",
+  ]}
+  correctIndex={0}
+  explanation="The PDA authority model only works when the signer seeds and the account derivation rule match exactly."
+/>
+
+<UpNextCard
+  nextTitle="Escrow with a PDA Vault"
+  nextDescription="Take the same PDA and token-CPI ideas into a fuller state machine where custody, settlement order, and invalid transitions all matter."
+  nextHref="/learn/anchor-programs/escrow-mechanism-project"
+  nextReadingTime={18}
+  prevTitle="Cross-Program Invocations"
+  prevHref="/learn/anchor-programs/cpi-cross-program"
+  moduleName="Anchor Programs"
+/>

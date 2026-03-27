@@ -12,8 +12,6 @@ keywords:
   - "seed derivation"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 The last lesson used a normal keypair-backed account for the counter.
 
 That is useful for learning, but it is not how many real Solana programs organize state.
@@ -68,6 +66,31 @@ That is why PDAs are so useful for:
 - authority accounts
 - vault patterns
 
+<ConceptCards
+  concepts={[
+    {
+      term: "PDA",
+      definition:
+        "A deterministic program-derived address computed from seeds, a bump, and one program ID.",
+    },
+    {
+      term: "Seed Formula",
+      definition:
+        "The ordered list of seed bytes that defines one stable account-address rule for your program.",
+    },
+    {
+      term: "Namespace Seed",
+      definition:
+        "A fixed label like `b\"profile\"` that makes the purpose of the PDA explicit and avoids collisions with other account types.",
+    },
+    {
+      term: "Bump",
+      definition:
+        "The extra byte used with the seeds to derive a valid PDA that the runtime accepts.",
+    },
+  ]}
+/>
+
 ## What Anchor Adds
 
 The official Anchor PDA docs emphasize that you usually define PDAs directly in the account constraints.
@@ -92,6 +115,14 @@ Two important things are happening here at once:
 That is why PDAs are not just an address trick.
 
 They are part of your validation model.
+
+```mermaid
+flowchart LR
+    A["Seeds: b\"profile\" + authority pubkey"] --> B[Find PDA + bump]
+    B --> C[Create account at deterministic address]
+    C --> D[Store authority and profile data]
+    D --> E[Later instructions validate same seeds]
+```
 
 ## `seeds` and `bump` Belong Together
 
@@ -246,11 +277,11 @@ That means seed order is part of your state model.
 
 Pick the rule once, document it, and keep it consistent everywhere.
 
-<Callout type="tip">
+<TipCallout title="Seed Order Is Part Of The Schema">
 If you ever have to ask “does seed order matter?”, the answer is yes.
 
 Treat the seed formula like a schema, not like a casual helper expression.
-</Callout>
+</TipCallout>
 
 ## Do Not Put Unstable Data In Seeds Without Thinking
 
@@ -420,3 +451,41 @@ That is a much better PDA exercise than jumping straight into a large escrow or 
 The next lesson moves from deterministic state to token-aware state.
 
 That is where PDAs start getting used for real authority flows, not just profile-style records.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-pda-seed-order"
+  question="Why does seed order matter when you design a PDA?"
+  options={[
+    "Because changing the order changes the derived address and therefore changes the state model",
+    "Because Anchor alphabetizes the seeds before deriving the PDA",
+    "Because the bump is only valid if static seeds come last",
+    "Because seed order only matters on devnet",
+  ]}
+  correctIndex={0}
+  explanation="A PDA is derived from the exact ordered seed list. Reordering the seeds produces a different address."
+/>
+
+<QuickCheck
+  id="anchor-pda-validation-rule"
+  question="Why should creation and later validation use the same PDA seed formula?"
+  options={[
+    "Because the PDA rule is part of the account contract, and drift breaks the validation model",
+    "Because Anchor refuses to compile if the formulas are not identical",
+    "Because only creation needs a bump, while validation ignores it",
+    "Because the IDL rewrites the seeds automatically",
+  ]}
+  correctIndex={0}
+  explanation="If the validation path derives a different PDA than the creation path, your instruction stops enforcing the address rule you intended."
+/>
+
+<UpNextCard
+  nextTitle="SPL Token Integration with Anchor"
+  nextDescription="Use the PDA mental model to reason about mints, token accounts, token programs, and the first real token-aware account constraints."
+  nextHref="/learn/anchor-programs/spl-token-integration"
+  nextReadingTime={12}
+  prevTitle="First Anchor Program"
+  prevHref="/learn/anchor-programs/first-anchor-program"
+  moduleName="Anchor Programs"
+/>

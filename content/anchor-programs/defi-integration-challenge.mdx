@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 This page should not be treated like the main teaching spine.
 
 It is an optional capstone.
@@ -88,6 +86,42 @@ This should look familiar by now.
 That is intentional.
 
 A capstone should combine the earlier patterns, not invent a totally different mental model.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "Settlement PDA",
+      definition:
+        "The program state account that stores who is paying, who receives funds, which treasury is allowed, and what stage the settlement is in.",
+    },
+    {
+      term: "Treasury Route",
+      definition:
+        "The explicit on-chain rule that sends the protocol fee to one expected treasury token account.",
+    },
+    {
+      term: "Replay Protection",
+      definition:
+        "The state-machine rule that stops settlement from being executed a second time after the first success.",
+    },
+    {
+      term: "Vault Settlement",
+      definition:
+        "A token flow where assets enter a program-controlled vault first and only leave when the program approves the release.",
+    },
+  ]}
+/>
+
+```mermaid
+flowchart LR
+    A[Payer funds vault] --> B[Settlement PDA becomes Funded]
+    B --> C[Program computes fee and net amount]
+    C --> D[Vault authority PDA signs token CPIs]
+    D --> E[Treasury receives fee]
+    D --> F[Recipient receives proceeds]
+    E --> G[Settlement marked Settled]
+    F --> G
+```
 
 ## Suggested Settlement State
 
@@ -322,11 +356,11 @@ It is the one where:
 
 That is the real standard.
 
-<Callout type="warn">
+<WarningCallout title="Do Not Hand-Wave Vault Authority">
 If you cannot explain exactly why the vault authority PDA is allowed to sign, do not call the design finished.
 
 That is the center of the whole module.
-</Callout>
+</WarningCallout>
 
 ## One Good Extension
 
@@ -341,3 +375,41 @@ That extension deepens the state machine without changing the core authority mod
 This is the end of the optional Anchor capstone path.
 
 If you can build this cleanly and explain the authority model without hand-waving, the Anchor section has done its job.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-capstone-fee-rule"
+  question="Why should the fee calculation and treasury route live inside the program instead of only in the client?"
+  options={[
+    "Because fee logic is part of the trust boundary, and the program must enforce who gets paid and how much",
+    "Because clients are unable to read token mint decimals",
+    "Because treasury token accounts cannot be passed into a transaction",
+    "Because PDA signer seeds only work when fee math is off-chain first",
+  ]}
+  correctIndex={0}
+  explanation="If the protocol takes a fee, the program must compute and route it itself. Otherwise the most important settlement rule is not really enforced."
+/>
+
+<QuickCheck
+  id="anchor-capstone-replay-protection"
+  question="What actually prevents the settlement from executing twice in the capstone design?"
+  options={[
+    "The on-chain settlement status changes after success, so later calls fail the state check",
+    "The frontend hides the settle button after the first click",
+    "The vault token account deletes itself automatically",
+    "The CPI helper remembers whether it already ran",
+  ]}
+  correctIndex={0}
+  explanation="Replay protection is a state-machine rule. The program must update status and reject later attempts."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Programs"
+  nextDescription="Return to the module overview and use it as the launch point for another pass, a project build, or a full section review with the new mental models in place."
+  nextHref="/learn/anchor-programs"
+  nextReadingTime={4}
+  prevTitle="Anchor Development Ergonomics"
+  prevHref="/learn/anchor-programs/anchor-ergonomics"
+  moduleName="Anchor Programs"
+/>

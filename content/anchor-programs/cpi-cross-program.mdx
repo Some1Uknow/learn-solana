@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 CPI is the point where Solana composability becomes real.
 
 It is also the point where many learners start treating code they do not understand as magic.
@@ -39,6 +37,31 @@ The current Anchor docs describe the same basic ingredients every time:
 3. the instruction data or arguments
 
 If those three things are clear, the CPI pattern is clear.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "CPI",
+      definition:
+        "A cross-program invocation where your program calls an instruction on another Solana program.",
+    },
+    {
+      term: "CpiContext",
+      definition:
+        "The Anchor wrapper that packages the target program and the account set for a CPI.",
+    },
+    {
+      term: "CPI Account Struct",
+      definition:
+        "The account layout expected by the callee, such as `Transfer` or `TransferChecked`.",
+    },
+    {
+      term: "with_signer",
+      definition:
+        "The mechanism that lets the runtime verify PDA signer seeds and treat the PDA as a signer for the CPI.",
+    },
+  ]}
+/>
 
 ## Why CPI Exists
 
@@ -67,6 +90,15 @@ Start with a plain system-program transfer.
 The official Anchor CPI docs use exactly that move for a reason.
 
 It lets you see the pattern without extra token complexity.
+
+```mermaid
+flowchart LR
+    A[Your instruction handler] --> B[Build CPI account struct]
+    B --> C[Create CpiContext]
+    C --> D[Optional with_signer seeds]
+    D --> E[Call callee program]
+    E --> F[State changes in callee]
+```
 
 ```rust
 use anchor_lang::prelude::*;
@@ -234,11 +266,11 @@ This is not a shortcut.
 
 It is a controlled PDA-signing mechanism.
 
-<Callout type="info">
+<InfoCallout title="PDA Signing Is Still Verified">
 If you do not understand why a PDA is allowed to sign in a CPI, go back to the PDA lesson first.
 
 CPI signer seeds only make sense once PDA derivation itself is clear.
-</Callout>
+</InfoCallout>
 
 ## Where Token CPI Fits In
 
@@ -342,3 +374,41 @@ That is how you move from “it worked once” to “the authority model is actu
 ## What Comes Next
 
 The next lesson should use this exact CPI mental model in a guided project where PDAs, token authority, and on-chain rules all meet in one place.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-cpi-three-parts"
+  question="What are the three core ingredients you should identify in any CPI?"
+  options={[
+    "The callee program, the accounts it expects, and the instruction data or arguments",
+    "The client wallet adapter, the React hook, and the RPC endpoint",
+    "The rent exemption, the blockhash, and the transaction fee",
+    "The seed namespace, the event type, and the IDL version",
+  ]}
+  correctIndex={0}
+  explanation="If you can name the program, the expected accounts, and the instruction data, the CPI structure stops feeling magical."
+/>
+
+<QuickCheck
+  id="anchor-cpi-signer-rule"
+  question="Why must the signer seeds passed into `with_signer(...)` match the PDA rule in the account context?"
+  options={[
+    "Because the runtime only lets the PDA sign if those seeds derive the same validated PDA",
+    "Because Anchor rewrites the account context from the signer seeds at runtime",
+    "Because `with_signer(...)` is only a logging helper for the IDL",
+    "Because signer seeds are only checked in tests",
+  ]}
+  correctIndex={0}
+  explanation="PDA signing is still verified. If the signer seeds do not match the validated derivation rule, the PDA cannot authorize the CPI."
+/>
+
+<UpNextCard
+  nextTitle="Token Minting and Supply Control"
+  nextDescription="Use PDAs, token CPIs, and on-chain business rules together in one guided project where the program controls mint authority and supply."
+  nextHref="/learn/anchor-programs/token-minting-project"
+  nextReadingTime={15}
+  prevTitle="SPL Token Integration with Anchor"
+  prevHref="/learn/anchor-programs/spl-token-integration"
+  moduleName="Anchor Programs"
+/>

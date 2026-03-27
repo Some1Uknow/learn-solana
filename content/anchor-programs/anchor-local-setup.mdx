@@ -12,8 +12,6 @@ keywords:
   - "anchor workspace"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 This lesson has one job.
 
 Get you to a working Anchor workspace that builds and tests locally without mystery.
@@ -31,6 +29,38 @@ By the end of this lesson, you should be able to:
 - explain what those two commands actually do
 
 That is enough for the first step.
+
+<ConceptCards concepts={[
+  {
+    term: "Anchor Workspace",
+    definition: "The project layout created by `anchor init`, including program code, tests, config, and generated artifacts."
+  },
+  {
+    term: "anchor build",
+    definition: "The command that compiles the program and updates build outputs like the IDL. It verifies the Rust side before you involve tests."
+  },
+  {
+    term: "anchor test",
+    definition: "The command that builds, deploys to localnet, and runs the test suite in one local workflow."
+  },
+  {
+    term: "Localnet",
+    definition: "A local validator environment that is safest for early Anchor development because it gives you full control over the test loop."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Install tools]
+  B[anchor init]
+  C[anchor build]
+  D[anchor test]
+  E[Workspace is ready]
+
+  A --> B --> C --> D --> E
+`}
+/>
 
 ## The Current Installation Path
 
@@ -61,11 +91,11 @@ Why this matters:
 - Anchor CLI creates, builds, deploys, and tests Anchor workspaces
 - Node and Yarn are needed for the default TypeScript test template created by `anchor init`
 
-<Callout type="info">
+<InfoCallout title="When AVM Matters">
 The official Anchor docs still recommend AVM, the Anchor Version Manager, when you need to manage multiple Anchor versions across projects.
 
 That matters once you start working across repos or need reproducible builds.
-</Callout>
+</InfoCallout>
 
 ## When To Use AVM
 
@@ -293,3 +323,43 @@ If those answers are still fuzzy, rerun the workflow once more.
 The next lesson is not more setup.
 
 It is learning what the generated Anchor workspace actually contains, and why those files exist.
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-setup-build-vs-test"
+  question="Why should you run `anchor build` before `anchor test` in this lesson?"
+  options={[
+    "Because build isolates toolchain and workspace problems before the test layer adds more moving parts",
+    "Because Anchor refuses to run tests until a separate build timestamp exists",
+    "Because tests only work on devnet after a local build",
+    "Because `anchor build` installs AVM automatically"
+  ]}
+  correctIndex={0}
+  explanation="The lesson is trying to keep the loop clean. If the program does not compile, the test runner only makes the failure noisier. Build first, then test."
+/>
+
+<QuickCheck
+  id="anchor-setup-localnet"
+  question="Why is localnet the safest place to learn Anchor first?"
+  options={[
+    "Because the validator controls the environment locally, so you can build and test without real funds or shared network state",
+    "Because Anchor only supports localnet for new workspaces",
+    "Because localnet automatically fixes keypair problems",
+    "Because PDAs work differently on devnet"
+  ]}
+  correctIndex={0}
+  explanation="Localnet gives you a controlled environment for the whole build-deploy-test loop. That keeps the first Anchor lessons focused on the framework model instead of network friction."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Program Anatomy"
+  nextDescription="Open the generated workspace and learn what each file is doing so the project layout stops looking like framework scaffolding."
+  nextHref="/learn/anchor-programs/anchor-program-anatomy"
+  nextReadingTime={10}
+  prevTitle="Anchor Programs"
+  prevHref="/learn/anchor-programs"
+  moduleName="Anchor Programs"
+/>

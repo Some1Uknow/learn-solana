@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 By this point in the section, you have already built enough Anchor code to see the real problem.
 
 Getting a program to work once is not the hard part.
@@ -37,6 +35,41 @@ Good ergonomics means:
 - tests describe the real risk surface
 
 That is the standard you want.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "Thin Handler",
+      definition:
+        "An instruction entrypoint that stays short because validation and repeated logic are pushed into better places.",
+    },
+    {
+      term: "Constraint Locality",
+      definition:
+        "The practice of keeping validation rules near the accounts they protect so reviewers can see the trust boundary quickly.",
+    },
+    {
+      term: "Failure Path",
+      definition:
+        "A test or code path that proves the program rejects the wrong signer, wrong state, wrong mint, or other abuse case.",
+    },
+    {
+      term: "Operational Clarity",
+      definition:
+        "Making authority, upgrades, and state evolution easy to explain before the program grows into a maintenance burden.",
+    },
+  ]}
+/>
+
+```mermaid
+flowchart LR
+    A[Account constraints] --> B[Thin handler]
+    B --> C[Specific errors]
+    B --> D[Meaningful events]
+    C --> E[Failure-path tests]
+    D --> E
+    E --> F[More reviewable program]
+```
 
 ## 1. Push Validation Into Account Constraints First
 
@@ -239,11 +272,11 @@ The current docs describe LiteSVM as a fast in-process VM and Mollusk as a light
 
 That should tell you when to reach for them.
 
-<Callout type="info">
+<InfoCallout title="Use More Test Tools Only When They Buy Clarity">
 Do not replace clear integration tests with clever simulation tests too early.
 
 The point is to increase confidence, not to collect testing tools for their own sake.
-</Callout>
+</InfoCallout>
 
 ## 9. Test Failure Paths As First-Class Behavior
 
@@ -323,3 +356,41 @@ The remaining capstone should only make sense if all of these habits are already
 - clear PDA derivation
 - clear CPI structure
 - clear failure testing
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-ergonomics-constraint-locality"
+  question="Why is it usually better to express a rule in the account context instead of hiding it deep in the handler?"
+  options={[
+    "Because it makes the trust boundary easier to review and keeps the handler focused on the business step",
+    "Because Anchor only enforces rules that appear in comments above the handler",
+    "Because handlers cannot return custom errors",
+    "Because CPI is impossible unless every rule is inside the context",
+  ]}
+  correctIndex={0}
+  explanation="Constraint locality improves reviewability. The handler should not be the only place the real rules are visible."
+/>
+
+<QuickCheck
+  id="anchor-ergonomics-testing-risk"
+  question="What should drive your Anchor test plan as the program becomes more serious?"
+  options={[
+    "The actual risk surface, especially wrong signer, wrong state, wrong mint, and replay paths",
+    "Only the fastest possible test framework",
+    "Only the happy path used in the demo",
+    "The number of lines in the handler",
+  ]}
+  correctIndex={0}
+  explanation="A good test suite follows the real abuse paths, not just the prettiest success path."
+/>
+
+<UpNextCard
+  nextTitle="DeFi Integration Capstone"
+  nextDescription="Finish the module by combining PDA settlement state, vault authority, token CPIs, fee routing, and failure-path testing in one controlled design."
+  nextHref="/learn/anchor-programs/defi-integration-challenge"
+  nextReadingTime={18}
+  prevTitle="Escrow with a PDA Vault"
+  prevHref="/learn/anchor-programs/escrow-mechanism-project"
+  moduleName="Anchor Programs"
+/>

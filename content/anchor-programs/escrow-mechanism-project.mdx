@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 Escrow is the first project in this section where your program has to do four hard things at once:
 
 - hold state over time
@@ -58,6 +56,40 @@ That is why the project needs both:
 The token program still controls token balances.
 
 Your Anchor program controls when those balances are allowed to move.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "Escrow PDA",
+      definition:
+        "The program-owned state account that stores the deal terms and the current stage of the escrow.",
+    },
+    {
+      term: "Vault Authority PDA",
+      definition:
+        "The PDA that is allowed to authorize token movement out of the escrow vault.",
+    },
+    {
+      term: "Vault Token Account",
+      definition:
+        "The token account that actually holds the escrowed assets while the program controls the next valid move.",
+    },
+    {
+      term: "State Transition",
+      definition:
+        "A controlled move such as `Initialized -> Funded -> Completed` that prevents replay and invalid actions.",
+    },
+  ]}
+/>
+
+```mermaid
+stateDiagram-v2
+    [*] --> Initialized
+    Initialized --> Funded: maker funds vault
+    Funded --> Completed: taker completes
+    Initialized --> Cancelled: maker cancels
+    Funded --> Cancelled: maker cancels before completion
+```
 
 ## Step 1: Define The Escrow State Clearly
 
@@ -534,3 +566,41 @@ That is a good extension because it deepens the same state-machine logic without
 After this project, the next lesson should move from “working flows” to “cleaner and safer program structure.”
 
 That is where ergonomics and maintainability start to matter more.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-escrow-two-jobs"
+  question="Why does this escrow design need both an escrow state account and a vault token account?"
+  options={[
+    "Because one account tracks the deal rules and state, while the vault token account actually holds the tokens under program-controlled authority",
+    "Because the token program cannot read PDA accounts",
+    "Because every escrow must use two separate mints",
+    "Because the vault token account stores the escrow status enum",
+  ]}
+  correctIndex={0}
+  explanation="State tracking and token custody are different jobs. The escrow account stores the agreement, while the vault account stores the assets."
+/>
+
+<QuickCheck
+  id="anchor-escrow-complete-rule"
+  question="What should be true before the program lets the taker complete the escrow?"
+  options={[
+    "The escrow is already `Funded`, the taker matches the stored taker, and the vault authority PDA can sign the token transfer",
+    "Only the maker needs to sign again",
+    "The client says the vault has enough tokens",
+    "The escrow was initialized on devnet instead of localnet",
+  ]}
+  correctIndex={0}
+  explanation="Completion is a state-machine step plus a token-authority step. Both must be enforced on-chain."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Development Ergonomics"
+  nextDescription="Step back from the raw mechanics and learn how to keep growing Anchor code readable, reviewable, and secure as the state machine gets more complex."
+  nextHref="/learn/anchor-programs/anchor-ergonomics"
+  nextReadingTime={10}
+  prevTitle="Token Minting and Supply Control"
+  prevHref="/learn/anchor-programs/token-minting-project"
+  moduleName="Anchor Programs"
+/>

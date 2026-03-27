@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 Before you write a real Anchor program, you need the mental model that makes the macros readable.
 
 Without that model, Anchor looks like syntax.
@@ -32,6 +30,38 @@ At the beginner level, Anchor is mostly four things working together:
 4. constraints
 
 If you understand those four clearly, the first real program lesson becomes much easier.
+
+<ConceptCards concepts={[
+  {
+    term: "Instruction",
+    definition: "One program action exposed through a handler in the `#[program]` module."
+  },
+  {
+    term: "Account Context",
+    definition: "The `#[derive(Accounts)]` struct that defines which accounts are required and what rules Anchor checks before the handler runs."
+  },
+  {
+    term: "Signer",
+    definition: "An account that approved the transaction. In Anchor, `Signer<'info>` enforces that requirement."
+  },
+  {
+    term: "Constraint",
+    definition: "A validation rule like `mut`, `init`, or `has_one` that becomes part of the instruction's security model."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Client calls instruction]
+  B[Anchor reads account context]
+  C[Constraints and signer checks run]
+  D[Handler logic executes]
+  E[State changes persist]
+
+  A --> B --> C --> D --> E
+`}
+/>
 
 ## 1. Instruction
 
@@ -135,13 +165,13 @@ If one of those checks fails, your handler does not run.
 
 That is the critical idea.
 
-<Callout type="info">
+<InfoCallout title="Why Constraints Matter">
 The official Anchor docs frame account validation as a core security feature.
 
 That is the right emphasis.
 
 Most serious program bugs are not caused by missing syntax. They are caused by bad validation.
-</Callout>
+</InfoCallout>
 
 ## How These Pieces Fit Together
 
@@ -290,3 +320,43 @@ If any of those answers are fuzzy, reread the examples once more.
 The next lesson uses these ideas to build a real Anchor program slowly.
 
 That is the point where the model stops being abstract and starts feeling practical.
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-core-handler-order"
+  question="When does an Anchor handler run relative to signer and constraint checks?"
+  options={[
+    "Only after Anchor validates the account context and required signer rules",
+    "Before validation, so the handler can decide which checks matter",
+    "At the same time as constraint evaluation",
+    "Only after the client-side TypeScript test passes"
+  ]}
+  correctIndex={0}
+  explanation="This ordering is the whole mental model. The account context is validated first. If a signer or constraint check fails, the handler never runs."
+/>
+
+<QuickCheck
+  id="anchor-core-signer-vs-authority"
+  question="Why is `Signer<'info>` different from a stored authority field inside account data?"
+  options={[
+    "A signer approves the transaction now, while a stored authority is program state that your logic still needs to enforce",
+    "They are the same concept written in different Anchor syntax",
+    "A stored authority only matters on devnet",
+    "A signer is always the owner of every account in the instruction"
+  ]}
+  correctIndex={0}
+  explanation="This distinction is one of the most important beginner checks. Signature approval and program-defined authority are related, but they are not the same thing."
+/>
+
+<UpNextCard
+  nextTitle="First Anchor Program"
+  nextDescription="Build a small counter program from scratch and read every account, constraint, and test step in the right order."
+  nextHref="/learn/anchor-programs/first-anchor-program"
+  nextReadingTime={14}
+  prevTitle="Anchor Program Anatomy"
+  prevHref="/learn/anchor-programs/anchor-program-anatomy"
+  moduleName="Anchor Programs"
+/>

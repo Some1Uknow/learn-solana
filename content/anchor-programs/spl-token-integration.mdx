@@ -12,8 +12,6 @@ keywords:
   - "solana token program"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 After PDAs, token integration is the next big step.
 
 This is where Solana programs stop looking like generic state machines and start handling real balances, real authorities, and real asset movement.
@@ -70,11 +68,36 @@ That distinction matters.
 
 The current Anchor docs push you toward `token_interface` types so one account model can work across both token programs.
 
-<Callout type="info">
+<ConceptCards
+  concepts={[
+    {
+      term: "Mint",
+      definition:
+        "The account that defines one token asset, including decimals and mint-authority rules.",
+    },
+    {
+      term: "Token Account",
+      definition:
+        "The balance-holding account for one owner and one mint.",
+    },
+    {
+      term: "Token Interface",
+      definition:
+        "The modern Anchor account model that works across the classic token program and Token-2022.",
+    },
+    {
+      term: "transfer_checked",
+      definition:
+        "A token instruction that keeps the transfer aligned with the mint's decimal configuration.",
+    },
+  ]}
+/>
+
+<InfoCallout title="Why Token Program Choice Matters">
 Do not hardcode your lesson mental model around the old idea that there is only one token program.
 
 The modern Anchor pattern is to be explicit about which token program is being used.
-</Callout>
+</InfoCallout>
 
 ## Why `token_interface` Is The Right Default
 
@@ -87,6 +110,16 @@ The current Anchor token docs use:
 That is the right default because it lets your instruction accept accounts from either Token or Token-2022, as long as the account shape is compatible.
 
 That is much better than teaching a narrow legacy path first and fixing it later.
+
+```mermaid
+flowchart LR
+    A[Instruction context] --> B[Mint account]
+    A --> C[Token account]
+    A --> D[Token program]
+    B --> E[Asset definition]
+    C --> F[Balance storage]
+    D --> G[CPI executes mint or transfer]
+```
 
 ## Start With One Mint Instruction
 
@@ -372,3 +405,41 @@ The CPI helper call is often the easiest part.
 The next lesson is where token flows and PDAs meet directly through signed CPI.
 
 That is the point where authority delegation becomes the main idea, not just token account wiring.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-token-interface-default"
+  question="Why is `token_interface` the right default for modern Anchor token lessons?"
+  options={[
+    "Because it lets one account model work with both the classic token program and Token-2022",
+    "Because it removes the need to pass a token program account",
+    "Because it makes token accounts signer-free",
+    "Because it automatically validates all mint-authority business rules",
+  ]}
+  correctIndex={0}
+  explanation="The interface types keep the lesson aligned with both token program families instead of teaching one narrow legacy path."
+/>
+
+<QuickCheck
+  id="anchor-token-validation-priority"
+  question="What is the main security question in a token instruction before you focus on CPI syntax?"
+  options={[
+    "Whether the mint, token accounts, authority, and token program are the exact ones the business logic expects",
+    "Whether the token helper function name is the newest one in the docs",
+    "Whether the client can render the token symbol correctly",
+    "Whether the destination ATA already has a nonzero balance",
+  ]}
+  correctIndex={0}
+  explanation="Most token bugs are account-validation bugs. The CPI helper is often the easy part."
+/>
+
+<UpNextCard
+  nextTitle="Cross-Program Invocations"
+  nextDescription="Take the token account model one layer deeper by learning how Anchor packages a CPI, and how PDA signer seeds turn program authority into real calls."
+  nextHref="/learn/anchor-programs/cpi-cross-program"
+  nextReadingTime={12}
+  prevTitle="PDAs and Seed Derivation"
+  prevHref="/learn/anchor-programs/pda-seed-derivation"
+  moduleName="Anchor Programs"
+/>

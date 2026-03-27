@@ -12,8 +12,6 @@ keywords:
   - "solana anchor"
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 After `anchor init`, most beginners see the file tree and immediately lose the thread.
 
 That is normal.
@@ -34,6 +32,44 @@ It is a small system with four separate jobs:
 - generated build artifacts
 
 If you keep those four buckets clear in your head, the file tree stops looking random.
+
+<ConceptCards
+  concepts={[
+    {
+      term: "Anchor.toml",
+      definition:
+        "The workspace control file that defines provider settings, program addresses, and test script behavior.",
+    },
+    {
+      term: "IDL",
+      definition:
+        "The generated interface description that tells clients which instructions, accounts, and data layouts the program exposes.",
+    },
+    {
+      term: "target/",
+      definition:
+        "Generated output from build and test flows, including deploy artifacts, the IDL, and generated client types.",
+    },
+    {
+      term: "Integration Test",
+      definition:
+        "A test that calls the program through real transactions instead of directly poking internal Rust functions.",
+    },
+  ]}
+/>
+
+```mermaid
+flowchart LR
+    A[Anchor.toml] --> B[anchor build]
+    B --> C[target/idl]
+    B --> D[target/deploy]
+    B --> E[target/types]
+    F[programs/.../src/lib.rs] --> B
+    G[tests/...ts] --> H[anchor test]
+    H --> B
+    H --> I[local validator]
+    I --> J[program state changes]
+```
 
 ## What `anchor init` Creates
 
@@ -297,3 +333,41 @@ Now that the workspace layout is clear, the next lesson can focus on the core An
 - accounts
 - signers
 - constraints
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-anatomy-generated-output"
+  question="Which part of an Anchor workspace should you treat as generated output instead of source code?"
+  options={[
+    "`target/`",
+    "`programs/<program-name>/src/lib.rs`",
+    "`tests/<program-name>.ts`",
+    "`Anchor.toml`",
+  ]}
+  correctIndex={0}
+  explanation="`target/` is build output. It is useful to inspect, but not the place where you write the program's real logic."
+/>
+
+<QuickCheck
+  id="anchor-anatomy-anchortoml-role"
+  question="Why should `Anchor.toml` be one of the first files you inspect when a workspace feels wrong?"
+  options={[
+    "Because it controls provider, cluster, script, and local program settings that affect both build and test flows",
+    "Because it contains the full Rust implementation of every instruction",
+    "Because it is the only place where account sizes are defined",
+    "Because Anchor ignores it during `anchor test`",
+  ]}
+  correctIndex={0}
+  explanation="`Anchor.toml` shapes workspace-level behavior. Cluster mistakes, wallet problems, and test script issues often start there."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Core Concepts"
+  nextDescription="Turn the generated workspace into a real mental model by learning how instructions, accounts, signers, and constraints fit together."
+  nextHref="/learn/anchor-programs/anchor-core-concepts"
+  nextReadingTime={5}
+  prevTitle="Anchor Local Setup"
+  prevHref="/learn/anchor-programs/anchor-local-setup"
+  moduleName="Anchor Programs"
+/>
