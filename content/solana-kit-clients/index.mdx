@@ -29,6 +29,43 @@ That order matters.
 
 If you start from scattered button handlers and ad hoc RPC helpers, the app will feel fine for one page and collapse as soon as it grows.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Shared Runtime",
+      definition:
+        "One client boundary that owns network endpoints, wallet state, subscriptions, and shared transport behavior.",
+    },
+    {
+      term: "Wallet Session",
+      definition:
+        "The current runtime-backed connection state for one Wallet Standard connector and account.",
+    },
+    {
+      term: "Transport Layer",
+      definition:
+        "The part of the client that sends, confirms, retries, and watches transactions consistently across the app.",
+    },
+    {
+      term: "Service Layer",
+      definition:
+        "The app code that assembles reads and program actions without leaking those details into React components.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Shared runtime] --> B[Wallet session]
+    B --> C[RPC reads]
+    C --> D[Transaction building]
+    D --> E[Send and confirm]
+    E --> F[Program and token actions]
+    F --> G[UX and testing]
+  `}
+/>
+
 ## What This Section Is For
 
 This section teaches how to build a client that is explainable.
@@ -116,3 +153,39 @@ You should also have:
 Start with `kit-foundations`.
 
 That lesson sets up the shared runtime model the rest of the section depends on.
+
+## Quick Check
+
+<QuickCheck
+  id="kit-clients-index-order"
+  question="Why does this module start with the shared runtime before wallet UX, reads, and transaction flows?"
+  options={[
+    "Because the runtime is the shared client truth that the later wallet, read, and send layers depend on",
+    "Because Wallet Standard only works after token transfers are implemented",
+    "Because transaction signing happens before client configuration exists",
+    "Because the capstone generates the runtime automatically",
+  ]}
+  correctIndex={0}
+  explanation="The module is ordered as a dependency chain. If the runtime model is wrong, every later client flow becomes harder to explain and maintain."
+/>
+
+<QuickCheck
+  id="kit-clients-index-ui-boundary"
+  question="What is the main architectural mistake this module is trying to prevent?"
+  options={[
+    "Letting UI components own RPC, wallet, and transaction logic directly until the app becomes inconsistent",
+    "Using TypeScript instead of JavaScript for wallet buttons",
+    "Decoding account data on the server",
+    "Showing transaction signatures to the user",
+  ]}
+  correctIndex={0}
+  explanation="This section is really about client boundaries. Scattered transport logic is what makes growing Solana frontends brittle."
+/>
+
+<UpNextCard
+  nextTitle="Kit Foundations"
+  nextDescription="Set up one shared Solana client runtime so the rest of the module can build on a clean transport and wallet boundary."
+  nextHref="/learn/solana-kit-clients/kit-foundations"
+  nextReadingTime={10}
+  moduleName="Solana Kit Clients"
+/>

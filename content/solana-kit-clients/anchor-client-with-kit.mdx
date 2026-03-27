@@ -25,6 +25,41 @@ The correct model is:
 
 That split is what keeps a Solana app explainable.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Service Layer",
+      definition:
+        "The client code that knows how to assemble program instructions and account inputs without being coupled to React rendering.",
+    },
+    {
+      term: "Instruction Builder",
+      definition:
+        "The generated or hand-written function that returns the concrete program instruction for one action.",
+    },
+    {
+      term: "Shared Transport",
+      definition:
+        "The wallet-aware send pipeline that submits instructions without letting each button reinvent transaction delivery.",
+    },
+    {
+      term: "UI Boundary",
+      definition:
+        "The narrow component responsibility of gathering input, triggering the action, and rendering status instead of understanding program wiring.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[UI input] --> B[Service layer builds instruction]
+    B --> C[Shared transport sends]
+    C --> D[Wallet signs]
+    D --> E[Signature and status return to UI]
+  `}
+/>
+
 ## What This Lesson Owns
 
 This lesson is not about generating an SDK.
@@ -192,6 +227,44 @@ You can keep Anchor program specifics in one service layer while still using a k
 That is the bridge between on-chain program logic and a maintainable client.
 
 The next lesson builds on that by making transaction status and recovery behavior explicit in the UI.
+
+## Quick Check
+
+<QuickCheck
+  id="anchor-client-service-boundary"
+  question="Why should the client build Anchor instructions in a service layer instead of directly inside the button component?"
+  options={[
+    "Because program account wiring and instruction assembly are reusable client logic that should not be tangled with rendering and button state",
+    "Because React components cannot import generated instruction builders",
+    "Because wallets only accept instructions created outside React",
+    "Because Kit automatically generates UI state from the IDL",
+  ]}
+  correctIndex={0}
+  explanation="This is a client-boundary lesson. The service layer owns instruction assembly, while the UI owns interaction and presentation."
+/>
+
+<QuickCheck
+  id="anchor-client-shared-transport"
+  question="What should stay shared when the app adds more Anchor actions?"
+  options={[
+    "The transport and wallet-aware send pattern, while only the service-layer instruction builder changes per action",
+    "Every button should recreate its own send logic for clarity",
+    "The UI should compute every PDA so the service layer stays generic",
+    "The wallet status should be inferred from program success",
+  ]}
+  correctIndex={0}
+  explanation="New actions should mostly mean new service functions. The transport and runtime flow should stay shared."
+/>
+
+<UpNextCard
+  nextTitle="Frontend Transaction UX: Status, Errors, Recovery"
+  nextDescription="Take the shared send flow and make its phases explicit in the UI so users always know what happened and what the next safe action is."
+  nextHref="/learn/solana-kit-clients/frontend-transaction-ux-status-errors-recovery"
+  nextReadingTime={12}
+  prevTitle="SPL Token and Token-2022 Client Flows"
+  prevHref="/learn/solana-kit-clients/spl-token-and-token-2022-client-flows"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

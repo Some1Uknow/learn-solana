@@ -25,6 +25,43 @@ The fix is not more styling.
 
 The fix is to treat wallet connection as explicit runtime state.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Connector",
+      definition:
+        "One Wallet Standard integration the runtime discovered in the browser, such as Phantom or another supported wallet.",
+    },
+    {
+      term: "Connection Status",
+      definition:
+        "The runtime truth about whether a wallet session is absent, changing, connected, or failed.",
+    },
+    {
+      term: "Wallet Session",
+      definition:
+        "The connected wallet account and related session data that signer-required actions depend on.",
+    },
+    {
+      term: "Honest UI",
+      definition:
+        "A wallet interface that only enables actions once the runtime actually says the session exists.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Discovered connectors] --> B[User chooses wallet]
+    B --> C[Runtime connection state changes]
+    C --> D[Connected session exists]
+    C --> E[Rejected or failed request]
+    D --> F[Signer actions unlock]
+    E --> G[UI stays usable]
+  `}
+/>
+
 ## The Correct Mental Model
 
 Your app does not own the wallet.
@@ -186,6 +223,44 @@ You can build a wallet panel that reflects real wallet-standard session state in
 That gives the rest of the client a stable starting point.
 
 The next lesson builds on that by reading chain state through the same shared runtime.
+
+## Quick Check
+
+<QuickCheck
+  id="wallet-flow-session-truth"
+  question="Why should send buttons stay disabled until the wallet session actually exists?"
+  options={[
+    "Because a connect click is not the same as a connected signer session, and the runtime is the only reliable source of that truth",
+    "Because Wallet Standard wallets do not allow reads before writes",
+    "Because connectors disappear once a wallet is connected",
+    "Because a disconnected wallet can still sign local transaction messages",
+  ]}
+  correctIndex={0}
+  explanation="The user action and the runtime state are not the same thing. The UI has to wait for the runtime to confirm the session."
+/>
+
+<QuickCheck
+  id="wallet-flow-rejection"
+  question="How should the client treat a user rejecting a wallet prompt?"
+  options={[
+    "As a normal recoverable runtime outcome, not as proof that the app crashed",
+    "As a fatal application error that should reload the page",
+    "As a sign that the wallet connector is invalid forever",
+    "As a confirmed disconnected session that should auto-delete local storage",
+  ]}
+  correctIndex={0}
+  explanation="User rejection is ordinary wallet behavior. A good wallet UI stays usable and reflects the state honestly afterward."
+/>
+
+<UpNextCard
+  nextTitle="RPC Reads and Account Decoding with Kit"
+  nextDescription="Use the same shared runtime to fetch real account facts first, then decode only after you know what account you actually fetched."
+  nextHref="/learn/solana-kit-clients/rpc-reads-and-account-decoding-with-kit"
+  nextReadingTime={12}
+  prevTitle="Kit Foundations"
+  prevHref="/learn/solana-kit-clients/kit-foundations"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

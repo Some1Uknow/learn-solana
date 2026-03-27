@@ -31,6 +31,44 @@ It should always tell the user:
 - whether they can act again
 - what the next safe action is
 
+<ConceptCards
+  concepts={[
+    {
+      term: "UI State Machine",
+      definition:
+        "A small explicit set of transaction states that stops the interface from guessing whether a send flow succeeded or failed.",
+    },
+    {
+      term: "Error Classification",
+      definition:
+        "The step that turns messy raw failures into a smaller set of recovery decisions the UI can actually act on.",
+    },
+    {
+      term: "Recovery Hint",
+      definition:
+        "The next safe action the interface can show once it knows what kind of failure happened.",
+    },
+    {
+      term: "Phase Truth",
+      definition:
+        "Showing the user the real stage of the transaction lifecycle instead of collapsing everything into one generic loading or error state.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[idle] --> B[preparing]
+    B --> C[awaiting-signature]
+    C --> D[sending]
+    D --> E[confirmed]
+    B --> F[failed]
+    C --> F
+    D --> F
+  `}
+/>
+
 ## Step 1: Normalize Errors Before They Reach The UI
 
 Create `lib/solana/uiTxState.ts`:
@@ -210,6 +248,44 @@ You can build a transaction card that sends a real instruction, exposes real sta
 That is the baseline for every serious Solana frontend.
 
 The next lesson uses the same discipline inside the final capstone page.
+
+## Quick Check
+
+<QuickCheck
+  id="frontend-ux-state-machine"
+  question="Why should a transaction UI use explicit phases like `preparing`, `awaiting-signature`, and `sending` instead of one generic loading state?"
+  options={[
+    "Because the user needs honest phase-specific feedback and recovery behavior, not one vague status that hides what actually happened",
+    "Because wallets only work when the UI has at least six statuses",
+    "Because blockhashes are only fetched during confirmation",
+    "Because sending and signing are always the same network event",
+  ]}
+  correctIndex={0}
+  explanation="The transaction lifecycle has meaningfully different phases. A useful UI exposes them instead of flattening them into one spinner."
+/>
+
+<QuickCheck
+  id="frontend-ux-error-kind"
+  question="Why is classifying transaction failures useful before they reach the component?"
+  options={[
+    "Because the UI can turn different failures into different next safe actions instead of treating every problem as the same generic dead end",
+    "Because classification automatically confirms the transaction",
+    "Because user rejection should be retried immediately",
+    "Because program errors never need user-facing text",
+  ]}
+  correctIndex={0}
+  explanation="Good transaction UX is mostly about recovery. Classification gives the UI the information it needs to suggest the right next step."
+/>
+
+<UpNextCard
+  nextTitle="Client Testing Strategy: Lite Unit and Integration"
+  nextDescription="Protect the same runtime, wallet, and transaction boundaries with a test strategy that is fast enough to use constantly and honest enough to catch real breakage."
+  nextHref="/learn/solana-kit-clients/client-testing-strategy-lite-unit-and-integration"
+  nextReadingTime={10}
+  prevTitle="Anchor Client Patterns with Kit"
+  prevHref="/learn/solana-kit-clients/anchor-client-with-kit"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

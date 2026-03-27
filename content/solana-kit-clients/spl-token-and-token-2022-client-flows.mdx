@@ -30,6 +30,42 @@ Before you ask the wallet to sign, the client should already know:
 
 That is the whole lesson.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Token Program Kind",
+      definition:
+        "The explicit choice between classic SPL Token and Token-2022, which the client should treat as different programs.",
+    },
+    {
+      term: "Transfer Plan",
+      definition:
+        "The validated client-side result that includes the chosen token program, token accounts, decimals, and instruction to send.",
+    },
+    {
+      term: "Preflight Validation",
+      definition:
+        "The checks the client performs before opening the wallet so malformed token flows fail early and honestly.",
+    },
+    {
+      term: "Associated Token Account",
+      definition:
+        "The derived token account address for a given owner, mint, and token program that the client can compute instead of guessing.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Choose token program] --> B[Read mint]
+    B --> C[Derive associated token accounts]
+    C --> D[Fetch token accounts]
+    D --> E[Validate owners and mint]
+    E --> F[Build transferChecked instruction]
+  `}
+/>
+
 ## Classic SPL Token and Token-2022 Are Different Programs
 
 They are not just two names for the same thing.
@@ -328,6 +364,44 @@ If the mint, owners, and token accounts do not line up, fail before the signatur
 You can build token transfer plans with explicit program choice, derive and validate the actual token accounts involved, and use the mint's real decimals instead of guessing.
 
 That is the client-side baseline for both classic SPL Token and Token-2022 flows.
+
+## Quick Check
+
+<QuickCheck
+  id="token-flow-program-choice"
+  question="Why should the client keep classic SPL Token and Token-2022 as an explicit choice instead of hiding it in a helper?"
+  options={[
+    "Because they are different token programs with different addresses and capabilities, so the transfer plan must know which one it is using",
+    "Because Token-2022 cannot be used on devnet",
+    "Because the wallet decides the token program automatically",
+    "Because decimals are identical across both programs",
+  ]}
+  correctIndex={0}
+  explanation="The client is building a concrete transfer plan. Program choice is part of that plan, not an implementation detail to guess later."
+/>
+
+<QuickCheck
+  id="token-flow-wallet-prompt-boundary"
+  question="What should already be true before the wallet prompt opens for a token transfer?"
+  options={[
+    "The client has already validated the mint, derived the token accounts, and confirmed the on-chain data matches the requested transfer",
+    "The wallet should be the first place token-account validation happens",
+    "The client should still be guessing decimals from a form field",
+    "The destination token account can still belong to any mint",
+  ]}
+  correctIndex={0}
+  explanation="By the time the wallet is asked to sign, the transfer plan should already be coherent and validated."
+/>
+
+<UpNextCard
+  nextTitle="Anchor Client Patterns with Kit"
+  nextDescription="Use the same separation of concerns for program actions by keeping instruction assembly in a service layer and transport in the shared client pipeline."
+  nextHref="/learn/solana-kit-clients/anchor-client-with-kit"
+  nextReadingTime={12}
+  prevTitle="Send, Confirm, Retry and Lifetime Management"
+  prevHref="/learn/solana-kit-clients/send-confirm-retry-and-lifetime-management"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

@@ -26,6 +26,41 @@ A good vertical slice does four things cleanly:
 
 If one of those is fake, the slice is incomplete.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Vertical Slice",
+      definition:
+        "One narrow but complete client flow that proves the architecture works from wallet connection through verification.",
+    },
+    {
+      term: "Shared Authority",
+      definition:
+        "Using the same actual wallet identity across browser and setup script so program actions and verification point at the same account.",
+    },
+    {
+      term: "Capstone Config",
+      definition:
+        "The small deterministic config layer that stores the exact runtime values the final page needs instead of relying on placeholders.",
+    },
+    {
+      term: "Verification",
+      definition:
+        "The final step where the client or Explorer proves the write path really landed instead of stopping at a local success message.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Connect wallet] --> B[Read chain state]
+    B --> C[Send SOL transfer]
+    C --> D[Submit Anchor action]
+    D --> E[Verify signatures and state]
+  `}
+/>
+
 ## What You Are Building
 
 Build one page that composes the pieces from the earlier lessons:
@@ -315,6 +350,44 @@ Use Explorer or your own read-back path and confirm that the state change actual
 You can build one real client page that combines wallet access, reads, writes, program actions, and verification without collapsing into ad hoc code.
 
 That is enough foundation to start a larger Solana frontend responsibly.
+
+## Quick Check
+
+<QuickCheck
+  id="kit-capstone-authority-match"
+  question="Why does the capstone insist that the browser wallet and the setup script use the same authority?"
+  options={[
+    "Because the final write flows only make sense if the connected signer is the same identity the setup step used to create and authorize the client state",
+    "Because Explorer only shows signatures from one wallet per page",
+    "Because the account inspector can only read from wallets created locally",
+    "Because Anchor instruction builders always derive wallet state from mnemonics automatically",
+  ]}
+  correctIndex={0}
+  explanation="If the runtime signer and the setup signer drift apart, the capstone stops proving one coherent client slice."
+/>
+
+<QuickCheck
+  id="kit-capstone-verification"
+  question="What makes the capstone incomplete even if the page appears to work?"
+  options={[
+    "Stopping at local success messages without verifying the returned signatures or the actual state change",
+    "Using one route instead of several tabs",
+    "Reading chain state before sending a transaction",
+    "Keeping the wallet panel on the same page as the action buttons",
+  ]}
+  correctIndex={0}
+  explanation="A real client flow ends with verification. If you never confirm the signatures or the state change, the slice is still incomplete."
+/>
+
+<UpNextCard
+  nextTitle="Solana Kit Clients"
+  nextDescription="Return to the module overview and use it as the reference entry point for the full modern client stack you just assembled lesson by lesson."
+  nextHref="/learn/solana-kit-clients"
+  nextReadingTime={4}
+  prevTitle="Client Testing Strategy: Lite Unit and Integration"
+  prevHref="/learn/solana-kit-clients/client-testing-strategy-lite-unit-and-integration"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

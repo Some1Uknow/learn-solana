@@ -30,6 +30,42 @@ If the plan changes after signing, the signatures are no longer valid.
 
 That is the whole mental model for this lesson.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Transaction Message",
+      definition:
+        "The exact plan being signed: instructions, accounts, fee payer, and recent blockhash lifetime.",
+    },
+    {
+      term: "Fee Payer",
+      definition:
+        "The signer whose account covers transaction fees and is therefore part of the signed message.",
+    },
+    {
+      term: "Lifetime",
+      definition:
+        "The recent blockhash-based validity window that determines how long the message can still be accepted.",
+    },
+    {
+      term: "Signer Set",
+      definition:
+        "The accounts that must authorize the exact final message, not every account mentioned in it.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Create message shell] --> B[Set fee payer]
+    B --> C[Set recent blockhash lifetime]
+    C --> D[Append instructions]
+    D --> E[Sign final message]
+    E --> F[Extract signature]
+  `}
+/>
+
 ## The Order Is Not Arbitrary
 
 With Kit, the correct build order is:
@@ -202,6 +238,44 @@ You can build a transaction message in the right order, explain why the fee paye
 That is the minimum foundation for sending transactions safely.
 
 The next lesson builds on this by covering confirmation, retries, and lifetime-aware resend behavior.
+
+## Quick Check
+
+<QuickCheck
+  id="tx-message-order"
+  question="Why must the fee payer and recent blockhash be set before the message is signed?"
+  options={[
+    "Because they are part of the signed transaction plan, so changing them later changes what the signer approved",
+    "Because Kit refuses to append instructions after a fee payer exists",
+    "Because only unsigned messages can include recipients",
+    "Because the blockhash is only used after confirmation succeeds",
+  ]}
+  correctIndex={0}
+  explanation="The message is a signed plan. Fee payer and lifetime belong inside that plan, so they must exist before the signature step."
+/>
+
+<QuickCheck
+  id="tx-message-signer-set"
+  question="Why does the recipient in the example transfer not sign the transaction?"
+  options={[
+    "Because receiving funds is not the same as authorizing the message; only the sender needs to approve value leaving their account",
+    "Because recipients are always system-owned signers automatically",
+    "Because Kit only supports one signer per transaction",
+    "Because the fee payer signature replaces all other signatures",
+  ]}
+  correctIndex={0}
+  explanation="Being mentioned in the transaction is not the same thing as being a signer. Only accounts that must authorize the plan need to sign."
+/>
+
+<UpNextCard
+  nextTitle="Send, Confirm, Retry and Lifetime Management"
+  nextDescription="Take the signed message and handle the real transport layer honestly by separating signature, submission, confirmation, and rebuild-aware retry."
+  nextHref="/learn/solana-kit-clients/send-confirm-retry-and-lifetime-management"
+  nextReadingTime={12}
+  prevTitle="RPC Reads and Account Decoding with Kit"
+  prevHref="/learn/solana-kit-clients/rpc-reads-and-account-decoding-with-kit"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

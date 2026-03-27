@@ -24,6 +24,43 @@ The correct model is simpler.
 
 Your app should create one shared Solana client runtime and let everything else sit on top of it.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Client Runtime",
+      definition:
+        "The shared app-level client object that owns endpoints, wallet connectors, subscriptions, and common transaction behavior.",
+    },
+    {
+      term: "SolanaProvider",
+      definition:
+        "The React boundary that exposes the shared runtime to hooks instead of recreating transport logic per page.",
+    },
+    {
+      term: "autoDiscover",
+      definition:
+        "The connector discovery step that finds Wallet Standard wallets available in the browser.",
+    },
+    {
+      term: "Network Config",
+      definition:
+        "The one central place where RPC and WebSocket endpoints are defined so the app cannot drift across clusters.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[config.ts] --> B[createClient]
+    B --> C[SolanaProvider]
+    C --> D[Wallet hooks]
+    C --> E[RPC reads]
+    C --> F[Transaction hooks]
+    G[QueryClientProvider] --> C
+  `}
+/>
+
 ## What The Shared Runtime Actually Owns
 
 A proper Solana client runtime owns these responsibilities:
@@ -186,6 +223,44 @@ You can explain where wallet sessions, RPC state, and transaction helpers actual
 That is the baseline for every other client lesson.
 
 The next lesson moves one layer up and shows how wallet connection works on top of this shared runtime.
+
+## Quick Check
+
+<QuickCheck
+  id="kit-foundations-one-runtime"
+  question="Why should a kit-first app create one shared client runtime at the app boundary instead of per page?"
+  options={[
+    "Because wallet state, subscriptions, endpoints, and transaction helpers need one shared source of truth",
+    "Because `@solana/kit` can only be imported once in a Next.js app",
+    "Because Query Client replaces the Solana client after the first render",
+    "Because Wallet Standard connectors only appear on the server",
+  ]}
+  correctIndex={0}
+  explanation="The runtime is the transport boundary. Recreating it per page causes state drift and inconsistent client behavior."
+/>
+
+<QuickCheck
+  id="kit-foundations-config-split"
+  question="What bug does centralizing `SOLANA_RPC` and `SOLANA_WS` help prevent?"
+  options={[
+    "Reading from one cluster while sending transactions or subscriptions to another",
+    "Wallet connectors disappearing after confirmation",
+    "Program instructions losing their signatures",
+    "Query cache invalidation on page navigation",
+  ]}
+  correctIndex={0}
+  explanation="Central network config keeps the app from drifting into split-brain cluster behavior."
+/>
+
+<UpNextCard
+  nextTitle="Wallet Standard Connection Flow"
+  nextDescription="Use the shared runtime honestly by showing real wallet session state instead of letting the UI guess what connected means."
+  nextHref="/learn/solana-kit-clients/wallet-standard-connection-flow"
+  nextReadingTime={10}
+  prevTitle="Solana Kit Clients"
+  prevHref="/learn/solana-kit-clients"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

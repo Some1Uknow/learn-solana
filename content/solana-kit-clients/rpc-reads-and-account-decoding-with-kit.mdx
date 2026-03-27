@@ -28,6 +28,43 @@ The correct model is:
 
 That order matters.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Encoded Account",
+      definition:
+        "The raw account facts returned by the chain, including existence, lamports, owner, flags, and bytes before program-specific decoding.",
+    },
+    {
+      term: "MaybeEncodedAccount",
+      definition:
+        "The Kit result shape that makes account existence explicit instead of pretending every lookup succeeds.",
+    },
+    {
+      term: "Normalization",
+      definition:
+        "The step where transport-heavy account data is converted into a simpler shape that UI code can reason about safely.",
+    },
+    {
+      term: "Decode Boundary",
+      definition:
+        "The point after existence and ownership checks where it finally makes sense to apply a program-specific decoder.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[User input address] --> B[fetchEncodedAccount]
+    B --> C{exists?}
+    C -->|no| D[Return missing account view]
+    C -->|yes| E[Inspect owner and shape]
+    E --> F[Normalize for UI]
+    E --> G[Decode only with correct program codec]
+  `}
+/>
+
 ## What A Read Path Actually Returns
 
 At the RPC layer, an account is just facts:
@@ -255,6 +292,44 @@ Always.
 You can fetch account data with a stable Kit helper, distinguish missing accounts from real failures, and decode program data only after the read path proves you are looking at the right account.
 
 That is the right base for the transaction-building lessons that come next.
+
+## Quick Check
+
+<QuickCheck
+  id="rpc-reads-exists-first"
+  question="Why is `MaybeEncodedAccount` a useful shape instead of pointless ceremony?"
+  options={[
+    "Because missing accounts are normal on Solana, and the client should distinguish them from true failures before it guesses",
+    "Because Kit cannot return owner or lamports until after decoding",
+    "Because all account reads must fail when the account is absent",
+    "Because only Token-2022 accounts can be normalized safely",
+  ]}
+  correctIndex={0}
+  explanation="A missing account is a normal read outcome. The client needs that fact explicitly before deciding whether to show an empty state or a real error."
+/>
+
+<QuickCheck
+  id="rpc-reads-decode-boundary"
+  question="Why should decoding happen only after the client knows the account exists and belongs to the expected program?"
+  options={[
+    "Because decoding arbitrary bytes with the wrong codec produces misleading client logic even when the account technically exists",
+    "Because encoded accounts do not include raw bytes",
+    "Because Kit forbids decoding accounts fetched from devnet",
+    "Because normalization makes ownership checks unnecessary",
+  ]}
+  correctIndex={0}
+  explanation="The account may exist and still be the wrong thing. Existence and ownership checks protect the decode step from turning random bytes into bogus state."
+/>
+
+<UpNextCard
+  nextTitle="Transaction Message Building and Signers"
+  nextDescription="Use the same client discipline on the write path by building transaction messages in the only order that still makes signatures meaningful."
+  nextHref="/learn/solana-kit-clients/transaction-message-building-and-signers"
+  nextReadingTime={12}
+  prevTitle="Wallet Standard Connection Flow"
+  prevHref="/learn/solana-kit-clients/wallet-standard-connection-flow"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

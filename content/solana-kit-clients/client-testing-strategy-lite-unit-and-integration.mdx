@@ -25,6 +25,42 @@ Test three things separately:
 
 That is enough for most serious frontend work.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Unit Test",
+      definition:
+        "A fast local test for pure logic that does not need wallets, RPC, or UI rendering to catch mistakes.",
+    },
+    {
+      term: "Component Test",
+      definition:
+        "A test that checks UI behavior around mocked hook state or a mocked provider without using a real wallet extension.",
+    },
+    {
+      term: "Integration Path",
+      definition:
+        "One honest end-to-end client flow that proves the shared runtime, wallet behavior, and transport still work together.",
+    },
+    {
+      term: "Risk Surface",
+      definition:
+        "The real failure modes the client has to handle, such as rejection, expiry, disconnects, or invalid input.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Pure logic tests] --> B[Component tests]
+    B --> C[One integration path]
+    A --> D[Fast feedback]
+    B --> E[UI contract protection]
+    C --> F[Runtime confidence]
+  `}
+/>
+
 ## Start With Pure Logic
 
 Pure logic is the cheapest place to catch mistakes.
@@ -179,6 +215,44 @@ Do not make simple component tests depend on wallet extensions.
 You can design a test suite that protects the real failure modes in a Solana client without making every test expensive or flaky.
 
 That is the correct testing posture for a modern kit-first frontend.
+
+## Quick Check
+
+<QuickCheck
+  id="client-testing-layers"
+  question="Why is a layered client test strategy better than making every test hit a live network?"
+  options={[
+    "Because most client logic and UI contracts can be tested locally and cheaply, while one real integration path is enough to prove the stack still works together",
+    "Because live networks cannot return transaction signatures",
+    "Because unit tests can replace all runtime verification entirely",
+    "Because mocked wallets are more secure than real ones",
+  ]}
+  correctIndex={0}
+  explanation="The point is to keep most tests fast and deterministic while still keeping one honest integration path for the shared runtime."
+/>
+
+<QuickCheck
+  id="client-testing-failure-modes"
+  question="What is the biggest weakness of a client test suite that only covers happy paths?"
+  options={[
+    "It misses the normal failure modes Solana users actually hit, like rejection, disconnects, expiry, and invalid input",
+    "It makes TypeScript compile more slowly",
+    "It prevents the client from using Wallet Standard",
+    "It forces every component to use React Query",
+  ]}
+  correctIndex={0}
+  explanation="A Solana client spends real time handling normal failure states. If those are untested, the suite is not protecting the real product."
+/>
+
+<UpNextCard
+  nextTitle="Mini Capstone: Kit Client for an Anchor Program"
+  nextDescription="Combine the shared runtime, wallet flow, reads, writes, program actions, UX, and testing discipline into one real vertical slice."
+  nextHref="/learn/solana-kit-clients/mini-capstone-kit-client-for-anchor-program"
+  nextReadingTime={15}
+  prevTitle="Frontend Transaction UX: Status, Errors, Recovery"
+  prevHref="/learn/solana-kit-clients/frontend-transaction-ux-status-errors-recovery"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 

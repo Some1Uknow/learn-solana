@@ -27,6 +27,44 @@ That is why the send flow has to separate three different ideas:
 
 If you collapse those into one step, your retry logic will be wrong.
 
+<ConceptCards
+  concepts={[
+    {
+      term: "Submission",
+      definition:
+        "The point where the signed transaction has been sent to the network, even though the final outcome is not known yet.",
+    },
+    {
+      term: "Confirmation",
+      definition:
+        "The later network result that tells you the submitted signature actually landed at the commitment you care about.",
+    },
+    {
+      term: "Retry Policy",
+      definition:
+        "The explicit rule for which failures justify rebuilding and resending a transaction and which ones do not.",
+    },
+    {
+      term: "Lifetime Rebuild",
+      definition:
+        "Creating a fresh message with a new blockhash and new signature instead of resending stale signed bytes.",
+    },
+  ]}
+/>
+
+<Mermaid
+  chart={`
+flowchart LR
+    A[Build and sign] --> B[Extract signature]
+    B --> C[Send transaction]
+    C --> D{confirmed?}
+    D -->|yes| E[Done]
+    D -->|retryable lifetime/network failure| F[Rebuild with fresh blockhash]
+    F --> A
+    D -->|non-retryable failure| G[Surface real error]
+  `}
+/>
+
 ## The Signature Exists Before Sending
 
 This matters more than most beginners expect.
@@ -255,6 +293,44 @@ You can separate signature, submission, and confirmation correctly, and you can 
 That is the baseline for reliable client-side transaction delivery.
 
 The next lessons build on that for token flows and broader client testing.
+
+## Quick Check
+
+<QuickCheck
+  id="send-confirm-signature-before-confirmation"
+  question="Why can the client show a transaction signature before the transaction is confirmed?"
+  options={[
+    "Because the signature exists as soon as the signed transaction is created, even though confirmation is still a separate network outcome",
+    "Because confirmation automatically signs the transaction a second time",
+    "Because RPC nodes generate the signature before the wallet signs",
+    "Because signatures only matter after retries fail",
+  ]}
+  correctIndex={0}
+  explanation="Identity and outcome are different. The signature exists once the message is signed, but confirmation still happens later."
+/>
+
+<QuickCheck
+  id="send-confirm-rebuild"
+  question="Why is rebuilding the transaction the correct retry path after a blockhash lifetime issue?"
+  options={[
+    "Because expired lifetime means the old signed message is stale, so the client needs a fresh blockhash and a fresh signature",
+    "Because retries are only valid if the recipient signs too",
+    "Because Kit deletes the signature after the first send attempt",
+    "Because confirmation cannot happen on rebuilt messages",
+  ]}
+  correctIndex={0}
+  explanation="A lifetime failure is a message problem, not just a transport problem. The fix is a new message with a fresh blockhash."
+/>
+
+<UpNextCard
+  nextTitle="SPL Token and Token-2022 Client Flows"
+  nextDescription="Apply the same transport discipline to token actions by validating program choice, mint, token accounts, and decimals before the wallet prompt opens."
+  nextHref="/learn/solana-kit-clients/spl-token-and-token-2022-client-flows"
+  nextReadingTime={14}
+  prevTitle="Transaction Message Building and Signers"
+  prevHref="/learn/solana-kit-clients/transaction-message-building-and-signers"
+  moduleName="Solana Kit Clients"
+/>
 
 ## Sources
 
