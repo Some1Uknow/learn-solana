@@ -2,13 +2,12 @@
 title: "Solana Development Environment Setup"
 description: "Set up the Solana CLI the right way, create a wallet, switch to devnet, fund it, and verify your machine is ready for the rest of the course."
 type: setup
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana cli", "devnet setup", "keypairs", "clusters", "wallet", "config"]
 ---
 
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 Most setup guides teach Solana like it is just another SDK install.
 
@@ -22,9 +21,9 @@ What you are really doing in this lesson is preparing three things:
 
 If those three pieces are clear in your head, the rest of this section gets much easier.
 
-<Callout type="info">
+<InfoCallout title="The Goal">
 This lesson is not about memorizing commands. It is about understanding what each command changes on your machine and on the network.
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -61,9 +60,44 @@ Before you type anything, lock in this model:
 
 If something breaks, the problem is usually one of those three.
 
-<Callout type="tip">
+<TipCallout>
 When Solana commands behave strangely, do not guess. Check your CLI version, your wallet address, and your current cluster first.
-</Callout>
+</TipCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "CLI",
+    definition: "The command-line tool that lets your machine talk to Solana for reads, config changes, airdrops, and later deployment work."
+  },
+  {
+    term: "Keypair",
+    definition: "A public/private key pair. The public key is your address. The private key authorizes transactions and must stay secret."
+  },
+  {
+    term: "Cluster",
+    definition: "A Solana network environment such as devnet, localnet, testnet, or mainnet-beta. Your commands only affect the cluster you are pointed at."
+  }
+]} />
+
+<Mermaid
+  chart={`
+flowchart TD
+  A[CLI]
+  B[Keypair]
+  C[Cluster]
+  D[solana --version]
+  E[solana address]
+  F[solana config get]
+  G[Ready to Build]
+
+  A --> D
+  B --> E
+  C --> F
+  D --> G
+  E --> G
+  F --> G
+`}
+/>
 
 ---
 
@@ -99,9 +133,9 @@ If that command prints a version, the CLI is installed correctly.
 
 If it says `command not found`, the install may have succeeded but your shell still cannot find the binary. That is a `PATH` problem, not a Solana problem.
 
-<Callout type="tip">
+<TipCallout title="Windows Users">
 If you are on Windows, use WSL2. Solana and Rust tooling are much more predictable there than in a native Windows shell.
-</Callout>
+</TipCallout>
 
 ---
 
@@ -124,7 +158,7 @@ solana-keygen new
 
 This command writes a new keypair file to disk. By default, it usually ends up here:
 
-```txt
+```bash title="terminal"
 ~/.config/solana/id.json
 ```
 
@@ -156,9 +190,9 @@ You should see at least:
 
 That output tells you which machine identity and which cluster your CLI is actually using.
 
-<Callout type="warn">
+<WarningCallout title="Security">
 Do not commit `id.json` to Git. If someone gets that file, they control that wallet.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -298,31 +332,27 @@ Use `solana config get`, `solana address`, and `solana balance` before assuming 
 </Step>
 </Steps>
 
-That is the real setup flow. Not “install package, move on.”
+That is the real setup flow. Not "install package, move on."
 
 ---
 
 ## Common Mistakes That Waste Time
 
-<Callout type="warn">
-**Mistake: Treating the wallet like an app login**  
+<WarningCallout title="Treating the wallet like an app login">
 Your wallet is a keypair file on disk. If you change that file, or point the CLI to a different file, you are using a different identity.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Mistake: Forgetting the active cluster**  
-If you airdrop on devnet and later point the CLI to localnet or mainnet, your balance will appear to “disappear.” It did not disappear. You changed environments.
-</Callout>
+<WarningCallout title="Forgetting the active cluster">
+If you airdrop on devnet and later point the CLI to localnet or mainnet, your balance will appear to "disappear." It did not disappear. You changed environments.
+</WarningCallout>
 
-<Callout type="warn">
-**Mistake: Trusting memory instead of config**  
+<WarningCallout title="Trusting memory instead of config">
 Do not rely on what you think your machine is using. Run `solana config get` and verify it.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Mistake: Using mainnet too early**  
+<WarningCallout title="Using mainnet too early">
 Mainnet is not a place to learn basic tooling. Learn on devnet, then move to localnet and production flows when your mental model is solid.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -340,6 +370,22 @@ That means you can now start learning the parts that actually make Solana feel d
 Without this setup, those lessons feel abstract.
 
 With this setup, they become testable.
+
+---
+
+## Quick Check
+
+<QuickCheck
+  question="Which network is safest for learning Solana development?"
+  options={[
+    "Mainnet Beta - it has the most users",
+    "Testnet - it's for testing",
+    "Devnet - free test SOL and no real value at risk",
+    "Localnet - runs on your machine"
+  ]}
+  correctIndex={2}
+  explanation="Devnet is the best choice for learning because it's public, free to use, and has no real monetary value at stake. You can request free test SOL from the faucet and experiment without risk."
+/>
 
 ---
 
@@ -362,3 +408,13 @@ You now have:
 - a repeatable way to verify your environment before building
 
 That is enough foundation for the next lesson.
+
+<UpNextCard
+  nextTitle="Working with Accounts and Lamports"
+  nextDescription="Create two wallets, transfer SOL between them, and understand what accounts and lamports really mean."
+  nextHref="/learn/solana-foundations/accounts-lamports-exercise"
+  nextReadingTime={10}
+  prevTitle="Solana Foundations Overview"
+  prevHref="/learn/solana-foundations"
+  moduleName="Solana Foundations"
+/>

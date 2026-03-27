@@ -2,12 +2,11 @@
 title: "Devnet Investigation Challenge"
 description: "Use your Solana foundations toolkit to inspect real accounts, send a real transfer on devnet, and write down what changed before and after the transaction."
 type: challenge
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana devnet", "account inspection", "transaction analysis", "challenge", "solana kit"]
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 A bad beginner challenge asks you to reverse-engineer a random devnet program before you can even explain a normal transfer cleanly.
 
@@ -19,9 +18,9 @@ Can you observe one real transaction, inspect the accounts around it, and explai
 
 That is what this challenge is for.
 
-<Callout type="info">
+<InfoCallout title="Use Your Existing Toolkit">
 Use the toolkit from the previous lesson. Do not build a new client from scratch here. The point is to use your tools to investigate the chain, not to start another project.
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -74,6 +73,32 @@ Far fewer can answer these basic questions cleanly afterward:
 
 That is the skill you are testing here.
 
+<Mermaid
+  chart={`
+flowchart LR
+  A[Record Before State]
+  B[Send Transfer]
+  C[Record After State]
+  D[Verify in Explorer]
+  E[Write Clear Report]
+
+  A --> B --> C --> D --> E
+`}
+/>
+
+<InfoCallout title="What counts as proof">
+For this challenge, proof means recorded evidence, not memory.
+
+Before you move on, make sure you capture:
+
+- the before balances for both wallets
+- the before account inspection output for both wallets
+- the transaction signature
+- the after balances for both wallets
+- the after account inspection output for both wallets
+- the Explorer page that confirms the transfer and fee
+</InfoCallout>
+
 ---
 
 ## Step-by-Step Challenge
@@ -105,6 +130,8 @@ You do not need every field. The important ones are:
 - owner
 - executable
 - data length
+
+If you skip this and only check the ending state, you lose the ability to prove what changed.
 
 </Step>
 
@@ -145,6 +172,11 @@ You should be able to explain:
 - why `wallet1` decreased by the transfer amount plus a fee
 - why both accounts are still normal wallet accounts owned by the System Program
 
+Do not stop at “the numbers changed.”
+
+Write down the balance delta for each wallet in lamports or SOL.
+That makes the fee visible instead of leaving it as a vague footnote.
+
 </Step>
 
 <Step>
@@ -183,6 +215,8 @@ Create a short note in plain English with this structure:
 ## Before
 - Sender balance:
 - Recipient balance:
+- Sender owner / executable / data length:
+- Recipient owner / executable / data length:
 
 ## Transaction
 - Signature:
@@ -193,6 +227,8 @@ Create a short note in plain English with this structure:
 ## After
 - Sender balance:
 - Recipient balance:
+- Sender owner / executable / data length:
+- Recipient owner / executable / data length:
 
 ## What Changed
 - Explain the balance movement in 3-5 sentences.
@@ -203,6 +239,8 @@ Create a short note in plain English with this structure:
 Keep it short.
 
 The point is clarity, not volume.
+
+If you want a sharper standard, write the report so another developer could verify every claim from your evidence without rerunning your commands.
 
 </Step>
 </Steps>
@@ -223,6 +261,19 @@ It says something closer to this:
 
 That is the level of precision you want.
 
+<QuickCheck
+  id="solana-foundations-challenge-fee-proof"
+  question="If `wallet2` received exactly `0.01 SOL` but `wallet1` lost slightly more than `0.01 SOL`, what does that extra loss represent?"
+  options={[
+    "Rent collected from the recipient account",
+    "A transaction fee paid by the sender",
+    "A validator reward paid to the recipient",
+    "Corrupted account data"
+  ]}
+  correctIndex={1}
+  explanation="The sender pays the network fee. That is why the sender's balance drop is slightly larger than the recipient's gain."
+/>
+
 ---
 
 ## Optional Stretch Task
@@ -237,29 +288,21 @@ That is useful because it closes the loop between your script output and public 
 
 ## Common Mistakes
 
-<Callout type="warn">
-**Only checking that the command did not crash**
-
+<WarningCallout title="Only checking that the command did not crash">
 A successful process exit is not the same thing as understanding the result. Always inspect balances and account output before and after.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Ignoring the fee**
-
+<WarningCallout title="Ignoring the fee">
 If you compare only the transfer amount, your math will look wrong. The sender pays a transaction fee in addition to the amount sent.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Treating Explorer like decoration**
-
+<WarningCallout title="Treating Explorer like decoration">
 Explorer is part of the investigation. It gives you an external confirmation that the signature, accounts, and program line up with what your script reported.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Writing a vague report**
-
+<WarningCallout title="Writing a vague report">
 If your report says “the blockchain updated” or “the transaction happened,” it is too vague. Name the signer, the recipient, the fee payer, and the observable balance changes.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -277,3 +320,69 @@ You used your toolkit to:
 That is a real beginner milestone.
 
 It means you are no longer just copying Solana commands. You are starting to reason about what the network actually did.
+
+---
+
+## Module Recap
+
+<QuickCheck
+  question="Which network should you use for testing and development?"
+  options={[
+    "mainnet-beta",
+    "devnet",
+    "testnet",
+    "localhost only"
+  ]}
+  correctIndex={1}
+  hint="This network has free airdrops and is specifically designed for development."
+  explanation="Devnet is the primary network for Solana development. It supports free airdrops, has a block explorer, and mirrors mainnet behavior without real money."
+/>
+
+<QuickCheck
+  question="How many lamports are in 1 SOL?"
+  options={[
+    "1,000",
+    "100,000",
+    "1,000,000",
+    "1,000,000,000"
+  ]}
+  correctIndex={3}
+  hint="Think about how many zeros are needed for precision in financial transactions."
+  explanation="1 SOL = 1,000,000,000 lamports (one billion). This allows for very precise fractional amounts in transactions."
+/>
+
+<QuickCheck
+  question="What do Solana accounts store?"
+  options={[
+    "Only SOL balances",
+    "Only program code",
+    "Data and lamports, owned by a program",
+    "Transaction history"
+  ]}
+  correctIndex={2}
+  hint="Accounts are the fundamental storage unit on Solana."
+  explanation="Every Solana account stores data (as a byte array), has a lamport balance, and is owned by a program that controls what can modify it."
+/>
+
+<QuickCheck
+  question="What are the essential components of a Solana transaction?"
+  options={[
+    "Just the recipient address",
+    "Instructions, signatures, and a recent blockhash",
+    "Only the amount to transfer",
+    "Program ID and nothing else"
+  ]}
+  correctIndex={1}
+  hint="Transactions need multiple pieces to be valid and processable."
+  explanation="A valid transaction requires instructions (what to do), signatures (authorization), and a recent blockhash (prevents replay attacks and proves freshness)."
+/>
+
+---
+
+<InfoCallout title="Solana Foundations Complete">
+You now have the baseline Solana model in place.
+
+You can identify the active wallet and cluster, reason about accounts as state containers, explain what a transaction contains, inspect account state directly, and use a real client toolkit to submit and verify a state change on devnet.
+
+That is enough to move into the next layer of Solana development without guessing at the basics.
+</InfoCallout>

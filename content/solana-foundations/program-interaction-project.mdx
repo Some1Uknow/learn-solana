@@ -2,12 +2,9 @@
 title: "Build a Solana Devnet Toolkit with Kit"
 description: "Build a small TypeScript CLI with @solana/kit to read balances, inspect accounts, and send SOL on devnet using the modern Solana client stack."
 type: project
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana kit", "devnet toolkit", "accounts", "transactions", "cli", "@solana-program/system"]
 ---
-
-import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 A lot of older Solana tutorials still teach client code with `@solana/web3.js`.
 
@@ -18,9 +15,28 @@ For new scripts and clients, `@solana/web3.js` 1.x is the legacy path. The moder
 So this project will not teach the old client surface first and fix it later.
 We will build with `@solana/kit` from the start.
 
-<Callout type="info">
+<InfoCallout>
 This project does not ask you to write an on-chain program yet. The goal is to build a small off-chain toolkit that can talk to devnet, inspect state, and send a real transaction.
-</Callout>
+</InfoCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "RPC Client",
+    definition: "The client object that sends read requests and transaction-related requests to a Solana RPC endpoint."
+  },
+  {
+    term: "Signer",
+    definition: "A wallet or keypair capable of authorizing a transaction by producing a valid cryptographic signature."
+  },
+  {
+    term: "Fee Payer",
+    definition: "The account that covers the network fee for a transaction. In a simple transfer, this is usually the sender."
+  },
+  {
+    term: "Blockhash Lifetime",
+    definition: "The freshness window attached to a transaction. If confirmation takes too long, the transaction can expire and must be rebuilt."
+  }
+]} />
 
 ---
 
@@ -88,6 +104,23 @@ Keep it small.
 
 This is not the time to build a framework.
 This is the time to make the client model feel normal.
+
+<Mermaid
+  chart={`
+flowchart TD
+  A[scripts/lib/solana.ts]
+  B[balance.ts]
+  C[inspect.ts]
+  D[send.ts]
+  E[RPC Reads]
+  F[Account Inspection]
+  G[Signed Transfer]
+
+  A --> B --> E
+  A --> C --> F
+  A --> D --> G
+`}
+/>
 
 ---
 
@@ -214,6 +247,10 @@ Run it against the wallet you funded earlier:
 pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
 ```
 
+<TipCallout title="Debugging balance issues">
+If you see `0` lamports, verify your wallet is funded on devnet with `solana balance -k wallet1.json`. If you get an RPC error, check that devnet is reachable with `solana cluster-version`.
+</TipCallout>
+
 What this teaches:
 
 - how to create an RPC client with Kit
@@ -279,6 +316,19 @@ What to notice in the output:
 - `dataLength` is usually `0` for a plain system wallet
 
 This is the same account model you already saw in the CLI lessons, now accessed through code.
+
+<QuickCheck
+  id="solana-foundations-kit-inspect-normal-wallet"
+  question="If `inspect.ts` shows `owner` as the System Program, `executable` as `false`, and `dataLength` as `0`, what are you usually looking at?"
+  options={[
+    "A deployed program account",
+    "A normal system wallet account",
+    "An NFT metadata account",
+    "A validator vote account"
+  ]}
+  correctIndex={1}
+  explanation="That combination usually means you are looking at a plain wallet account managed by the System Program, not a custom program account with its own stored data layout."
+/>
 
 ---
 
@@ -393,6 +443,14 @@ pnpm tsx scripts/balance.ts $(solana address -k wallet1.json)
 pnpm tsx scripts/balance.ts $(solana address -k wallet2.json)
 ```
 
+<TipCallout title="Debugging failed transactions">
+If the send fails with "insufficient funds," remember you need enough SOL to cover both the transfer amount and the transaction fee (~5000 lamports). Use `pnpm tsx scripts/balance.ts` to check your sender's balance first.
+</TipCallout>
+
+<WarningCallout title="Blockhash expired">
+If you see "blockhash not found" or "transaction expired," the blockhash became stale before confirmation. This happens if there is a long delay between fetching the blockhash and sending. Re-run the command to get a fresh blockhash.
+</WarningCallout>
+
 What this command teaches that the read scripts did not:
 
 - the fee payer must be explicit
@@ -400,54 +458,70 @@ What this command teaches that the read scripts did not:
 - the message must be fully built before signing
 - sending and confirming are separate steps
 
+<DeepDive title="Why the send pipeline is built in that order">
+The order in `send.ts` is not stylistic.
+
+It is a correctness rule.
+
+You start with an empty transaction message.
+
+Then you attach the fee payer, because the network must know who is covering the fee.
+
+Then you attach the latest blockhash, because the transaction needs a freshness window.
+
+Then you append the transfer instruction, because the message now has the context it needs.
+
+Only after all of that do you sign.
+
+That sequence matters because a signature is over the fully constructed message. If you change the fee payer, change the lifetime, or add instructions after signing, the original signature no longer matches the message you are trying to send.
+</DeepDive>
+
 ---
 
-## Why This Project Is Better Than the Old Version
+## The Client Pattern You Just Built
 
-The old version of this lesson pushed you toward `@solana/web3.js` and told you to pick a few random features.
+This project should not feel like three unrelated scripts.
 
-That is weak teaching for this section.
+It should feel like one small Solana client split into three commands.
 
-A beginner project should not feel like product planning.
-It should feel like guided contact with the real client model.
+Each command reuses the same foundation:
 
-This version is better because it gives you:
+- one RPC setup
+- one signer-loading path
+- one way to turn raw strings into typed Solana values
 
-- one modern SDK path
-- one shared helper file
-- one read command for balances
-- one read command for full account facts
-- one write command for a real SOL transfer
+From there, the commands branch into two kinds of work:
 
-That is a complete first toolkit.
+- read state with `balance.ts` and `inspect.ts`
+- write state with `send.ts`
+
+That is the pattern that keeps showing up later in real Solana work.
+
+A frontend does the same thing.
+A backend job does the same thing.
+An Anchor client does the same thing.
+
+The surface area gets bigger, but the client model does not fundamentally change.
 
 ---
 
 ## Common Mistakes
 
-<Callout type="warn">
-**Using `@solana/web3.js` out of habit**
-
+<WarningCallout title="Using @solana/web3.js out of habit">
 For new low-level client code, prefer `@solana/kit`. If you keep learning through the legacy surface first, you will eventually have to unlearn the object-heavy API model anyway.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Forgetting that reads and writes are different kinds of work**
-
+<WarningCallout title="Forgetting that reads and writes are different kinds of work">
 Reading an account only needs a valid address and RPC access. Sending a transaction needs a signer, a fresh blockhash, a complete message, and a confirmation flow.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Signing too early**
-
+<WarningCallout title="Signing too early">
 Once the transaction message is signed, you should not mutate it. Build the fee payer, lifetime, and instructions first. Sign last.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Treating the local keypair file like a harmless config file**
-
+<WarningCallout title="Treating the local keypair file like a harmless config file">
 `wallet1.json` contains secret key material. Never commit it, publish it, or paste it into random tools.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -475,3 +549,43 @@ That is a much stronger outcome for this section than just knowing a few command
 - https://solana.com/developers/cookbook/accounts/get-account-balance
 - https://www.solanakit.com/docs/getting-started/build-transaction
 - https://www.solanakit.com/docs/getting-started/send-transaction
+
+---
+
+## Quick Check
+
+<QuickCheck
+  id="solana-foundations-kit-shared-helper"
+  question="Why do all three toolkit scripts share the same `scripts/lib/solana.ts` helper?"
+  options={[
+    "Because Kit only allows one file per project",
+    "To keep RPC and signer setup centralized instead of duplicating client setup in every script",
+    "Because TypeScript requires all code to live in a lib folder",
+    "To avoid using environment variables"
+  ]}
+  correctIndex={1}
+  explanation="The shared helper keeps your RPC clients and signer-loading logic in one place. That makes the toolkit easier to reason about and avoids copy-pasting the same Solana setup into every command."
+/>
+
+<QuickCheck
+  id="solana-foundations-kit-transaction-requirements"
+  question="Which extra requirements appear when you move from account reads to sending a transaction?"
+  options={[
+    "Nothing extra. Reads and writes use the same data path",
+    "Only a destination address",
+    "A signer, fee payer, fresh blockhash lifetime, and confirmation flow",
+    "A deployed Anchor program"
+  ]}
+  correctIndex={2}
+  explanation="Reads only need RPC access and a valid address. Sending requires authorization, fee payment, freshness, and confirmation handling. That is the real jump from passive inspection to state-changing client code."
+/>
+
+<UpNextCard
+  nextTitle="Devnet Investigation Challenge"
+  nextDescription="Use your toolkit to investigate a real transfer and prove you can reason about state changes."
+  nextHref="/learn/solana-foundations/basic-exploration-challenge"
+  nextReadingTime={10}
+  prevTitle="How Solana Stays Fast"
+  prevHref="/learn/solana-foundations/solana-architecture"
+  moduleName="Solana Foundations"
+/>

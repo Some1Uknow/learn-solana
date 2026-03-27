@@ -1,12 +1,11 @@
 ---
 title: "Solana Fundamentals"
 description: "Solana Foundations teaches the core mental model for Solana: wallets, accounts, transactions, network architecture, and your first modern client toolkit with @solana/kit."
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana fundamentals", "week 1", "accounts", "transactions", "solana architecture", "solana kit"]
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 Solana Foundations is where Solana stops looking like a list of commands and starts looking like a system.
 
@@ -20,9 +19,28 @@ If this week works, you should leave with a clean answer to questions like these
 
 That is the point of this module.
 
-<Callout type="info">
+<TipCallout title="Learning Path">
 Follow this section in order. The sequence matters. Each lesson removes one source of beginner confusion before the next lesson adds a new moving part.
-</Callout>
+</TipCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Wallet",
+    definition: "A keypair that can sign transactions. The wallet does not store state itself. It controls which accounts can authorize changes."
+  },
+  {
+    term: "Account",
+    definition: "The basic unit of state on Solana. Accounts hold lamports, data, an owner, and metadata about how they can be changed."
+  },
+  {
+    term: "Transaction",
+    definition: "A signed message containing one or more instructions, the accounts involved, and a recent blockhash proving freshness."
+  },
+  {
+    term: "Validator",
+    definition: "A machine in the network that helps receive transactions, verify blocks, vote on outcomes, and maintain the ledger."
+  }
+]} />
 
 ---
 
@@ -64,6 +82,20 @@ This week fixes that in the right order.
 ---
 
 ## Solana Foundations Roadmap
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Setup]
+  B[Accounts and Lamports]
+  C[Transactions]
+  D[Architecture]
+  E[Kit Toolkit]
+  F[Investigation Challenge]
+
+  A --> B --> C --> D --> E --> F
+`}
+/>
 
 <Steps>
 <Step>
@@ -173,6 +205,36 @@ If you can say all of that honestly, you are ready to move beyond the basics.
 
 ---
 
+## Quick Check
+
+<QuickCheck
+  id="solana-foundations-overview-goal"
+  question="What is the real goal of Solana Foundations?"
+  options={[
+    "Memorize as many CLI commands as possible",
+    "Build a trustworthy mental model for Solana state, transactions, and client interaction",
+    "Deploy a production program on mainnet",
+    "Learn Anchor before understanding accounts and transactions"
+  ]}
+  correctIndex={1}
+  explanation="This module is about building the core Solana mental model first: wallets, accounts, transactions, network behavior, and a first real client toolkit. That foundation makes later lessons much easier to reason about."
+/>
+
+<QuickCheck
+  id="solana-foundations-overview-debugging"
+  question="When something feels unclear in this module, what question should you ask first?"
+  options={[
+    "Which command syntax did I forget?",
+    "What changed on-chain?",
+    "Which framework should I install next?",
+    "How do I skip ahead to programs?"
+  ]}
+  correctIndex={1}
+  explanation="The module keeps pushing you toward state-change reasoning. The important habit is asking what changed on-chain, not just what command you typed."
+/>
+
+---
+
 ## Summary
 
 This section is the foundation layer.
@@ -186,3 +248,11 @@ It teaches the minimum Solana model that everything else depends on:
 - clients need to read and write that state cleanly
 
 That is what the rest of the course will build on.
+
+<UpNextCard
+  nextTitle="Development Environment Setup"
+  nextDescription="Install the Solana CLI, create a wallet, switch to devnet, and verify your machine is ready."
+  nextHref="/learn/solana-foundations/devnet-setup"
+  nextReadingTime={8}
+  moduleName="Solana Foundations"
+/>

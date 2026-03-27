@@ -2,12 +2,11 @@
 title: "Working with Solana Accounts and Lamports"
 description: "Create two wallets, fund one, transfer SOL between them, inspect the receiving account, and understand what lamports and rent actually mean."
 type: exercise
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana accounts", "lamports", "rent exempt", "cli", "transfers"]
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 A lot of beginner confusion comes from treating a wallet, an address, and an account like they are three different things.
 
@@ -21,9 +20,41 @@ When you send SOL, you are changing the balance stored in accounts on the networ
 
 That is the core idea this exercise is meant to lock in.
 
-<Callout type="info">
+<InfoCallout>
 This lesson assumes you already finished the devnet setup lesson. If something looks wrong, run `solana config get` first and make sure your CLI is still pointed at `devnet`.
-</Callout>
+</InfoCallout>
+
+---
+
+## Key Terms
+
+<ConceptCard term="Account">
+A data structure on Solana that stores state (like balance) and is identified by a public key address.
+</ConceptCard>
+
+<ConceptCard term="Lamport">
+The smallest unit of SOL. 1 SOL = 1,000,000,000 lamports. Named after Leslie Lamport.
+</ConceptCard>
+
+<ConceptCard term="Rent">
+The minimum balance an account must maintain to stay alive on-chain. Accounts below this threshold can be garbage collected.
+</ConceptCard>
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[wallet1 keypair]
+  B[wallet1 address]
+  C[wallet1 account]
+  D[wallet2 keypair]
+  E[wallet2 address]
+  F[wallet2 account]
+
+  A --> B --> C
+  D --> E --> F
+  C -- transfer lamports --> F
+`}
+/>
 
 ---
 
@@ -223,9 +254,9 @@ Why this matters:
 - program-owned accounts often need to be funded above a rent threshold based on their data size
 - later, when you create accounts for programs, rent becomes part of account design
 
-<Callout type="tip">
+<TipCallout>
 Right now, you do not need to calculate rent by hand. The important thing is to understand that account storage on Solana is not free, and balance is part of keeping account state alive.
-</Callout>
+</TipCallout>
 
 ---
 
@@ -244,29 +275,21 @@ That is the foundation for understanding transactions in the next lesson.
 
 ## Common Mistakes
 
-<Callout type="warn">
-**Using the wrong wallet by accident**
-
+<WarningCallout title="Using the wrong wallet by accident">
 When you work with multiple keypairs, always pass `-k wallet1.json` or `-k wallet2.json` explicitly. If you do not, the CLI may fall back to the default wallet in your global Solana config.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Assuming the transfer amount is in lamports**
-
+<WarningCallout title="Assuming the transfer amount is in lamports">
 For `solana transfer`, the amount is in SOL by default. If you send `0.01`, you are sending `0.01 SOL`, not `0.01 lamports`.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Forgetting that fees exist**
-
+<WarningCallout title="Forgetting that fees exist">
 After the transfer, the sender will not be reduced by exactly `0.01 SOL`. It will be reduced by the transfer amount plus a small network fee.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Thinking every account stores user data**
-
+<WarningCallout title="Thinking every account stores user data">
 A plain wallet account is usually just a system-owned account with a balance and no custom data. Program accounts are where richer state starts to appear.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -281,4 +304,32 @@ That means you now understand the basic unit of state on Solana:
 - transfers update account balances
 - rent affects whether accounts can stay alive on-chain
 
+---
+
+## Quick Check
+
+<QuickCheck
+  question="How many lamports are in 1 SOL?"
+  options={[
+    "1,000 lamports",
+    "1,000,000 lamports",
+    "1,000,000,000 lamports",
+    "100 lamports"
+  ]}
+  correctIndex={2}
+  explanation="1 SOL equals 1 billion (1,000,000,000) lamports. This is similar to how 1 Bitcoin equals 100 million satoshis."
+/>
+
+---
+
 Next, you can move into transactions with a much better mental model because you have already seen what a balance change looks like from the CLI.
+
+<UpNextCard
+  nextTitle="Understanding Solana Transactions"
+  nextDescription="Learn what a transaction really contains: instructions, accounts, signatures, and lifetime."
+  nextHref="/learn/solana-foundations/transaction-anatomy"
+  nextReadingTime={12}
+  prevTitle="Development Environment Setup"
+  prevHref="/learn/solana-foundations/devnet-setup"
+  moduleName="Solana Foundations"
+/>

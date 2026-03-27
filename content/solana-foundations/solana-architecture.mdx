@@ -1,12 +1,11 @@
 ---
 title: "How Solana Stays Fast"
 description: "Understand how Solana orders, executes, and propagates transactions through validators, leaders, Proof of History, Sealevel, Gulf Stream, and Turbine."
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana architecture", "proof of history", "validators", "epochs slots", "sealevel", "turbine", "gulf stream"]
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 By this point, you have already done the most important beginner work:
 
@@ -21,9 +20,32 @@ How does Solana take all of those transactions from all of those users and proce
 
 That is the architecture question.
 
-<Callout type="info">
+<InfoCallout>
 You do not need to memorize every subsystem in this lesson. The goal is to leave with a clean mental model of how Solana handles ordering, leadership, execution, and propagation.
-</Callout>
+</InfoCallout>
+
+<ConceptCards concepts={[
+  {
+    term: "Validator",
+    definition: "A machine participating in the network that receives transactions, verifies blocks, votes on results, and stores network state."
+  },
+  {
+    term: "Leader",
+    definition: "The validator assigned to produce blocks during a specific slot, responsible for collecting and ordering transactions."
+  },
+  {
+    term: "Slot",
+    definition: "A small unit of time (~400ms) in which a leader gets a chance to produce a block."
+  },
+  {
+    term: "Epoch",
+    definition: "A larger stretch of time containing many slots (~2-3 days) that defines the validator schedule."
+  },
+  {
+    term: "Proof of History",
+    definition: "Solana's cryptographic clock that provides a verifiable ordering signal without requiring validators to communicate timestamps."
+  }
+]} />
 
 ---
 
@@ -70,6 +92,24 @@ Solana architecture is doing four jobs at once:
 4. **Propagate the results fast enough to keep up**
 
 Most of the named Solana systems fit into one of those jobs.
+
+<Mermaid
+  chart={`
+flowchart LR
+  A[Leader Schedule]
+  B[Proof of History]
+  C[Sealevel]
+  D[Gulf Stream]
+  E[Turbine]
+  F[Confirmed State]
+
+  A --> B
+  B --> C
+  D --> A
+  C --> E
+  E --> F
+`}
+/>
 
 ---
 
@@ -130,6 +170,38 @@ The short version is:
 - validators can use that sequence as a shared timing reference
 
 That is why PoH is best thought of as a clock, not as the whole security model.
+
+<DeepDive title="How Proof of History Actually Works">
+Proof of History uses a **sequential SHA-256 hash chain** where each output becomes the input for the next hash. This creates a verifiable sequence that proves time has passed.
+
+**The Core Mechanism:**
+1. Start with an initial value
+2. Hash it to get output₁
+3. Use output₁ as input to get output₂
+4. Repeat continuously
+
+```
+hash(initial) → output₁
+hash(output₁) → output₂
+hash(output₂) → output₃
+...
+```
+
+**Why This Proves Time:**
+- Each hash takes a minimum amount of real time to compute
+- You cannot skip ahead—you must compute each hash in sequence
+- But verification is fast: validators can check the chain in parallel
+
+**How Transactions Fit In:**
+Transactions are "mixed in" to the hash chain. When a transaction arrives, its hash becomes part of the next PoH output. This anchors the transaction to a specific point in the sequence.
+
+**What PoH Does NOT Do:**
+- It does not replace consensus voting
+- It does not guarantee transaction finality
+- It does not prevent malicious leaders
+
+PoH is a **coordination optimization**. It gives everyone a shared clock so validators spend less time arguing about ordering.
+</DeepDive>
 
 ### Sealevel
 
@@ -278,29 +350,21 @@ That is much more precise, and it will help you later when you debug compute and
 
 ## Common Mistakes
 
-<Callout type="warn">
-**Thinking Proof of History is the whole consensus model**
-
+<WarningCallout title="Thinking Proof of History is the whole consensus model">
 It is not. Proof of History provides a verifiable clock and ordering aid. Validators still verify blocks and vote as part of the network's broader consensus process.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Assuming faster means fewer checks**
-
+<WarningCallout title="Assuming faster means fewer checks">
 Solana is not fast because it skips verification. It is fast because the network is organized to reduce waste in ordering, scheduling, execution, and propagation.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Assuming Sealevel means every transaction runs in parallel**
-
+<WarningCallout title="Assuming Sealevel means every transaction runs in parallel">
 Parallelism depends on account access. If transactions contend on the same writable state, they still serialize.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Treating architecture as trivia instead of a debugging tool**
-
+<WarningCallout title="Treating architecture as trivia instead of a debugging tool">
 These concepts are not only for interviews. They explain real behavior you will see later: transaction delays, account contention, block production timing, and why some operations compose well while others do not.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -322,3 +386,49 @@ when you send a transaction, Solana is not just “processing a request.”
 It is scheduling leadership, ordering messages, executing account-aware work, verifying the result, and spreading that result across a distributed network.
 
 With that model in place, the rest of the course will feel much less abstract.
+
+<QuickCheck
+  question="What makes Solana fast compared to simpler blockchain models?"
+  options={[
+    "It skips transaction verification to save time",
+    "It uses scheduled leadership, a cryptographic clock, parallel execution, and fast propagation",
+    "It processes all transactions one at a time in a single queue",
+    "It only allows a small number of validators to participate"
+  ]}
+  correctIndex={1}
+  explanation="Solana achieves speed through architectural optimizations: predictable leader scheduling, Proof of History for ordering, Sealevel for parallel execution of non-conflicting transactions, and Gulf Stream/Turbine for fast forwarding and propagation. It does NOT skip verification."
+/>
+
+<QuickCheck
+  question="When can Sealevel execute two transactions in parallel?"
+  options={[
+    "Always—Solana runs everything in parallel",
+    "Never—all transactions must be sequential",
+    "When the transactions do not write to the same accounts",
+    "Only when the transactions are from the same user"
+  ]}
+  correctIndex={2}
+  explanation="Sealevel checks account access patterns. If two transactions touch different writable accounts, they can run in parallel. If they both need writable access to the same account, they must serialize."
+/>
+
+<QuickCheck
+  question="What is the role of Proof of History in Solana?"
+  options={[
+    "It replaces the need for validators to vote on blocks",
+    "It provides a verifiable ordering signal and shared timing reference",
+    "It encrypts all transaction data for privacy",
+    "It determines which transactions are valid"
+  ]}
+  correctIndex={1}
+  explanation="Proof of History is a cryptographic clock that gives the network a shared sense of ordering. It does NOT replace consensus—validators still verify blocks and vote. PoH reduces coordination overhead by providing a timing reference."
+/>
+
+<UpNextCard
+  nextTitle="Build a Solana Devnet Toolkit"
+  nextDescription="Build your first client toolkit with @solana/kit to read balances, inspect accounts, and send SOL."
+  nextHref="/learn/solana-foundations/program-interaction-project"
+  nextReadingTime={15}
+  prevTitle="Understanding Solana Transactions"
+  prevHref="/learn/solana-foundations/transaction-anatomy"
+  moduleName="Solana Foundations"
+/>

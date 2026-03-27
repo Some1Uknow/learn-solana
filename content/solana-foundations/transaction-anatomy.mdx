@@ -2,12 +2,11 @@
 title: "Understanding Solana Transactions"
 description: "Use one simple SOL transfer to understand what a Solana transaction contains, why signers and recent blockhashes matter, and how a transaction moves through the network."
 type: theory
-module: "🧱 Solana Fundamentals"
+module: "Solana Fundamentals"
 keywords: ["solana transaction", "instructions", "signers", "recent blockhash", "accounts", "confirmation"]
 ---
 
 import { Steps, Step } from 'fumadocs-ui/components/steps';
-import { Callout } from 'fumadocs-ui/components/callout';
 
 Most beginners think a transaction is just “the thing that sends SOL.”
 
@@ -19,9 +18,28 @@ That is the mental model you need for everything that comes later.
 
 If you understand transactions, program calls stop feeling magical.
 
-<Callout type="info">
+<ConceptCards concepts={[
+  {
+    term: "Signature",
+    definition: "Cryptographic proof that the holder of a private key approved the transaction. Required for any account that authorizes or pays."
+  },
+  {
+    term: "Instruction",
+    definition: "The action a transaction asks the network to execute, such as transferring SOL, creating an account, or calling a program."
+  },
+  {
+    term: "Blockhash",
+    definition: "A unique identifier for a recent block on Solana, used as a reference point for transaction validity."
+  },
+  {
+    term: "Recent Blockhash",
+    definition: "A blockhash included in every transaction to prove freshness. Transactions expire if the blockhash is too old (typically ~60-90 seconds)."
+  }
+]} />
+
+<InfoCallout>
 This lesson builds directly on the previous one. The `solana transfer` command you already ran is the concrete example we will keep returning to.
-</Callout>
+</InfoCallout>
 
 ---
 
@@ -155,6 +173,29 @@ It is validating and executing a structured, signed message.
 
 ## How a Transaction Moves Through the Network
 
+<Mermaid
+  chart={`
+flowchart LR
+  A[Terminal Command]
+  B[CLI Builds Transaction]
+  C[Instruction and Accounts]
+  D[Signatures]
+  E[Recent Blockhash]
+  F[RPC Submission]
+  G[Leader Executes]
+  H[State Changes]
+
+  A --> B
+  B --> C
+  B --> D
+  B --> E
+  C --> F
+  D --> F
+  E --> F
+  F --> G --> H
+`}
+/>
+
 Now that you know what is inside the message, here is the lifecycle.
 
 <Steps>
@@ -283,29 +324,21 @@ That property becomes more important once you start creating accounts and then u
 
 ## Common Mistakes
 
-<Callout type="warn">
-**Confusing the command with the transaction**
-
+<WarningCallout title="Confusing the command with the transaction">
 The CLI command is just how you ask for a transaction to be built. The network only sees the serialized transaction message and its signatures.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Assuming every account in a transaction must sign**
-
+<WarningCallout title="Assuming every account in a transaction must sign">
 That is not true. The sender in a transfer must sign. The recipient usually does not.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Treating the recent blockhash like an implementation detail you can ignore**
-
+<WarningCallout title="Treating the recent blockhash like an implementation detail you can ignore">
 You may not fetch it manually very often, but transaction freshness depends on it. If a transaction sits around too long, it can expire.
-</Callout>
+</WarningCallout>
 
-<Callout type="warn">
-**Thinking “sent” means “succeeded”**
-
+<WarningCallout title="Thinking “sent” means “succeeded”">
 Submitting a transaction and confirming a transaction are two different stages. Always care about the final result, not just the submission step.
-</Callout>
+</WarningCallout>
 
 ---
 
@@ -325,3 +358,95 @@ That is why the transfer from the previous lesson worked the way it did.
 The CLI built the message, `wallet1` signed it, the network checked it, and validators applied the state change.
 
 With that model in place, the next lessons on architecture and programs will make much more sense because you now know what is actually moving through the network when you interact with Solana.
+
+---
+
+<DeepDive title="Transaction Internals: The Binary Format">
+
+When you build a transaction, it gets serialized into a compact binary format before being sent to the network. Understanding this structure helps when debugging or working with raw transaction data.
+
+**Message Header**
+
+The header contains three bytes:
+- Number of required signatures
+- Number of read-only signed accounts  
+- Number of read-only unsigned accounts
+
+**Account Keys Array**
+
+All accounts referenced by the transaction are listed in a specific order:
+1. Writable signers (fee payer first)
+2. Read-only signers
+3. Writable non-signers
+4. Read-only non-signers
+
+**Recent Blockhash**
+
+A 32-byte blockhash that anchors the transaction to a specific point in time.
+
+**Compact Instruction Array**
+
+Each instruction contains:
+- Program ID index (pointing to the account keys array)
+- Account indices (which accounts this instruction uses)
+- Instruction data (the actual payload for the program)
+
+**Signatures**
+
+An array of 64-byte Ed25519 signatures, one for each required signer, in the same order as signers appear in the account keys array.
+
+**Why This Matters**
+
+When you see errors like "Transaction too large" or "Invalid account index," understanding this binary layout helps you diagnose the issue. The maximum transaction size is 1232 bytes, which limits how many accounts and instructions you can pack into a single transaction.
+
+</DeepDive>
+
+---
+
+<QuickCheck
+  question="Which of the following must be included in every Solana transaction?"
+  options={[
+    "A recent blockhash and at least one signature",
+    "Multiple instructions",
+    "A recipient signature",
+    "A timestamp in UTC format"
+  ]}
+  correctIndex={0}
+  explanation="Every Solana transaction requires a recent blockhash (to prove freshness and prevent replay) and at least one signature (to authorize the transaction and pay fees). Multiple instructions are optional, recipient signatures are not required for receiving funds, and Solana uses blockhashes rather than wall-clock timestamps."
+/>
+
+<QuickCheck
+  question="Why does a transaction include a recent blockhash?"
+  options={[
+    "To record the exact time the transaction was created",
+    "To prevent old signed transactions from being replayed later",
+    "To identify which validator should process the transaction",
+    "To calculate the transaction fee"
+  ]}
+  correctIndex={1}
+  explanation="The recent blockhash acts as a freshness marker. It ensures that transactions expire after a short window (~60-90 seconds), preventing attackers from saving a signed transaction and replaying it later."
+/>
+
+<QuickCheck
+  question="In a simple SOL transfer from wallet1 to wallet2, which account must sign the transaction?"
+  options={[
+    "Both wallet1 and wallet2",
+    "Only wallet2 (the recipient)",
+    "Only wallet1 (the sender)",
+    "Neither—the System Program handles authorization"
+  ]}
+  correctIndex={2}
+  explanation="Only wallet1 (the sender) must sign because it is authorizing funds to leave its account. The recipient (wallet2) does not need to sign just to receive SOL. This distinction between signers and non-signers is fundamental to understanding Solana's permission model."
+/>
+
+---
+
+<UpNextCard
+  nextTitle="How Solana Stays Fast"
+  nextDescription="Understand Proof of History, validators, leaders, and the systems that make Solana fast."
+  nextHref="/learn/solana-foundations/solana-architecture"
+  nextReadingTime={15}
+  prevTitle="Working with Accounts and Lamports"
+  prevHref="/learn/solana-foundations/accounts-lamports-exercise"
+  moduleName="Solana Foundations"
+/>
