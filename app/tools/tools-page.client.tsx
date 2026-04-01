@@ -28,12 +28,6 @@ const tools = [
   },
 ];
 
-const upcomingFlows = [
-  "Escrow Exchange",
-  "NFT Mint Pipeline",
-  "Staking Reward Loop",
-];
-
 const breadcrumbItems = [
   { name: "Home", url: "/" },
   { name: "Tools", url: "/tools" },
@@ -116,24 +110,6 @@ export function ToolsPageClient() {
                 </div>
               </Link>
             ))}
-          </div>
-
-          <div className="mt-10 rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
-            <h2 className="mb-2 text-lg font-medium text-white">Planned flows</h2>
-            <p className="mb-4 text-sm text-neutral-500">
-              New scenarios will be added to Runtime Lab over time using the same
-              interaction model.
-            </p>
-            <div className="grid gap-3 md:grid-cols-3">
-              {upcomingFlows.map((flow) => (
-                <div
-                  key={flow}
-                  className="rounded-lg border border-neutral-800 bg-neutral-950 p-4"
-                >
-                  <p className="text-sm text-neutral-300">{flow}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
           {filteredTools.length === 0 && (
