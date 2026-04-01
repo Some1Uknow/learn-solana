@@ -4,14 +4,15 @@ import { createCanonical } from "@/lib/seo";
 
 const title = "Interactive Solana Learning Tools | LearnSol";
 const description =
-  "Explore LearnSol’s interactive, beginner-friendly tools for understanding Solana programs, accounts, and transactions.";
+  "Learn Solana through interactive labs and visual builders. Start with Runtime Lab to understand runtime checks, account diffs, and common failures.";
 
 const toolsKeywords = [
   "solana learning tools",
+  "solana runtime lab",
+  "solana runtime visualizer",
   "solana visual builder",
-  "anchor simulator",
-  "solana transaction visualizer",
-  "solana account explorer",
+  "anchor beginner lab",
+  "solana account diffs",
   "blockchain learning tools",
   "web3 education tools",
 ];

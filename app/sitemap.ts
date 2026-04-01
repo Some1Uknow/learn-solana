@@ -39,6 +39,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
   { path: '/games', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/challenges', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/tools', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/tools/runtime-lab', priority: 0.65, changeFrequency: 'monthly' },
   { path: '/tools/visual-builder', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/tools/visual-builder/fullscreen', priority: 0.5, changeFrequency: 'monthly' },
   { path: '/partner', priority: 0.5, changeFrequency: 'monthly' },
