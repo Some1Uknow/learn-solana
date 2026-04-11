@@ -119,7 +119,7 @@ They are part of your validation model.
 <Mermaid
   chart={`
 flowchart LR
-    A["Seeds: b\\"profile\\" + authority pubkey"] --> B[Find PDA + bump]
+    A["Seeds: profile namespace + authority pubkey"] --> B[Find PDA + bump]
     B --> C[Create account at deterministic address]
     C --> D[Store authority and profile data]
     D --> E[Later instructions validate same seeds]
