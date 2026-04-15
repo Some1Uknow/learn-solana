@@ -109,7 +109,7 @@ export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
     <Link href={githubConfig.url} target="_blank" rel="noopener noreferrer">
       <Button
         variant="outline"
-        className={`flex items-center gap-2 h-10 px-2 py-0 bg-[#0d1117] hover:bg-[#161b22] border-[#0d1117] text-white ${
+        className={`flex h-10 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-0 text-white/80 hover:bg-white/[0.06] hover:text-white ${
           isMobile ? "w-full justify-center" : ""
         }`}
       >

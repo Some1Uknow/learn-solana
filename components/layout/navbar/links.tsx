@@ -6,9 +6,8 @@ import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { label: "Learn", href: "/modules" },
-  { label: "Games", href: "/games" },
-  { label: "Tools", href: "/tools" },
   { label: "Challenges", href: "/challenges" },
+  { label: "Tools", href: "/tools" },
 ];
 
 interface NavbarLinksProps {
@@ -30,10 +29,10 @@ export function NavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) 
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "block px-3 py-2 text-sm transition-colors rounded-md",
+                "block rounded-2xl border px-4 py-3 text-sm transition-all",
                 isActive
-                  ? "text-white bg-white/10"
-                  : "text-white/70 hover:text-white hover:bg-white/5"
+                  ? "border-[#a9ff2f]/30 bg-[#a9ff2f]/10 text-white shadow-[inset_0_0_0_1px_rgba(169,255,47,0.05)]"
+                  : "border-white/[0.06] bg-white/[0.02] text-white/70 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white"
               )}
             >
               {item.label}
@@ -45,7 +44,7 @@ export function NavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) 
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       {navigationItems.map((item) => {
         const isActive = pathname.startsWith(item.href);
         return (
@@ -53,10 +52,10 @@ export function NavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) 
             key={item.label}
             href={item.href}
             className={cn(
-              "px-4 py-1.5 text-sm rounded-full transition-all",
+              "rounded-full px-4 py-2 text-sm transition-all",
               isActive
-                ? "text-white bg-white/10"
-                : "text-white/60 hover:text-white hover:bg-white/5"
+                ? "bg-white/[0.08] text-white"
+                : "text-white/60 hover:bg-white/[0.05] hover:text-white"
             )}
           >
             {item.label}

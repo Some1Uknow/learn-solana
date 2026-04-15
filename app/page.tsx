@@ -7,16 +7,17 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "Learn Solana | Free Solana Development Course & Tutorials";
+const title = "learn.sol | Onboarding and Education Layer for Solana";
 const description =
-  "Learn Solana development from scratch with our free course. Master Solana programming, smart contracts, Rust & Anchor through interactive tutorials, games, and coding challenges.";
+  "Learn Solana through public modules, executable coding challenges, and full-stack developer tooling. Rust, Anchor, runtime concepts, and modern client flows in one place.";
 
 const homeKeywords = [
   ...courseKeywords,
   "solana for beginners",
-  "blockchain development course",
-  "web3 development tutorial",
-  "learn blockchain programming",
+  "solana onboarding",
+  "solana developer education",
+  "anchor rust solana course",
+  "solana coding challenges",
 ];
 
 export const metadata: Metadata = {
