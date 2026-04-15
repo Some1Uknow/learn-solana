@@ -42,7 +42,7 @@ export const longTailKeywords = [
   "solana development for beginners",
   "best solana course",
   "solana coding challenges",
-  "solana games to learn",
+  "solana onboarding platform",
   "solana developer bootcamp",
   "solana projects",
 ];

@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/use-auth";
 const PROTECTED_ROUTES = [
   "/jobs",
   "/projects",
-  "/test-auth",
   "/dashboard",
   "/admin",
 ];
