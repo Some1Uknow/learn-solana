@@ -7,7 +7,8 @@ import {
   defaultTwitterImage,
 } from "@/lib/seo";
 
-const title = "learn.sol | Onboarding and Education Layer for Solana";
+const title = "Learn Solana | Free Solana Development Course & Tutorials";
+
 const description =
   "Learn Solana through public modules, executable coding challenges, and full-stack developer tooling. Rust, Anchor, runtime concepts, and modern client flows in one place.";
 

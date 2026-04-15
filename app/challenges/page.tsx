@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ChallengesPageClient from "./challenges-page.client";
 import { createCanonical } from "@/lib/seo";
+import { getTrackMeta, listExerciseTracks, listExercisesByTrack } from "@/lib/challenges/exercises";
 
 const title = "Solana Coding Challenges | 30-Day Rust & Solana Practice";
 const description =
@@ -45,5 +46,17 @@ export const metadata: Metadata = {
 };
 
 export default function ChallengesPage() {
-  return <ChallengesPageClient />;
+  const tracks = listExerciseTracks().map((track) => {
+    const meta = getTrackMeta(track);
+    const exercises = listExercisesByTrack(track);
+
+    return {
+      track,
+      name: meta.name,
+      description: meta.description,
+      exerciseCount: exercises.length,
+    };
+  });
+
+  return <ChallengesPageClient tracks={tracks} />;
 }

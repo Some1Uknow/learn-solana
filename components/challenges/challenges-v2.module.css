@@ -1,0 +1,1051 @@
+.page {
+  --bg: #040404;
+  --panel: #0f0f0f;
+  --panel-soft: #151515;
+  --panel-muted: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f5f5f5;
+  --muted: #8e8e8e;
+  --muted-strong: #b7b7b7;
+  --lime: #a9ff2f;
+  --lime-soft: rgba(169, 255, 47, 0.12);
+  --purple-soft: rgba(153, 69, 255, 0.14);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(169, 255, 47, 0.08), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(169, 255, 47, 0.06), transparent 22%),
+    linear-gradient(180deg, #050505 0%, #040404 100%);
+  color: var(--text);
+  overflow-x: clip;
+}
+
+.shell {
+  width: min(1240px, calc(100vw - 80px));
+  margin: 0 auto;
+}
+
+.hero {
+  position: relative;
+  padding: 7rem 0 3rem;
+}
+
+.heroGrid {
+  display: block;
+}
+
+.heroCopy {
+  max-width: 100%;
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.breadcrumb a {
+  transition: color 180ms ease;
+}
+
+.breadcrumb a:hover {
+  color: var(--text);
+}
+
+.breadcrumbDivider {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.heroKicker {
+  margin-top: 1.35rem;
+  color: var(--lime);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+}
+
+.heroTitle {
+  margin-top: 0.9rem;
+  font-size: clamp(2.7rem, 5.8vw, 4.25rem);
+  line-height: 0.97;
+  letter-spacing: -0.055em;
+  max-width: none;
+}
+
+.heroBody {
+  margin-top: 1.05rem;
+  max-width: 50rem;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.78;
+}
+
+.heroActions {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-top: 1.7rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.05rem;
+  border-radius: 999px;
+  padding: 0 1.35rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover {
+  transform: translateY(-1px);
+}
+
+.primaryButton {
+  background: var(--lime);
+  color: #070707;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+}
+
+.section {
+  padding: 0 0 4rem;
+}
+
+.sectionHeader {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.7rem;
+}
+
+.sectionKicker {
+  color: var(--lime);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+}
+
+.sectionTitle {
+  margin-top: 0.8rem;
+  font-size: clamp(1.95rem, 3.3vw, 2.85rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.sectionBody {
+  margin-top: 0.85rem;
+  max-width: 42rem;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.72;
+}
+
+.trackSpotlight {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 0;
+  border-radius: 1.7rem;
+  background:
+    radial-gradient(circle at top left, rgba(169, 255, 47, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(16, 16, 16, 0.98), rgba(8, 8, 8, 0.98));
+  box-shadow:
+    inset 0 -28px 70px -40px rgba(255, 255, 255, 0.07),
+    0 22px 60px rgba(0, 0, 0, 0.26);
+}
+
+.trackCatalog {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.trackCatalogSingle {
+  grid-template-columns: 1fr;
+}
+
+.trackSpotlightVisual {
+  position: relative;
+  min-height: 17rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(169, 255, 47, 0.16), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01));
+}
+
+.trackImage {
+  object-fit: contain;
+  padding: 2.15rem;
+  filter: drop-shadow(0 0 28px rgba(255, 255, 255, 0.12));
+}
+
+.trackFallbackMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 2rem;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+}
+
+.trackSpotlightBody {
+  padding: 1.7rem 1.7rem 1.85rem;
+}
+
+.trackStatsInline {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.trackStatItem {
+  padding-top: 0.3rem;
+}
+
+.trackStatValue {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--text);
+}
+
+.trackStatLabel {
+  margin-top: 0.45rem;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.trackStatNote {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.48;
+}
+
+.trackMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  border-radius: 999px;
+  padding: 0 0.75rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pillActive {
+  background: rgba(169, 255, 47, 0.14);
+  color: var(--lime);
+}
+
+.pillGhost {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.trackSpotlightTitle {
+  margin-top: 0.8rem;
+  font-size: clamp(1.75rem, 3.3vw, 2.3rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+  max-width: none;
+}
+
+.trackSpotlightDescription {
+  margin-top: 0.85rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.72;
+  max-width: 34rem;
+}
+
+.roadmapGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.roadmapCard {
+  min-height: 13.75rem;
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(17, 17, 17, 0.98), rgba(8, 8, 8, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 18px 42px rgba(0, 0, 0, 0.18);
+  padding: 1.05rem;
+}
+
+.roadmapIcon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(169, 255, 47, 0.12);
+  color: var(--lime);
+}
+
+.roadmapDays {
+  margin-top: 0.85rem;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.roadmapTitle {
+  margin-top: 0.5rem;
+  font-size: 1.08rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.roadmapDescription {
+  margin-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.58;
+}
+
+.panel {
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(180deg, rgba(17, 17, 17, 0.98), rgba(8, 8, 8, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 20px 54px rgba(0, 0, 0, 0.2);
+}
+
+.trackLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  align-items: start;
+}
+
+.trackSidebar {
+  position: sticky;
+  top: 6.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.sidebarCard {
+  padding: 1.15rem;
+}
+
+.sidebarLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+
+.progressValue {
+  margin-top: 0.75rem;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.progressMeta {
+  margin-top: 0.45rem;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.progressBar {
+  margin-top: 0.85rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a9ff2f, #d5ff8d);
+}
+
+.trackSections {
+  display: grid;
+  gap: 1rem;
+}
+
+.trackSection {
+  padding: 1.1rem;
+}
+
+.trackSectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trackSectionIntro h2 {
+  font-size: 1.28rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.trackSectionIntro p {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.87rem;
+  line-height: 1.62;
+}
+
+.roadmapBadge {
+  min-height: 1.8rem;
+  border-radius: 999px;
+  padding: 0 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.challengeList {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.challengeRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  min-height: 4.7rem;
+  border-radius: 1.1rem;
+  padding: 0.85rem 0.95rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.challengeRow:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.challengeRowCompleted {
+  background: rgba(169, 255, 47, 0.08);
+}
+
+.challengeOrder {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.challengeOrderCompleted {
+  background: rgba(169, 255, 47, 0.18);
+  color: var(--lime);
+}
+
+.challengeMain {
+  min-width: 0;
+}
+
+.challengeTopline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.challengeTitle {
+  font-size: 0.92rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.challengeDescription {
+  margin-top: 0.28rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.challengeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.tagChip {
+  padding: 0.28rem 0.52rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.66rem;
+}
+
+.difficultyEasy {
+  color: var(--lime);
+}
+
+.difficultyMedium {
+  color: #f5b659;
+}
+
+.difficultyHard {
+  color: #c987ff;
+}
+
+.helperText {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.62;
+}
+
+.workspaceRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(169, 255, 47, 0.07), transparent 24%),
+    linear-gradient(180deg, #040404 0%, #050505 100%);
+}
+
+.workspaceShell {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.workspaceTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(6, 6, 6, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.workspaceTopbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.workspaceBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.84rem;
+  transition: color 180ms ease;
+}
+
+.workspaceBack:hover {
+  color: var(--text);
+}
+
+.workspaceDivider {
+  width: 1px;
+  height: 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.workspaceTitleBlock {
+  min-width: 0;
+}
+
+.workspaceTitle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspaceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.difficultyBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.36rem;
+  border-radius: 999px;
+  padding: 0 0.55rem;
+  font-size: 0.61rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.badgeEasy {
+  color: var(--lime);
+  background: rgba(169, 255, 47, 0.09);
+  border-color: rgba(169, 255, 47, 0.18);
+}
+
+.badgeMedium {
+  color: #f5b659;
+  background: rgba(245, 182, 89, 0.1);
+  border-color: rgba(245, 182, 89, 0.18);
+}
+
+.badgeHard {
+  color: #c987ff;
+  background: rgba(201, 135, 255, 0.1);
+  border-color: rgba(201, 135, 255, 0.18);
+}
+
+.workspaceCounter {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.workspaceBody {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--workspace-columns, minmax(0, 1fr) 12px minmax(420px, 0.96fr));
+}
+
+.workspacePanel {
+  min-height: 0;
+  background: rgba(10, 10, 10, 0.94);
+}
+
+.workspacePanelLeft {
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.workspacePanelRight {
+  background:
+    linear-gradient(180deg, rgba(14, 14, 14, 0.95), rgba(8, 8, 8, 0.98));
+}
+
+.workspaceResizeHandle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: col-resize;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background-color 180ms ease;
+}
+
+.workspaceResizeHandle:hover,
+.workspaceResizeHandleActive {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.workspaceResizeGrip {
+  width: 4px;
+  height: 52px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.workspaceScroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1.6rem 1.6rem 2rem;
+}
+
+.workspaceIntro {
+  max-width: 48rem;
+}
+
+.workspaceIntroTitle {
+  font-size: clamp(1.72rem, 3vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.workspaceIntroBody {
+  margin-top: 0.85rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.72;
+  max-width: 40rem;
+}
+
+.workspaceTagRow {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.workspaceTag {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.58);
+  padding: 0.34rem 0.62rem;
+  font-size: 0.68rem;
+}
+
+.mdxSurface {
+  margin-top: 1.6rem;
+  border-radius: 1.45rem;
+  background:
+    linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(8, 8, 8, 0.98));
+  box-shadow:
+    inset 0 -20px 60px -40px rgba(255, 255, 255, 0.05),
+    0 18px 54px rgba(0, 0, 0, 0.2);
+  padding: 1.25rem 1.35rem 1.5rem;
+}
+
+.mdxSurfaceTight {
+  margin-top: 0;
+}
+
+.inlineLink {
+  color: var(--lime);
+}
+
+@media (max-width: 1100px) {
+  .trackLayout,
+  .workspaceBody {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceResizeHandle {
+    display: none;
+  }
+
+  .trackCatalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trackSidebar {
+    position: static;
+  }
+
+  .hero {
+    padding: 6.4rem 0 2.6rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.35rem, 6vw, 3.6rem);
+  }
+
+  .heroBody {
+    max-width: 44rem;
+    font-size: 0.92rem;
+  }
+
+  .trackSpotlight {
+    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  }
+
+  .trackSpotlightVisual {
+    min-height: 15rem;
+  }
+
+  .trackSpotlightBody {
+    padding: 1.45rem 1.45rem 1.55rem;
+  }
+
+  .trackStatsInline {
+    gap: 0.75rem;
+  }
+
+  .trackStatValue {
+    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  }
+
+  .trackStatLabel {
+    font-size: 0.68rem;
+  }
+
+  .trackStatNote {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .shell {
+    width: min(1240px, calc(100vw - 32px));
+  }
+
+  .hero {
+    padding: 6rem 0 2.2rem;
+  }
+
+  .trackCatalog {
+    grid-template-columns: 1fr;
+  }
+
+  .heroKicker,
+  .sectionKicker {
+    font-size: 0.64rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.1rem, 10vw, 3rem);
+    line-height: 0.99;
+  }
+
+  .heroBody {
+    max-width: none;
+    font-size: 0.9rem;
+    line-height: 1.68;
+  }
+
+  .heroActions {
+    margin-top: 1.25rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    min-height: 2.95rem;
+    padding: 0 1rem;
+    font-size: 0.86rem;
+  }
+
+  .section {
+    padding: 0 0 3rem;
+  }
+
+  .sectionHeader {
+    margin-bottom: 1.2rem;
+  }
+
+  .sectionTitle {
+    font-size: clamp(1.65rem, 8vw, 2.2rem);
+    line-height: 1.04;
+  }
+
+  .sectionBody {
+    max-width: none;
+    font-size: 0.88rem;
+    line-height: 1.62;
+  }
+
+  .trackSpotlight {
+    grid-template-columns: 1fr;
+    border-radius: 1.3rem;
+  }
+
+  .trackStatsInline {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .trackSpotlightVisual {
+    min-height: 12rem;
+  }
+
+  .trackImage {
+    padding: 1.5rem;
+  }
+
+  .trackFallbackMark {
+    width: 5.4rem;
+    height: 5.4rem;
+    border-radius: 1.4rem;
+    font-size: 1.6rem;
+  }
+
+  .trackSpotlightBody {
+    padding: 1.1rem 1rem 1.1rem;
+  }
+
+  .trackMetaRow {
+    gap: 0.45rem;
+  }
+
+  .pill {
+    min-height: 1.55rem;
+    padding: 0 0.65rem;
+    font-size: 0.6rem;
+  }
+
+  .trackSpotlightTitle {
+    margin-top: 0.65rem;
+    font-size: clamp(1.45rem, 6vw, 1.9rem);
+    line-height: 1.04;
+  }
+
+  .trackSpotlightDescription {
+    margin-top: 0.7rem;
+    max-width: none;
+    font-size: 0.84rem;
+    line-height: 1.58;
+  }
+
+  .trackStatItem {
+    padding-top: 0;
+  }
+
+  .trackStatValue {
+    font-size: 1.2rem;
+  }
+
+  .trackStatLabel {
+    margin-top: 0.35rem;
+    font-size: 0.64rem;
+  }
+
+  .trackStatNote {
+    margin-top: 0.28rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  .challengeRow {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .challengeMeta {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .workspaceTopbar {
+    padding: 0.9rem 1rem;
+    align-items: flex-start;
+  }
+
+  .workspaceTopbarLeft {
+    align-items: flex-start;
+  }
+
+  .workspaceDivider {
+    display: none;
+  }
+
+  .workspaceScroll {
+    padding: 1.35rem 1rem 1.6rem;
+  }
+
+  .mdxSurface {
+    padding: 1.2rem 1rem 1.45rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(1240px, calc(100vw - 22px));
+  }
+
+  .hero {
+    padding: 5.6rem 0 1.9rem;
+  }
+
+  .breadcrumb {
+    gap: 0.5rem;
+    font-size: 0.76rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.9rem, 10vw, 2.45rem);
+    letter-spacing: -0.05em;
+  }
+
+  .heroBody {
+    margin-top: 0.8rem;
+    font-size: 0.86rem;
+  }
+
+  .heroActions {
+    gap: 0.7rem;
+  }
+
+  .sectionTitle {
+    font-size: clamp(1.45rem, 8vw, 1.9rem);
+  }
+
+  .trackSpotlightVisual {
+    min-height: 10.25rem;
+  }
+
+  .trackSpotlightBody {
+    padding: 0.95rem 0.9rem 1rem;
+  }
+
+  .trackSpotlightTitle {
+    font-size: 1.3rem;
+  }
+
+  .trackSpotlightDescription {
+    font-size: 0.8rem;
+  }
+
+  .trackStatsInline {
+    margin-top: 0.8rem;
+    gap: 0.6rem;
+  }
+
+  .trackStatValue {
+    font-size: 1.08rem;
+  }
+
+  .trackStatNote {
+    font-size: 0.7rem;
+  }
+}

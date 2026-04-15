@@ -2,169 +2,244 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import { Inter, Space_Grotesk } from "next/font/google";
+import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { NumberTicker } from "@/components/ui/number-ticker";
-import { Code, Trophy, Zap, Target, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { BreadcrumbSchema } from "@/components/seo";
-import { getChallengeGroupsForTrack } from "@/lib/challenges/track-groups";
+import styles from "@/components/challenges/challenges-v2.module.css";
+
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const body = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const mono = Inter({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
 
 const breadcrumbItems = [
   { name: "Home", url: "/" },
   { name: "Challenges", url: "/challenges" },
 ];
 
-const challengeStats = {
-  participants: 50,
-  totalAttempted: 200,
+type ChallengeTrackSummary = {
+  track: string;
+  name: string;
+  description: string;
+  exerciseCount: number;
 };
 
-function getPhaseIcon(groupId: string) {
-  switch (groupId) {
-    case "foundations":
-      return Code;
-    case "deep-dive":
-      return Target;
-    case "advanced":
-      return Zap;
-    case "solana-ready":
-      return Trophy;
+type TrackDisplayStats = {
+  developers: string;
+  completions: string;
+};
+
+function getTrackVisual(track: string) {
+  switch (track) {
+    case "rust":
+      return {
+        imageSrc: "/rust-2.png",
+        imageAlt: "Rust logo",
+        eyebrow: "Language track",
+      };
+    case "anchor":
+      return {
+        imageSrc: "/anchor.png",
+        imageAlt: "Anchor logo",
+        eyebrow: "Framework track",
+      };
+    case "solana-kit":
+      return {
+        imageSrc: "/solana-kit.svg",
+        imageAlt: "Solana Kit logo",
+        eyebrow: "Client track",
+      };
+    case "solana":
+      return {
+        imageSrc: "/solanaLogo.png",
+        imageAlt: "Solana logo",
+        eyebrow: "Runtime track",
+      };
     default:
-      return Code;
+      return {
+        imageSrc: null,
+        imageAlt: `${track} track`,
+        eyebrow: "Track",
+      };
   }
 }
 
-export function ChallengesPageClient() {
+export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary[] }) {
   const router = useRouter();
-  const phases = getChallengeGroupsForTrack("rust").map((group) => ({
-    ...group,
-    icon: getPhaseIcon(group.id),
-  }));
+
+  const getTrackStats = (track: ChallengeTrackSummary): TrackDisplayStats => {
+    if (track.track === "rust") {
+      return {
+        developers: "50+",
+        completions: "200+",
+      };
+    }
+
+    return {
+      developers: "0+",
+      completions: "0+",
+    };
+  };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className={`${styles.page} ${body.className}`}>
       <BreadcrumbSchema items={breadcrumbItems} />
       <Navbar />
 
-      <div className="pt-24 pb-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          {/* Breadcrumb */}
-          <nav className="text-sm text-neutral-500 mb-8">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <span className="mx-2">/</span>
-            <span className="text-white">Challenges</span>
-          </nav>
+      <main>
+        <section className={styles.hero}>
+          <div className={styles.shell}>
+            <div className={styles.heroCopy}>
+              <nav className={styles.breadcrumb}>
+                <Link href="/">Home</Link>
+                <span className={styles.breadcrumbDivider}>/</span>
+                <span>Challenges</span>
+              </nav>
 
-          {/* Header */}
-          <div className="mb-12">
-            <p className="text-xs uppercase tracking-widest text-[#14f195] mb-3">Daily Challenges</p>
-            <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">
-              30 Days of Rust Coding
-            </h1>
-            <p className="text-lg text-neutral-400 max-w-2xl">
-              Progressive daily Rust coding series—from foundations to Solana program primitives.
-            </p>
+              <div className={`${styles.heroKicker} ${mono.className}`}>Exercises</div>
+              <h1 className={`${styles.heroTitle} ${display.className}`}>
+                Practice tracks that can grow beyond Rust without rewiring the product
+              </h1>
+              <p className={styles.heroBody}>
+                Challenges are discovered from content, routed by track and slug, validated
+                on the server, and saved against the user. Add a new category and the
+                landing page should just pick it up.
+              </p>
 
-            {challengeStats.participants > 0 && (
-              <div className="mt-6 flex flex-wrap gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-semibold text-[#14f195]">
-                    <NumberTicker value={challengeStats.participants} />
-                  </span>
-                  <span className="text-sm text-neutral-500">developers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-semibold text-[#9945ff]">
-                    <NumberTicker value={challengeStats.totalAttempted} />
-                  </span>
-                  <span className="text-sm text-neutral-500">challenges completed</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Main Challenge Card */}
-          <div className="mb-12 rounded-lg border border-neutral-800 bg-neutral-900/30 overflow-hidden">
-            <div className="grid md:grid-cols-[200px_1fr] gap-0">
-              <div className="relative h-40 md:h-auto bg-gradient-to-br from-[#9945ff]/10 to-[#14f195]/10 flex items-center justify-center p-6">
-                <div className="relative w-24 h-24 md:w-32 md:h-32">
-                  <Image
-                    src="/rust-2.png"
-                    alt="Rust Logo"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-
-              <div className="p-6 md:p-8">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-400">
-                    30 Days
-                  </span>
-                  <span className="inline-flex items-center rounded-full border border-[#14f195]/30 bg-[#14f195]/10 px-2.5 py-0.5 text-xs font-medium text-[#14f195]">
-                    Active
-                  </span>
-                </div>
-
-                <h2 className="text-xl md:text-2xl font-medium mb-3">
-                  From Basics to Solana-Grade Problem Solving
-                </h2>
-
-                <p className="text-neutral-400 text-sm mb-6">
-                  Master Rust programming through daily challenges designed specifically for
-                  aspiring Solana developers. Each day builds on the last.
-                </p>
-
+              <div className={styles.heroActions}>
                 <button
+                  type="button"
+                  className={styles.primaryButton}
                   onClick={() => router.push("/challenges/rust")}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#14f195] px-5 py-2.5 text-sm font-medium text-black transition-all hover:bg-[#12d182]"
                 >
-                  Start Challenge
-                  <ArrowRight className="w-4 h-4" />
+                  Start Rust track
                 </button>
+                <Link href="/modules" className={styles.secondaryButton}>
+                  Explore modules
+                </Link>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Phases */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Challenge Roadmap</h3>
-            <p className="text-sm text-neutral-500">Progressive difficulty across 4 phases</p>
-          </div>
+        <section className={styles.section}>
+          <div className={styles.shell}>
+            <div className={styles.sectionHeader}>
+              <div className={`${styles.sectionKicker} ${mono.className}`}>Track Inventory</div>
+              <h2 className={`${styles.sectionTitle} ${display.className}`}>
+                Challenge tracks should scale with the content system
+              </h2>
+              <p className={styles.sectionBody}>
+                This page is now driven by the tracks discovered under `content/challenges`.
+                If you add a new category with valid exercises, it should appear here without
+                another route-level redesign.
+              </p>
+            </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {phases.map((phase) => {
-              const IconComponent = phase.icon;
-              return (
-                <div
-                  key={phase.id}
-                  className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-5 transition-colors hover:border-neutral-700"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#14f195]/10 flex items-center justify-center">
-                      <IconComponent className="w-4 h-4 text-[#14f195]" />
+            <div
+              className={`${styles.trackCatalog} ${
+                tracks.length === 1 ? styles.trackCatalogSingle : ""
+              }`}
+            >
+              {tracks.map((track) => {
+                const visual = getTrackVisual(track.track);
+                const stats = getTrackStats(track);
+                return (
+                  <article key={track.track} className={styles.trackSpotlight}>
+                    <div className={styles.trackSpotlightVisual}>
+                      {visual.imageSrc ? (
+                        <Image
+                          src={visual.imageSrc}
+                          alt={visual.imageAlt}
+                          fill
+                          sizes="(max-width: 820px) 280px, 320px"
+                          className={styles.trackImage}
+                          priority={track.track === "rust"}
+                        />
+                      ) : (
+                        <div className={`${styles.trackFallbackMark} ${display.className}`}>
+                          {track.name.slice(0, 2)}
+                        </div>
+                      )}
                     </div>
-                    <span className="text-xs text-neutral-500 uppercase tracking-wider">{phase.days}</span>
-                  </div>
-                  <h4 className="text-base font-medium mb-2">{phase.title}</h4>
-                  <p className="text-sm text-neutral-400">{phase.description}</p>
-                </div>
-              );
-            })}
-          </div>
 
-          {/* Coming Soon */}
-          <div className="mt-10 rounded-lg border border-neutral-800 bg-neutral-900/30 px-5 py-4 text-center">
-            <p className="text-sm text-neutral-400">
-              <span className="text-[#14f195]">Next Up:</span> More test coverage per exercise, streak tracking, and mini Solana program checkpoints.
-            </p>
+                    <div className={styles.trackSpotlightBody}>
+                      <div className={styles.trackMetaRow}>
+                        <span className={`${styles.pill} ${styles.pillActive}`}>{visual.eyebrow}</span>
+                        <span className={`${styles.pill} ${styles.pillGhost}`}>
+                          {track.exerciseCount} exercises
+                        </span>
+                      </div>
+
+                      <h3 className={`${styles.trackSpotlightTitle} ${display.className}`}>
+                        {track.name}
+                      </h3>
+                      <p className={styles.trackSpotlightDescription}>{track.description}</p>
+
+                      <div className={styles.trackStatsInline}>
+                        <div className={styles.trackStatItem}>
+                          <div className={`${styles.trackStatValue} ${display.className}`}>
+                            {stats.developers}
+                          </div>
+                          <div className={styles.trackStatLabel}>Developers</div>
+                          <div className={styles.trackStatNote}>
+                            Builders using this track to sharpen production instincts.
+                          </div>
+                        </div>
+                        <div className={styles.trackStatItem}>
+                          <div className={`${styles.trackStatValue} ${display.className}`}>
+                            {stats.completions}
+                          </div>
+                          <div className={styles.trackStatLabel}>Exercises completed</div>
+                          <div className={styles.trackStatNote}>
+                            Proof-driven progress from exercises that only pass when all tests pass.
+                          </div>
+                        </div>
+                        <div className={styles.trackStatItem}>
+                          <div className={`${styles.trackStatValue} ${display.className}`}>
+                            {track.exerciseCount}
+                          </div>
+                          <div className={styles.trackStatLabel}>Published exercises</div>
+                          <div className={styles.trackStatNote}>
+                            Current inventory for this track, discovered directly from content.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.heroActions}>
+                        <button
+                          type="button"
+                          className={styles.primaryButton}
+                          onClick={() => router.push(`/challenges/${track.track}`)}
+                        >
+                          Open track
+                        </button>
+                        <Link href="/modules" className={styles.secondaryButton}>
+                          Read modules
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
       <Footer />
     </div>

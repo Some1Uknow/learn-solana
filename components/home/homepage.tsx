@@ -11,7 +11,7 @@ import {
 
 import { Globe } from "@/components/ui/globe";
 import { BentoGrid } from "@/components/ui/bento-grid";
-import styles from "./homepage-v2.module.css";
+import styles from "./homepage.module.css";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -153,7 +153,7 @@ const heroGlobeConfig = {
   ],
 };
 
-export function HomePageV2() {
+export function HomePage() {
   return (
     <main className={`${styles.page} ${body.className}`}>
       <section className={styles.hero}>
@@ -166,13 +166,12 @@ export function HomePageV2() {
               Learn the stack, build faster, and keep progress in one place.
             </p>
             <div className={styles.heroActions}>
-              <Link className={styles.primaryButton} href="/challenges">
+              <Link className={styles.primaryButton} href="/modules">
                 Get Started
               </Link>
-              <a className={styles.secondaryButton} href="#entire-stack">
-                <span className={styles.playIcon}>▶</span>
-                Explore stack
-              </a>
+              <Link className={styles.secondaryButton} href="/challenges">
+                Solve challenges
+              </Link>
             </div>
           </div>
 

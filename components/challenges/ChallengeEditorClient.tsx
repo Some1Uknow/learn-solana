@@ -16,7 +16,8 @@ import { LoginRequiredModal } from "@/components/ui/login-required-modal";
 
 const MIN_OUTPUT_HEIGHT = 150;
 const MIN_EDITOR_HEIGHT = 220;
-const INITIAL_OUTPUT_HEIGHT = 220;
+const INITIAL_EDITOR_HEIGHT = 420;
+const SEPARATOR_HEIGHT = 16;
 
 type RunResult = {
   stdout: string;
@@ -62,7 +63,7 @@ export default function ChallengeEditorClient({
   const [isRunning, setIsRunning] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const containerRef = useRef<HTMLElement | null>(null);
-  const [outputHeight, setOutputHeight] = useState(INITIAL_OUTPUT_HEIGHT);
+  const [editorHeight, setEditorHeight] = useState(INITIAL_EDITOR_HEIGHT);
   const [isResizing, setIsResizing] = useState(false);
   const isCompleted = Boolean(exerciseSlug && progress[exerciseSlug]);
 
@@ -81,44 +82,47 @@ export default function ChallengeEditorClient({
   const gutterRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const clampOutputHeight = useCallback(
+  const clampEditorHeight = useCallback(
     (value: number) => {
       const container = containerRef.current;
       if (!container) return value;
       const rect = container.getBoundingClientRect();
-      const minHeight = MIN_OUTPUT_HEIGHT;
-      const maxHeight = Math.max(minHeight, rect.height - MIN_EDITOR_HEIGHT);
+      const minHeight = MIN_EDITOR_HEIGHT;
+      const maxHeight = Math.max(
+        minHeight,
+        rect.height - MIN_OUTPUT_HEIGHT - SEPARATOR_HEIGHT
+      );
       const clamped = Math.min(Math.max(value, minHeight), maxHeight);
       return Number.isFinite(clamped) ? clamped : minHeight;
     },
     []
   );
 
-  const updateOutputHeightFromPointer = useCallback(
+  const updateEditorHeightFromPointer = useCallback(
     (clientY: number) => {
       const container = containerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
-      const desired = rect.bottom - clientY;
-      setOutputHeight((prev) => clampOutputHeight(Number.isFinite(desired) ? desired : prev));
+      const desired = clientY - rect.top;
+      setEditorHeight((prev) => clampEditorHeight(Number.isFinite(desired) ? desired : prev));
     },
-    [clampOutputHeight]
+    [clampEditorHeight]
   );
 
   useEffect(() => {
-    setOutputHeight((prev) => clampOutputHeight(prev));
+    setEditorHeight((prev) => clampEditorHeight(prev));
     const handleResize = () => {
-      setOutputHeight((prev) => clampOutputHeight(prev));
+      setEditorHeight((prev) => clampEditorHeight(prev));
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [clampOutputHeight]);
+  }, [clampEditorHeight]);
 
   useEffect(() => {
     if (!isResizing) return;
     const handlePointerMove = (event: PointerEvent) => {
       event.preventDefault();
-      updateOutputHeightFromPointer(event.clientY);
+      updateEditorHeightFromPointer(event.clientY);
     };
     const stop = () => setIsResizing(false);
 
@@ -131,7 +135,7 @@ export default function ChallengeEditorClient({
       window.removeEventListener("pointerup", stop);
       window.removeEventListener("pointercancel", stop);
     };
-  }, [isResizing, updateOutputHeightFromPointer]);
+  }, [isResizing, updateEditorHeightFromPointer]);
 
   useEffect(() => {
     if (!isResizing) return;
@@ -154,7 +158,7 @@ export default function ChallengeEditorClient({
     event: ReactPointerEvent<HTMLDivElement>
   ) => {
     event.preventDefault();
-    updateOutputHeightFromPointer(event.clientY);
+    updateEditorHeightFromPointer(event.clientY);
     setIsResizing(true);
   };
 
@@ -280,7 +284,10 @@ export default function ChallengeEditorClient({
         ref={containerRef}
         className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <div className="relative min-h-0 flex flex-1 flex-col overflow-hidden">
+        <div
+          className="relative min-h-0 shrink-0 flex flex-col overflow-hidden"
+          style={{ height: editorHeight, minHeight: MIN_EDITOR_HEIGHT }}
+        >
           {/* Editor header (mobile) */}
           <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-black/40 px-4 py-2 sm:hidden">
             <div className="text-xs text-zinc-400">Language: Rust</div>
@@ -382,7 +389,7 @@ export default function ChallengeEditorClient({
         {/* Output and Bottom navigation */}
         <div
           className="flex shrink-0 flex-col border-t border-white/10 bg-black/40 p-3 sm:p-4"
-          style={{ height: outputHeight, minHeight: MIN_OUTPUT_HEIGHT }}
+          style={{ minHeight: MIN_OUTPUT_HEIGHT, flex: "1 1 0%" }}
         >
           <div className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
             Output

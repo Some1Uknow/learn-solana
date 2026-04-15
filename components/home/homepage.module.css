@@ -170,21 +170,10 @@
 }
 
 .secondaryButton {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--text);
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: #060606;
   gap: 10px;
-}
-
-.playIcon {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.64rem;
 }
 
 .heroVisual {
@@ -612,11 +601,11 @@
   }
 
   .heroVisual {
-    min-height: 420px;
+    min-height: 360px;
   }
 
   .globeFrame {
-    width: min(440px, 100%);
+    width: min(380px, 100%);
   }
 
   .ctaFeatureGrid {
@@ -625,7 +614,7 @@
 
   .sectionScreen {
     min-height: auto;
-    padding: 96px 0;
+    padding: 88px 0;
   }
 }
 
@@ -647,8 +636,30 @@
   }
 
   .heroGrid {
-    padding: 96px 0 64px;
-    gap: 34px;
+    padding: 88px 0 48px;
+    gap: 24px;
+  }
+
+  .heroCopy {
+    max-width: none;
+  }
+
+  .heroTitle {
+    margin-top: 16px;
+    font-size: clamp(2.65rem, 12vw, 4rem);
+    line-height: 0.98;
+    max-width: none;
+  }
+
+  .heroBody {
+    margin-top: 18px;
+    max-width: none;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .heroVisual {
+    min-height: 300px;
   }
 
   .heroActions,
@@ -660,22 +671,215 @@
   .primaryButton,
   .secondaryButton {
     width: 100%;
+    min-height: 50px;
+    font-size: 0.94rem;
   }
 
   .globeFrame {
-    width: min(360px, 100%);
+    width: min(310px, 100%);
+  }
+
+  .sectionHeader {
+    margin: 0 auto 36px;
+  }
+
+  .sectionTitle {
+    margin-top: 12px;
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    line-height: 1.06;
+  }
+
+  .sectionBody {
+    margin-top: 14px;
+    font-size: 0.96rem;
+    line-height: 1.72;
+  }
+
+  .stackGridLayout {
+    gap: 16px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .stackPortraitCard,
+  .stackPortraitSurface {
+    min-height: 0;
+  }
+
+  .stackPortraitSurface {
+    border-radius: 1.5rem;
+  }
+
+  .stackPortraitVisual {
+    height: 10.5rem;
+    margin: 1rem 1rem 0;
+    border-radius: 1.1rem;
+  }
+
+  .stackPortraitImage {
+    padding: 1.5rem;
+  }
+
+  .stackPortraitBody {
+    padding: 0.9rem 1rem 1.1rem;
+  }
+
+  .stackPortraitTitle {
+    margin-top: 0.7rem;
+    font-size: 1.3rem;
+  }
+
+  .stackPortraitDescription {
+    margin-top: 0.5rem;
+    font-size: 0.88rem;
+    line-height: 1.58;
   }
 
   .ctaPanel {
-    padding: 34px 24px;
+    border-radius: 24px;
+    padding: 28px 20px;
   }
 
   .statsBentoGrid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .statBentoCard {
+    min-height: 0;
+    border-radius: 1.4rem;
+    padding: 1.2rem;
+  }
+
+  .statBentoValue {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .statBentoLabel {
+    margin-top: 0.7rem;
+    font-size: 0.92rem;
+  }
+
+  .statBentoNote {
+    margin-top: 0.7rem;
+    font-size: 0.86rem;
+    line-height: 1.58;
+  }
+
+  .ctaTitle {
+    margin-top: 12px;
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    line-height: 1.05;
+  }
+
+  .ctaBody {
+    margin-top: 14px;
+    font-size: 0.94rem;
+    line-height: 1.72;
+  }
+
+  .ctaFeatureGrid {
+    gap: 12px;
+  }
+
+  .ctaFeatureCard {
+    min-height: 0;
+    border-radius: 1.2rem;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .ctaFeatureTitle {
+    font-size: 0.94rem;
+  }
+
+  .ctaFeatureBody {
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .footer {
+    padding-bottom: 36px;
+  }
+
+  .footerGrid {
+    gap: 20px;
+    padding-top: 28px;
+  }
+
+  .footerLead {
+    max-width: none;
+    font-size: 0.9rem;
+    line-height: 1.68;
+  }
+
+  .footerLinks {
+    margin-top: 12px;
+    gap: 8px;
+    font-size: 0.9rem;
   }
 
   .footerBottom {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+    font-size: 0.8rem;
+  }
+
+  .footerSupport {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell,
+  .sectionCenter {
+    width: min(100vw - 20px, 1240px);
+  }
+
+  .heroGrid {
+    padding: 82px 0 40px;
+    gap: 20px;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.3rem, 11vw, 3rem);
+    letter-spacing: -0.055em;
+  }
+
+  .heroBody {
+    font-size: 0.92rem;
+  }
+
+  .heroActions {
+    margin-top: 28px;
+    gap: 10px;
+  }
+
+  .heroVisual {
+    min-height: 260px;
+  }
+
+  .globeFrame {
+    width: min(270px, 100%);
+  }
+
+  .sectionScreen {
+    padding: 72px 0;
+  }
+
+  .sectionHeader {
+    margin-bottom: 28px;
+  }
+
+  .stackPortraitVisual {
+    height: 9.25rem;
+  }
+
+  .ctaPanel {
+    padding: 22px 16px;
+  }
+
+  .ctaFeatureCard {
+    padding: 0.92rem;
   }
 }
