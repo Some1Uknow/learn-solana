@@ -1,13 +1,56 @@
 ---
-title: "Day 20: Closures"
-description: "Capture environment with closures in Day 20: anonymous functions with superpowers. Learn Fn, FnMut, FnOnce traits for Solana callback patterns."
+title: 'Day 20: Closures'
+description: >-
+  Capture environment with closures in Day 20: anonymous functions with
+  superpowers. Learn Fn, FnMut, FnOnce traits for Solana callback patterns.
 keywords:
-  - "rust closures"
-  - "rust anonymous functions"
-  - "rust fn traits"
-  - "closure capture rust"
-  - "rust lambda"
-  - "solana closures"
+  - rust closures
+  - rust anonymous functions
+  - rust fn traits
+  - closure capture rust
+  - rust lambda
+  - solana closures
+track: rust
+slug: closures
+order: 20
+difficulty: Medium
+tags:
+  - Closures
+  - Fn
+  - FnMut
+  - Capturing
+starterCode: |-
+  // Day 20: Closures
+  // Create a counter using closures
+
+  fn make_counter(start: i32) -> impl FnMut() -> i32 {
+      // TODO: Return a closure that:
+      // - Starts at 'start'
+      // - Returns the current value and increments it each call
+      let mut count = start;
+      move || {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let mut counter = make_counter(1);
+      println!("{}", counter()); // 1
+      println!("{}", counter()); // 2
+      println!("{}", counter()); // 3
+  }
+executor:
+  type: rust-playground
+  description: Counter increments from 1 to 3.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        1
+        2
+        3
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

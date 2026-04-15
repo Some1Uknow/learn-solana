@@ -1,13 +1,52 @@
 ---
-title: "Day 19: Iterators"
-description: "Master Rust iterators in Day 19: functional data processing with map, filter, fold, and collect. Write efficient Solana data transformations."
+title: 'Day 19: Iterators'
+description: >-
+  Master Rust iterators in Day 19: functional data processing with map, filter,
+  fold, and collect. Write efficient Solana data transformations.
 keywords:
-  - "rust iterators"
-  - "rust map filter"
-  - "rust functional programming"
-  - "iterator adapters rust"
-  - "rust collect"
-  - "solana iterators"
+  - rust iterators
+  - rust map filter
+  - rust functional programming
+  - iterator adapters rust
+  - rust collect
+  - solana iterators
+track: rust
+slug: iterators
+order: 19
+difficulty: Medium
+tags:
+  - Iterator
+  - map
+  - filter
+  - collect
+starterCode: |-
+  // Day 19: Iterators
+  // Use iterator adapters to transform data
+
+  fn process_numbers(numbers: Vec<i32>) -> Vec<i32> {
+      // TODO: Filter to keep only even numbers
+      // Then square each number
+      // Return the result as a Vec
+      vec![]
+  }
+
+  fn main() {
+      let nums = vec![1, 2, 3, 4, 5, 6];
+      let result = process_numbers(nums);
+      for n in result {
+          print!("{} ", n);
+      }
+      println!();
+  }
+executor:
+  type: rust-playground
+  description: Filters even numbers and squares them.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '4 16 36 '
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

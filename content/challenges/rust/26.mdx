@@ -1,13 +1,69 @@
 ---
-title: "Day 26: Working with Bytes"
-description: "Build a Pubkey-like struct in Day 26: implement a 32-byte public key type similar to Solana's. Essential for Solana address handling."
+title: 'Day 26: Working with Bytes'
+description: >-
+  Build a Pubkey-like struct in Day 26: implement a 32-byte public key type
+  similar to Solana's. Essential for Solana address handling.
 keywords:
-  - "rust pubkey"
-  - "solana public key"
-  - "32 byte array rust"
-  - "rust crypto types"
-  - "solana address"
-  - "rust key implementation"
+  - rust pubkey
+  - solana public key
+  - 32 byte array rust
+  - rust crypto types
+  - solana address
+  - rust key implementation
+track: rust
+slug: working-with-bytes
+order: 26
+difficulty: Hard
+tags:
+  - Bytes
+  - Pubkey
+  - Endianness
+starterCode: |-
+  // Day 26: Working with Bytes
+  // Create a simplified Pubkey type
+
+  #[derive(Debug, Clone, Copy, PartialEq)]
+  struct Pubkey([u8; 32]);
+
+  impl Pubkey {
+      const fn new(bytes: [u8; 32]) -> Self {
+          Pubkey(bytes)
+      }
+      
+      // TODO: Create a "default" pubkey (all zeros)
+      fn default() -> Self {
+          todo!()
+      }
+      
+      // TODO: Check if this is the default/zero pubkey
+      fn is_zero(&self) -> bool {
+          todo!()
+      }
+      
+      // TODO: Return the bytes as a slice
+      fn as_bytes(&self) -> &[u8] {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let zero = Pubkey::default();
+      let custom = Pubkey::new([1u8; 32]);
+      
+      println!("{} {}", zero.is_zero(), custom.is_zero());
+      println!("{}", custom.as_bytes()[0]);
+  }
+executor:
+  type: rust-playground
+  description: 'Zero check works, and we can access bytes.'
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        true false
+        1
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

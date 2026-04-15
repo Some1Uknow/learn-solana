@@ -1,13 +1,46 @@
 ---
-title: "Day 13: Strings"
-description: "Understand String vs &str in Day 13: owned strings, string slices, and manipulation methods. Essential for handling text data in Solana programs."
+title: 'Day 13: Strings'
+description: >-
+  Understand String vs &str in Day 13: owned strings, string slices, and
+  manipulation methods. Essential for handling text data in Solana programs.
 keywords:
-  - "rust string"
-  - "rust str"
-  - "string vs str rust"
-  - "rust string manipulation"
-  - "owned string rust"
-  - "solana string handling"
+  - rust string
+  - rust str
+  - string vs str rust
+  - rust string manipulation
+  - owned string rust
+  - solana string handling
+track: rust
+slug: strings
+order: 13
+difficulty: Medium
+tags:
+  - String
+  - '&str'
+  - UTF-8
+starterCode: |-
+  // Day 13: Strings
+  // Reverse the order of words in a sentence
+
+  fn reverse_words(s: &str) -> String {
+      // TODO: Reverse the order of words
+      // "hello world" -> "world hello"
+      String::new()
+  }
+
+  fn main() {
+      let result = reverse_words("rust is awesome");
+      println!("{}", result);
+  }
+executor:
+  type: rust-playground
+  description: Reverses word order in the sentence.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: awesome is rust
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,13 +1,60 @@
 ---
-title: "Day 21: Modules"
-description: "Organize code with modules in Day 21: visibility, pub keyword, and clean API design. Structure your Solana programs professionally."
+title: 'Day 21: Modules'
+description: >-
+  Organize code with modules in Day 21: visibility, pub keyword, and clean API
+  design. Structure your Solana programs professionally.
 keywords:
-  - "rust modules"
-  - "rust mod"
-  - "rust visibility"
-  - "rust pub keyword"
-  - "rust code organization"
-  - "solana program structure"
+  - rust modules
+  - rust mod
+  - rust visibility
+  - rust pub keyword
+  - rust code organization
+  - solana program structure
+track: rust
+slug: modules
+order: 21
+difficulty: Medium
+tags:
+  - Modules
+  - pub
+  - use
+  - Visibility
+starterCode: |-
+  // Day 21: Modules
+  // Organize code with modules and visibility
+
+  mod math {
+      // TODO: Make this function public
+      fn add(a: i32, b: i32) -> i32 {
+          a + b
+      }
+      
+      pub mod advanced {
+          // TODO: Make this function public
+          // It should call the parent add function
+          fn multiply_and_add(a: i32, b: i32, c: i32) -> i32 {
+              // Hint: Use super:: to access parent module
+              a * b + c
+          }
+      }
+  }
+
+  fn main() {
+      // TODO: Call math::add(5, 3)
+      // TODO: Call math::advanced::multiply_and_add(2, 3, 4)
+      let sum = 0;
+      let result = 0;
+      println!("{} {}", sum, result);
+  }
+executor:
+  type: rust-playground
+  description: '5+3=8, 2*3+4=10'
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 8 10
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,13 +1,47 @@
 ---
-title: "Day 9: Enums & Option"
-description: "Master Rust enums and Option type in Day 9: define variants, pattern match, and handle null-safety elegantly. Critical for Solana error handling patterns."
+title: 'Day 9: Enums & Option'
+description: >-
+  Master Rust enums and Option type in Day 9: define variants, pattern match,
+  and handle null-safety elegantly. Critical for Solana error handling patterns.
 keywords:
-  - "rust enums"
-  - "rust option type"
-  - "rust null safety"
-  - "enum variants rust"
-  - "pattern matching enums"
-  - "solana rust enums"
+  - rust enums
+  - rust option type
+  - rust null safety
+  - enum variants rust
+  - pattern matching enums
+  - solana rust enums
+track: rust
+slug: enums-and-option
+order: 9
+difficulty: Medium
+tags:
+  - Enums
+  - Option
+  - Pattern Matching
+starterCode: |-
+  // Day 9: Enums & Option
+  // Implement safe division using Option<T>
+
+  fn safe_divide(a: i32, b: i32) -> Option<i32> {
+      // TODO: Return None if b is 0, otherwise return Some(a / b)
+      None
+  }
+
+  fn main() {
+      match safe_divide(10, 2) {
+          Some(result) => println!("Result: {}", result),
+          None => println!("Cannot divide by zero"),
+      }
+  }
+executor:
+  type: rust-playground
+  description: Safely divides 10 by 2.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'Result: 5'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

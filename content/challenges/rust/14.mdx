@@ -1,13 +1,54 @@
 ---
-title: "Day 14: HashMaps"
-description: "Store key-value pairs with HashMap in Day 14: insertion, lookup, iteration, and common patterns. Perfect for mapping accounts in Solana applications."
+title: 'Day 14: HashMaps'
+description: >-
+  Store key-value pairs with HashMap in Day 14: insertion, lookup, iteration,
+  and common patterns. Perfect for mapping accounts in Solana applications.
 keywords:
-  - "rust hashmap"
-  - "rust key value"
-  - "hashmap operations rust"
-  - "rust collections"
-  - "rust dictionary"
-  - "solana hashmap"
+  - rust hashmap
+  - rust key value
+  - hashmap operations rust
+  - rust collections
+  - rust dictionary
+  - solana hashmap
+track: rust
+slug: hashmaps
+order: 14
+difficulty: Medium
+tags:
+  - HashMap
+  - Collections
+  - Entry API
+starterCode: |-
+  // Day 14: HashMaps
+  // Count character frequency in a string
+
+  use std::collections::HashMap;
+
+  fn char_frequency(s: &str) -> HashMap<char, u32> {
+      // TODO: Return a map of each character to its count
+      // Only count alphabetic characters, lowercase them
+      HashMap::new()
+  }
+
+  fn main() {
+      let freq = char_frequency("Hello");
+      // Print in sorted order for consistent output
+      let mut pairs: Vec<_> = freq.iter().collect();
+      pairs.sort_by_key(|&(c, _)| c);
+      for (c, count) in pairs {
+          print!("{}:{} ", c, count);
+      }
+      println!();
+  }
+executor:
+  type: rust-playground
+  description: Counts each character's frequency.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'e:1 h:1 l:2 o:1 '
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

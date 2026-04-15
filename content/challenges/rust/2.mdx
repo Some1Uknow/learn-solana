@@ -1,13 +1,46 @@
 ---
-title: "Day 2: Primitive Types"
-description: "Master Rust's fundamental types in Day 2: integers, floats, tuples, and basic arithmetic operations. Build a strong foundation for Solana smart contract development."
+title: 'Day 2: Primitive Types'
+description: >-
+  Master Rust's fundamental types in Day 2: integers, floats, tuples, and basic
+  arithmetic operations. Build a strong foundation for Solana smart contract
+  development.
 keywords:
-  - "rust data types"
-  - "rust integers"
-  - "rust tuples"
-  - "rust arithmetic"
-  - "rust fundamentals"
-  - "solana rust types"
+  - rust data types
+  - rust integers
+  - rust tuples
+  - rust arithmetic
+  - rust fundamentals
+  - solana rust types
+track: rust
+slug: primitive-types
+order: 2
+difficulty: Easy
+tags:
+  - Types
+  - Numbers
+  - Tuples
+starterCode: |-
+  // Day 2: Primitive Types
+  // Work with different number types and tuples
+
+  fn calculate(a: i32, b: i32) -> (i32, i32) {
+      // TODO: Return a tuple of (sum, product)
+      (0, 0)
+  }
+
+  fn main() {
+      let (sum, product) = calculate(7, 6);
+      println!("{} {}", sum, product);
+  }
+executor:
+  type: rust-playground
+  description: Returns the sum and product as a tuple.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 13 42
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,13 +1,47 @@
 ---
-title: "Day 7: Slices"
-description: "Master Rust slices in Day 7: string slices, array slices, and working with contiguous sequences. Essential for handling Solana account data efficiently."
+title: 'Day 7: Slices'
+description: >-
+  Master Rust slices in Day 7: string slices, array slices, and working with
+  contiguous sequences. Essential for handling Solana account data efficiently.
 keywords:
-  - "rust slices"
-  - "rust string slice"
-  - "array slice rust"
-  - "rust slice syntax"
-  - "contiguous data rust"
-  - "solana data slices"
+  - rust slices
+  - rust string slice
+  - array slice rust
+  - rust slice syntax
+  - contiguous data rust
+  - solana data slices
+track: rust
+slug: slices
+order: 7
+difficulty: Easy
+tags:
+  - Slices
+  - '&str'
+  - '&[T]'
+starterCode: |-
+  // Day 7: Slices
+  // Extract the first word from a string (up to first space)
+
+  fn first_word(s: &str) -> &str {
+      // TODO: Return a slice of the first word
+      // If there's no space, return the entire string
+      ""
+  }
+
+  fn main() {
+      let sentence = "hello world";
+      let word = first_word(sentence);
+      println!("{}", word);
+  }
+executor:
+  type: rust-playground
+  description: Extracts 'hello' from 'hello world'.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: hello
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

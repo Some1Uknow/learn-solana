@@ -1,13 +1,58 @@
 ---
-title: "Day 24: Attributes"
-description: "Control compilation with attributes in Day 24: #[repr], #[allow], and memory layout control. Crucial for Solana program optimization."
+title: 'Day 24: Attributes'
+description: >-
+  Control compilation with attributes in Day 24: #[repr], #[allow], and memory
+  layout control. Crucial for Solana program optimization.
 keywords:
-  - "rust attributes"
-  - "rust repr"
-  - "rust memory layout"
-  - "rust compilation control"
-  - "rust macros"
-  - "solana attributes"
+  - rust attributes
+  - rust repr
+  - rust memory layout
+  - rust compilation control
+  - rust macros
+  - solana attributes
+track: rust
+slug: attributes
+order: 24
+difficulty: Medium
+tags:
+  - Attributes
+  - '#[cfg]'
+  - '#[repr]'
+starterCode: |-
+  // Day 24: Attributes
+  // Use attributes for memory layout (important for Solana!)
+
+  // TODO: Add #[repr(C)] for predictable memory layout
+  struct AccountHeader {
+      is_initialized: bool,  // 1 byte
+      account_type: u8,      // 1 byte
+      authority: [u8; 32],   // 32 bytes - simulating a Pubkey
+  }
+
+  impl AccountHeader {
+      fn new(account_type: u8, authority: [u8; 32]) -> Self {
+          Self {
+              is_initialized: true,
+              account_type,
+              authority,
+          }
+      }
+  }
+
+  fn main() {
+      let header = AccountHeader::new(1, [0u8; 32]);
+      // With #[repr(C)], size should be exactly 34 bytes
+      println!("{}", std::mem::size_of::<AccountHeader>());
+  }
+executor:
+  type: rust-playground
+  description: 'With #[repr(C)], the struct is exactly 34 bytes.'
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '34'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

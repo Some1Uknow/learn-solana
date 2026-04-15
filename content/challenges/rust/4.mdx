@@ -1,13 +1,47 @@
 ---
-title: "Day 4: Control Flow"
-description: "Master Rust control flow in Day 4: if/else expressions, match patterns, and loops (loop, while, for). Critical for Solana program logic implementation."
+title: 'Day 4: Control Flow'
+description: >-
+  Master Rust control flow in Day 4: if/else expressions, match patterns, and
+  loops (loop, while, for). Critical for Solana program logic implementation.
 keywords:
-  - "rust if else"
-  - "rust match"
-  - "rust loops"
-  - "rust control flow"
-  - "pattern matching rust"
-  - "solana control flow"
+  - rust if else
+  - rust match
+  - rust loops
+  - rust control flow
+  - pattern matching rust
+  - solana control flow
+track: rust
+slug: control-flow
+order: 4
+difficulty: Easy
+tags:
+  - if/else
+  - match
+  - Loops
+starterCode: |-
+  // Day 4: Control Flow
+  // Implement FizzBuzz for a single number
+
+  fn fizzbuzz(n: u32) -> String {
+      // TODO: Return "FizzBuzz" if divisible by both 3 and 5
+      // Return "Fizz" if divisible by 3
+      // Return "Buzz" if divisible by 5
+      // Otherwise return the number as a string
+      String::new()
+  }
+
+  fn main() {
+      println!("{}", fizzbuzz(15));
+  }
+executor:
+  type: rust-playground
+  description: '15 is divisible by both 3 and 5, so output is FizzBuzz.'
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: FizzBuzz
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

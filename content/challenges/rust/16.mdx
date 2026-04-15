@@ -1,13 +1,62 @@
 ---
-title: "Day 16: Traits"
-description: "Define shared behavior with traits in Day 16: Rust's approach to interfaces. Learn trait bounds and implementations for Solana program design."
+title: 'Day 16: Traits'
+description: >-
+  Define shared behavior with traits in Day 16: Rust's approach to interfaces.
+  Learn trait bounds and implementations for Solana program design.
 keywords:
-  - "rust traits"
-  - "rust interfaces"
-  - "trait bounds rust"
-  - "trait implementation"
-  - "rust polymorphism"
-  - "solana traits"
+  - rust traits
+  - rust interfaces
+  - trait bounds rust
+  - trait implementation
+  - rust polymorphism
+  - solana traits
+track: rust
+slug: traits
+order: 16
+difficulty: Medium
+tags:
+  - Traits
+  - Polymorphism
+  - impl Trait
+starterCode: |-
+  // Day 16: Traits
+  // Define and implement a trait
+
+  trait Describable {
+      fn describe(&self) -> String;
+  }
+
+  struct Dog {
+      name: String,
+  }
+
+  struct Cat {
+      name: String,
+  }
+
+  // TODO: Implement Describable for Dog
+  // Should return "Dog: {name}"
+
+  // TODO: Implement Describable for Cat
+  // Should return "Cat: {name}"
+
+  fn print_description(item: &impl Describable) {
+      println!("{}", item.describe());
+  }
+
+  fn main() {
+      let dog = Dog { name: String::from("Buddy") };
+      print_description(&dog);
+  }
+executor:
+  type: rust-playground
+  description: Prints the dog's description.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'Dog: Buddy'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

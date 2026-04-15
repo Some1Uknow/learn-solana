@@ -1,13 +1,64 @@
 ---
-title: "Day 28: Error Enums"
-description: "Create Solana-style error enums in Day 28: numeric error codes, error messages, and the patterns used in production Solana programs."
+title: 'Day 28: Error Enums'
+description: >-
+  Create Solana-style error enums in Day 28: numeric error codes, error
+  messages, and the patterns used in production Solana programs.
 keywords:
-  - "rust error enums"
-  - "solana error codes"
-  - "rust custom errors"
-  - "error handling patterns"
-  - "solana program errors"
-  - "rust error types"
+  - rust error enums
+  - solana error codes
+  - rust custom errors
+  - error handling patterns
+  - solana program errors
+  - rust error types
+track: rust
+slug: error-enums
+order: 28
+difficulty: Hard
+tags:
+  - Error
+  - Enums
+  - From
+starterCode: |-
+  // Day 28: Error Enums
+  // Create Solana-style error enums
+
+  #[derive(Debug, Clone, Copy)]
+  #[repr(u32)]
+  enum ProgramError {
+      NotInitialized = 0,
+      AlreadyInitialized = 1,
+      InvalidAuthority = 2,
+      InsufficientFunds = 3,
+  }
+
+  impl ProgramError {
+      // TODO: Convert error to its numeric code
+      fn code(&self) -> u32 {
+          todo!()
+      }
+      
+      // TODO: Convert from code to error
+      fn from_code(code: u32) -> Option<Self> {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let err = ProgramError::InsufficientFunds;
+      let code = err.code();
+      let restored = ProgramError::from_code(code).unwrap();
+      
+      println!("{} {:?}", code, restored);
+  }
+executor:
+  type: rust-playground
+  description: Error code 3 maps to InsufficientFunds.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 3 InsufficientFunds
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

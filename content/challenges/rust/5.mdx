@@ -1,13 +1,51 @@
 ---
-title: "Day 5: Ownership Basics"
-description: "Understand Rust's ownership system in Day 5: the core concept that makes Rust memory-safe without garbage collection. Fundamental for Solana account management."
+title: 'Day 5: Ownership Basics'
+description: >-
+  Understand Rust's ownership system in Day 5: the core concept that makes Rust
+  memory-safe without garbage collection. Fundamental for Solana account
+  management.
 keywords:
-  - "rust ownership"
-  - "rust memory safety"
-  - "rust move semantics"
-  - "ownership system"
-  - "solana ownership"
-  - "rust memory management"
+  - rust ownership
+  - rust memory safety
+  - rust move semantics
+  - ownership system
+  - solana ownership
+  - rust memory management
+track: rust
+slug: ownership-basics
+order: 5
+difficulty: Easy
+tags:
+  - Ownership
+  - Move
+  - Clone
+starterCode: |-
+  // Day 5: Ownership Basics
+  // Fix this code so it compiles and runs correctly
+
+  fn take_ownership(s: String) -> usize {
+      s.len()
+  }
+
+  fn main() {
+      let message = String::from("ownership");
+      
+      // TODO: Fix this code - currently the second call won't work!
+      // Hint: You might need to clone, or restructure the calls
+      let len1 = take_ownership(message);
+      let len2 = take_ownership(message); // This line causes an error!
+      
+      println!("{}", len1 + len2);
+  }
+executor:
+  type: rust-playground
+  description: 'Both calls should work, each returning 9 (length of ''ownership'').'
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '18'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

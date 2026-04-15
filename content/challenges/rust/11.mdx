@@ -1,13 +1,49 @@
 ---
-title: "Day 11: Result & Error Handling"
-description: "Handle errors gracefully in Day 11: Result type, the ? operator, and error propagation patterns. Master Solana's error handling conventions."
+title: 'Day 11: Result & Error Handling'
+description: >-
+  Handle errors gracefully in Day 11: Result type, the ? operator, and error
+  propagation patterns. Master Solana's error handling conventions.
 keywords:
-  - "rust error handling"
-  - "rust result type"
-  - "rust question mark operator"
-  - "error propagation rust"
-  - "solana errors"
-  - "rust try operator"
+  - rust error handling
+  - rust result type
+  - rust question mark operator
+  - error propagation rust
+  - solana errors
+  - rust try operator
+track: rust
+slug: result-and-error-handling
+order: 11
+difficulty: Medium
+tags:
+  - Result
+  - Error Handling
+  - '?'
+starterCode: |-
+  // Day 11: Result & Error Handling
+  // Parse and double a number from a string
+
+  fn parse_and_double(s: &str) -> Result<i32, String> {
+      // TODO: Parse the string to i32
+      // If parsing fails, return Err("Invalid number")
+      // If successful, return Ok(number * 2)
+      Err(String::from("Not implemented"))
+  }
+
+  fn main() {
+      match parse_and_double("21") {
+          Ok(n) => println!("Doubled: {}", n),
+          Err(e) => println!("Error: {}", e),
+      }
+  }
+executor:
+  type: rust-playground
+  description: Parses '21' and doubles it to 42.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'Doubled: 42'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

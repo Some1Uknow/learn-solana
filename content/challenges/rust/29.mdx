@@ -1,13 +1,78 @@
 ---
-title: "Day 29: Account Validation"
-description: "Implement account validation in Day 29: discriminators, type checking, and the security patterns that protect Solana programs."
+title: 'Day 29: Account Validation'
+description: >-
+  Implement account validation in Day 29: discriminators, type checking, and the
+  security patterns that protect Solana programs.
 keywords:
-  - "solana account validation"
-  - "rust discriminator"
-  - "account type checking"
-  - "solana security"
-  - "account verification rust"
-  - "solana discriminator"
+  - solana account validation
+  - rust discriminator
+  - account type checking
+  - solana security
+  - account verification rust
+  - solana discriminator
+track: rust
+slug: account-validation
+order: 29
+difficulty: Hard
+tags:
+  - Validation
+  - Accounts
+  - Patterns
+starterCode: |-
+  // Day 29: Account Validation
+  // Solana-style account structure with discriminator
+
+  const ACCOUNT_DISCRIMINATOR: u8 = 1;
+
+  #[repr(C)]
+  struct TokenAccount {
+      discriminator: u8,
+      is_initialized: bool,
+      owner: [u8; 32],
+      balance: u64,
+  }
+
+  impl TokenAccount {
+      // TODO: Create a new initialized account
+      fn new(owner: [u8; 32], balance: u64) -> Self {
+          todo!()
+      }
+      
+      // TODO: Validate the account (check discriminator and initialized)
+      fn validate(&self) -> Result<(), &'static str> {
+          todo!()
+      }
+      
+      // TODO: Check if the given pubkey is the owner
+      fn is_owner(&self, pubkey: &[u8; 32]) -> bool {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let owner = [42u8; 32];
+      let account = TokenAccount::new(owner, 1000);
+      
+      match account.validate() {
+          Ok(()) => println!("Valid"),
+          Err(e) => println!("Error: {}", e),
+      }
+      
+      println!("{}", account.is_owner(&owner));
+      println!("{}", account.balance);
+  }
+executor:
+  type: rust-playground
+  description: Account validation passes for properly initialized account.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        Valid
+        true
+        1000
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

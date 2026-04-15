@@ -1,13 +1,62 @@
 ---
-title: "Day 10: Methods & impl"
-description: "Add behavior to types with impl blocks in Day 10: methods, associated functions, and self parameter. Build reusable components for Solana programs."
+title: 'Day 10: Methods & impl'
+description: >-
+  Add behavior to types with impl blocks in Day 10: methods, associated
+  functions, and self parameter. Build reusable components for Solana programs.
 keywords:
-  - "rust impl blocks"
-  - "rust methods"
-  - "associated functions rust"
-  - "rust self parameter"
-  - "rust oop"
-  - "solana rust methods"
+  - rust impl blocks
+  - rust methods
+  - associated functions rust
+  - rust self parameter
+  - rust oop
+  - solana rust methods
+track: rust
+slug: methods-and-impl
+order: 10
+difficulty: Medium
+tags:
+  - Methods
+  - impl
+  - self
+starterCode: |-
+  // Day 10: Methods & impl
+  // Implement methods for a Rectangle struct
+
+  struct Rectangle {
+      width: u32,
+      height: u32,
+  }
+
+  impl Rectangle {
+      // TODO: Implement 'new' associated function
+      fn new(width: u32, height: u32) -> Self {
+          todo!()
+      }
+
+      // TODO: Implement 'area' method
+      fn area(&self) -> u32 {
+          todo!()
+      }
+
+      // TODO: Implement 'is_square' method
+      fn is_square(&self) -> bool {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let rect = Rectangle::new(5, 5);
+      println!("{} {}", rect.area(), rect.is_square());
+  }
+executor:
+  type: rust-playground
+  description: A 5x5 rectangle has area 25 and is a square.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 25 true
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

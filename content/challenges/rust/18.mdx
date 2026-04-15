@@ -1,13 +1,51 @@
 ---
-title: "Day 18: Lifetimes"
-description: "Master lifetime annotations in Day 18: Rust's way of ensuring reference validity. Critical for understanding Solana's account lifetime requirements."
+title: 'Day 18: Lifetimes'
+description: >-
+  Master lifetime annotations in Day 18: Rust's way of ensuring reference
+  validity. Critical for understanding Solana's account lifetime requirements.
 keywords:
-  - "rust lifetimes"
-  - "lifetime annotations rust"
-  - "rust reference validity"
-  - "lifetime bounds rust"
-  - "rust borrow checker"
-  - "solana lifetimes"
+  - rust lifetimes
+  - lifetime annotations rust
+  - rust reference validity
+  - lifetime bounds rust
+  - rust borrow checker
+  - solana lifetimes
+track: rust
+slug: lifetimes
+order: 18
+difficulty: Hard
+tags:
+  - Lifetimes
+  - '''a'
+  - References
+starterCode: |-
+  // Day 18: Lifetimes
+  // Return the longer of two string slices
+
+  // TODO: Add lifetime annotations to make this compile
+  fn longest(x: &str, y: &str) -> &str {
+      if x.len() > y.len() {
+          x
+      } else {
+          y
+      }
+  }
+
+  fn main() {
+      let s1 = String::from("short");
+      let s2 = String::from("much longer string");
+      let result = longest(&s1, &s2);
+      println!("{}", result);
+  }
+executor:
+  type: rust-playground
+  description: Returns the longer string.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: much longer string
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

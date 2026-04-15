@@ -1,13 +1,57 @@
 ---
-title: "Day 22: Smart Pointers"
-description: "Explore smart pointers in Day 22: Box, Rc, and RefCell for advanced memory management. Understand patterns used in complex Solana programs."
+title: 'Day 22: Smart Pointers'
+description: >-
+  Explore smart pointers in Day 22: Box, Rc, and RefCell for advanced memory
+  management. Understand patterns used in complex Solana programs.
 keywords:
-  - "rust smart pointers"
-  - "rust box"
-  - "rust rc"
-  - "rust refcell"
-  - "rust memory management"
-  - "solana smart pointers"
+  - rust smart pointers
+  - rust box
+  - rust rc
+  - rust refcell
+  - rust memory management
+  - solana smart pointers
+track: rust
+slug: smart-pointers
+order: 22
+difficulty: Hard
+tags:
+  - Box
+  - Rc
+  - RefCell
+starterCode: |-
+  // Day 22: Smart Pointers
+  // Use Box<T> for heap allocation
+
+  // A recursive type needs Box to have known size
+  enum List {
+      Cons(i32, Box<List>),
+      Nil,
+  }
+
+  use List::{Cons, Nil};
+
+  fn sum_list(list: &List) -> i32 {
+      // TODO: Recursively sum all values in the list
+      match list {
+          Cons(value, next) => todo!(),
+          Nil => todo!(),
+      }
+  }
+
+  fn main() {
+      // Creates list: 1 -> 2 -> 3 -> Nil
+      let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+      println!("{}", sum_list(&list));
+  }
+executor:
+  type: rust-playground
+  description: Sums 1+2+3=6 from the linked list.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '6'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

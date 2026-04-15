@@ -1,13 +1,55 @@
 ---
-title: "Day 23: Derive Macros"
-description: "Auto-implement traits with #[derive] in Day 23: Debug, Clone, Copy, PartialEq, and more. Essential macros for Solana account serialization."
+title: 'Day 23: Derive Macros'
+description: >-
+  Auto-implement traits with #[derive] in Day 23: Debug, Clone, Copy, PartialEq,
+  and more. Essential macros for Solana account serialization.
 keywords:
-  - "rust derive macro"
-  - "rust derive traits"
-  - "rust debug trait"
-  - "rust clone copy"
-  - "derive attributes rust"
-  - "solana derive"
+  - rust derive macro
+  - rust derive traits
+  - rust debug trait
+  - rust clone copy
+  - derive attributes rust
+  - solana derive
+track: rust
+slug: derive-macros
+order: 23
+difficulty: Medium
+tags:
+  - derive
+  - Debug
+  - Clone
+  - PartialEq
+starterCode: |-
+  // Day 23: Derive Macros
+  // Use #[derive] to auto-implement traits
+
+  // TODO: Add derives for Debug, Clone, PartialEq
+  struct Token {
+      symbol: String,
+      amount: u64,
+  }
+
+  fn main() {
+      let token1 = Token {
+          symbol: String::from("SOL"),
+          amount: 100,
+      };
+      let token2 = token1.clone();
+      
+      println!("{:?}", token1);
+      println!("{}", token1 == token2);
+  }
+executor:
+  type: rust-playground
+  description: Demonstrates Debug and PartialEq derives.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        Token { symbol: "SOL", amount: 100 }
+        true
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

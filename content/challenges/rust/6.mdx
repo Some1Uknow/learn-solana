@@ -1,13 +1,53 @@
 ---
-title: "Day 6: References & Borrowing"
-description: "Learn Rust borrowing and references in Day 6: immutable and mutable borrows, reference rules, and avoiding ownership transfer. Key for Solana account references."
+title: 'Day 6: References & Borrowing'
+description: >-
+  Learn Rust borrowing and references in Day 6: immutable and mutable borrows,
+  reference rules, and avoiding ownership transfer. Key for Solana account
+  references.
 keywords:
-  - "rust borrowing"
-  - "rust references"
-  - "mutable borrow"
-  - "immutable borrow"
-  - "rust borrow checker"
-  - "solana references"
+  - rust borrowing
+  - rust references
+  - mutable borrow
+  - immutable borrow
+  - rust borrow checker
+  - solana references
+track: rust
+slug: references-and-borrowing
+order: 6
+difficulty: Easy
+tags:
+  - References
+  - Borrowing
+  - '&mut'
+starterCode: |-
+  // Day 6: References & Borrowing
+  // Use references to avoid taking ownership
+
+  fn add_suffix(s: &mut String) {
+      // TODO: Append "_modified" to the string
+      
+  }
+
+  fn get_length(s: &String) -> usize {
+      // TODO: Return the length without taking ownership
+      0
+  }
+
+  fn main() {
+      let mut text = String::from("rust");
+      add_suffix(&mut text);
+      let len = get_length(&text);
+      println!("{} {}", text, len);
+  }
+executor:
+  type: rust-playground
+  description: The string is modified in place and its length is calculated.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: rust_modified 13
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,56 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { challenges, type TrackId } from "@/lib/challenges/registry";
+import { getTrackMeta, listExercisesByTrack } from "@/lib/challenges/exercises";
 import TrackChallengesClient from "./track-challenges.client";
 import { createCanonical } from "@/lib/seo";
 
 type Params = Promise<{ track: string }>;
 
-const trackMeta: Record<
-  TrackId,
-  {
-    name: string;
-    description: string;
-    keywords: string[];
-  }
-> = {
-  rust: {
-    name: "30 Days of Rust",
-    description:
-      "Master Rust programming with 30 daily coding challenges. Learn ownership, borrowing, lifetimes, and Solana program primitives through hands-on practice.",
-    keywords: [
-      "rust coding challenges",
-      "learn rust",
-      "rust programming exercises",
-      "rust for solana",
-      "rust ownership",
-      "rust borrowing",
-      "30 days of rust",
-      "rust practice problems",
-    ],
-  },
-  anchor: {
-    name: "Anchor Deep Dive",
-    description:
-      "Master the Anchor framework for building secure Solana programs. Learn PDAs, CPIs, account validation, and smart contract patterns through practical challenges.",
-    keywords: [
-      "anchor framework tutorial",
-      "anchor solana",
-      "solana smart contracts",
-      "anchor pda",
-      "anchor cpi",
-      "solana program development",
-      "anchor challenges",
-      "learn anchor",
-    ],
-  },
-};
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { track: trackParam } = await params;
-  const track = trackParam as TrackId;
-  const meta = trackMeta[track];
-  if (!meta) return { title: "Challenges" };
+  const track = trackParam;
+  const exercises = listExercisesByTrack(track);
+  if (exercises.length === 0) return { title: "Challenges" };
+  const meta = getTrackMeta(track);
 
   const canonical = createCanonical(`/challenges/${track}`);
   const ogImageUrl = createCanonical(`/og/challenges/${track}`);
@@ -87,12 +48,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function TrackChallengesPage({ params }: { params: Params }) {
   const { track: trackParam } = await params;
-  const track = trackParam as TrackId;
-  const meta = trackMeta[track];
-
-  if (!meta) return notFound();
-
-  const trackChallenges = challenges.filter((c) => c.track === track);
+  const track = trackParam;
+  const meta = getTrackMeta(track);
+  const trackChallenges = listExercisesByTrack(track);
 
   if (trackChallenges.length === 0) return notFound();
 

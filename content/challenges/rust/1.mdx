@@ -1,13 +1,42 @@
 ---
-title: "Day 1 - Hello Rust"
-description: "Start your Rust journey with Day 1: Learn to declare variables, understand basic types, and use println! macro for output. Perfect for Solana development beginners."
+title: Day 1 - Hello Rust
+description: >-
+  Start your Rust journey with Day 1: Learn to declare variables, understand
+  basic types, and use println! macro for output. Perfect for Solana development
+  beginners.
 keywords:
-  - "rust hello world"
-  - "rust variables"
-  - "rust println"
-  - "learn rust basics"
-  - "rust for beginners"
-  - "solana rust"
+  - rust hello world
+  - rust variables
+  - rust println
+  - learn rust basics
+  - rust for beginners
+  - solana rust
+track: rust
+slug: hello-rust
+order: 1
+difficulty: Easy
+tags:
+  - Basics
+  - Variables
+  - println!
+starterCode: |-
+  // Day 1: Hello Rust
+  // Create a variable 'name' with your name and print a greeting
+
+  fn main() {
+      // TODO: Create a variable called 'name' with the value "Rustacean"
+      // TODO: Print "Hello, {name}! Welcome to Rust."
+      
+  }
+executor:
+  type: rust-playground
+  description: Your program should print the exact greeting message.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'Hello, Rustacean! Welcome to Rust.'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

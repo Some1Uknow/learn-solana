@@ -1,13 +1,46 @@
 ---
-title: "Day 15: Generics"
-description: "Write flexible code with generics in Day 15: generic functions, structs, and type parameters. Build reusable Solana program components."
+title: 'Day 15: Generics'
+description: >-
+  Write flexible code with generics in Day 15: generic functions, structs, and
+  type parameters. Build reusable Solana program components.
 keywords:
-  - "rust generics"
-  - "rust type parameters"
-  - "generic functions rust"
-  - "rust generic structs"
-  - "rust polymorphism"
-  - "solana generics"
+  - rust generics
+  - rust type parameters
+  - generic functions rust
+  - rust generic structs
+  - rust polymorphism
+  - solana generics
+track: rust
+slug: generics
+order: 15
+difficulty: Medium
+tags:
+  - Generics
+  - Type Parameters
+  - Reusability
+starterCode: |-
+  // Day 15: Generics
+  // Find the largest element in a slice using generics
+
+  fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+      // TODO: Return the largest element
+      // Hint: You can compare with > because of PartialOrd
+      todo!()
+  }
+
+  fn main() {
+      let numbers = vec![34, 50, 25, 100, 65];
+      println!("{}", largest(&numbers));
+  }
+executor:
+  type: rust-playground
+  description: Finds the largest number in the vector.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '100'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,13 +1,55 @@
 ---
-title: "Day 8: Structs"
-description: "Create custom data types with Rust structs in Day 8: define fields, implement methods, and model complex data. Foundation for Solana account structures."
+title: 'Day 8: Structs'
+description: >-
+  Create custom data types with Rust structs in Day 8: define fields, implement
+  methods, and model complex data. Foundation for Solana account structures.
 keywords:
-  - "rust structs"
-  - "rust custom types"
-  - "struct methods rust"
-  - "rust data modeling"
-  - "solana account struct"
-  - "rust struct impl"
+  - rust structs
+  - rust custom types
+  - struct methods rust
+  - rust data modeling
+  - solana account struct
+  - rust struct impl
+track: rust
+slug: structs
+order: 8
+difficulty: Easy
+tags:
+  - Structs
+  - Data
+  - Types
+starterCode: |-
+  // Day 8: Structs
+  // Create a User struct and implement a greeting
+
+  // TODO: Define a User struct with 'name' (String) and 'age' (u32) fields
+  struct User {
+      // Add fields here
+  }
+
+  fn create_user(name: &str, age: u32) -> User {
+      // TODO: Create and return a User instance
+      todo!()
+  }
+
+  fn greet(user: &User) -> String {
+      // TODO: Return "Hi, I'm {name} and I'm {age} years old"
+      String::new()
+  }
+
+  fn main() {
+      let user = create_user("Alice", 30);
+      println!("{}", greet(&user));
+  }
+executor:
+  type: rust-playground
+  description: Creates a user and prints a greeting.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'Hi, I''m Alice and I''m 30 years old'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

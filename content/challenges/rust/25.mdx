@@ -1,13 +1,65 @@
 ---
-title: "Day 25: Byte Serialization"
-description: "Manually serialize data to bytes in Day 25: the foundation for understanding Borsh serialization used throughout Solana development."
+title: 'Day 25: Byte Serialization'
+description: >-
+  Manually serialize data to bytes in Day 25: the foundation for understanding
+  Borsh serialization used throughout Solana development.
 keywords:
-  - "rust serialization"
-  - "rust bytes"
-  - "rust borsh foundation"
-  - "data serialization rust"
-  - "binary format rust"
-  - "solana serialization"
+  - rust serialization
+  - rust bytes
+  - rust borsh foundation
+  - data serialization rust
+  - binary format rust
+  - solana serialization
+track: rust
+slug: byte-serialization
+order: 25
+difficulty: Hard
+tags:
+  - Bytes
+  - Serialization
+  - '[u8]'
+starterCode: |-
+  // Day 25: Byte Serialization
+  // Manually serialize a struct to bytes
+
+  struct Transfer {
+      amount: u64,
+      recipient: [u8; 4], // Simplified "address"
+  }
+
+  impl Transfer {
+      // TODO: Serialize to bytes (little-endian for amount)
+      fn to_bytes(&self) -> [u8; 12] {
+          let mut bytes = [0u8; 12];
+          // First 8 bytes: amount as little-endian
+          // Next 4 bytes: recipient
+          bytes
+      }
+      
+      // TODO: Deserialize from bytes
+      fn from_bytes(data: &[u8; 12]) -> Self {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let transfer = Transfer {
+          amount: 1000,
+          recipient: [1, 2, 3, 4],
+      };
+      let bytes = transfer.to_bytes();
+      let restored = Transfer::from_bytes(&bytes);
+      println!("{} {:?}", restored.amount, restored.recipient);
+  }
+executor:
+  type: rust-playground
+  description: Round-trip serialization preserves data.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '1000 [1, 2, 3, 4]'
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

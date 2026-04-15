@@ -4,6 +4,7 @@ import path from 'node:path'
 import { siteUrl } from "@/lib/seo";
 import { getAllCategoryIds } from "@/data/tools-data";
 import { contentsData } from "@/data/contents-data";
+import { listExerciseTracks, listExercisesByTrack } from "@/lib/challenges/exercises";
 
 /**
  * Enhanced sitemap for learn.sol with SEO optimizations:
@@ -139,12 +140,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
 
     // Add challenge tracks and individual challenges
-    const challengesDir = path.join(CONTENT_DIR, 'challenges')
-    if (fs.existsSync(challengesDir)) {
-      const challengeTracks = fs.readdirSync(challengesDir).filter((f) =>
-        fs.statSync(path.join(challengesDir, f)).isDirectory()
-      )
-      
+    const challengeTracks = listExerciseTracks()
+    if (challengeTracks.length > 0) {
       for (const track of challengeTracks) {
         // Track landing page
         entries.push({
@@ -154,29 +151,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
           lastModified: now,
         })
 
-        // Individual challenges within track - sorted numerically
-        const trackDir = path.join(challengesDir, track)
-        const challengeFiles = fs
-          .readdirSync(trackDir)
-          .filter((f) => /\.mdx?$/.test(f))
-          .sort((a, b) => {
-            const numA = parseInt(a.replace(/\D/g, ''), 10) || 0
-            const numB = parseInt(b.replace(/\D/g, ''), 10) || 0
-            return numA - numB
-          })
-          
-        for (const file of challengeFiles) {
-          // Extract the challenge number from filename (e.g., "1.mdx" -> "1")
-          const challengeNum = file.replace(/\.mdx?$/, '')
-          const filePath = path.join(trackDir, file)
+        for (const exercise of listExercisesByTrack(track)) {
           let lastModified: Date = now
           try {
-            lastModified = fs.statSync(filePath).mtime
+            lastModified = fs.statSync(exercise.filePath).mtime
           } catch {
             // Use current date if stat fails
           }
           entries.push({
-            url: normalizeUrl(BASE_URL, `/challenges/${track}/${challengeNum}`),
+            url: normalizeUrl(BASE_URL, `/challenges/${track}/${exercise.slug}`),
             priority: 0.65,
             changeFrequency: 'monthly',
             lastModified,

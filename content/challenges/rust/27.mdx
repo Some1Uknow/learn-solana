@@ -1,13 +1,64 @@
 ---
-title: "Day 27: The From Trait"
-description: "Implement type conversions in Day 27: From/Into traits used everywhere in Solana for seamless type transformations."
+title: 'Day 27: The From Trait'
+description: >-
+  Implement type conversions in Day 27: From/Into traits used everywhere in
+  Solana for seamless type transformations.
 keywords:
-  - "rust from into"
-  - "rust type conversion"
-  - "rust from trait"
-  - "rust into trait"
-  - "type coercion rust"
-  - "solana type conversion"
+  - rust from into
+  - rust type conversion
+  - rust from trait
+  - rust into trait
+  - type coercion rust
+  - solana type conversion
+track: rust
+slug: the-from-trait
+order: 27
+difficulty: Hard
+tags:
+  - From
+  - Into
+  - Conversions
+starterCode: |-
+  // Day 27: The From Trait
+  // Implement type conversions
+
+  struct Lamports(u64);
+  struct Sol(f64);
+
+  // TODO: Implement From<Sol> for Lamports
+  // 1 SOL = 1_000_000_000 lamports
+  impl From<Sol> for Lamports {
+      fn from(sol: Sol) -> Self {
+          todo!()
+      }
+  }
+
+  // TODO: Implement From<Lamports> for Sol
+  impl From<Lamports> for Sol {
+      fn from(lamports: Lamports) -> Self {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let sol = Sol(1.5);
+      let lamports: Lamports = sol.into();
+      println!("{}", lamports.0);
+      
+      let back: Sol = lamports.into();
+      println!("{}", back.0);
+  }
+executor:
+  type: rust-playground
+  description: Converts SOL to lamports and back.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        1500000000
+        1.5
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

@@ -1,40 +1,29 @@
 import { generateLearnSolOgImage } from "@/lib/og/learnsol";
+import { getTrackMeta, listExercisesByTrack } from "@/lib/challenges/exercises";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 1200, height: 630 };
 
 type Params = { track: string };
-
-const trackMeta: Record<string, { title: string; subtitle: string }> = {
-  rust: {
-    title: "30 Days of Rust\nchallenge track",
-    subtitle:
-      "Daily exercises to build Rust muscle memory for real Solana development.",
-  },
-  anchor: {
-    title: "Anchor Deep Dive\nchallenge track",
-    subtitle:
-      "Hands-on PDAs, CPIs, and account validation drills for production-safe programs.",
-  },
-};
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<Params> }
 ) {
   const { track } = await params;
-  const meta = trackMeta[track];
-
-  if (!meta) {
+  const exercises = listExercisesByTrack(track);
+  if (exercises.length === 0) {
     return new Response("Track not found", { status: 404 });
   }
 
+  const meta = getTrackMeta(track);
+
   return generateLearnSolOgImage({
     eyebrow: `${track} challenges`,
-    title: meta.title,
-    subtitle: meta.subtitle,
-    bullets: ["Structured daily progression", "Skill checks for each milestone"],
+    title: `${meta.name}\nexercise track`,
+    subtitle: meta.description,
+    bullets: ["MDX-defined curriculum", "Progress saved by exercise slug"],
     footer: "learn.sol",
   });
 }

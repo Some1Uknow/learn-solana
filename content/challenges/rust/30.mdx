@@ -1,13 +1,102 @@
 ---
-title: "Day 30: Capstone - State Machine"
-description: "Build a complete escrow state machine in Day 30: your capstone project combining all Rust concepts for a production-ready Solana pattern."
+title: 'Day 30: Capstone - State Machine'
+description: >-
+  Build a complete escrow state machine in Day 30: your capstone project
+  combining all Rust concepts for a production-ready Solana pattern.
 keywords:
-  - "rust escrow"
-  - "solana escrow"
-  - "state machine rust"
-  - "rust capstone project"
-  - "solana state management"
-  - "escrow smart contract"
+  - rust escrow
+  - solana escrow
+  - state machine rust
+  - rust capstone project
+  - solana state management
+  - escrow smart contract
+track: rust
+slug: capstone-state-machine
+order: 30
+difficulty: Hard
+tags:
+  - Capstone
+  - State Machine
+  - Solana Patterns
+starterCode: |-
+  // Day 30: Capstone - Solana-Style State Machine
+  // Combine everything: enums, structs, traits, error handling
+
+  #[derive(Debug, Clone, Copy, PartialEq)]
+  #[repr(u8)]
+  enum EscrowState {
+      Uninitialized = 0,
+      Initialized = 1,
+      Deposited = 2,
+      Completed = 3,
+      Cancelled = 4,
+  }
+
+  #[derive(Debug)]
+  enum EscrowError {
+      InvalidState,
+      InvalidAmount,
+      Unauthorized,
+  }
+
+  #[repr(C)]
+  struct Escrow {
+      state: EscrowState,
+      maker: [u8; 32],
+      taker: [u8; 32],
+      amount: u64,
+  }
+
+  impl Escrow {
+      fn new(maker: [u8; 32]) -> Self {
+          Self {
+              state: EscrowState::Initialized,
+              maker,
+              taker: [0u8; 32],
+              amount: 0,
+          }
+      }
+      
+      // TODO: Deposit funds (only maker can do this, only when Initialized)
+      fn deposit(&mut self, caller: &[u8; 32], amount: u64) -> Result<(), EscrowError> {
+          todo!()
+      }
+      
+      // TODO: Complete the escrow (only when Deposited, sets taker)
+      fn complete(&mut self, taker: [u8; 32]) -> Result<(), EscrowError> {
+          todo!()
+      }
+      
+      // TODO: Cancel (only maker, only when not Completed)
+      fn cancel(&mut self, caller: &[u8; 32]) -> Result<(), EscrowError> {
+          todo!()
+      }
+  }
+
+  fn main() {
+      let maker = [1u8; 32];
+      let taker = [2u8; 32];
+      let mut escrow = Escrow::new(maker);
+      
+      escrow.deposit(&maker, 100).unwrap();
+      println!("After deposit: {:?}", escrow.state);
+      
+      escrow.complete(taker).unwrap();
+      println!("After complete: {:?}", escrow.state);
+      println!("Amount: {}", escrow.amount);
+  }
+executor:
+  type: rust-playground
+  description: Full escrow state machine working correctly.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        After deposit: Deposited
+        After complete: Completed
+        Amount: 100
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";

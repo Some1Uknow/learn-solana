@@ -1,11 +1,11 @@
 import { generateLearnSolOgImage } from "@/lib/og/learnsol";
-import { getChallenge, type TrackId } from "@/lib/challenges/registry";
+import { getExercise } from "@/lib/challenges/exercises";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 1200, height: 630 };
 
-type Params = { track: string; id: string };
+type Params = { track: string; slug: string };
 
 const truncate = (value: string, limit: number): string => {
   if (value.length <= limit) return value;
@@ -16,8 +16,8 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<Params> }
 ) {
-  const { track, id } = await params;
-  const challenge = getChallenge(track as TrackId, Number(id));
+  const { track, slug } = await params;
+  const challenge = getExercise(track, slug);
 
   if (!challenge) {
     return new Response("Challenge not found", { status: 404 });

@@ -1,13 +1,62 @@
 ---
-title: "Day 17: Trait Objects"
-description: "Use dyn Trait for runtime polymorphism in Day 17: trait objects and heterogeneous collections. Advanced patterns for flexible Solana architectures."
+title: 'Day 17: Trait Objects'
+description: >-
+  Use dyn Trait for runtime polymorphism in Day 17: trait objects and
+  heterogeneous collections. Advanced patterns for flexible Solana
+  architectures.
 keywords:
-  - "rust dyn trait"
-  - "rust trait objects"
-  - "runtime polymorphism rust"
-  - "heterogeneous collections"
-  - "rust dynamic dispatch"
-  - "solana trait objects"
+  - rust dyn trait
+  - rust trait objects
+  - runtime polymorphism rust
+  - heterogeneous collections
+  - rust dynamic dispatch
+  - solana trait objects
+track: rust
+slug: trait-objects
+order: 17
+difficulty: Hard
+tags:
+  - dyn Trait
+  - Dynamic Dispatch
+  - Box
+starterCode: |-
+  // Day 17: Trait Objects
+  // Use dyn Trait for heterogeneous collections
+
+  trait Speak {
+      fn speak(&self) -> String;
+  }
+
+  struct Dog;
+  struct Cat;
+
+  impl Speak for Dog {
+      fn speak(&self) -> String {
+          String::from("Woof!")
+      }
+  }
+
+  // TODO: Implement Speak for Cat (should return "Meow!")
+
+  fn main() {
+      // TODO: Create a Vec<Box<dyn Speak>> containing a Dog and a Cat
+      let animals: Vec<Box<dyn Speak>> = vec![];
+      
+      for animal in &animals {
+          println!("{}", animal.speak());
+      }
+  }
+executor:
+  type: rust-playground
+  description: Both animals speak through dynamic dispatch.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: |-
+        Woof!
+        Meow!
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
