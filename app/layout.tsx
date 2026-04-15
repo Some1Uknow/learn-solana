@@ -6,9 +6,8 @@ import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
-import Provider from "../components/web3Auth/authProvider";
+import PrivyAppProvider from "@/components/auth/privy-provider";
 import { RouteGuard } from "@/components/route-guard";
-import { headers } from "next/headers";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import {
@@ -18,7 +17,6 @@ import {
   metadataBase,
   siteUrl,
 } from "@/lib/seo";
-import { parseWeb3AuthStateFromCookie } from "@/lib/web3auth-cookie";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -136,14 +134,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const secChUa = headersList.get("sec-ch-ua") || "";
-  const userAgent = headersList.get("user-agent") || "";
-  const isBrave =
-    /\bBrave\b/i.test(secChUa) || /\bBrave\b/i.test(userAgent);
-  const web3authInitialState = isBrave
-    ? undefined
-    : parseWeb3AuthStateFromCookie(headersList.get("cookie"));
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (
@@ -202,14 +192,14 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           enableSystem
           disableTransitionOnChange
         >
-          <Provider web3authInitialState={web3authInitialState} isBrave={isBrave}>
+          <PrivyAppProvider>
             <RouteGuard>
               <RootProvider>
                 {children}
                 <Analytics />
               </RootProvider>
             </RouteGuard>
-          </Provider>
+          </PrivyAppProvider>
 
           <Toaster />
         </ThemeProvider>

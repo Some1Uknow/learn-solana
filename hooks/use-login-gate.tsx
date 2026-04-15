@@ -1,22 +1,39 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useWeb3Auth } from "@/hooks/use-web3-auth";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 export function useLoginGate() {
-    const { isLoggedIn, login } = useWeb3Auth();
-    const [showModal, setShowModal] = useState(false);
+    const { authenticated, login, ready } = useAuth();
+    const [showModal, setShowModalState] = useState(false);
+    const pendingActionRef = useRef<(() => void) | null>(null);
 
     const requireLogin = useCallback((callback: () => void) => {
-        if (isLoggedIn) {
+        if (ready && authenticated) {
             callback();
         } else {
-            setShowModal(true);
+            pendingActionRef.current = callback;
+            setShowModalState(true);
         }
-    }, [isLoggedIn]);
+    }, [authenticated, ready]);
+
+    useEffect(() => {
+        if (!ready || !authenticated || !pendingActionRef.current) return;
+        const action = pendingActionRef.current;
+        pendingActionRef.current = null;
+        setShowModalState(false);
+        action();
+    }, [authenticated, ready]);
+
+    const setShowModal = useCallback((open: boolean) => {
+        if (!open && !authenticated) {
+            pendingActionRef.current = null;
+        }
+        setShowModalState(open);
+    }, [authenticated]);
 
     return {
-        isLoggedIn,
+        isLoggedIn: authenticated,
         login,
         showModal,
         setShowModal,
