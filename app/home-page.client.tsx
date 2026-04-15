@@ -1,13 +1,13 @@
 "use client";
 
 import { Navbar } from "@/components/layout/navbar";
-import { NeoFiTestPage } from "@/components/test/neofi-test-page";
+import { HomePageV2 } from "@/components/home/homepage-v2";
 
 export function HomePageClient() {
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-      <NeoFiTestPage />
+      <HomePageV2 />
     </div>
   );
 }

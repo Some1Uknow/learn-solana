@@ -111,12 +111,12 @@ export default function NotFound() {
                 </Link>
 
                 <Link
-                  href="/games"
+                  href="/tools"
                   className="group/btn flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-center transition hover:border-white/20 hover:bg-white/[0.06]"
                 >
-                  <div className="text-2xl">🎮</div>
-                  <div className="text-sm font-medium text-white">Games</div>
-                  <div className="text-xs text-zinc-400">Have some fun</div>
+                  <div className="text-2xl">🛠️</div>
+                  <div className="text-sm font-medium text-white">Tools</div>
+                  <div className="text-xs text-zinc-400">Explore utilities</div>
                 </Link>
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 
 const partnerCategories = [
   { id: "rpc", name: "RPC Providers", available: true },
@@ -11,13 +11,12 @@ const partnerCategories = [
   { id: "devtools", name: "Developer Tooling", available: true },
 ];
 
-interface PlatformStats {
-  totalUsers: number;
-  totalTutorialMinutes: number;
-  totalGamePlayers: number;
-  totalRustChallengesAttempted: number;
-  rustChallengeParticipants: number;
-}
+const platformStats = {
+  totalUsers: 1200,
+  totalTutorialMinutes: 8342,
+  totalRustChallengesAttempted: 50,
+  modulesPublished: 4,
+};
 
 // Count-up animation component
 function AnimatedCounter({ end, duration = 2, decimals = 0, suffix = "" }: { end: number; duration?: number; decimals?: number; suffix?: string }) {
@@ -75,15 +74,6 @@ function ScrollSection({ children, delay = 0 }: { children: React.ReactNode; del
 
 export function PartnerPageClient() {
   const prefersReducedMotion = useReducedMotion();
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-
-  useEffect(() => {
-    fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch((err) => console.error("Failed to fetch stats:", err));
-  }, []);
-
   const fadeUp = {
     hidden: { opacity: 0, y: 12 },
     visible: { opacity: 1, y: 0 },
@@ -207,23 +197,23 @@ export function PartnerPageClient() {
           <ScrollSection>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={stats?.totalUsers || 1250} suffix="+" />
+                  <AnimatedCounter end={platformStats.totalUsers} suffix="+" />
                   <div className="text-sm text-zinc-400">Solana Learners</div>
                 </div>
                 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={stats?.totalTutorialMinutes || 2700} suffix=" min" />
+                  <AnimatedCounter end={platformStats.totalTutorialMinutes} suffix=" min" />
                   <div className="text-sm text-zinc-400">Total Tutorial Minutes Read</div>
                 </div>
 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={stats?.totalRustChallengesAttempted || 200} suffix="+" />
+                  <AnimatedCounter end={platformStats.totalRustChallengesAttempted} suffix="+" />
                   <div className="text-sm text-zinc-400">Coding Challenges Attempted</div>
                 </div>
 
                 <div className="rounded-lg border border-zinc-800/50 bg-zinc-900/20 p-6 space-y-2 hover:border-zinc-700/50 transition-colors">
-                  <AnimatedCounter end={stats?.totalGamePlayers || 30} suffix="+" />
-                  <div className="text-sm text-zinc-400">Games Played</div>
+                  <AnimatedCounter end={platformStats.modulesPublished} suffix="+" />
+                  <div className="text-sm text-zinc-400">Modules Published</div>
                 </div>
               </div>
 

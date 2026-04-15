@@ -37,7 +37,6 @@ function normalizeUrl(baseUrl: string, urlPath: string): string {
 const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' | 'weekly' | 'monthly' }[] = [
   { path: '/', priority: 1.0, changeFrequency: 'weekly' },
   { path: '/modules', priority: 0.9, changeFrequency: 'weekly' },
-  { path: '/games', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/challenges', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/tools', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/tools/runtime-lab', priority: 0.65, changeFrequency: 'monthly' },

@@ -25,7 +25,7 @@ const organizationJsonLd = {
   alternateName: "Learn Solana",
   url: siteUrl,
   logo: `${siteUrl}/opengraph-image.png`,
-  description: "Free Solana development courses, tutorials, and coding challenges",
+  description: "Solana onboarding, tutorials, and coding challenges for developers learning the full stack",
   sameAs: ["https://x.com/learndotsol", "https://github.com/learn-solana"],
   contactPoint: [
     {
@@ -40,7 +40,7 @@ const courseJsonLd = {
   "@context": "https://schema.org",
   "@type": "Course",
   name: "Learn Solana Development",
-  description: "Free comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps",
+  description: "Comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps",
   provider: {
     "@type": "EducationalOrganization",
     name: "learn.sol",
@@ -50,7 +50,7 @@ const courseJsonLd = {
   isAccessibleForFree: true,
   inLanguage: "en",
   coursePrerequisites: "Basic programming knowledge",
-  teaches: ["Solana Development", "Rust Programming", "Smart Contracts", "Anchor Framework", "Web3 Development"],
+  teaches: ["Solana Development", "Rust Programming", "Smart Contracts", "Anchor Framework", "Solana Client Tooling"],
   hasCourseInstance: {
     "@type": "CourseInstance",
     courseMode: "online",
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     template: "%s | learn.sol",
   },
   description:
-    "Learn Solana development for free. Master Solana programming, Rust, Anchor framework through interactive courses, games, and coding challenges. The best way to learn Solana.",
+    "Learn Solana development through public modules, coding challenges, and full-stack developer tooling. Master Rust, Anchor, and modern Solana workflows.",
   keywords: courseKeywords,
   applicationName: "learn.sol",
   authors: [{ name: "learn.sol Team" }],
@@ -99,7 +99,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Learn Solana | Free Solana Development Course",
     description:
-      "Learn Solana development for free. Master Solana programming through interactive courses, games, and challenges.",
+      "Learn Solana development through interactive modules, coding challenges, and full-stack developer tooling.",
     url: siteUrl,
     siteName: "learn.sol, Learn Solana Development",
     locale: "en_US",
@@ -112,7 +112,7 @@ export const metadata: Metadata = {
     creator: "@Some1UKnow25",
     title: "Learn Solana | Free Development Course",
     description:
-      "Learn Solana development for free through interactive courses, games, and coding challenges.",
+      "Learn Solana development through interactive modules, coding challenges, and full-stack developer tooling.",
     images: [defaultTwitterImage],
   },
   robots: {

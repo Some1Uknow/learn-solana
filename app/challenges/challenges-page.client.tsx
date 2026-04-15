@@ -16,6 +16,11 @@ const breadcrumbItems = [
   { name: "Challenges", url: "/challenges" },
 ];
 
+const challengeStats = {
+  participants: 50,
+  totalAttempted: 200,
+};
+
 function getPhaseIcon(groupId: string) {
   switch (groupId) {
     case "foundations":
@@ -33,23 +38,6 @@ function getPhaseIcon(groupId: string) {
 
 export function ChallengesPageClient() {
   const router = useRouter();
-  const [challengeStats, setChallengeStats] = React.useState<{
-    participants: number;
-    totalAttempted: number;
-  } | null>(null);
-
-  React.useEffect(() => {
-    fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data) => {
-        setChallengeStats({
-          participants: data.rustChallengeParticipants || 0,
-          totalAttempted: data.totalRustChallengesAttempted || 0,
-        });
-      })
-      .catch((err) => console.error("Failed to fetch stats:", err));
-  }, []);
-
   const phases = getChallengeGroupsForTrack("rust").map((group) => ({
     ...group,
     icon: getPhaseIcon(group.id),
@@ -79,7 +67,7 @@ export function ChallengesPageClient() {
               Progressive daily Rust coding series—from foundations to Solana program primitives.
             </p>
 
-            {challengeStats && challengeStats.participants > 0 && (
+            {challengeStats.participants > 0 && (
               <div className="mt-6 flex flex-wrap gap-6">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-semibold text-[#14f195]">

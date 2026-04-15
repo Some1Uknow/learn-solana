@@ -11,7 +11,7 @@ import {
 
 import { Globe } from "@/components/ui/globe";
 import { BentoGrid } from "@/components/ui/bento-grid";
-import styles from "./neofi-test-page.module.css";
+import styles from "./homepage-v2.module.css";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -153,7 +153,7 @@ const heroGlobeConfig = {
   ],
 };
 
-export function NeoFiTestPage() {
+export function HomePageV2() {
   return (
     <main className={`${styles.page} ${body.className}`}>
       <section className={styles.hero}>
