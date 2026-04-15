@@ -4,13 +4,6 @@ import Link from "next/link";
 import { motion, useReducedMotion, useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-const partnerCategories = [
-  { id: "rpc", name: "RPC Providers", available: true },
-  { id: "wallets", name: "Wallets", available: true },
-  { id: "indexing", name: "Indexing & Data", available: true },
-  { id: "devtools", name: "Developer Tooling", available: true },
-];
-
 const platformStats = {
   totalUsers: 1200,
   totalTutorialMinutes: 8342,
@@ -430,50 +423,6 @@ export function PartnerPageClient() {
                   This is long-term adoption, not short-term exposure.
                 </p>
               </div>
-            </div>
-            </section>
-          </ScrollSection>
-
-          {/* AVAILABLE CATEGORIES */}
-          <ScrollSection>
-            <section className="space-y-8">
-            <div className="space-y-2 max-w-3xl">
-              <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-                Available Partner Categories
-              </h2>
-              <p className="text-base text-zinc-400">
-                We currently onboard partners in a limited set of core infrastructure categories
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl">
-              {partnerCategories.map((category) => (
-                <div
-                  key={category.id}
-                  className={`rounded-lg border p-6 space-y-3 transition-colors ${
-                    category.available
-                      ? "border-zinc-800/50 bg-zinc-900/10 hover:border-zinc-700/50"
-                      : "border-zinc-800/30 bg-zinc-900/5 opacity-60"
-                  }`}
-                >
-                  <div>
-                    <div className="text-base font-medium text-white mb-1">{category.name}</div>
-                    <div className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
-                      category.available 
-                        ? "bg-violet-500/10 text-violet-300 border border-violet-500/20" 
-                        : "bg-zinc-800/50 text-zinc-500"
-                    }`}>
-                      {category.available ? "Available" : "Limited"}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="max-w-2xl">
-              <p className="text-sm text-zinc-500 italic border-l-2 border-zinc-800 pl-4">
-                We intentionally keep categories limited to maintain quality and trust.
-              </p>
             </div>
             </section>
           </ScrollSection>

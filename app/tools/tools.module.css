@@ -1,0 +1,662 @@
+.page {
+  --bg: #040404;
+  --panel: #0f0f0f;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f5f5f5;
+  --muted: #8e8e8e;
+  --muted-strong: #b7b7b7;
+  --lime: #a9ff2f;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(169, 255, 47, 0.08), transparent 26%),
+    radial-gradient(circle at 82% 16%, rgba(169, 255, 47, 0.06), transparent 22%),
+    linear-gradient(180deg, #050505 0%, #040404 100%);
+  color: var(--text);
+  overflow-x: clip;
+}
+
+.shell {
+  width: min(1240px, calc(100vw - 80px));
+  margin: 0 auto;
+}
+
+.hero {
+  min-height: 100svh;
+  padding: 7rem 0 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.heroCompact {
+  min-height: auto;
+  padding-top: 4.5rem;
+  display: block;
+}
+
+.heroGrid {
+  display: block;
+}
+
+.heroGridSingle {
+  display: block;
+}
+
+.heroCopy {
+  max-width: 100%;
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.breadcrumb a:hover {
+  color: white;
+}
+
+.breadcrumbItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.breadcrumbDivider {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.heroKicker {
+  margin-top: 1.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.heroTitle {
+  margin-top: 0.9rem;
+  max-width: none;
+  font-size: clamp(2.7rem, 5.8vw, 4.25rem);
+  line-height: 0.97;
+  letter-spacing: -0.055em;
+}
+
+.heroBody {
+  margin-top: 1.05rem;
+  max-width: 50rem;
+  font-size: 0.96rem;
+  line-height: 1.78;
+  color: var(--muted);
+}
+
+.heroActions {
+  display: inline-flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-top: 1.7rem;
+}
+
+.heroAside {
+  margin-top: 1rem;
+  max-width: 24rem;
+}
+
+.heroPanel,
+.panel,
+.surfaceCard,
+.infoCard,
+.statCard,
+.searchShell,
+.railCard {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(16, 16, 16, 0.98), rgba(8, 8, 8, 0.98));
+  box-shadow:
+    inset 0 -24px 60px -42px rgba(255, 255, 255, 0.05),
+    0 20px 48px rgba(0, 0, 0, 0.22);
+}
+
+.heroPanel,
+.panel,
+.surfaceCard,
+.railCard {
+  border-radius: 1.35rem;
+}
+
+.infoCard,
+.statCard,
+.searchShell {
+  border-radius: 1.1rem;
+}
+
+.heroPanel {
+  padding: 1rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.panel {
+  padding: 1.15rem;
+}
+
+.surfaceCard {
+  padding: 1rem 1.05rem;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.surfaceCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(169, 255, 47, 0.2);
+}
+
+.section {
+  padding: 0 0 4rem;
+}
+
+.sectionSpacious {
+  padding-top: 0;
+}
+
+.sectionHeader {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.7rem;
+}
+
+.sectionIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sectionEyebrow {
+  color: var(--lime);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  margin-top: 0.8rem;
+  font-size: clamp(1.95rem, 3.3vw, 2.85rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.sectionBody {
+  margin-top: 0.85rem;
+  max-width: 42rem;
+  font-size: 0.94rem;
+  line-height: 1.72;
+  color: var(--muted);
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.05rem;
+  padding: 0 1.35rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.primaryButton {
+  background: white;
+  color: black;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.primaryButton:hover,
+.secondaryButton:hover {
+  transform: translateY(-1px);
+}
+
+.secondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.pill,
+.ghostPill,
+.accentPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.75rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+}
+
+.pill {
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ghostPill {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.accentPill {
+  background: rgba(169, 255, 47, 0.14);
+  color: var(--lime);
+  border-color: transparent;
+}
+
+.heroStatValue {
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--text);
+}
+
+.heroStatLabel {
+  margin-top: 0.45rem;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.heroStatNote {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.48;
+  color: var(--muted);
+}
+
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.catalogGridWide {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.cardEyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+.cardTitle {
+  margin-top: 0.8rem;
+  font-size: clamp(1.75rem, 3.3vw, 2.3rem);
+  line-height: 1.04;
+  letter-spacing: -0.05em;
+}
+
+.cardDescription {
+  margin-top: 0.85rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.72;
+}
+
+.cardMeta {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.cardFooter {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.metaLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-strong);
+}
+
+.miniStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.statCard {
+  padding: 0.9rem;
+}
+
+.statValue {
+  font-size: 1.45rem;
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+}
+
+.statLabel {
+  margin-top: 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-strong);
+}
+
+.statNote {
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
+  line-height: 1.48;
+  color: var(--muted);
+}
+
+.searchShell {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.searchInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.toolsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1rem;
+}
+
+.toolsMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toolsAside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stickyAside {
+  position: sticky;
+  top: 92px;
+}
+
+.railCard {
+  padding: 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.listLabel {
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.listValue {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.providerLogo {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.providerLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fallbackLogo {
+  font-size: 1.6rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tutorialGrid,
+.providerCatalog,
+.featureGrid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.tutorialGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.providerCatalog {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.featureGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.toolCanvas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.toolGrid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.toolGridTwo {
+  grid-template-columns: 1.05fr 0.95fr;
+}
+
+.toolGridSidebar {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.textRight {
+  text-align: right;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.compactStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.spotlightCard {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.emptyState {
+  padding: 3.2rem 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+@media (max-width: 1120px) {
+  .heroGrid,
+  .toolsLayout,
+  .toolGridTwo,
+  .toolGridSidebar,
+  .catalogGridWide,
+  .providerGrid,
+  .tutorialGrid,
+  .providerCatalog,
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stickyAside {
+    position: static;
+  }
+
+  .miniStats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .shell {
+    width: min(100vw - 32px, 1240px);
+  }
+
+  .hero {
+    padding-top: 6.25rem;
+    padding-bottom: 2.2rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.4rem, 10vw, 3.4rem);
+  }
+
+  .panel,
+  .surfaceCard,
+  .heroPanel,
+  .railCard,
+  .statCard,
+  .infoCard,
+  .searchShell {
+    border-radius: 24px;
+  }
+
+  .panel,
+  .surfaceCard,
+  .heroPanel,
+  .railCard {
+    padding: 1.15rem;
+  }
+
+  .catalogGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: min(100vw - 22px, 1240px);
+  }
+
+  .hero {
+    padding-top: 5.6rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .heroBody,
+  .sectionBody,
+  .cardDescription,
+  .heroStatNote {
+    font-size: 0.88rem;
+    line-height: 1.58;
+  }
+
+  .heroActions,
+  .cardFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    justify-content: center;
+    width: 100%;
+  }
+}

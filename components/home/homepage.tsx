@@ -121,11 +121,11 @@ const footerColumns = {
     { label: "Runtime Lab", href: "/tools/runtime-lab" },
     { label: "Visual Builder", href: "/tools/visual-builder" },
   ],
-  Ecosystem: [
+  Build: [
     { label: "Partner", href: "/partner" },
-    { label: "Account Explorer", href: "/tools/account-explorer" },
-    { label: "Program Simulator", href: "/tools/program-simulator" },
-    { label: "Transaction Visualizer", href: "/tools/transaction-visualizer" },
+    { label: "Runtime Lab", href: "/tools/runtime-lab" },
+    { label: "Visual Builder", href: "/tools/visual-builder" },
+    { label: "Challenges", href: "/challenges" },
   ],
 };
 

@@ -10,11 +10,11 @@ import {
   Search,
   TriangleAlert,
 } from "lucide-react";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { BreadcrumbSchema } from "@/components/seo";
 import { runtimeLabPrograms } from "@/lib/runtime-lab/flows";
 import { cn } from "@/lib/utils";
+import { ToolsPageFrame } from "../tools-shell";
+import styles from "../tools.module.css";
+import { toolsDisplay, toolsMono } from "../tools-theme";
 
 const breadcrumbItems = [
   { name: "Home", url: "/" },
@@ -135,51 +135,45 @@ export default function RuntimeLabClient() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <BreadcrumbSchema items={breadcrumbItems} />
-      <Navbar />
-
-      <div className="pt-24 pb-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <nav className="mb-8 text-sm text-neutral-500">
-            <Link href="/" className="transition-colors hover:text-white">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
-            <Link href="/tools" className="transition-colors hover:text-white">
-              Tools
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-white">Runtime Lab</span>
-          </nav>
-
-          <div className="mb-8">
-            <p className="mb-3 text-xs uppercase tracking-widest text-[#14f195]">
-              Runtime Lab
-            </p>
-            <h1 className="mb-4 text-4xl font-medium tracking-tight md:text-5xl">
-              Learn Solana program flows
-            </h1>
-            <p className="max-w-3xl text-lg text-neutral-400">
-              Pick a program, choose a flow, then walk through the runtime checks,
-              state changes, and failures that shape how Solana programs behave.
-            </p>
+    <ToolsPageFrame
+      breadcrumbItems={breadcrumbItems}
+      heroKicker="Runtime Lab"
+      title="Learn Solana program flows"
+      description="Pick a program, choose a flow, then walk through the runtime checks, state changes, and failure paths that shape how the instruction behaves."
+      heroActions={
+        <div className={styles.pillRow}>
+          <span className={styles.accentPill}>{runtimeLabPrograms.length} programs</span>
+          <span className={styles.ghostPill}>Step-by-step predictions</span>
+          <span className={styles.ghostPill}>Runtime evidence</span>
+        </div>
+      }
+      heroAside={
+        <div className={styles.heroPanel}>
+          <div className={`${styles.heroStatLabel} ${toolsMono.className}`}>Active flow</div>
+          <div className={`${styles.heroStatValue} ${toolsDisplay.className}`}>{activeProgram.name}</div>
+          <div className={styles.heroStatNote}>
+            {activeFlow.title} · {activeFlow.duration}. Use this lab to connect narrative flow,
+            runtime checks, and actual account changes.
           </div>
-
-          <section className="mb-8">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-medium text-white">Programs</h2>
-                <p className="mt-1 text-sm text-neutral-500">
-                  Vault Bootcamp stays first. The rest build out the library around it.
+        </div>
+      }
+    >
+      <section className={styles.section}>
+        <div className={styles.shell}>
+          <section className={styles.stack}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIntro}>
+                <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>Program library</div>
+                <h2 className={`${styles.sectionTitle} ${toolsDisplay.className}`}>
+                  Pick the program family first
+                </h2>
+                <p className={styles.sectionBody}>
+                  Vault Bootcamp stays first, then the rest of the library expands around it.
                 </p>
-              </div>
-              <div className="text-sm text-neutral-500">
-                {runtimeLabPrograms.length} programs
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className={styles.catalogGridWide}>
               {runtimeLabPrograms.map((program) => {
                 const isActive = program.id === activeProgram.id;
                 return (
@@ -187,119 +181,120 @@ export default function RuntimeLabClient() {
                     key={program.id}
                     type="button"
                     onClick={() => handleProgramChange(program.id)}
-                    className={cn(
-                      "rounded-lg border p-5 text-left transition-all",
-                      isActive
-                        ? "border-neutral-700 bg-neutral-900/60"
-                        : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700 hover:bg-neutral-900/50"
-                    )}
+                    className={styles.surfaceCard}
+                    style={{
+                      textAlign: "left",
+                      borderColor: isActive ? "rgba(169,255,47,0.28)" : undefined,
+                      background: isActive
+                        ? "linear-gradient(180deg, rgba(169,255,47,0.09), rgba(7,7,7,0.98))"
+                        : undefined,
+                    }}
                   >
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <span className="text-xs uppercase tracking-widest text-[#14f195]">
-                        {program.difficulty}
-                      </span>
-                      <span className="text-xs text-neutral-500">
+                    <div className={styles.cardHeader}>
+                      <div>
+                        <div className={`${styles.cardEyebrow} ${toolsMono.className}`}>
+                          {program.difficulty}
+                        </div>
+                        <h3 className={`${styles.cardTitle} ${toolsDisplay.className}`}>{program.name}</h3>
+                      </div>
+                      <span className={styles.ghostPill}>
                         {program.flows.length} flow{program.flows.length === 1 ? "" : "s"}
                       </span>
                     </div>
-                    <h3 className="text-base font-medium text-white">{program.name}</h3>
-                    <p className="mt-2 text-sm text-neutral-500">{program.focus}</p>
-                    <p className="mt-3 text-sm text-neutral-400">{program.description}</p>
+                    <p className={styles.cardDescription}>{program.focus}</p>
+                    <p className={styles.cardDescription}>{program.description}</p>
                   </button>
                 );
               })}
             </div>
           </section>
 
-          <div className="mb-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto_auto_auto] md:items-center">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search steps in this flow..."
-                className="w-full rounded-lg border border-neutral-800 bg-neutral-900/50 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-neutral-700 focus:bg-neutral-900"
-              />
-            </div>
-            <div className="rounded-lg border border-neutral-800 bg-neutral-900/30 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-neutral-500">Program</p>
-              <p className="mt-1 text-sm text-white">{activeProgram.name}</p>
-            </div>
-            <div className="rounded-lg border border-neutral-800 bg-neutral-900/30 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-neutral-500">Flow</p>
-              <p className="mt-1 text-sm text-white">{activeFlow.title}</p>
-            </div>
-            <div className="rounded-lg border border-neutral-800 bg-neutral-900/30 px-4 py-3">
-              <p className="text-[10px] uppercase tracking-widest text-neutral-500">Duration</p>
-              <p className="mt-1 text-sm text-white">{activeFlow.duration}</p>
+          <div className={styles.panel} style={{ marginTop: "1rem" }}>
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto_auto_auto] md:items-center">
+              <div className={styles.searchShell}>
+                <Search className="h-4 w-4 text-white/35" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search steps in this flow..."
+                  className={styles.searchInput}
+                />
+              </div>
+              <div className={styles.heroPanel}>
+                <p className="text-[10px] uppercase tracking-widest text-neutral-500">Program</p>
+                <p className="mt-1 text-sm text-white">{activeProgram.name}</p>
+              </div>
+              <div className={styles.heroPanel}>
+                <p className="text-[10px] uppercase tracking-widest text-neutral-500">Flow</p>
+                <p className="mt-1 text-sm text-white">{activeFlow.title}</p>
+              </div>
+              <div className={styles.heroPanel}>
+                <p className="text-[10px] uppercase tracking-widest text-neutral-500">Duration</p>
+                <p className="mt-1 text-sm text-white">{activeFlow.duration}</p>
+              </div>
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
-            <aside className="lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
-              <div className="flex h-full flex-col gap-4">
-                <div className="rounded-lg border border-neutral-800 bg-neutral-900/30">
-                  <div className="border-b border-neutral-800 px-5 py-4">
-                    <p className="text-xs uppercase tracking-widest text-neutral-500">
-                      Flows in {activeProgram.name}
-                    </p>
+          <div className={`${styles.toolGrid} ${styles.toolGridSidebar}`} style={{ marginTop: "1rem" }}>
+            <aside className={styles.stickyAside}>
+              <div className={styles.stack}>
+                <div className={styles.railCard}>
+                  <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>
+                    Flows in {activeProgram.name}
                   </div>
-                  <div className="space-y-3 p-4">
+                  <div className={styles.compactStack}>
                     {activeProgram.flows.map((flow) => (
                       <button
                         key={flow.id}
                         type="button"
                         onClick={() => handleFlowChange(flow.id)}
-                        className={cn(
-                          "w-full rounded-lg border p-4 text-left transition-all",
-                          flow.id === activeFlow.id
-                            ? "border-neutral-700 bg-neutral-900/70"
-                            : "border-neutral-800 bg-neutral-950/70 hover:border-neutral-700 hover:bg-neutral-900"
-                        )}
+                        className={styles.surfaceCard}
+                        style={{
+                          textAlign: "left",
+                          borderColor: flow.id === activeFlow.id ? "rgba(169,255,47,0.28)" : undefined,
+                          background:
+                            flow.id === activeFlow.id
+                              ? "linear-gradient(180deg, rgba(169,255,47,0.09), rgba(7,7,7,0.98))"
+                              : undefined,
+                        }}
                       >
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-xs uppercase tracking-widest text-[#14f195]">
-                            {flow.difficulty}
-                          </span>
-                          <span className="text-xs text-neutral-500">{flow.duration}</span>
+                        <div className={styles.cardHeader}>
+                          <span className={styles.cardEyebrow}>{flow.difficulty}</span>
+                          <span className={styles.metaLabel}>{flow.duration}</span>
                         </div>
-                        <h3 className="text-sm font-medium text-white">{flow.title}</h3>
-                        <p className="mt-2 text-xs leading-5 text-neutral-500">
-                          {flow.tagline}
-                        </p>
+                        <h3 className={`${styles.cardTitle} ${toolsDisplay.className}`}>{flow.title}</h3>
+                        <p className={styles.cardDescription}>{flow.tagline}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col rounded-lg border border-neutral-800 bg-neutral-900/30">
-                  <div className="border-b border-neutral-800 px-5 py-4">
-                    <p className="text-xs uppercase tracking-widest text-neutral-500">
-                      Step rail
-                    </p>
-                    <p className="mt-2 text-sm text-neutral-400">
-                      {filteredSteps.length} visible steps
-                    </p>
-                  </div>
-                  <div className="space-y-3 overflow-y-auto p-4">
+                <div className={styles.railCard}>
+                  <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>Step rail</div>
+                  <p className={styles.sectionBody}>{filteredSteps.length} visible steps</p>
+                  <div className={styles.compactStack}>
                     {filteredSteps.map(({ step, index }) => (
                       <button
                         key={step.id}
                         type="button"
                         onClick={() => handleStepChange(index)}
-                        className={cn(
-                          "w-full rounded-lg border p-4 text-left transition-all",
-                          index === safeActiveStepIndex
-                            ? "border-neutral-700 bg-neutral-900/70"
-                            : "border-neutral-800 bg-neutral-950/70 hover:border-neutral-700 hover:bg-neutral-900"
-                        )}
+                        className={styles.surfaceCard}
+                        style={{
+                          textAlign: "left",
+                          borderColor:
+                            index === safeActiveStepIndex ? "rgba(169,255,47,0.28)" : undefined,
+                          background:
+                            index === safeActiveStepIndex
+                              ? "linear-gradient(180deg, rgba(169,255,47,0.09), rgba(7,7,7,0.98))"
+                              : undefined,
+                        }}
                       >
-                        <div className="mb-2 flex items-center justify-between gap-3">
-                          <span className="text-xs text-neutral-500">Step {index + 1}</span>
-                          <span className="text-xs text-[#14f195]">{step.eyebrow}</span>
+                        <div className={styles.cardHeader}>
+                          <span className={styles.metaLabel}>Step {index + 1}</span>
+                          <span className={styles.cardEyebrow}>{step.eyebrow}</span>
                         </div>
-                        <h4 className="text-sm font-medium text-white">{step.title}</h4>
-                        <p className="mt-2 text-xs leading-5 text-neutral-500">{step.concept}</p>
+                        <h4 className={styles.listValue}>{step.title}</h4>
+                        <p className={styles.cardDescription}>{step.concept}</p>
                       </button>
                     ))}
                   </div>
@@ -307,38 +302,28 @@ export default function RuntimeLabClient() {
               </div>
             </aside>
 
-            <div className="space-y-6">
-              <section className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-xs uppercase tracking-widest text-[#14f195]">
-                      {activeStep.eyebrow}
-                    </p>
-                    <h2 className="mt-2 text-2xl font-medium text-white">
-                      {activeStep.title}
-                    </h2>
-                    <p className="mt-2 text-sm text-neutral-400">{activeStep.objective}</p>
+            <div className={styles.stack}>
+              <section className={styles.panel}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.sectionIntro}>
+                    <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>{activeStep.eyebrow}</div>
+                    <h2 className={`${styles.sectionTitle} ${toolsDisplay.className}`}>{activeStep.title}</h2>
+                    <p className={styles.sectionBody}>{activeStep.objective}</p>
                   </div>
-                  <div className="shrink-0 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-xs text-neutral-400">
+                  <div className={styles.ghostPill}>
                     {safeActiveStepIndex + 1}/{activeFlow.steps.length}
                   </div>
                 </div>
 
-                <div className="mb-5 rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-                  <p className="text-xs uppercase tracking-widest text-neutral-500">
-                    Flow memory hook
-                  </p>
-                  <p className="mt-2 text-sm text-neutral-300">{activeFlow.memoryHook}</p>
+                <div className={styles.heroPanel}>
+                  <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>Flow memory hook</div>
+                  <div className={styles.listValue}>{activeFlow.memoryHook}</div>
                 </div>
 
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
                   <div>
-                    <p className="mb-3 text-xs uppercase tracking-widest text-[#14f195]">
-                      Predict first
-                    </p>
-                    <h3 className="mb-4 text-base font-medium text-white">
-                      {activeStep.prompt}
-                    </h3>
+                    <p className="mb-3 text-xs uppercase tracking-widest text-[#14f195]">Predict first</p>
+                    <h3 className="mb-4 text-base font-medium text-white">{activeStep.prompt}</h3>
                     <div className="space-y-3">
                       {activeStep.options.map((option) => {
                         const isChosen = selectedAnswer === option.id;
@@ -353,14 +338,14 @@ export default function RuntimeLabClient() {
                             type="button"
                             onClick={() => handleAnswerSelect(option.id)}
                             className={cn(
-                              "w-full rounded-lg border p-4 text-left transition-all",
+                              "w-full rounded-[24px] border p-4 text-left transition-all",
                               isCorrectChoice
                                 ? "border-emerald-400/40 bg-emerald-400/10"
                                 : isWrongChoice
                                 ? "border-red-400/40 bg-red-400/10"
                                 : isChosen
-                                ? "border-neutral-700 bg-neutral-900/60"
-                                : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
+                                ? "border-white/14 bg-white/[0.05]"
+                                : "border-white/8 bg-[linear-gradient(180deg,rgba(17,17,17,0.92),rgba(7,7,7,0.98))] hover:border-white/14"
                             )}
                           >
                             <p className="text-sm leading-6 text-neutral-200">{option.label}</p>
@@ -374,7 +359,7 @@ export default function RuntimeLabClient() {
                         type="button"
                         onClick={handleReveal}
                         disabled={!selectedAnswer}
-                        className="rounded-lg border border-[#14f195]/40 bg-[#14f195]/10 px-4 py-2 text-sm font-medium text-[#14f195] transition hover:bg-[#14f195]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                        className={styles.primaryButton}
                       >
                         Check prediction
                       </button>
@@ -386,7 +371,7 @@ export default function RuntimeLabClient() {
                     {isRevealed && (
                       <div
                         className={cn(
-                          "mt-4 rounded-lg border p-4",
+                          "mt-4 rounded-[24px] border p-4",
                           isCorrect
                             ? "border-emerald-400/30 bg-emerald-400/10"
                             : "border-red-400/30 bg-red-400/10"
@@ -410,13 +395,9 @@ export default function RuntimeLabClient() {
                     )}
                   </div>
 
-                  <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
-                    <p className="text-xs uppercase tracking-widest text-neutral-500">
-                      Coach note
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-300">
-                      {activeStep.coachNote}
-                    </p>
+                  <div className={styles.surfaceCard}>
+                    <div className={`${styles.cardEyebrow} ${toolsMono.className}`}>Coach note</div>
+                    <p className={styles.cardDescription}>{activeStep.coachNote}</p>
                   </div>
                 </div>
 
@@ -425,7 +406,7 @@ export default function RuntimeLabClient() {
                     type="button"
                     onClick={() => handleStepChange(Math.max(0, safeActiveStepIndex - 1))}
                     disabled={safeActiveStepIndex === 0}
-                    className="inline-flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className={styles.secondaryButton}
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Previous
@@ -438,7 +419,7 @@ export default function RuntimeLabClient() {
                       )
                     }
                     disabled={safeActiveStepIndex >= activeFlow.steps.length - 1}
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#14f195]/40 bg-[#14f195]/10 px-4 py-2 text-sm font-medium text-[#14f195] transition hover:bg-[#14f195]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                    className={styles.primaryButton}
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />
@@ -446,15 +427,15 @@ export default function RuntimeLabClient() {
                 </div>
               </section>
 
-              <section className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Evidence</h3>
-                    <p className="mt-1 text-sm text-neutral-500">
+              <section className={styles.panel}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.sectionIntro}>
+                    <h3 className={`${styles.sectionTitle} ${toolsDisplay.className}`}>Evidence</h3>
+                    <p className={styles.sectionBody}>
                       Runtime proof, account diffs, and failure analysis for this step.
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className={styles.pillRow}>
                     {[
                       { id: "runtime", label: "Runtime" },
                       { id: "accounts", label: "Accounts" },
@@ -464,12 +445,7 @@ export default function RuntimeLabClient() {
                         key={panel.id}
                         type="button"
                         onClick={() => setActivePanel(panel.id as DetailPanel)}
-                        className={cn(
-                          "rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition",
-                          activePanel === panel.id
-                            ? "border-[#14f195]/30 bg-[#14f195]/10 text-[#14f195]"
-                            : "border-neutral-800 bg-neutral-950 text-neutral-500 hover:border-neutral-700"
-                        )}
+                        className={activePanel === panel.id ? styles.accentPill : styles.pill}
                       >
                         {panel.label}
                       </button>
@@ -483,10 +459,7 @@ export default function RuntimeLabClient() {
                       <h4 className="mb-4 text-base font-medium text-white">Runtime checks</h4>
                       <div className="space-y-3">
                         {activeStep.checks.map((check) => (
-                          <div
-                            key={check.label}
-                            className="rounded-lg border border-neutral-800 bg-neutral-950 p-4"
-                          >
+                          <div key={check.label} className={styles.surfaceCard}>
                             <div className="mb-2 flex items-center justify-between gap-3">
                               <p className="text-sm font-medium text-white">{check.label}</p>
                               <span
@@ -508,16 +481,11 @@ export default function RuntimeLabClient() {
                       <h4 className="mb-4 text-base font-medium text-white">Runtime timeline</h4>
                       <div className="space-y-3">
                         {activeStep.logs.map((log, index) => (
-                          <div
-                            key={`${log.label}-${index}`}
-                            className="rounded-lg border border-neutral-800 bg-neutral-950 p-4"
-                          >
+                          <div key={`${log.label}-${index}`} className={styles.surfaceCard}>
                             <p className="text-xs uppercase tracking-widest text-neutral-500">
                               {log.label}
                             </p>
-                            <p className="mt-2 text-sm leading-6 text-neutral-400">
-                              {log.detail}
-                            </p>
+                            <p className="mt-2 text-sm leading-6 text-neutral-400">{log.detail}</p>
                           </div>
                         ))}
                       </div>
@@ -528,10 +496,7 @@ export default function RuntimeLabClient() {
                 {activePanel === "accounts" && (
                   <div className="space-y-4">
                     {activeStep.accounts.map((account) => (
-                      <div
-                        key={account.id}
-                        className="rounded-lg border border-neutral-800 bg-neutral-950 p-4"
-                      >
+                      <div key={account.id} className={styles.surfaceCard}>
                         <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <h4 className="text-base font-medium text-white">{account.name}</h4>
@@ -545,10 +510,7 @@ export default function RuntimeLabClient() {
 
                         <div className="mb-3 flex flex-wrap gap-2">
                           {account.chips.map((chip) => (
-                            <span
-                              key={chip}
-                              className="rounded-full border border-neutral-800 bg-neutral-900 px-2 py-1 text-[10px] uppercase tracking-wider text-neutral-500"
-                            >
+                            <span key={chip} className={styles.ghostPill}>
                               {chip}
                             </span>
                           ))}
@@ -556,10 +518,7 @@ export default function RuntimeLabClient() {
 
                         <div className="grid gap-3 md:grid-cols-2">
                           {account.changes.map((change) => (
-                            <div
-                              key={change.label}
-                              className="rounded-lg border border-neutral-800 bg-neutral-900 p-3"
-                            >
+                            <div key={change.label} className={styles.heroPanel}>
                               <p className="text-xs uppercase tracking-widest text-neutral-500">
                                 {change.label}
                               </p>
@@ -584,12 +543,7 @@ export default function RuntimeLabClient() {
                           key={failure.id}
                           type="button"
                           onClick={() => handleFailureChange(failure.id)}
-                          className={cn(
-                            "rounded-lg border px-3 py-3 text-left text-xs font-medium uppercase tracking-wider transition",
-                            selectedFailure?.id === failure.id
-                              ? "border-[#14f195]/30 bg-[#14f195]/10 text-[#14f195]"
-                              : "border-neutral-800 bg-neutral-950 text-neutral-500 hover:border-neutral-700"
-                          )}
+                          className={selectedFailure?.id === failure.id ? styles.accentPill : styles.pill}
                         >
                           {failure.title}
                         </button>
@@ -597,19 +551,13 @@ export default function RuntimeLabClient() {
                     </div>
 
                     {selectedFailure && (
-                      <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-4">
+                      <div className={styles.surfaceCard}>
                         <div className="mb-2 flex items-center justify-between gap-3">
-                          <h4 className="text-base font-medium text-white">
-                            {selectedFailure.title}
-                          </h4>
-                          <span className="text-xs text-red-300">
-                            {selectedFailure.error}
-                          </span>
+                          <h4 className="text-base font-medium text-white">{selectedFailure.title}</h4>
+                          <span className="text-xs text-red-300">{selectedFailure.error}</span>
                         </div>
-                        <p className="mb-4 text-sm leading-6 text-neutral-400">
-                          {selectedFailure.why}
-                        </p>
-                        <div className="rounded-lg border border-neutral-800 bg-neutral-900 p-3">
+                        <p className="mb-4 text-sm leading-6 text-neutral-400">{selectedFailure.why}</p>
+                        <div className={styles.heroPanel}>
                           <p className="text-xs uppercase tracking-widest text-neutral-500">
                             First fix to try
                           </p>
@@ -623,27 +571,25 @@ export default function RuntimeLabClient() {
                 )}
               </section>
 
-              <section className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-6">
-                <h3 className="mb-2 text-lg font-medium text-white">
+              <section className={styles.panel}>
+                <h3 className={`mb-2 ${styles.sectionTitle} ${toolsDisplay.className}`}>
                   Continue after this lab
                 </h3>
-                <p className="mb-4 text-sm text-neutral-500">
-                  Once the runtime model clicks, move to Visual Builder to map the same accounts and instructions visually.
+                <p className={styles.sectionBody}>
+                  Once the runtime model clicks, move to Visual Builder to map the same accounts
+                  and instructions visually.
                 </p>
-                <Link
-                  href="/tools/visual-builder"
-                  className="inline-flex items-center text-sm text-[#14f195]"
-                >
-                  <span>Open Visual Builder</span>
-                  <ArrowRight size={14} className="ml-1" />
-                </Link>
+                <div className={styles.heroActions}>
+                  <Link href="/tools/visual-builder" className={styles.primaryButton}>
+                    Open Visual Builder
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               </section>
             </div>
           </div>
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      </section>
+    </ToolsPageFrame>
   );
 }

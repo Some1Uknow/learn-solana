@@ -1,127 +1,124 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { BreadcrumbSchema } from "@/components/seo";
-
-const tools = [
-  {
-    id: "runtime-lab",
-    name: "Runtime Lab",
-    description:
-      "Program-flow lab library where beginners pick a Solana program, follow a flow, inspect runtime checks, compare account diffs, and debug failures.",
-    href: "/tools/runtime-lab",
-    meta: "4 programs",
-    cta: "Start learning",
-  },
-  {
-    id: "visual-builder",
-    name: "Visual Builder",
-    description:
-      "Map programs, instructions, signers, PDAs, and token accounts visually, then export a beginner-friendly Anchor starter.",
-    href: "/tools/visual-builder",
-    meta: "Builder",
-    cta: "Open builder",
-  },
-];
+import { ArrowRight, Blocks, Compass } from "lucide-react";
+import { ToolsPageFrame } from "./tools-shell";
+import styles from "./tools.module.css";
+import { toolsDisplay, toolsMono } from "./tools-theme";
 
 const breadcrumbItems = [
   { name: "Home", url: "/" },
   { name: "Tools", url: "/tools" },
 ];
 
+const tools = [
+  {
+    id: "runtime-lab",
+    name: "Runtime Lab",
+    description:
+      "Step through real Solana instruction flows, inspect runtime checks, and see why a transaction passes or fails.",
+    href: "/tools/runtime-lab",
+    eyebrow: "Core Lab",
+    note: "Use it when signer checks, PDAs, account ownership, and runtime errors still feel fuzzy.",
+    meta: "Runtime checks",
+    icon: Compass,
+  },
+  {
+    id: "visual-builder",
+    name: "Visual Builder",
+    description:
+      "Map programs, instructions, accounts, and PDAs visually before you start wiring the code.",
+    href: "/tools/visual-builder",
+    eyebrow: "Builder",
+    note: "Use it when you know the pieces but still need help structuring the program and client flow.",
+    meta: "Architecture",
+    icon: Blocks,
+  },
+];
+
 export function ToolsPageClient() {
-  const [query, setQuery] = useState("");
-
-  const filteredTools = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    return tools.filter((tool) => {
-      return q
-        ? tool.name.toLowerCase().includes(q) ||
-            tool.description.toLowerCase().includes(q)
-        : true;
-    });
-  }, [query]);
-
   return (
-    <div className="min-h-screen bg-black text-white">
-      <BreadcrumbSchema items={breadcrumbItems} />
-      <Navbar />
-
-      <div className="pt-24 pb-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <nav className="mb-8 text-sm text-neutral-500">
-            <Link href="/" className="transition-colors hover:text-white">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-white">Tools</span>
-          </nav>
-
-          <div className="mb-10">
-            <p className="mb-3 text-xs uppercase tracking-widest text-[#14f195]">
-              Interactive Labs
-            </p>
-            <h1 className="mb-4 text-4xl font-medium tracking-tight md:text-5xl">
-              Learn Solana by interacting with it
-            </h1>
-            <p className="max-w-2xl text-lg text-neutral-400">
-              Start with Runtime Lab to understand what Solana validates, why
-              transactions fail, and what actually changes on-chain. Then move
-              into Visual Builder to map those ideas visually.
-            </p>
+    <ToolsPageFrame
+      breadcrumbItems={breadcrumbItems}
+      heroKicker="Developer Tools"
+      title="Tools that make Solana easier to reason about"
+      description="Use Runtime Lab to understand what the runtime is actually checking. Use Visual Builder to map the accounts, instructions, and PDAs before you start coding."
+      heroActions={
+        <>
+          <Link href="/tools/runtime-lab" className={styles.primaryButton}>
+            Open Runtime Lab
+          </Link>
+          <Link href="/tools/visual-builder" className={styles.secondaryButton}>
+            Open Visual Builder
+          </Link>
+        </>
+      }
+      heroAside={
+        <article className={styles.heroPanel}>
+          <div className={`${styles.heroStatLabel} ${toolsMono.className}`}>Current tools</div>
+          <div className={`${styles.heroStatValue} ${toolsDisplay.className}`}>2</div>
+          <div className={styles.heroStatNote}>
+            Both are focused on the early developer learning curve: runtime behavior and program structure.
           </div>
-
-          <div className="mb-10">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search tools..."
-                className="w-full rounded-lg border border-neutral-800 bg-neutral-900/50 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-neutral-700 focus:bg-neutral-900"
-              />
+        </article>
+      }
+    >
+      <section className={styles.section}>
+        <div className={styles.shell}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionIntro}>
+              <div className={`${styles.sectionEyebrow} ${toolsMono.className}`}>Start here</div>
+              <h2 className={`${styles.sectionTitle} ${toolsDisplay.className}`}>
+                Two tools that remove the most confusion
+              </h2>
+              <p className={styles.sectionBody}>
+                If you are new to Solana, the hard part is usually not syntax. It is understanding
+                what the runtime is doing and how the moving parts fit together. These tools are
+                built for exactly that.
+              </p>
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredTools.map((tool) => (
-              <Link
-                key={tool.id}
-                href={tool.href}
-                className="group rounded-lg border border-neutral-800 bg-neutral-900/30 p-6 transition-all hover:border-neutral-700 hover:bg-neutral-900/50"
-              >
-                <div className="mb-4 flex items-start justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-base font-medium text-white">{tool.name}</h3>
-                    <p className="mt-1 text-xs text-neutral-500">{tool.meta}</p>
+          <div className={styles.catalogGrid}>
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+
+              return (
+                <Link key={tool.id} href={tool.href} className={`${styles.surfaceCard} ${styles.spotlightCard}`}>
+                  <div className={styles.cardHeader}>
+                    <div>
+                      <div className={`${styles.cardEyebrow} ${toolsMono.className}`}>{tool.eyebrow}</div>
+                      <h3 className={`${styles.cardTitle} ${toolsDisplay.className}`}>{tool.name}</h3>
+                    </div>
+                    <div className={styles.providerLogo}>
+                      <Icon className="h-7 w-7 text-[#a9ff2f]" />
+                    </div>
                   </div>
-                </div>
-                <p className="mb-4 text-sm text-neutral-400">{tool.description}</p>
-                <div className="flex items-center text-sm text-[#14f195]">
-                  <span>{tool.cta}</span>
-                  <ArrowRight
-                    size={14}
-                    className="ml-1 transition-transform group-hover:translate-x-1"
-                  />
-                </div>
-              </Link>
-            ))}
+
+                  <p className={styles.cardDescription}>{tool.description}</p>
+
+                  <div className={styles.cardMeta}>
+                    <span className={styles.accentPill}>{tool.meta}</span>
+                    <span className={styles.ghostPill}>Interactive</span>
+                  </div>
+
+                  <div className={styles.cardFooter}>
+                    <div>
+                      <div className={styles.metaLabel}>Best used when</div>
+                      <div className={styles.listValue}>{tool.note}</div>
+                    </div>
+                    <span className={styles.secondaryButton}>
+                      Open tool
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
-
-          {filteredTools.length === 0 && (
-            <div className="py-20 text-center">
-              <p className="text-neutral-500">No tools found matching "{query}"</p>
-            </div>
-          )}
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      </section>
+    </ToolsPageFrame>
   );
 }
 

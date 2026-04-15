@@ -2,19 +2,18 @@ import type { Metadata } from "next";
 import ToolsPageClient from "./tools-page.client";
 import { createCanonical } from "@/lib/seo";
 
-const title = "Interactive Solana Learning Tools | LearnSol";
+const title = "Solana Developer Tools | Runtime Lab & Visual Builder";
 const description =
-  "Learn Solana through interactive labs and visual builders. Start with Runtime Lab to understand runtime checks, account diffs, and common failures.";
+  "Use Runtime Lab to understand Solana runtime checks and Visual Builder to map accounts, instructions, and PDAs before you code.";
 
 const toolsKeywords = [
-  "solana learning tools",
+  "solana developer tools",
   "solana runtime lab",
-  "solana runtime visualizer",
   "solana visual builder",
-  "anchor beginner lab",
-  "solana account diffs",
-  "blockchain learning tools",
-  "web3 education tools",
+  "solana instruction flow",
+  "solana runtime checks",
+  "solana pda builder",
+  "solana instruction visualizer",
 ];
 
 export const metadata: Metadata = {

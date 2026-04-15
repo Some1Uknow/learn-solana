@@ -82,13 +82,23 @@ export function Globe({
       }
     };
 
+    const getCanvasWidth = () => {
+      if (canvasRef.current?.offsetWidth) {
+        return canvasRef.current.offsetWidth;
+      }
+      return config.width ? config.width / 2 : 600;
+    };
+
     window.addEventListener("resize", onResize);
     onResize();
 
+    const initialWidth = getCanvasWidth();
+    widthRef.current = initialWidth;
+
     const globe = createGlobe(canvasRef.current!, {
       ...config,
-      width: widthRef.current * 2,
-      height: widthRef.current * 2,
+      width: initialWidth * 2,
+      height: initialWidth * 2,
       phi: phiRef.current,
     } as GlobeConfig);
 
@@ -109,11 +119,21 @@ export function Globe({
 
     animate();
 
-    setTimeout(() => (canvasRef.current!.style.opacity = "1"), 0);
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0 && canvasRef.current) {
+          canvasRef.current.style.opacity = "1";
+          resizeObserver.disconnect();
+        }
+      }
+    });
+    resizeObserver.observe(canvasRef.current!);
+
     return () => {
       window.cancelAnimationFrame(frameId);
       globe.destroy();
       window.removeEventListener("resize", onResize);
+      resizeObserver.disconnect();
     };
   }, [rs, config]);
 

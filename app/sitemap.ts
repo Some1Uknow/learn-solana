@@ -2,7 +2,6 @@ import type { MetadataRoute } from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import { siteUrl } from "@/lib/seo";
-import { getAllCategoryIds } from "@/data/tools-data";
 import { contentsData } from "@/data/contents-data";
 import { listExerciseTracks, listExercisesByTrack } from "@/lib/challenges/exercises";
 
@@ -45,9 +44,6 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
   { path: '/partner', priority: 0.5, changeFrequency: 'monthly' },
 ]
 
-// Tool categories that have actual pages
-const TOOL_CATEGORIES = getAllCategoryIds()
-
 // Module IDs that have actual pages
 const MODULE_IDS = contentsData.modules.map((module) => module.id)
 
@@ -61,16 +57,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: normalizeUrl(BASE_URL, route.path),
       priority: route.priority,
       changeFrequency: route.changeFrequency,
-      lastModified: now,
-    })
-  }
-
-  // Add tool category pages
-  for (const category of TOOL_CATEGORIES) {
-    entries.push({
-      url: normalizeUrl(BASE_URL, `/tools/${category}`),
-      priority: 0.6,
-      changeFrequency: 'monthly',
       lastModified: now,
     })
   }
