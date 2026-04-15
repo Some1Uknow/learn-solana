@@ -2,50 +2,11 @@ import { openai } from "@ai-sdk/openai";
 import { convertToModelMessages, streamText, stepCountIs } from "ai";
 import { searchDocumentationTool } from "@/lib/ai/tools/searchDocumentation";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompts";
-import { verifyWeb3Auth } from "@/lib/auth/verifyWeb3Auth";
 
 export const maxDuration = 30;
 
-async function verifyAuthentication(req: Request): Promise<{ isAuthenticated: boolean; user?: any }> {
-  try {
-    const verified = await verifyWeb3Auth(req);
-    if (!verified) {
-      return { isAuthenticated: false };
-    }
-    const { payload } = verified;
-
-    return { 
-      isAuthenticated: true, 
-      user: {
-        sub: payload.sub,
-        email: payload.email,
-        name: payload.name
-      }
-    };
-  } catch (error) {
-    console.error('Authentication verification failed:', error);
-    return { isAuthenticated: false };
-  }
-}
-
 export async function POST(req: Request) {
   try {
-    // Verify authentication first
-    const authResult = await verifyAuthentication(req);
-    
-    if (!authResult.isAuthenticated) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Authentication required',
-          message: 'Please log in to access the AI chat assistant.' 
-        }), 
-        { 
-          status: 401, 
-          headers: { 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
     const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -61,21 +22,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Add user context to system prompt
-    const enhancedSystemPrompt = `${SYSTEM_PROMPT}
-
-User Context:
-- User: ${authResult.user?.name || 'Anonymous'}
-- Email: ${authResult.user?.email || 'N/A'}
-- Authenticated: Yes
-
-Please provide personalized assistance and remember that this user is authenticated and has access to premium features.`;
-
     const result = streamText({
       model: openai("gpt-4o"),
       messages: convertToModelMessages(messages),
       temperature: 0.1,
-      system: enhancedSystemPrompt,
+      system: SYSTEM_PROMPT,
       tools: {
         searchDocumentation: searchDocumentationTool,
       },

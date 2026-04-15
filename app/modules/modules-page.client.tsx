@@ -6,7 +6,6 @@ import Image from "next/image";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { contentsData } from "../../data/contents-data";
-import { useWeb3AuthUser } from "@web3auth/modal/react";
 import { Search, ArrowRight } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
 
@@ -18,7 +17,6 @@ const breadcrumbItems = [
 ];
 
 export function ModulesPageClient() {
-  const { userInfo } = useWeb3AuthUser();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -57,7 +55,7 @@ export function ModulesPageClient() {
               Learning Paths
             </p>
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-4">
-              {userInfo ? `Welcome back, ${userInfo?.name || "Developer"}` : "Master Solana Development"}
+              Master Solana Development
             </h1>
             <p className="text-lg text-neutral-400 max-w-2xl">
               Structured learning paths from fundamentals to advanced Solana programming.

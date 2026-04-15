@@ -14,12 +14,8 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useChatContext } from "./chat-context";
-import { authFetch } from "@/lib/auth/authFetch";
-import { LoginRequiredModal } from "@/components/ui/login-required-modal";
-import { useLoginGate } from "@/hooks/use-login-gate";
 
 export default function DocsChat() {
-  const { requireLogin, showModal, setShowModal } = useLoginGate();
   const { isOpen, setIsOpen, panelWidth, setPanelWidth } = useChatContext();
   const [input, setInput] = useState("");
   const [isResizing, setIsResizing] = useState(false);
@@ -29,22 +25,6 @@ export default function DocsChat() {
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        fetch: (input, init) => {
-          if (typeof input === "string") {
-            return authFetch(input, init);
-          }
-
-          const headers = new Headers(init?.headers ?? (input as Request).headers);
-          const requestInit: RequestInit = {
-            ...init,
-            headers: Object.fromEntries(headers.entries()),
-            method: init?.method ?? (input as Request).method,
-            body: init?.body ?? undefined,
-            signal: init?.signal ?? (input as Request).signal,
-          };
-
-          return authFetch((input as Request).url || input.toString(), requestInit);
-        },
       }),
     []
   );
@@ -121,11 +101,8 @@ export default function DocsChat() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
-    requireLogin(() => {
-      sendMessage({ text: input });
-      setInput("");
-    });
+    sendMessage({ text: input });
+    setInput("");
   };
 
   const renderMessageContent = (message: any) => {
@@ -297,9 +274,7 @@ export default function DocsChat() {
                     <button
                       key={index}
                       onClick={() => {
-                        requireLogin(() => {
-                          sendMessage({ text: question });
-                        });
+                        sendMessage({ text: question });
                       }}
                       className="text-left p-2 text-xs rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/90 transition-colors break-words"
                     >
@@ -413,14 +388,6 @@ export default function DocsChat() {
           </form>
         </div>
       </div>
-
-
-      <LoginRequiredModal
-        open={showModal}
-        onOpenChange={setShowModal}
-        title="Solana Assistant"
-        description="Connect your wallet to chat with the AI assistant and get personalized help."
-      />
     </>
   );
 }
