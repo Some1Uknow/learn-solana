@@ -1,30 +1,22 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { challengeProgress } from "@/lib/db/schema/challengeProgress";
+import { exerciseProgress } from "@/lib/db/schema/exerciseProgress";
 import { eq, and } from "drizzle-orm";
-import {
-  verifyWeb3Auth,
-  resolveAuthenticatedWallet,
-} from "@/lib/auth/verifyWeb3Auth";
+import { requirePrivyUser } from "@/lib/auth/privy-server";
+import { syncAppUser } from "@/lib/auth/app-user";
+import { getExercise } from "@/lib/challenges/exercises";
 
 export async function POST(req: NextRequest) {
   try {
-    // Clone request so we can read body even if verifyWeb3Auth consumes it
-    const clonedReq = req.clone();
-    const body = await clonedReq.json().catch(() => ({}));
-    const { track, challengeId, code } = body;
+    const body = await req.json().catch(() => ({}));
+    const { track, exerciseSlug, code } = body;
 
-    const verified = await verifyWeb3Auth(req);
+    const verified = await requirePrivyUser(req);
     if (!verified) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
       });
     }
-
-    const { walletAddress, error } = resolveAuthenticatedWallet(
-      req,
-      verified.payload
-    );
 
     if (!track || typeof track !== "string") {
       return new Response(JSON.stringify({ error: "track required" }), {
@@ -32,31 +24,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (!challengeId || typeof challengeId !== "number") {
-      return new Response(JSON.stringify({ error: "challengeId required" }), {
+    if (!exerciseSlug || typeof exerciseSlug !== "string") {
+      return new Response(JSON.stringify({ error: "exerciseSlug required" }), {
         status: 400,
       });
     }
 
-    if (error === "wallet_mismatch") {
-      return new Response(JSON.stringify({ error: "Wallet mismatch" }), {
-        status: 403,
+    if (!getExercise(track, exerciseSlug)) {
+      return new Response(JSON.stringify({ error: "exercise not found" }), {
+        status: 404,
       });
     }
 
-    if (!walletAddress) {
-      return new Response(
-        JSON.stringify({ error: "Wallet address missing" }),
-        { status: 400 }
-      );
-    }
+    const { user } = await syncAppUser({
+      privyUserId: verified.userId,
+    });
 
     // Check for existing completion
-    const existing = await db.query.challengeProgress.findFirst({
+    const existing = await db.query.exerciseProgress.findFirst({
       where: and(
-        eq(challengeProgress.walletAddress, walletAddress),
-        eq(challengeProgress.track, track),
-        eq(challengeProgress.challengeId, challengeId)
+        eq(exerciseProgress.userId, user.id),
+        eq(exerciseProgress.trackSlug, track),
+        eq(exerciseProgress.exerciseSlug, exerciseSlug)
       ),
     });
 
@@ -64,41 +53,58 @@ export async function POST(req: NextRequest) {
 
     if (!existing) {
       // First completion
-      await db.insert(challengeProgress).values({
-        walletAddress,
-        track,
-        challengeId,
+      await db.insert(exerciseProgress).values({
+        userId: user.id,
+        trackSlug: track,
+        exerciseSlug,
+        status: "completed",
         completedAt: now,
-        attempts: 1,
-        solutionCode: typeof code === "string" ? code : null,
+        attemptCount: 1,
+        lastRunAt: now,
+        lastCode: typeof code === "string" ? code : null,
       });
     } else {
-      // Already completed - increment attempts and update solution
       await db
-        .update(challengeProgress)
+        .update(exerciseProgress)
         .set({
-          attempts: existing.attempts + 1,
-          solutionCode: typeof code === "string" ? code : existing.solutionCode,
+          status: "completed",
+          completedAt: existing.completedAt ?? now,
+          attemptCount: existing.attemptCount + 1,
+          lastRunAt: now,
+          lastCode: typeof code === "string" ? code : existing.lastCode,
           updatedAt: now,
         })
         .where(
           and(
-            eq(challengeProgress.walletAddress, walletAddress),
-            eq(challengeProgress.track, track),
-            eq(challengeProgress.challengeId, challengeId)
+            eq(exerciseProgress.userId, user.id),
+            eq(exerciseProgress.trackSlug, track),
+            eq(exerciseProgress.exerciseSlug, exerciseSlug)
           )
         );
     }
 
-    const refreshed = await db.query.challengeProgress.findFirst({
+    const refreshed = await db.query.exerciseProgress.findFirst({
       where: and(
-        eq(challengeProgress.walletAddress, walletAddress),
-        eq(challengeProgress.track, track),
-        eq(challengeProgress.challengeId, challengeId)
+        eq(exerciseProgress.userId, user.id),
+        eq(exerciseProgress.trackSlug, track),
+        eq(exerciseProgress.exerciseSlug, exerciseSlug)
       ),
     });
 
-    return new Response(JSON.stringify({ progress: refreshed }), { status: 200 });
+    return new Response(
+      JSON.stringify({
+        userId: user.id,
+        progress: refreshed
+          ? {
+              exerciseSlug: refreshed.exerciseSlug,
+              completedAt: refreshed.completedAt,
+              attemptCount: refreshed.attemptCount,
+              status: refreshed.status,
+            }
+          : null,
+      }),
+      { status: 200 }
+    );
   } catch (e) {
     console.error("[challenges/complete] error", e);
     return new Response(JSON.stringify({ error: "Internal error" }), {

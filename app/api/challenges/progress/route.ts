@@ -1,11 +1,9 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { challengeProgress } from "@/lib/db/schema/challengeProgress";
+import { exerciseProgress } from "@/lib/db/schema/exerciseProgress";
 import { eq, and } from "drizzle-orm";
-import {
-  verifyWeb3Auth,
-  resolveAuthenticatedWallet,
-} from "@/lib/auth/verifyWeb3Auth";
+import { requirePrivyUser } from "@/lib/auth/privy-server";
+import { syncAppUser } from "@/lib/auth/app-user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,61 +16,47 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const verified = await verifyWeb3Auth(req);
+    const verified = await requirePrivyUser(req);
     if (!verified) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
       });
     }
 
-    const { walletAddress, error } = resolveAuthenticatedWallet(
-      req,
-      verified.payload
-    );
+    const { user } = await syncAppUser({
+      privyUserId: verified.userId,
+    });
 
-    if (error === "wallet_mismatch") {
-      return new Response(JSON.stringify({ error: "Wallet mismatch" }), {
-        status: 403,
-      });
-    }
-
-    if (!walletAddress) {
-      return new Response(
-        JSON.stringify({ error: "Wallet address missing" }),
-        { status: 400 }
-      );
-    }
-
-    // Fetch all completed challenges for this user + track
-    const completed = await db.query.challengeProgress.findMany({
+    const completed = await db.query.exerciseProgress.findMany({
       where: and(
-        eq(challengeProgress.walletAddress, walletAddress),
-        eq(challengeProgress.track, track)
+        eq(exerciseProgress.userId, user.id),
+        eq(exerciseProgress.trackSlug, track)
       ),
       columns: {
-        challengeId: true,
+        exerciseSlug: true,
         completedAt: true,
-        attempts: true,
+        attemptCount: true,
+        status: true,
       },
     });
 
-    // Return as a map of challengeId -> completion info
     const progressMap: Record<
-      number,
-      { completedAt: Date; attempts: number }
+      string,
+      { completedAt: Date | null; attemptCount: number; status: string }
     > = {};
 
     for (const item of completed) {
-      progressMap[item.challengeId] = {
+      progressMap[item.exerciseSlug] = {
         completedAt: item.completedAt,
-        attempts: item.attempts,
+        attemptCount: item.attemptCount,
+        status: item.status,
       };
     }
 
     return new Response(
       JSON.stringify({
         track,
-        wallet: walletAddress,
+        userId: user.id,
         progress: progressMap,
         completedCount: completed.length,
       }),

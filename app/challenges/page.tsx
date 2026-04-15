@@ -4,13 +4,12 @@ import { createCanonical } from "@/lib/seo";
 
 const title = "Solana Coding Challenges | 30-Day Rust & Solana Practice";
 const description =
-  "Sharpen your Solana skills with daily coding challenges. 30-day tracks covering Rust, Anchor, and Solana smart contracts. Perfect for learning Solana programming.";
+  "Sharpen your Solana skills with hands-on Rust exercises. Work through an MDX-driven challenge track and save progress with Privy.";
 
 const challengeKeywords = [
   "solana coding challenges",
   "solana practice",
   "rust solana exercises",
-  "anchor challenges",
   "solana programming practice",
   "learn rust solana",
   "solana developer exercises",

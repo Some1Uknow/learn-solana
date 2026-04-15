@@ -7,19 +7,32 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Code, Trophy, Zap, Target, ArrowRight } from "lucide-react";
-import { LoginRequiredModal } from "@/components/ui/login-required-modal";
-import { useLoginGate } from "@/hooks/use-login-gate";
 import { useRouter } from "next/navigation";
 import { BreadcrumbSchema } from "@/components/seo";
+import { getChallengeGroupsForTrack } from "@/lib/challenges/track-groups";
 
 const breadcrumbItems = [
   { name: "Home", url: "/" },
   { name: "Challenges", url: "/challenges" },
 ];
 
+function getPhaseIcon(groupId: string) {
+  switch (groupId) {
+    case "foundations":
+      return Code;
+    case "deep-dive":
+      return Target;
+    case "advanced":
+      return Zap;
+    case "solana-ready":
+      return Trophy;
+    default:
+      return Code;
+  }
+}
+
 export function ChallengesPageClient() {
   const router = useRouter();
-  const { requireLogin, showModal, setShowModal } = useLoginGate();
   const [challengeStats, setChallengeStats] = React.useState<{
     participants: number;
     totalAttempted: number;
@@ -37,12 +50,10 @@ export function ChallengesPageClient() {
       .catch((err) => console.error("Failed to fetch stats:", err));
   }, []);
 
-  const phases = [
-    { title: "Foundations", days: "Days 1-8", description: "Core syntax, ownership, borrowing, enums, error patterns.", icon: Code },
-    { title: "Deep Dive", days: "Days 9-16", description: "Generics, traits, lifetimes, collections & iterators.", icon: Target },
-    { title: "Advanced", days: "Days 17-23", description: "Algorithms, concurrency primitives, benchmarking.", icon: Zap },
-    { title: "Solana Ready", days: "Days 24-30", description: "PDAs, serialization, cross-program invocations, security.", icon: Trophy },
-  ];
+  const phases = getChallengeGroupsForTrack("rust").map((group) => ({
+    ...group,
+    icon: getPhaseIcon(group.id),
+  }));
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -121,7 +132,7 @@ export function ChallengesPageClient() {
                 </p>
 
                 <button
-                  onClick={() => requireLogin(() => router.push("/challenges/rust"))}
+                  onClick={() => router.push("/challenges/rust")}
                   className="inline-flex items-center gap-2 rounded-lg bg-[#14f195] px-5 py-2.5 text-sm font-medium text-black transition-all hover:bg-[#12d182]"
                 >
                   Start Challenge
@@ -142,7 +153,7 @@ export function ChallengesPageClient() {
               const IconComponent = phase.icon;
               return (
                 <div
-                  key={phase.title}
+                  key={phase.id}
                   className="rounded-lg border border-neutral-800 bg-neutral-900/30 p-5 transition-colors hover:border-neutral-700"
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -161,20 +172,13 @@ export function ChallengesPageClient() {
           {/* Coming Soon */}
           <div className="mt-10 rounded-lg border border-neutral-800 bg-neutral-900/30 px-5 py-4 text-center">
             <p className="text-sm text-neutral-400">
-              <span className="text-[#14f195]">Coming Soon:</span> Interactive coding prompts, hidden tests, streak tracking & mini Solana program checkpoints.
+              <span className="text-[#14f195]">Next Up:</span> More test coverage per exercise, streak tracking, and mini Solana program checkpoints.
             </p>
           </div>
         </div>
       </div>
 
       <Footer />
-
-      <LoginRequiredModal
-        open={showModal}
-        onOpenChange={setShowModal}
-        title="Start Your Journey"
-        description="Connect your wallet to track your progress and earn achievements in the 30 Days of Rust challenge."
-      />
     </div>
   );
 }

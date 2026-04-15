@@ -1,27 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useWeb3Auth } from "@/hooks/use-web3-auth";
-import { authFetch } from "@/lib/auth/authFetch";
-import { Progress } from "@/components/ui/progress";
-import { LoginRequiredModal } from "@/components/ui/login-required-modal";
-import { useLoginGate } from "@/hooks/use-login-gate";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
+import { Progress } from "@/components/ui/progress";
+import type { ExerciseEntry } from "@/lib/challenges/exercises";
+import { buildChallengeSections } from "@/lib/challenges/track-groups";
+import { useAuth } from "@/hooks/use-auth";
+import { useExerciseProgress } from "@/hooks/use-exercise-progress";
 import { ArrowLeft, Check, ChevronRight } from "lucide-react";
-import type { ChallengeEntry } from "@/lib/challenges/registry";
-
-type ProgressMap = Record<number, { completedAt: string; attempts: number }>;
-
-const CACHE_KEY_PREFIX = "challenge_progress_";
 
 interface Props {
   track: string;
   trackName: string;
   trackDescription: string;
-  challenges: ChallengeEntry[];
+  challenges: ExerciseEntry[];
 }
 
 export default function TrackChallengesClient({
@@ -31,78 +25,14 @@ export default function TrackChallengesClient({
   challenges,
 }: Props) {
   const router = useRouter();
-  const { requireLogin, showModal, setShowModal } = useLoginGate();
-  const { isConnected, walletAddress, sessionReady } = useWeb3Auth();
-  const [progress, setProgress] = useState<ProgressMap>({});
-  const [completedCount, setCompletedCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const { ready, authenticated } = useAuth();
+  const { progress, completedCount } = useExerciseProgress(track);
 
-  // Calculate progress percentage
-  const progressPercentage = challenges.length > 0
-    ? Math.round((completedCount / challenges.length) * 100)
-    : 0;
-
-  // Load cached progress immediately on mount
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem(`${CACHE_KEY_PREFIX}${track}`);
-      if (cached) {
-        const { progress: cachedProgress, completedCount: cachedCount } = JSON.parse(cached);
-        if (cachedProgress) {
-          setProgress(cachedProgress);
-          setCompletedCount(cachedCount || Object.keys(cachedProgress).length);
-        }
-      }
-    } catch {
-      // Ignore cache errors
-    }
-  }, [track]);
-
-  useEffect(() => {
-    if (!sessionReady) return;
-    setIsLoading(false);
-  }, [sessionReady]);
-
-  // Fetch progress when wallet is available
-  useEffect(() => {
-    if (!walletAddress) {
-      if (!isConnected) {
-        setProgress({});
-        setCompletedCount(0);
-      }
-      return;
-    }
-
-    const fetchProgress = async () => {
-      try {
-        const res = await authFetch(`/api/challenges/progress?track=${track}`, {
-          walletAddress,
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const newProgress = data.progress || {};
-          const newCount = data.completedCount || 0;
-          setProgress(newProgress);
-          setCompletedCount(newCount);
-
-          try {
-            localStorage.setItem(`${CACHE_KEY_PREFIX}${track}`, JSON.stringify({
-              progress: newProgress,
-              completedCount: newCount,
-              wallet: walletAddress,
-              timestamp: Date.now(),
-            }));
-          } catch {
-            // Ignore storage errors
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch progress:", e);
-      }
-    };
-
-    fetchProgress();
-  }, [walletAddress, track, isConnected]);
+  const progressPercentage =
+    challenges.length > 0
+      ? Math.round((completedCount / challenges.length) * 100)
+      : 0;
+  const challengeSections = buildChallengeSections(track, challenges);
 
   const getDifficultyStyle = (difficulty?: string) => {
     switch (difficulty) {
@@ -121,65 +51,61 @@ export default function TrackChallengesClient({
     <div className="min-h-screen w-full bg-black text-white">
       <Navbar />
 
-      <div className="pt-28 pb-24 px-4 sm:px-6 md:px-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="text-sm text-neutral-400 mb-8">
-            <Link href="/" className="hover:text-white transition-colors">
+      <div className="px-4 pb-24 pt-28 sm:px-6 md:px-8">
+        <div className="mx-auto max-w-4xl">
+          <nav className="mb-8 text-sm text-neutral-400">
+            <Link href="/" className="transition-colors hover:text-white">
               Home
             </Link>
             <span className="mx-2 text-neutral-600">/</span>
-            <Link href="/challenges" className="hover:text-white transition-colors">
+            <Link href="/challenges" className="transition-colors hover:text-white">
               Challenges
             </Link>
             <span className="mx-2 text-neutral-600">/</span>
             <span className="text-white">{trackName}</span>
           </nav>
 
-          {/* Back Link */}
           <Link
             href="/challenges"
-            className="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors mb-8"
+            className="mb-8 inline-flex items-center gap-2 text-sm text-neutral-400 transition-colors hover:text-white"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Challenges
           </Link>
 
-          {/* Header */}
           <header className="mb-12">
-            <p className="text-xs uppercase tracking-widest text-[#14f195] mb-3">
+            <p className="mb-3 text-xs uppercase tracking-widest text-[#14f195]">
               {track.toUpperCase()} Track
             </p>
-            <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">
+            <h1 className="mb-4 text-3xl font-medium tracking-tight md:text-4xl">
               {trackName}
             </h1>
-            <p className="text-lg text-neutral-400 max-w-2xl">
-              {trackDescription}
-            </p>
+            <p className="max-w-2xl text-lg text-neutral-400">{trackDescription}</p>
 
-            {/* Progress Bar */}
-            {isConnected && (
+            {authenticated && (
               <div className="mt-8 max-w-md">
-                <div className="flex items-center justify-between text-sm mb-2">
+                <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="text-neutral-400">Your Progress</span>
-                  <span className="text-white font-mono">
+                  <span className="font-mono text-white">
                     {completedCount}/{challenges.length} ({progressPercentage}%)
                   </span>
                 </div>
-                <Progress
-                  value={progressPercentage}
-                  className="h-1.5 bg-neutral-800"
-                />
+                <Progress value={progressPercentage} className="h-1.5 bg-neutral-800" />
                 {completedCount === challenges.length && challenges.length > 0 && (
-                  <p className="text-sm text-[#14f195] mt-2">
-                    🎉 All challenges completed!
+                  <p className="mt-2 text-sm text-[#14f195]">
+                    All challenges completed.
                   </p>
                 )}
               </div>
             )}
 
-            {/* Stats */}
-            <div className="flex items-center gap-6 mt-6 text-sm text-neutral-500">
+            {!authenticated && ready && (
+              <p className="mt-6 text-sm text-neutral-500">
+                Sign in to save progress across devices.
+              </p>
+            )}
+
+            <div className="mt-6 flex items-center gap-6 text-sm text-neutral-500">
               <span>{challenges.length} challenges</span>
               <span className="flex items-center gap-4">
                 <span className="flex items-center gap-1.5">
@@ -198,82 +124,96 @@ export default function TrackChallengesClient({
             </div>
           </header>
 
-          {/* Challenge List */}
-          <div className="space-y-2">
-            {challenges.map((challenge) => {
-              const isCompleted = Boolean(progress[challenge.id]);
-
-              return (
-                <div
-                  key={challenge.id}
-                  onClick={() => requireLogin(() => router.push(`/challenges/${track}/${challenge.id}`))}
-                  className={`group flex items-center gap-4 rounded-lg border p-4 cursor-pointer transition-all ${
-                    isCompleted
-                      ? "border-[#14f195]/20 bg-[#14f195]/5 hover:border-[#14f195]/30"
-                      : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700 hover:bg-neutral-900/50"
-                  }`}
-                >
-                  {/* Number / Checkmark */}
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isCompleted
-                      ? "bg-[#14f195]/20 text-[#14f195]"
-                      : "bg-neutral-800 text-neutral-500"
-                  }`}>
-                    {isCompleted ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <span className="text-sm font-mono">{challenge.id}</span>
+          <div className="mt-2 space-y-10">
+            {challengeSections.map((section) => (
+              <section key={section.id} className="space-y-4">
+                <div>
+                  <div className="mb-2 flex flex-wrap items-center gap-3">
+                    <h2 className="text-xl font-medium tracking-tight text-white md:text-2xl">
+                      {section.title}
+                    </h2>
+                    {section.days && (
+                      <span className="inline-flex items-center rounded-full border border-neutral-700 bg-neutral-900/60 px-2.5 py-0.5 text-xs font-medium text-neutral-400">
+                        {section.days}
+                      </span>
                     )}
                   </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className={`font-medium truncate ${
-                        isCompleted ? "text-[#14f195]" : "text-white group-hover:text-[#14f195]"
-                      } transition-colors`}>
-                        {challenge.title}
-                      </h3>
-                      {challenge.difficulty && (
-                        <span className={`text-xs font-medium ${getDifficultyStyle(challenge.difficulty)}`}>
-                          {challenge.difficulty}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-neutral-500 truncate">
-                      {challenge.description}
-                    </p>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="hidden md:flex items-center gap-2">
-                    {challenge.tags?.slice(0, 2).map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Arrow */}
-                  <ChevronRight className="w-5 h-5 text-neutral-600 group-hover:text-[#14f195] group-hover:translate-x-1 transition-all flex-shrink-0" />
+                  <p className="text-sm text-neutral-500">{section.description}</p>
                 </div>
-              );
-            })}
+
+                <div className="h-px w-full bg-neutral-800" />
+
+                <div className="space-y-1.5">
+                  {section.challenges.map((challenge) => {
+                    const isCompleted = Boolean(progress[challenge.slug]);
+
+                    return (
+                      <div
+                        key={challenge.slug}
+                        onClick={() => router.push(`/challenges/${track}/${challenge.slug}`)}
+                        className={`group flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 transition-all ${
+                          isCompleted
+                            ? "border-[#14f195]/20 bg-[#14f195]/5 hover:border-[#14f195]/30"
+                            : "border-neutral-800 bg-neutral-900/30 hover:border-neutral-700 hover:bg-neutral-900/50"
+                        }`}
+                      >
+                        <div
+                          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md ${
+                            isCompleted
+                              ? "bg-[#14f195]/20 text-[#14f195]"
+                              : "bg-neutral-800 text-neutral-500"
+                          }`}
+                        >
+                          {isCompleted ? <Check className="h-4 w-4" /> : <span className="text-xs font-mono">{challenge.order}</span>}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-0.5 flex items-center gap-2">
+                            <h3
+                              className={`truncate text-sm font-medium transition-colors ${
+                                isCompleted
+                                  ? "text-[#14f195]"
+                                  : "text-white group-hover:text-[#14f195]"
+                              }`}
+                            >
+                              {challenge.title}
+                            </h3>
+                            {challenge.difficulty && (
+                              <span
+                                className={`text-[11px] font-medium ${getDifficultyStyle(challenge.difficulty)}`}
+                              >
+                                {challenge.difficulty}
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-xs text-neutral-500">
+                            {challenge.description}
+                          </p>
+                        </div>
+
+                        <div className="hidden items-center gap-1.5 md:flex">
+                          {challenge.tags?.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded bg-neutral-800 px-1.5 py-0.5 text-[11px] text-neutral-500"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <ChevronRight className="h-4 w-4 flex-shrink-0 text-neutral-600 transition-all group-hover:translate-x-1 group-hover:text-[#14f195]" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
         </div>
       </div>
 
       <Footer />
-
-      <LoginRequiredModal
-        open={showModal}
-        onOpenChange={setShowModal}
-        title="Challenge Locked"
-        description="Connect your wallet to access this challenge and track your learning progress."
-      />
     </div>
   );
 }

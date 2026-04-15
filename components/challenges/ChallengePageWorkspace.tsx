@@ -2,7 +2,7 @@ import Link from "next/link";
 import { challengesSource } from "@/lib/challenges/source";
 import { getMDXComponents } from "@/mdx-components";
 import ChallengeEditorClient from "./ChallengeEditorClient";
-import type { ChallengeExecutor } from "@/lib/challenges/registry";
+import type { ExerciseExecutor } from "@/lib/challenges/exercises";
 import { ArrowLeft } from "lucide-react";
 
 export type ChallengeSpec = {
@@ -11,11 +11,14 @@ export type ChallengeSpec = {
   tags?: string[];
   description: string;
   starterCode?: string;
-  mdxSlug?: string[]; // e.g., ["rust","1"] mapped to content/challenges/rust/1.mdx
-  currentIndex?: number; // for nav
-  totalCount?: number; // for nav
-  track?: string; // e.g., "rust"
-  executor?: ChallengeExecutor;
+  mdxSlug?: string[];
+  currentIndex?: number;
+  totalCount?: number;
+  track?: string;
+  exerciseSlug?: string;
+  previousHref?: string;
+  nextHref?: string;
+  executor?: ExerciseExecutor;
 };
 
 type Props = ChallengeSpec & {
@@ -46,6 +49,9 @@ export default function ChallengePageWorkspace({
   currentIndex,
   totalCount,
   track,
+  exerciseSlug,
+  previousHref,
+  nextHref,
   executor,
 }: Props) {
   // Resolve MDX for problem statement if provided
@@ -130,7 +136,9 @@ export default function ChallengePageWorkspace({
               track={track}
               currentIndex={currentIndex}
               totalCount={totalCount}
-              challengeId={currentIndex}
+              exerciseSlug={exerciseSlug}
+              previousHref={previousHref}
+              nextHref={nextHref}
               canExecute={canExecute}
             />
           </section>
