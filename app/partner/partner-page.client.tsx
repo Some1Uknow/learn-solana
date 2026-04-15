@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const partnerCategories = [
   { id: "rpc", name: "RPC Providers", available: true },
