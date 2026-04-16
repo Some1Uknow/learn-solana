@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/use-auth";
 import { useExerciseProgress } from "@/hooks/use-exercise-progress";
 import { useLoginGate } from "@/hooks/use-login-gate";
 import { LoginRequiredModal } from "@/components/ui/login-required-modal";
+import { RustMonacoEditor } from "./RustMonacoEditor";
 
-const INDENTATION = "    ";
 const MIN_OUTPUT_HEIGHT = 150;
 const MIN_EDITOR_HEIGHT = 220;
 const INITIAL_EDITOR_HEIGHT = 420;
@@ -35,24 +27,11 @@ type RunResult = {
   message?: string;
 };
 
-function getLineStartIndex(value: string, index: number) {
-  return value.lastIndexOf("\n", Math.max(0, index - 1)) + 1;
-}
-
-function getIndentRemovalCount(line: string) {
-  if (line.startsWith("\t")) {
-    return 1;
-  }
-
-  const leadingSpaces = line.match(/^ +/)?.[0].length ?? 0;
-  return Math.min(leadingSpaces, INDENTATION.length);
-}
-
 export default function ChallengeEditorClient({
   starterCode,
   track,
-  currentIndex,
-  totalCount,
+  currentIndex: _currentIndex,
+  totalCount: _totalCount,
   exerciseSlug,
   previousHref,
   nextHref,
@@ -77,7 +56,7 @@ export default function ChallengeEditorClient({
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [editorHeight, setEditorHeight] = useState(INITIAL_EDITOR_HEIGHT);
   const [isResizing, setIsResizing] = useState(false);
   const isCompleted = Boolean(exerciseSlug && progress[exerciseSlug]);
@@ -88,35 +67,22 @@ export default function ChallengeEditorClient({
     setSaveError(null);
   }, [starterCode]);
 
-  const lineCount = useMemo(() => (code ? code.split("\n").length : 1), [code]);
-  const lines = useMemo(
-    () => Array.from({ length: lineCount }, (_, i) => i + 1),
-    [lineCount]
-  );
+  const clampEditorHeight = useCallback((value: number) => {
+    const container = containerRef.current;
+    if (!container) return value;
 
-  const gutterRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const clampEditorHeight = useCallback(
-    (value: number) => {
-      const container = containerRef.current;
-      if (!container) return value;
-      const rect = container.getBoundingClientRect();
-      const minHeight = MIN_EDITOR_HEIGHT;
-      const maxHeight = Math.max(
-        minHeight,
-        rect.height - MIN_OUTPUT_HEIGHT - SEPARATOR_HEIGHT
-      );
-      const clamped = Math.min(Math.max(value, minHeight), maxHeight);
-      return Number.isFinite(clamped) ? clamped : minHeight;
-    },
-    []
-  );
+    const rect = container.getBoundingClientRect();
+    const minHeight = MIN_EDITOR_HEIGHT;
+    const maxHeight = Math.max(minHeight, rect.height - MIN_OUTPUT_HEIGHT - SEPARATOR_HEIGHT);
+    const clamped = Math.min(Math.max(value, minHeight), maxHeight);
+    return Number.isFinite(clamped) ? clamped : minHeight;
+  }, []);
 
   const updateEditorHeightFromPointer = useCallback(
     (clientY: number) => {
       const container = containerRef.current;
       if (!container) return;
+
       const rect = container.getBoundingClientRect();
       const desired = clientY - rect.top;
       setEditorHeight((prev) => clampEditorHeight(Number.isFinite(desired) ? desired : prev));
@@ -135,6 +101,7 @@ export default function ChallengeEditorClient({
 
   useEffect(() => {
     if (!isResizing) return;
+
     const handlePointerMove = (event: PointerEvent) => {
       event.preventDefault();
       updateEditorHeightFromPointer(event.clientY);
@@ -154,28 +121,17 @@ export default function ChallengeEditorClient({
 
   useEffect(() => {
     if (!isResizing) return;
+
     const originalCursor = document.body.style.cursor;
     const originalSelect = document.body.style.userSelect;
     document.body.style.cursor = "row-resize";
     document.body.style.userSelect = "none";
+
     return () => {
       document.body.style.cursor = originalCursor;
       document.body.style.userSelect = originalSelect;
     };
   }, [isResizing]);
-
-  const syncScroll = () => {
-    if (!gutterRef.current || !textareaRef.current) return;
-    gutterRef.current.scrollTop = textareaRef.current.scrollTop;
-  };
-
-  const handleSeparatorPointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>
-  ) => {
-    event.preventDefault();
-    updateEditorHeightFromPointer(event.clientY);
-    setIsResizing(true);
-  };
 
   const canRun = Boolean(canExecute && track && exerciseSlug);
 
@@ -191,7 +147,7 @@ export default function ChallengeEditorClient({
     [exerciseSlug, isCompleted, markCompleted, track]
   );
 
-  const handleRun = async () => {
+  const executeRun = useCallback(async () => {
     if (!canRun) {
       setRunResult({
         stdout: "",
@@ -245,23 +201,21 @@ export default function ChallengeEditorClient({
         message: data?.message,
       });
 
-      if (passed === true) {
-        if (!isCompleted) {
-          if (authenticated) {
-            try {
-              await persistCompletion(code);
-            } catch (error) {
-              console.error("Failed to save progress:", error);
-              setSaveError("Challenge passed, but progress could not be saved. Try again.");
-            }
-          } else {
-            requireLogin(() => {
-              void persistCompletion(code).catch((error) => {
-                console.error("Failed to save progress after login:", error);
-                setSaveError("Signed in, but progress could not be saved. Try again.");
-              });
-            });
+      if (passed === true && !isCompleted) {
+        if (authenticated) {
+          try {
+            await persistCompletion(code);
+          } catch (error) {
+            console.error("Failed to save progress:", error);
+            setSaveError("Challenge passed, but progress could not be saved. Try again.");
           }
+        } else {
+          requireLogin(() => {
+            void persistCompletion(code).catch((error) => {
+              console.error("Failed to save progress after login:", error);
+              setSaveError("Signed in, but progress could not be saved. Try again.");
+            });
+          });
         }
       }
     } catch (error) {
@@ -276,89 +230,49 @@ export default function ChallengeEditorClient({
     } finally {
       setIsRunning(false);
     }
-  };
+  }, [
+    authenticated,
+    canRun,
+    code,
+    exerciseSlug,
+    isCompleted,
+    persistCompletion,
+    track,
+  ]);
+
+  const handleRun = useCallback(() => {
+    if (!canRun) {
+      setRunResult({
+        stdout: "",
+        stderr: "",
+        testResults: [],
+        passed: null,
+        message: "Execution is not available for this challenge yet.",
+      });
+      return;
+    }
+
+    requireLogin(() => {
+      void executeRun();
+    });
+  }, [canRun, executeRun, requireLogin]);
 
   const handleReset = () => {
     setCode(starterCode || "");
     setRunResult(null);
   };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
     } catch {}
   };
 
-  const handleEditorKeyDown = useCallback(
-    (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
-      if (event.key !== "Tab") {
-        return;
-      }
-
-      event.preventDefault();
-
-      const textarea = event.currentTarget;
-      const { selectionStart, selectionEnd, value } = textarea;
-
-      let nextCode = value;
-      let nextSelectionStart = selectionStart;
-      let nextSelectionEnd = selectionEnd;
-
-      if (event.shiftKey) {
-        const lineStart = getLineStartIndex(value, selectionStart);
-        const selectionTail = value.slice(lineStart, selectionEnd);
-        const selectedLines = selectionTail.split("\n");
-        const removalCounts = selectedLines.map(getIndentRemovalCount);
-        const totalRemoved = removalCounts.reduce((sum, count) => sum + count, 0);
-
-        if (totalRemoved === 0) {
-          return;
-        }
-
-        nextCode =
-          value.slice(0, lineStart) +
-          selectedLines
-            .map((line, index) => line.slice(removalCounts[index]))
-            .join("\n") +
-          value.slice(selectionEnd);
-
-        const removedFromFirstLine = Math.min(
-          selectionStart - lineStart,
-          removalCounts[0] ?? 0
-        );
-
-        nextSelectionStart = selectionStart - removedFromFirstLine;
-        nextSelectionEnd = selectionEnd - totalRemoved;
-      } else if (selectionStart === selectionEnd) {
-        nextCode =
-          value.slice(0, selectionStart) +
-          INDENTATION +
-          value.slice(selectionEnd);
-        nextSelectionStart = selectionStart + INDENTATION.length;
-        nextSelectionEnd = nextSelectionStart;
-      } else {
-        const lineStart = getLineStartIndex(value, selectionStart);
-        const selectionTail = value.slice(lineStart, selectionEnd);
-        const selectedLines = selectionTail.split("\n");
-
-        nextCode =
-          value.slice(0, lineStart) +
-          selectedLines.map((line) => `${INDENTATION}${line}`).join("\n") +
-          value.slice(selectionEnd);
-
-        nextSelectionStart = selectionStart + INDENTATION.length;
-        nextSelectionEnd =
-          selectionEnd + selectedLines.length * INDENTATION.length;
-      }
-
-      setCode(nextCode);
-
-      requestAnimationFrame(() => {
-        textarea.focus();
-        textarea.setSelectionRange(nextSelectionStart, nextSelectionEnd);
-      });
-    },
-    []
-  );
+  const handleSeparatorPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    updateEditorHeightFromPointer(event.clientY);
+    setIsResizing(true);
+  };
 
   const desktopButtonClasses =
     "rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white";
@@ -367,46 +281,12 @@ export default function ChallengeEditorClient({
 
   return (
     <>
-      <section
-        ref={containerRef}
-        className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
-      >
+      <section ref={containerRef} className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <div
           className="relative min-h-0 shrink-0 flex flex-col overflow-hidden"
           style={{ height: editorHeight, minHeight: MIN_EDITOR_HEIGHT }}
         >
-          {/* Editor header (mobile) */}
-          <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-black/40 px-4 py-2 sm:hidden">
-            <div className="text-xs text-zinc-400">Language: Rust</div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopy}
-                className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-zinc-300"
-              >
-                Copy
-              </button>
-              <button
-                onClick={handleReset}
-                className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-zinc-300"
-              >
-                Reset
-              </button>
-              <button
-                onClick={handleRun}
-                disabled={isRunning || !canRun}
-                className={`rounded-md border border-emerald-400/30 bg-emerald-400/10 px-2 py-1 text-[11px] font-semibold text-emerald-200 transition ${
-                  isRunning || !canRun
-                    ? "cursor-not-allowed opacity-60"
-                    : "hover:border-emerald-400/50 hover:bg-emerald-400/15"
-                }`}
-              >
-                {isRunning ? "Running..." : "Run"}
-              </button>
-            </div>
-          </div>
-
-          {/* Editor header (desktop) */}
-          <div className="hidden shrink-0 items-center justify-between border-b border-white/10 bg-black/40 px-5 py-3 sm:flex">
+          <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-black/40 px-4 py-2 sm:px-5 sm:py-3">
             <div className="flex items-center gap-3 text-sm text-zinc-300">
               <span className="rounded-md border border-white/10 bg-white/[0.06] px-2 py-0.5 text-xs uppercase tracking-[0.2em] text-zinc-400">
                 Language
@@ -423,38 +303,17 @@ export default function ChallengeEditorClient({
               <button
                 onClick={handleRun}
                 disabled={isRunning || !canRun}
-                className={`${
-                  isRunning || !canRun ? "opacity-60 cursor-not-allowed" : ""
-                } ${primaryButtonClasses}`}
+                className={`${primaryButtonClasses} ${
+                  isRunning || !canRun ? "cursor-not-allowed opacity-60" : ""
+                }`}
               >
                 {isRunning ? "Running..." : "Run Code"}
               </button>
             </div>
           </div>
 
-          {/* Simple editor */}
-          <div className="grid h-full min-h-0 flex-1 grid-cols-[48px_1fr] overflow-hidden">
-            <div
-              ref={gutterRef}
-              className="select-none overflow-hidden border-r border-white/10 bg-black/40 px-2 py-3 text-right text-[11px] leading-5 text-zinc-600"
-            >
-              {lines.map((n) => (
-                <div key={n} className="tabular-nums">
-                  {n}
-                </div>
-              ))}
-            </div>
-            <textarea
-              ref={textareaRef}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={handleEditorKeyDown}
-              onScroll={syncScroll}
-              spellCheck={false}
-              aria-label="Rust code editor"
-              title="Rust code editor"
-              className="h-full min-h-0 w-full resize-none overflow-x-auto overflow-y-scroll overscroll-contain bg-transparent p-3 pr-4 font-mono text-[12.5px] leading-5 text-zinc-100 outline-none [caret-color:#22d3ee]"
-            />
+          <div className="h-full min-h-0 flex-1 overflow-hidden">
+            <RustMonacoEditor value={code} onChange={setCode} onRun={handleRun} height="100%" />
           </div>
         </div>
 
@@ -474,7 +333,6 @@ export default function ChallengeEditorClient({
           />
         </div>
 
-        {/* Output and Bottom navigation */}
         <div
           className="flex shrink-0 flex-col border-t border-white/10 bg-black/40 p-3 sm:p-4"
           style={{ minHeight: MIN_OUTPUT_HEIGHT, flex: "1 1 0%" }}
@@ -488,103 +346,99 @@ export default function ChallengeEditorClient({
               : (() => {
                   if (!runResult) return "Run to see the result here.";
                   const chunks: string[] = [];
-                  if (runResult.stdout) {
-                    chunks.push(`stdout:\n${runResult.stdout}`);
-                  }
-                  if (runResult.stderr) {
-                    chunks.push(`stderr:\n${runResult.stderr}`);
-                  }
-                  if (chunks.length === 0) {
-                    chunks.push("(no output)");
-                  }
+                  if (runResult.stdout) chunks.push(`stdout:\n${runResult.stdout}`);
+                  if (runResult.stderr) chunks.push(`stderr:\n${runResult.stderr}`);
+                  if (chunks.length === 0) chunks.push("(no output)");
                   return chunks.join("\n\n");
                 })()}
           </pre>
 
-        {runResult && (
-          <div
-            role="status"
-            className={`mt-3 rounded-xl border px-4 py-3 text-sm shadow-[0_6px_30px_rgba(0,0,0,0.25)] sm:text-[13px] transition ${
-              runResult.passed === true
-                ? "border-emerald-300/60 bg-gradient-to-r from-emerald-500/25 via-emerald-400/20 to-cyan-400/20 text-emerald-50"
-                : runResult.passed === false
-                ? "border-rose-400/60 bg-gradient-to-r from-rose-500/25 via-rose-400/15 to-amber-400/15 text-rose-50"
-                : "border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 via-sky-500/15 to-indigo-500/15 text-cyan-50"
-            }`}
-          >
-            {runResult.passed === true ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
-                  <span className="text-xl sm:text-2xl" aria-hidden>🎉</span>
-                  <span>All test cases passed.</span>
-                </div>
-                <p className="text-xs text-white/90 sm:text-sm">
-                  Your solution satisfied every configured test case for this exercise.
-                </p>
-              </div>
-            ) : runResult.passed === false ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
-                  <span className="text-xl sm:text-2xl" aria-hidden>⚠️</span>
-                  <span>One or more test cases failed.</span>
-                </div>
-                <p className="text-xs text-white/90 sm:text-sm">
-                  Review the failing cases below and keep iterating on your solution.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
-                  <span className="text-xl sm:text-2xl" aria-hidden>ℹ️</span>
-                  <span>Execution completed with diagnostics.</span>
-                </div>
-                <p className="text-xs text-white/90 sm:text-sm">
-                  Review the output below for compiler details or runtime messages.
-                </p>
-              </div>
-            )}
-
-            {runResult.testResults && runResult.testResults.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {runResult.testResults.map((test) => (
-                  <div
-                    key={test.name}
-                    className="rounded-md bg-black/30 px-3 py-2 text-[11px] text-white/80 sm:text-xs"
-                  >
-                    <div className="font-medium text-white">
-                      {test.passed ? "PASS" : "FAIL"} · {test.name}
-                    </div>
-                    {!test.passed && (
-                      <>
-                        <div className="mt-1">
-                          Expected stdout: <code>{test.expectedStdout}</code>
-                        </div>
-                        <div className="mt-1">
-                          Actual stdout: <code>{test.actualStdout || "(empty)"}</code>
-                        </div>
-                        {test.stderr && (
-                          <div className="mt-1">
-                            stderr: <code>{test.stderr}</code>
-                          </div>
-                        )}
-                      </>
-                    )}
+          {runResult && (
+            <div
+              role="status"
+              className={`mt-3 rounded-xl border px-4 py-3 text-sm shadow-[0_6px_30px_rgba(0,0,0,0.25)] transition sm:text-[13px] ${
+                runResult.passed === true
+                  ? "border-emerald-300/60 bg-gradient-to-r from-emerald-500/25 via-emerald-400/20 to-cyan-400/20 text-emerald-50"
+                  : runResult.passed === false
+                    ? "border-rose-400/60 bg-gradient-to-r from-rose-500/25 via-rose-400/15 to-amber-400/15 text-rose-50"
+                    : "border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 via-sky-500/15 to-indigo-500/15 text-cyan-50"
+              }`}
+            >
+              {runResult.passed === true ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
+                    <span className="text-xl sm:text-2xl" aria-hidden>
+                      🎉
+                    </span>
+                    <span>All test cases passed.</span>
                   </div>
-                ))}
-              </div>
-            )}
-            {runResult.message && (
-              <div className="mt-2 text-[11px] text-white/80 sm:text-xs">
-                {runResult.message}
-              </div>
-            )}
-            {saveError && (
-              <div className="mt-2 text-[11px] text-amber-100 sm:text-xs">
-                {saveError}
-              </div>
-            )}
-          </div>
-        )}
+                  <p className="text-xs text-white/90 sm:text-sm">
+                    Your solution satisfied every configured test case for this exercise.
+                  </p>
+                </div>
+              ) : runResult.passed === false ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
+                    <span className="text-xl sm:text-2xl" aria-hidden>
+                      ⚠️
+                    </span>
+                    <span>One or more test cases failed.</span>
+                  </div>
+                  <p className="text-xs text-white/90 sm:text-sm">
+                    Review the failing cases below and keep iterating on your solution.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 text-base font-semibold text-white sm:text-lg">
+                    <span className="text-xl sm:text-2xl" aria-hidden>
+                      ℹ️
+                    </span>
+                    <span>Execution completed with diagnostics.</span>
+                  </div>
+                  <p className="text-xs text-white/90 sm:text-sm">
+                    Review the output below for compiler details or runtime messages.
+                  </p>
+                </div>
+              )}
+
+              {runResult.testResults && runResult.testResults.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {runResult.testResults.map((test) => (
+                    <div
+                      key={test.name}
+                      className="rounded-md bg-black/30 px-3 py-2 text-[11px] text-white/80 sm:text-xs"
+                    >
+                      <div className="font-medium text-white">
+                        {test.passed ? "PASS" : "FAIL"} · {test.name}
+                      </div>
+                      {!test.passed && (
+                        <>
+                          <div className="mt-1">
+                            Expected stdout: <code>{test.expectedStdout}</code>
+                          </div>
+                          <div className="mt-1">
+                            Actual stdout: <code>{test.actualStdout || "(empty)"}</code>
+                          </div>
+                          {test.stderr && (
+                            <div className="mt-1">
+                              stderr: <code>{test.stderr}</code>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {runResult.message && (
+                <div className="mt-2 text-[11px] text-white/80 sm:text-xs">
+                  {runResult.message}
+                </div>
+              )}
+              {saveError && <div className="mt-2 text-[11px] text-amber-100 sm:text-xs">{saveError}</div>}
+            </div>
+          )}
 
           <div className="mt-3 flex items-center justify-between">
             <Link
@@ -614,8 +468,8 @@ export default function ChallengeEditorClient({
       <LoginRequiredModal
         open={showModal}
         onOpenChange={setShowModal}
-        title="Sign in to save progress"
-        description="Your solution passed. Sign in now and we'll save this challenge to your account."
+        title="Sign in to run code"
+        description="Challenge execution is locked behind sign-in so your progress can be saved and resumed."
       />
     </>
   );
