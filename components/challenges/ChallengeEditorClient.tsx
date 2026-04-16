@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Link from "next/link";
@@ -14,6 +15,7 @@ import { useExerciseProgress } from "@/hooks/use-exercise-progress";
 import { useLoginGate } from "@/hooks/use-login-gate";
 import { LoginRequiredModal } from "@/components/ui/login-required-modal";
 
+const INDENTATION = "    ";
 const MIN_OUTPUT_HEIGHT = 150;
 const MIN_EDITOR_HEIGHT = 220;
 const INITIAL_EDITOR_HEIGHT = 420;
@@ -32,6 +34,19 @@ type RunResult = {
   passed: boolean | null;
   message?: string;
 };
+
+function getLineStartIndex(value: string, index: number) {
+  return value.lastIndexOf("\n", Math.max(0, index - 1)) + 1;
+}
+
+function getIndentRemovalCount(line: string) {
+  if (line.startsWith("\t")) {
+    return 1;
+  }
+
+  const leadingSpaces = line.match(/^ +/)?.[0].length ?? 0;
+  return Math.min(leadingSpaces, INDENTATION.length);
+}
 
 export default function ChallengeEditorClient({
   starterCode,
@@ -273,6 +288,78 @@ export default function ChallengeEditorClient({
     } catch {}
   };
 
+  const handleEditorKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      event.preventDefault();
+
+      const textarea = event.currentTarget;
+      const { selectionStart, selectionEnd, value } = textarea;
+
+      let nextCode = value;
+      let nextSelectionStart = selectionStart;
+      let nextSelectionEnd = selectionEnd;
+
+      if (event.shiftKey) {
+        const lineStart = getLineStartIndex(value, selectionStart);
+        const selectionTail = value.slice(lineStart, selectionEnd);
+        const selectedLines = selectionTail.split("\n");
+        const removalCounts = selectedLines.map(getIndentRemovalCount);
+        const totalRemoved = removalCounts.reduce((sum, count) => sum + count, 0);
+
+        if (totalRemoved === 0) {
+          return;
+        }
+
+        nextCode =
+          value.slice(0, lineStart) +
+          selectedLines
+            .map((line, index) => line.slice(removalCounts[index]))
+            .join("\n") +
+          value.slice(selectionEnd);
+
+        const removedFromFirstLine = Math.min(
+          selectionStart - lineStart,
+          removalCounts[0] ?? 0
+        );
+
+        nextSelectionStart = selectionStart - removedFromFirstLine;
+        nextSelectionEnd = selectionEnd - totalRemoved;
+      } else if (selectionStart === selectionEnd) {
+        nextCode =
+          value.slice(0, selectionStart) +
+          INDENTATION +
+          value.slice(selectionEnd);
+        nextSelectionStart = selectionStart + INDENTATION.length;
+        nextSelectionEnd = nextSelectionStart;
+      } else {
+        const lineStart = getLineStartIndex(value, selectionStart);
+        const selectionTail = value.slice(lineStart, selectionEnd);
+        const selectedLines = selectionTail.split("\n");
+
+        nextCode =
+          value.slice(0, lineStart) +
+          selectedLines.map((line) => `${INDENTATION}${line}`).join("\n") +
+          value.slice(selectionEnd);
+
+        nextSelectionStart = selectionStart + INDENTATION.length;
+        nextSelectionEnd =
+          selectionEnd + selectedLines.length * INDENTATION.length;
+      }
+
+      setCode(nextCode);
+
+      requestAnimationFrame(() => {
+        textarea.focus();
+        textarea.setSelectionRange(nextSelectionStart, nextSelectionEnd);
+      });
+    },
+    []
+  );
+
   const desktopButtonClasses =
     "rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white";
   const primaryButtonClasses =
@@ -361,6 +448,7 @@ export default function ChallengeEditorClient({
               ref={textareaRef}
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              onKeyDown={handleEditorKeyDown}
               onScroll={syncScroll}
               spellCheck={false}
               aria-label="Rust code editor"

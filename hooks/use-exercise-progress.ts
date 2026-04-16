@@ -22,15 +22,25 @@ type ExerciseProgressKey = readonly ["exercise-progress", string];
 
 const EMPTY_PROGRESS: Record<string, ExerciseProgressItem> = {};
 
+function isAuthError(error: Error & { status?: number }) {
+  return error.status === 401 || error.status === 403;
+}
+
 function getExerciseProgressKey(track?: string): ExerciseProgressKey | null {
   return track ? (["exercise-progress", track] as const) : null;
 }
 
 async function fetchExerciseProgress(track: string): Promise<ExerciseProgressResponse> {
-  const response = await authFetch(`/api/challenges/progress?track=${track}`);
+  const response = await authFetch(
+    `/api/challenges/progress?${new URLSearchParams({ track })}`
+  );
 
   if (!response.ok) {
-    throw new Error(`progress fetch failed with status ${response.status}`);
+    const error = new Error(`progress fetch failed with status ${response.status}`) as Error & {
+      status?: number;
+    };
+    error.status = response.status;
+    throw error;
   }
 
   return response.json();
@@ -50,7 +60,7 @@ export function useExerciseProgress(track?: string) {
   const { authenticated, ready } = useAuth();
   const cacheKey = ready && authenticated ? getExerciseProgressKey(track) : null;
 
-  const swr = useSWR<ExerciseProgressResponse, Error, ExerciseProgressKey | null>(
+  const swr = useSWR<ExerciseProgressResponse, Error & { status?: number }, ExerciseProgressKey | null>(
     cacheKey,
     (key) => fetchExerciseProgress(key[1]),
     {
@@ -59,6 +69,9 @@ export function useExerciseProgress(track?: string) {
       revalidateIfStale: true,
       keepPreviousData: true,
       dedupingInterval: 15_000,
+      errorRetryCount: 2,
+      focusThrottleInterval: 30_000,
+      shouldRetryOnError: (error) => !isAuthError(error),
     }
   );
 
