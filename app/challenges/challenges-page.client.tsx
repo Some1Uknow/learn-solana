@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Inter, Space_Grotesk } from "next/font/google";
-import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -36,11 +35,6 @@ type ChallengeTrackSummary = {
   name: string;
   description: string;
   exerciseCount: number;
-};
-
-type TrackDisplayStats = {
-  developers: string;
-  completions: string;
 };
 
 function getTrackVisual(track: string) {
@@ -81,20 +75,6 @@ function getTrackVisual(track: string) {
 export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary[] }) {
   const router = useRouter();
 
-  const getTrackStats = (track: ChallengeTrackSummary): TrackDisplayStats => {
-    if (track.track === "rust") {
-      return {
-        developers: "50+",
-        completions: "200+",
-      };
-    }
-
-    return {
-      developers: "0+",
-      completions: "0+",
-    };
-  };
-
   return (
     <div className={`${styles.page} ${body.className}`}>
       <BreadcrumbSchema items={breadcrumbItems} />
@@ -112,12 +92,10 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
 
               <div className={`${styles.heroKicker} ${mono.className}`}>Exercises</div>
               <h1 className={`${styles.heroTitle} ${display.className}`}>
-                Practice tracks that can grow beyond Rust without rewiring the product
+                Challenges
               </h1>
               <p className={styles.heroBody}>
-                Challenges are discovered from content, routed by track and slug, validated
-                on the server, and saved against the user. Add a new category and the
-                landing page should just pick it up.
+                Minimal, focused practice tracks with saved progress and server validation.
               </p>
 
               <div className={styles.heroActions}>
@@ -138,26 +116,11 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
 
         <section className={styles.section}>
           <div className={styles.shell}>
-            <div className={styles.sectionHeader}>
-              <div className={`${styles.sectionKicker} ${mono.className}`}>Track Inventory</div>
-              <h2 className={`${styles.sectionTitle} ${display.className}`}>
-                Challenge tracks should scale with the content system
-              </h2>
-              <p className={styles.sectionBody}>
-                This page is now driven by the tracks discovered under `content/challenges`.
-                If you add a new category with valid exercises, it should appear here without
-                another route-level redesign.
-              </p>
-            </div>
-
-            <div
-              className={`${styles.trackCatalog} ${
-                tracks.length === 1 ? styles.trackCatalogSingle : ""
-              }`}
-            >
+            <div className={`${styles.sectionKicker} ${mono.className} mb-4`}>Track</div>
+            <div className={styles.trackCatalog}>
               {tracks.map((track) => {
                 const visual = getTrackVisual(track.track);
-                const stats = getTrackStats(track);
+
                 return (
                   <article key={track.track} className={styles.trackSpotlight}>
                     <div className={styles.trackSpotlightVisual}>
@@ -189,36 +152,6 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
                         {track.name}
                       </h3>
                       <p className={styles.trackSpotlightDescription}>{track.description}</p>
-
-                      <div className={styles.trackStatsInline}>
-                        <div className={styles.trackStatItem}>
-                          <div className={`${styles.trackStatValue} ${display.className}`}>
-                            {stats.developers}
-                          </div>
-                          <div className={styles.trackStatLabel}>Developers</div>
-                          <div className={styles.trackStatNote}>
-                            Builders using this track to sharpen production instincts.
-                          </div>
-                        </div>
-                        <div className={styles.trackStatItem}>
-                          <div className={`${styles.trackStatValue} ${display.className}`}>
-                            {stats.completions}
-                          </div>
-                          <div className={styles.trackStatLabel}>Exercises completed</div>
-                          <div className={styles.trackStatNote}>
-                            Proof-driven progress from exercises that only pass when all tests pass.
-                          </div>
-                        </div>
-                        <div className={styles.trackStatItem}>
-                          <div className={`${styles.trackStatValue} ${display.className}`}>
-                            {track.exerciseCount}
-                          </div>
-                          <div className={styles.trackStatLabel}>Published exercises</div>
-                          <div className={styles.trackStatNote}>
-                            Current inventory for this track, discovered directly from content.
-                          </div>
-                        </div>
-                      </div>
 
                       <div className={styles.heroActions}>
                         <button
