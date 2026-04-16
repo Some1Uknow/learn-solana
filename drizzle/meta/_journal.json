@@ -64,6 +64,13 @@
       "when": 1776196800000,
       "tag": "0008_tidy_exercise_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776321115024,
+      "tag": "0009_fluffy_mysterio",
+      "breakpoints": true
     }
   ]
 }
