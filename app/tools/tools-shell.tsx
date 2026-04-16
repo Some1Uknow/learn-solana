@@ -23,6 +23,7 @@ type ToolsPageFrameProps = {
   children: ReactNode;
   footer?: boolean;
   fullscreen?: boolean;
+  compactHero?: boolean;
 };
 
 export function ToolsPageFrame({
@@ -35,6 +36,7 @@ export function ToolsPageFrame({
   children,
   footer = true,
   fullscreen = false,
+  compactHero = false,
 }: ToolsPageFrameProps) {
   const crumbs = breadcrumbItems.slice(1);
 
@@ -44,7 +46,7 @@ export function ToolsPageFrame({
       {!fullscreen && <Navbar />}
 
       <main>
-        <section className={`${styles.hero} ${fullscreen ? styles.heroCompact : ""}`}>
+        <section className={`${styles.hero} ${fullscreen || compactHero ? styles.heroCompact : ""}`}>
           <div className={styles.shell}>
             <div className={`${styles.heroGrid} ${heroAside ? "" : styles.heroGridSingle}`}>
               <div className={styles.heroCopy}>
