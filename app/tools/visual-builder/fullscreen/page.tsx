@@ -10,12 +10,16 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: createCanonical("/tools/visual-builder/fullscreen"),
+    canonical: createCanonical("/tools/visual-builder"),
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
   openGraph: {
     title,
     description,
-    url: createCanonical("/tools/visual-builder/fullscreen"),
+    url: createCanonical("/tools/visual-builder"),
     images: [
       {
         url: "/og/tools",

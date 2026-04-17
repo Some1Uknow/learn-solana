@@ -145,6 +145,16 @@ const nextConfig = {
         destination: "/modules/solana-kit-clients",
         permanent: true,
       },
+      {
+        source: "/projects",
+        destination: "/modules",
+        permanent: true,
+      },
+      {
+        source: "/projects/:path*",
+        destination: "/modules",
+        permanent: true,
+      },
       // Redirect any trailing slash URLs to non-trailing slash versions
       // This ensures consistent URLs and prevents duplicate content
       {

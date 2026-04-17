@@ -1,8 +1,49 @@
-const FALLBACK_SITE_URL = "https://www.learnsol.site";
+const CANONICAL_HOST = "www.learnsol.site";
+const CANONICAL_SITE_URL = `https://${CANONICAL_HOST}`;
+const DEVELOPMENT_SITE_URL = "http://localhost:3000";
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
+const LEGACY_HOSTS = new Set(["learnsol.site"]);
 
-const sanitized = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+function normalizeConfiguredSiteUrl(rawValue: string | undefined): string {
+  const sanitized = rawValue?.trim().replace(/\/$/, "");
 
-export const siteUrl = sanitized && sanitized.startsWith("http") ? sanitized : FALLBACK_SITE_URL;
+  if (!sanitized) {
+    return process.env.NODE_ENV === "production" ? CANONICAL_SITE_URL : DEVELOPMENT_SITE_URL;
+  }
+
+  const withProtocol = sanitized.startsWith("http") ? sanitized : `https://${sanitized}`;
+
+  try {
+    const url = new URL(withProtocol);
+    const hostname = url.hostname.toLowerCase();
+
+    if (process.env.NODE_ENV !== "production" && LOCAL_HOSTS.has(hostname)) {
+      return url.origin;
+    }
+
+    if (LOCAL_HOSTS.has(hostname) || LEGACY_HOSTS.has(hostname) || hostname === CANONICAL_HOST) {
+      return CANONICAL_SITE_URL;
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      return CANONICAL_SITE_URL;
+    }
+
+    return url.origin;
+  } catch {
+    return process.env.NODE_ENV === "production" ? CANONICAL_SITE_URL : DEVELOPMENT_SITE_URL;
+  }
+}
+
+export const canonicalHost = CANONICAL_HOST;
+export const canonicalSiteUrl = CANONICAL_SITE_URL;
+export const legacySiteHosts = [...LEGACY_HOSTS];
+
+export function isLocalDevelopmentHost(hostname: string): boolean {
+  return LOCAL_HOSTS.has(hostname.toLowerCase());
+}
+
+export const siteUrl = normalizeConfiguredSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 
 export const metadataBase = new URL(siteUrl);
 
