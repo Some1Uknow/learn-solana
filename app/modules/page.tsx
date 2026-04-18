@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ModulesPageClient from "./modules-page.client";
+import { brand } from "@/lib/brand";
 import { createCanonical } from "@/lib/seo";
 
 const title = "Free Solana Course | Learn Solana Development Step-by-Step";
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
         url: "/og/modules",
         width: 1200,
         height: 630,
-        alt: "learn.sol modules",
+        alt: `${brand.name} modules`,
       },
     ],
   },

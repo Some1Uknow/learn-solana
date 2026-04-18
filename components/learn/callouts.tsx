@@ -40,9 +40,9 @@ const variantConfig = {
   },
   tip: {
     icon: Lightbulb,
-    accentColor: "#14f195",
-    bgGradient: "from-[#14f195]/5 to-transparent",
-    borderGradient: "from-[#14f195]/30 via-[#14f195]/10 to-transparent",
+    accentColor: "#a9ff2f",
+    bgGradient: "from-[#a9ff2f]/5 to-transparent",
+    borderGradient: "from-[#a9ff2f]/30 via-[#a9ff2f]/10 to-transparent",
     defaultTitle: "Pro Tip",
   },
   "deep-dive": {

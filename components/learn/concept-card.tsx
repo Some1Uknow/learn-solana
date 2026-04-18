@@ -21,7 +21,7 @@ interface ConceptCardsProps {
 export function ConceptCard({
   term,
   children,
-  accentColor = "#14f195",
+  accentColor = "#a9ff2f",
 }: ConceptCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 

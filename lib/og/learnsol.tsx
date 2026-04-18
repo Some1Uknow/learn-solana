@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
+import { brand } from "@/lib/brand";
 
 const SIZE = { width: 1200, height: 630 };
 
-const accent = "#14F195"; // Solana green from theme
+const accent = brand.colors.lime;
 
 export interface LearnSolOgOptions {
   title: string;
@@ -15,7 +16,7 @@ export interface LearnSolOgOptions {
 export async function generateLearnSolOgImage(
   options: LearnSolOgOptions
 ): Promise<ImageResponse> {
-  const { title, subtitle, eyebrow = "learn.sol", bullets = [], footer } = options;
+  const { title, subtitle, eyebrow = brand.name, bullets = [] } = options;
 
   const limitedBullets = bullets.slice(0, 2);
   const showBullets = limitedBullets.length > 0;
@@ -29,13 +30,13 @@ export async function generateLearnSolOgImage(
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#0a0a0a",
-          backgroundImage: "radial-gradient(ellipse 120% 80% at 70% 20%, rgba(153, 69, 255, 0.12), transparent 50%), radial-gradient(ellipse 100% 60% at 30% 10%, rgba(20, 241, 149, 0.08), transparent 60%)",
+          backgroundImage: "radial-gradient(ellipse 120% 80% at 70% 20%, rgba(169, 255, 47, 0.12), transparent 50%), radial-gradient(ellipse 100% 60% at 30% 10%, rgba(169, 255, 47, 0.08), transparent 60%)",
           color: "#f5f5f5",
           fontFamily: "'Inter', sans-serif",
           padding: "64px",
         }}
       >
-        {/* Header with learn.sol branding */}
+        {/* Header with brand */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "64px" }}>
           <span
             style={{
@@ -43,7 +44,7 @@ export async function generateLearnSolOgImage(
               fontWeight: 600,
             }}
           >
-            learn.sol
+            {brand.name}
           </span>
           <div
             style={{

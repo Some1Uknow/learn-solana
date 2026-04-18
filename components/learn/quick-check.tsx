@@ -74,7 +74,7 @@ export function QuickCheck({
 
   const statusTone = hasSubmitted
     ? isCorrect
-      ? "text-[#14f195]"
+      ? "text-[#a9ff2f]"
       : "text-[#f87171]"
     : "text-[#a1a1a1]";
 
@@ -90,7 +90,7 @@ export function QuickCheck({
           "relative overflow-hidden rounded-2xl border bg-[#0a0a0a]",
           "shadow-[0_1px_0_rgba(255,255,255,0.03)_inset]",
           hasSubmitted && isCorrect
-            ? "border-[#14f195]/18"
+            ? "border-[#a9ff2f]/18"
             : hasSubmitted && !isCorrect
               ? "border-[#f87171]/18"
               : "border-white/[0.08]"
@@ -180,7 +180,7 @@ export function QuickCheck({
                     hasSubmitted && "cursor-default",
                     !showResult && !isSelected && "border-white/[0.08] text-[#a1a1a1]",
                     !showResult && isSelected && "border-white/[0.18] bg-white/[0.045] text-[#ededed]",
-                    showResult && isCorrectOption && "border-[#14f195]/22 bg-[#14f195]/[0.06] text-[#d7ffe9]",
+                    showResult && isCorrectOption && "border-[#a9ff2f]/22 bg-[#a9ff2f]/[0.06] text-[#d7ffe9]",
                     showResult && isSelected && !isCorrectOption && "border-[#f87171]/20 bg-[#f87171]/[0.05] text-[#ffd7d7]"
                   )}
                 >
@@ -189,7 +189,7 @@ export function QuickCheck({
                       "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border text-[11px] font-medium",
                       !showResult && !isSelected && "border-white/[0.1] bg-white/[0.03] text-[#8a8a8a]",
                       !showResult && isSelected && "border-white/[0.16] bg-white/[0.06] text-[#ededed]",
-                      showResult && isCorrectOption && "border-[#14f195]/24 bg-[#14f195]/[0.08] text-[#7dffc4]",
+                      showResult && isCorrectOption && "border-[#a9ff2f]/24 bg-[#a9ff2f]/[0.08] text-[#7dffc4]",
                       showResult && isSelected && !isCorrectOption && "border-[#f87171]/20 bg-[#f87171]/[0.08] text-[#ffb3b3]"
                     )}
                   >
@@ -249,7 +249,7 @@ export function QuickCheck({
                 <p
                   className={cn(
                     "text-sm font-medium",
-                    isCorrect ? "text-[#14f195]" : "text-[#f87171]"
+                    isCorrect ? "text-[#a9ff2f]" : "text-[#f87171]"
                   )}
                 >
                   {isCorrect ? "Correct. The selected answer matches the lesson." : "Not quite. The correct answer is marked above."}

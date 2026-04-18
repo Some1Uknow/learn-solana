@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ChallengesPageClient from "./challenges-page.client";
+import { brand } from "@/lib/brand";
 import { createCanonical } from "@/lib/seo";
 import { getTrackMeta, listExerciseTracks, listExercisesByTrack } from "@/lib/challenges/exercises";
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
         url: "/og/challenges",
         width: 1200,
         height: 630,
-        alt: "learn.sol challenges",
+        alt: `${brand.name} challenges`,
       },
     ],
   },

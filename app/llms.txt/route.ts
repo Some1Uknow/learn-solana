@@ -1,3 +1,4 @@
+import { brand } from "@/lib/brand";
 import { source } from "@/lib/source";
 import { createCanonical, siteUrl } from "@/lib/seo";
 
@@ -20,9 +21,9 @@ export async function GET() {
     })
     .join("\n\n");
 
-  const body = `# learn.sol
+  const body = `# ${brand.name}
 
-> Learn Solana development through structured lessons and hands-on projects.
+> ${brand.longDescription}
 
 - Docs home: ${createCanonical("/learn")}
 - Full content dump: ${createCanonical("/llms-full.txt")}

@@ -21,7 +21,7 @@ export default function PrivyAppProvider({ children }: { children: ReactNode }) 
       config={{
         appearance: {
           theme: "dark",
-          accentColor: "#14f195",
+          accentColor: "#a9ff2f",
         },
         embeddedWallets: {
           solana: {

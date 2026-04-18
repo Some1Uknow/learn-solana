@@ -6,11 +6,11 @@ import {
   defaultOpenGraphImage,
   defaultTwitterImage,
 } from "@/lib/seo";
+import { brand } from "@/lib/brand";
 
-const title = "Learn Solana | Free Solana Development Course & Tutorials";
+const title = `${brand.name} | ${brand.tagline}`;
 
-const description =
-  "Learn Solana through public modules, executable coding challenges, and full-stack developer tooling. Rust, Anchor, runtime concepts, and modern client flows in one place.";
+const description = brand.longDescription;
 
 const homeKeywords = [
   ...courseKeywords,

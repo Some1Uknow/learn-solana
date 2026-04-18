@@ -57,7 +57,7 @@ export function ReadingProgress() {
         className="h-full origin-left"
         style={{
           scaleX: springProgress,
-          background: "linear-gradient(90deg, #14f195 0%, #9945ff 50%, #00c2ff 100%)",
+          background: "linear-gradient(90deg, #a9ff2f 0%, #9945ff 50%, #00c2ff 100%)",
         }}
       />
     </motion.div>

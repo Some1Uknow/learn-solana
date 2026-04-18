@@ -1,7 +1,8 @@
 import { ImageResponse } from "next/og";
+import { brand } from "@/lib/brand";
 
 const SIZE = { width: 1200, height: 630 };
-const ACCENT = "#14F195";
+const ACCENT = brand.colors.lime;
 
 export interface ModuleOgOptions {
   title: string;
@@ -38,7 +39,7 @@ export async function generateModuleOgImage(
           padding: "52px",
           backgroundColor: "#05070b",
           backgroundImage:
-            "radial-gradient(circle at 82% 22%, rgba(20,241,149,0.2), transparent 34%), radial-gradient(circle at 20% 0%, rgba(31,126,255,0.2), transparent 38%), linear-gradient(120deg, #05070b 20%, #0a121f 100%)",
+            "radial-gradient(circle at 82% 22%, rgba(169,255,47,0.2), transparent 34%), radial-gradient(circle at 20% 0%, rgba(169,255,47,0.1), transparent 38%), linear-gradient(120deg, #05070b 20%, #080c06 100%)",
           color: "#f8fafc",
           fontFamily: "Inter, system-ui, sans-serif",
         }}
@@ -59,7 +60,7 @@ export async function generateModuleOgImage(
               marginBottom: "24px",
             }}
           >
-            <span style={{ fontSize: "26px", fontWeight: 700 }}>learn.sol</span>
+            <span style={{ fontSize: "26px", fontWeight: 700 }}>{brand.name}</span>
             <span
               style={{
                 width: "8px",
@@ -76,8 +77,8 @@ export async function generateModuleOgImage(
               display: "flex",
               padding: "8px 14px",
               borderRadius: "999px",
-              border: "1px solid rgba(20,241,149,0.35)",
-              color: "#bafadb",
+              border: "1px solid rgba(169,255,47,0.35)",
+              color: "#d8ffa0",
               fontSize: "16px",
               fontWeight: 600,
               textTransform: "uppercase",
@@ -95,7 +96,7 @@ export async function generateModuleOgImage(
               fontSize: "66px",
               lineHeight: 1.04,
               fontWeight: 700,
-              letterSpacing: "-0.02em",
+              letterSpacing: "0",
               maxWidth: "760px",
             }}
           >
@@ -148,7 +149,7 @@ export async function generateModuleOgImage(
               />
             ) : (
               <span style={{ fontSize: "40px", fontWeight: 700, color: "#f8fafc" }}>
-                learn.sol
+                {brand.name}
               </span>
             )}
           </div>

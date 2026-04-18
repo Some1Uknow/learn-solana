@@ -34,7 +34,7 @@ export function UpNextCard({
       {/* Section header */}
       {moduleName && (
         <p className="text-sm text-[#a1a1a1] mb-4">
-          Up Next in <span className="text-[#14f195]">{moduleName}</span>
+          Up Next in <span className="text-[#a9ff2f]">{moduleName}</span>
         </p>
       )}
 
@@ -49,7 +49,7 @@ export function UpNextCard({
             "bg-gradient-to-br from-[#0a0a0a] to-[#111111]",
             "p-6",
             "transition-all duration-300",
-            "hover:border-[#14f195]/30 hover:shadow-[0_0_40px_-15px_#14f195]"
+            "hover:border-[#a9ff2f]/30 hover:shadow-[0_0_40px_-15px_#a9ff2f]"
           )}
         >
           {/* Large lesson number watermark */}
@@ -82,7 +82,7 @@ export function UpNextCard({
                 )}
               </div>
 
-              <span className="flex items-center gap-1.5 text-sm font-medium text-[#14f195] group-hover:gap-2 transition-all">
+              <span className="flex items-center gap-1.5 text-sm font-medium text-[#a9ff2f] group-hover:gap-2 transition-all">
                 Continue
                 <ArrowRight className="w-4 h-4" />
               </span>

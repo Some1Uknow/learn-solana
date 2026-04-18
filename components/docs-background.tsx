@@ -7,7 +7,7 @@ const DocsBackground = () => (
     <div
       className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px]"
       style={{
-        background: 'radial-gradient(ellipse at 50% 0%, rgba(20, 241, 149, 0.04) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(169, 255, 47, 0.04) 0%, transparent 70%)',
       }}
     />
   </div>

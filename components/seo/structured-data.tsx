@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { brand } from "@/lib/brand";
 import { siteUrl as SITE_URL } from "@/lib/seo";
 
 /**
@@ -61,7 +62,7 @@ export function ArticleSchema({
   url,
   datePublished,
   dateModified,
-  author = "learn.sol Team",
+  author = `${brand.name} Team`,
   image,
   keywords,
 }: ArticleSchemaProps) {
@@ -78,11 +79,11 @@ export function ArticleSchema({
     },
     publisher: {
       "@type": "Organization",
-      name: "learn.sol",
+      name: brand.name,
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/opengraph-image.png`,
+        url: `${SITE_URL}${brand.assets.appleTouchIcon}`,
       },
     },
     ...(datePublished && { datePublished }),
@@ -146,7 +147,7 @@ export function LearningResourceSchema({
     isAccessibleForFree: true,
     provider: {
       "@type": "EducationalOrganization",
-      name: "learn.sol",
+      name: brand.name,
       url: SITE_URL,
     },
     ...(teaches && teaches.length > 0 && { teaches }),
@@ -288,7 +289,7 @@ export function CourseModuleSchema({
     url: moduleUrl.startsWith("http") ? moduleUrl : `${SITE_URL}${moduleUrl}`,
     provider: {
       "@type": "EducationalOrganization",
-      name: "learn.sol",
+      name: brand.name,
       url: SITE_URL,
     },
     isPartOf: {

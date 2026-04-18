@@ -26,7 +26,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     label: "Program",
     description: "The Anchor program container that owns instructions.",
     group: "Core",
-    accent: "#14f195",
+    accent: "#a9ff2f",
   },
   {
     kind: "instruction",

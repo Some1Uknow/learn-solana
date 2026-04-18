@@ -574,6 +574,10 @@
   opacity: 0.72;
 }
 
+.footerBrandLogo {
+  width: 142px;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0);

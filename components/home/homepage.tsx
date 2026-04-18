@@ -11,6 +11,8 @@ import {
 
 import { Globe } from "@/components/ui/globe";
 import { BentoGrid } from "@/components/ui/bento-grid";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -113,7 +115,7 @@ const footerColumns = {
     { label: "Learn", href: "/modules" },
     { label: "Challenges", href: "/challenges" },
     { label: "Build with Me", href: "/tools/visual-builder" },
-    { label: "Tools", href: "/tools" },
+    { label: "Brand Kit", href: "/branding" },
   ],
   Explore: [
     { label: "Tutorials", href: "/learn" },
@@ -160,10 +162,11 @@ export function HomePage() {
         <div className={`${styles.shell} ${styles.heroGrid}`}>
           <div className={styles.heroCopy}>
             <h1 className={`${styles.heroTitle} ${display.className}`}>
-              Onboarding and Education layer for Solana
+              {brand.tagline}
             </h1>
             <p className={styles.heroBody}>
-              Learn the stack, build faster, and keep progress in one place.
+              Learn the stack, build faster, and keep your builder progress in
+              one durable product loop.
             </p>
             <div className={styles.heroActions}>
               <Link className={styles.primaryButton} href="/modules">
@@ -189,7 +192,7 @@ export function HomePage() {
           <div className={styles.sectionHeader}>
             <div className={`${styles.sectionKicker} ${mono.className}`}>Entire Stack</div>
             <h2 className={`${styles.sectionTitle} ${display.className}`}>
-              We Cover The Entire Stack
+              learn.sol covers the entire stack
             </h2>
             <p className={styles.sectionBody}>
               The product should not feel like isolated pockets of knowledge. It should
@@ -229,7 +232,7 @@ export function HomePage() {
           <div className={styles.sectionHeader}>
             <div className={`${styles.sectionKicker} ${mono.className}`}>Developer Listening</div>
             <h2 className={`${styles.sectionTitle} ${display.className}`}>
-              We Listen To Our Developers
+              Built from developer feedback
             </h2>
             <p className={styles.sectionBody}>
               The strongest product decisions here came from removing friction, reducing
@@ -256,7 +259,7 @@ export function HomePage() {
             <div className={styles.ctaCopy}>
               <div className={`${styles.sectionKicker} ${mono.className}`}>Build Better</div>
               <h2 className={`${styles.ctaTitle} ${display.className}`}>
-                Learn Solana with one product that actually holds together
+                Build on Solana with one product that actually holds together
               </h2>
               <p className={styles.ctaBody}>
                 Public lessons, executable exercises, entire-stack coverage, and a product
@@ -295,8 +298,7 @@ export function HomePage() {
           <div className={styles.footerGrid}>
             <div>
               <div className={`${styles.brand} ${mono.className}`}>
-                <span className={styles.brandMark} />
-                <span>learn.sol</span>
+                <BrandLogo variant="wordmark" className={styles.footerBrandLogo} />
               </div>
               <p className={styles.footerLead}>
                 A sharper, more durable way to learn Solana through lessons, exercises, and
@@ -320,13 +322,13 @@ export function HomePage() {
             <div>
               <div className={`${styles.footerHeading} ${mono.className}`}>Contact</div>
               <div className={styles.footerLinks}>
-                <a href="mailto:raghav@learnsol.site" title="Email learn.sol">
+                <a href={`mailto:${brand.email}`} title={`Email ${brand.name}`}>
                   Email
                 </a>
-                <a href="https://x.com/learndotsol" title="learn.sol on X">
+                <a href={brand.xUrl} title={`${brand.name} on X`}>
                   X
                 </a>
-                <a href="https://github.com/learn-solana" title="learn.sol on GitHub">
+                <a href={brand.githubUrl} title={`${brand.name} on GitHub`}>
                   GitHub
                 </a>
               </div>
@@ -334,7 +336,7 @@ export function HomePage() {
           </div>
 
           <div className={styles.footerBottom}>
-            <span>© 2026 learn.sol. Built for iterative homepage design.</span>
+            <span>© 2026 {brand.name}. Built for Solana developers.</span>
             <span className={styles.footerSupport}>
               <span className={mono.className}>Supported by</span>
               <Image

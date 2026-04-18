@@ -1,3 +1,5 @@
+import { brand, brandKeywords } from "@/lib/brand";
+
 const CANONICAL_HOST = "www.learnsol.site";
 const CANONICAL_SITE_URL = `https://${CANONICAL_HOST}`;
 const DEVELOPMENT_SITE_URL = "http://localhost:3000";
@@ -48,13 +50,13 @@ export const siteUrl = normalizeConfiguredSiteUrl(process.env.NEXT_PUBLIC_SITE_U
 export const metadataBase = new URL(siteUrl);
 
 export const defaultOpenGraphImage = {
-  url: "/opengraph-image.png",
+  url: brand.assets.openGraph,
   width: 1200,
   height: 630,
-  alt: "learn.sol",
+  alt: `${brand.name} - ${brand.tagline}`,
 };
 
-export const defaultTwitterImage = "/twitter-image.png";
+export const defaultTwitterImage = brand.assets.twitter;
 
 // Primary keywords (highest search volume)
 export const primaryKeywords = [
@@ -90,6 +92,7 @@ export const longTailKeywords = [
 
 // Combined for metadata
 export const courseKeywords = [
+  ...brandKeywords,
   ...primaryKeywords,
   ...secondaryKeywords,
   ...longTailKeywords,

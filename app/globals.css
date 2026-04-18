@@ -34,7 +34,7 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  --color-solana-green: #14f195;
+  --color-solana-green: #a9ff2f;
   --color-solana-purple: #9945ff;
   --color-solana-cyan: #00c2ff;
 
@@ -150,8 +150,8 @@
     50% { transform: translateY(-6px); }
   }
   @keyframes glow {
-    0%, 100% { box-shadow: 0 0 0 rgba(20, 241, 149, 0); }
-    50% { box-shadow: 0 0 30px rgba(20, 241, 149, 0.2); }
+    0%, 100% { box-shadow: 0 0 0 rgba(169, 255, 47, 0); }
+    50% { box-shadow: 0 0 30px rgba(169, 255, 47, 0.2); }
   }
 }
 
@@ -660,11 +660,11 @@
   --ls-docs-muted: #f5f5f5;
   --ls-docs-muted-foreground: #737373;
   --ls-docs-border: rgba(0, 0, 0, 0.08);
-  --ls-docs-primary: #14f195;
+  --ls-docs-primary: #a9ff2f;
   --ls-docs-primary-foreground: #021a0f;
-  --ls-docs-accent: rgba(20, 241, 149, 0.1);
-  --ls-docs-accent-foreground: #059669;
-  --ls-docs-ring: #14f195;
+  --ls-docs-accent: rgba(169, 255, 47, 0.1);
+  --ls-docs-accent-foreground: #548000;
+  --ls-docs-ring: #a9ff2f;
   --ls-docs-sidebar: rgba(255, 255, 255, 0.9);
 }
 
@@ -675,11 +675,11 @@
   --ls-docs-muted: #171717;
   --ls-docs-muted-foreground: #a1a1a1;
   --ls-docs-border: rgba(255, 255, 255, 0.08);
-  --ls-docs-primary: #14f195;
+  --ls-docs-primary: #a9ff2f;
   --ls-docs-primary-foreground: #021a0f;
-  --ls-docs-accent: rgba(20, 241, 149, 0.1);
-  --ls-docs-accent-foreground: #5cffb8;
-  --ls-docs-ring: #14f195;
+  --ls-docs-accent: rgba(169, 255, 47, 0.1);
+  --ls-docs-accent-foreground: #cfff84;
+  --ls-docs-ring: #a9ff2f;
   --ls-docs-sidebar: rgba(0, 0, 0, 0.8);
 }
 
@@ -696,7 +696,7 @@
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 0.75rem;
-  background: radial-gradient(circle at 30% 30%, rgba(20, 241, 149, 0.2), rgba(0, 0, 0, 0.8));
+  background: radial-gradient(circle at 30% 30%, rgba(169, 255, 47, 0.16), rgba(0, 0, 0, 0.82));
   padding: 0.25rem;
 }
 
@@ -704,7 +704,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(20, 241, 149, 0.3));
+  filter: drop-shadow(0 4px 12px rgba(169, 255, 47, 0.3));
 }
 
 .ls-nav-brand-text {

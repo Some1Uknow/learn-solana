@@ -70,7 +70,7 @@ export function LoginRequiredModal({
             <Button
               onClick={handleLogin}
               disabled={isConnecting}
-              className="mt-4 h-11 w-full justify-center rounded-lg bg-[#14f195] text-black hover:bg-[#12d182]"
+              className="mt-4 h-11 w-full justify-center rounded-lg bg-[#a9ff2f] text-black hover:bg-[#8fe826]"
             >
               {isConnecting ? "Opening sign-in..." : "Continue"}
             </Button>

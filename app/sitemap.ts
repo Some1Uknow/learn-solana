@@ -40,6 +40,7 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: 'daily' 
   { path: '/tools', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/tools/runtime-lab', priority: 0.65, changeFrequency: 'monthly' },
   { path: '/tools/visual-builder', priority: 0.6, changeFrequency: 'monthly' },
+  { path: '/branding', priority: 0.55, changeFrequency: 'monthly' },
   { path: '/partner', priority: 0.5, changeFrequency: 'monthly' },
 ]
 

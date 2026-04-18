@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ToolsPageClient from "./tools-page.client";
+import { brand } from "@/lib/brand";
 import { createCanonical } from "@/lib/seo";
 
 const title = "Solana Developer Tools | Runtime Lab & Visual Builder";
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
         url: "/og/tools",
         width: 1200,
         height: 630,
-        alt: "learn.sol tools",
+        alt: `${brand.name} tools`,
       },
     ],
   },

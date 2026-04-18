@@ -17,21 +17,22 @@ import {
   metadataBase,
   siteUrl,
 } from "@/lib/seo";
+import { brand } from "@/lib/brand";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
-  name: "learn.sol",
-  alternateName: "Learn Solana",
+  name: brand.name,
+  alternateName: brand.alternateName,
   url: siteUrl,
-  logo: `${siteUrl}/opengraph-image.png`,
-  description: "Solana onboarding, tutorials, and coding challenges for developers learning the full stack",
-  sameAs: ["https://x.com/learndotsol", "https://github.com/learn-solana"],
+  logo: `${siteUrl}${brand.assets.appleTouchIcon}`,
+  description: brand.longDescription,
+  sameAs: [brand.xUrl, brand.githubUrl],
   contactPoint: [
     {
       "@type": "ContactPoint",
       contactType: "support",
-      email: "raghav@learnsol.site",
+      email: brand.email,
     },
   ],
 };
@@ -40,10 +41,11 @@ const courseJsonLd = {
   "@context": "https://schema.org",
   "@type": "Course",
   name: "Learn Solana Development",
-  description: "Comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps",
+  description:
+    "Comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps.",
   provider: {
     "@type": "EducationalOrganization",
-    name: "learn.sol",
+    name: brand.name,
     url: siteUrl,
   },
   educationalLevel: "Beginner to Advanced",
@@ -61,8 +63,8 @@ const courseJsonLd = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "learn.sol",
-  alternateName: "Learn Solana",
+  name: brand.name,
+  alternateName: brand.alternateName,
   url: siteUrl,
   // NOTE: SearchAction commented out - fumadocs uses a different search mechanism
   // Uncomment when a /search page is implemented
@@ -85,23 +87,21 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase,
   title: {
-    default: "Learn Solana | Free Solana Development Course",
-    template: "%s | learn.sol",
+    default: `${brand.name} | ${brand.tagline}`,
+    template: `%s | ${brand.name}`,
   },
-  description:
-    "Learn Solana development through public modules, coding challenges, and full-stack developer tooling. Master Rust, Anchor, and modern Solana workflows.",
+  description: brand.longDescription,
   keywords: courseKeywords,
-  applicationName: "learn.sol",
-  authors: [{ name: "learn.sol Team" }],
+  applicationName: brand.name,
+  authors: [{ name: `${brand.name} Team` }],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: "Learn Solana | Free Solana Development Course",
-    description:
-      "Learn Solana development through interactive modules, coding challenges, and full-stack developer tooling.",
+    title: `${brand.name} | ${brand.tagline}`,
+    description: brand.longDescription,
     url: siteUrl,
-    siteName: "learn.sol, Learn Solana Development",
+    siteName: `${brand.name}, ${brand.alternateName} Development`,
     locale: "en_US",
     images: [defaultOpenGraphImage],
     type: "website",
@@ -110,9 +110,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@learndotsol",
     creator: "@Some1UKnow25",
-    title: "Learn Solana | Free Development Course",
-    description:
-      "Learn Solana development through interactive modules, coding challenges, and full-stack developer tooling.",
+    title: `${brand.name} | ${brand.tagline}`,
+    description: brand.longDescription,
     images: [defaultTwitterImage],
   },
   robots: {

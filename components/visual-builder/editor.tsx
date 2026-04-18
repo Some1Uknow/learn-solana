@@ -46,7 +46,7 @@ const nodeTypes = {
 };
 
 const defaultEdgeOptions = {
-  style: { stroke: "#14f195", strokeWidth: 1.2 },
+  style: { stroke: "#a9ff2f", strokeWidth: 1.2 },
   animated: false,
 };
 
@@ -424,7 +424,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
             </button>
             <button
               onClick={handleExport}
-              className="border border-[#14f195]/50 bg-[#14f195]/10 px-4 py-2 text-xs font-semibold text-[#14f195] transition hover:bg-[#14f195]/20"
+              className="border border-[#a9ff2f]/50 bg-[#a9ff2f]/10 px-4 py-2 text-xs font-semibold text-[#a9ff2f] transition hover:bg-[#a9ff2f]/20"
             >
               Export Anchor
             </button>
@@ -527,7 +527,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
               <button
                 onClick={handleNextStep}
                 disabled={activeStepIndex >= steps.length - 1 || !currentStepComplete}
-                className="border border-[#14f195]/50 bg-[#14f195]/10 px-3 py-1 text-[10px] font-semibold uppercase text-[#14f195] transition hover:bg-[#14f195]/20 disabled:cursor-not-allowed disabled:opacity-40"
+                className="border border-[#a9ff2f]/50 bg-[#a9ff2f]/10 px-3 py-1 text-[10px] font-semibold uppercase text-[#a9ff2f] transition hover:bg-[#a9ff2f]/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>
@@ -546,7 +546,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
               <span
                 className={`px-2 py-1 text-[10px] font-semibold uppercase ${
                   currentStepComplete
-                    ? "border border-[#14f195]/50 bg-[#14f195]/10 text-[#14f195]"
+                    ? "border border-[#a9ff2f]/50 bg-[#a9ff2f]/10 text-[#a9ff2f]"
                     : "border border-white/15 bg-white/5 text-white/60"
                 }`}
               >
@@ -565,7 +565,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
                   onClick={() => setActiveStepIndex(index)}
                   className={`border px-2 py-1 text-[10px] font-semibold uppercase transition ${
                     isActive
-                      ? "border-[#14f195]/60 bg-[#14f195]/10 text-[#14f195]"
+                      ? "border-[#a9ff2f]/60 bg-[#a9ff2f]/10 text-[#a9ff2f]"
                       : "border-white/10 bg-black/40 text-white/60 hover:border-white/30"
                   }`}
                 >
