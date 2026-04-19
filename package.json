@@ -10,6 +10,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "seo:check": "node scripts/check-seo-routes.mjs",
     "lint": "next lint",
     "postinstall": "fumadocs-mdx",
     "db:generate": "drizzle-kit generate",
