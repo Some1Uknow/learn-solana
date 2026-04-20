@@ -6,6 +6,7 @@ const requestSchema = z.object({
   code: z.string().min(1, "Code is required").max(10000),
   track: z.string().min(1),
   exerciseSlug: z.string().min(1),
+  mode: z.enum(["run", "submit"]).default("run"),
 });
 
 const normalizeStdout = (value: string) => value.replace(/\r\n/g, "\n").trimEnd();
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { code, track, exerciseSlug } = parsed.data;
+  const { code, track, exerciseSlug, mode } = parsed.data;
   const exercise = getExercise(track, exerciseSlug);
 
   if (!exercise || !exercise.executor) {
@@ -116,10 +117,11 @@ export async function POST(request: Request) {
 
     results.push({
       name: test.name,
+      displayInput: test.displayInput,
       passed,
       expectedStdout: test.expectedStdout,
       actualStdout: stdout,
-      stderr,
+      stderr: playgroundSuccess ? "" : stderr,
       compiler: {
         success: playgroundSuccess,
         exitCode:
@@ -142,6 +144,7 @@ export async function POST(request: Request) {
       stdout: firstFailure?.actualStdout ?? results.at(-1)?.actualStdout ?? "",
       stderr: firstFailure?.stderr ?? results.at(-1)?.stderr ?? "",
       passed,
+      mode,
       tests: results,
       message:
         passed === true

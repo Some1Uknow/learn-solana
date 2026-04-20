@@ -9,6 +9,7 @@ export type ExerciseDifficulty = "Easy" | "Medium" | "Hard";
 
 export type RustPlaygroundTestCase = {
   name: string;
+  displayInput?: string;
   expectedStdout: string;
   harnessBefore?: string;
   harnessAfter?: string;
@@ -81,21 +82,22 @@ function asStringArray(value: unknown): string[] {
 function normalizeExecutor(raw: ParsedExerciseFrontmatter["executor"]): ExerciseExecutor | undefined {
   if (!raw || raw.type !== "rust-playground") return undefined;
 
-  const tests = Array.isArray(raw.tests)
+  const tests: RustPlaygroundTestCase[] = Array.isArray(raw.tests)
     ? raw.tests
-        .map((entry) => {
+        .map((entry): RustPlaygroundTestCase | null => {
           if (!entry || typeof entry !== "object") return null;
           const test = entry as Record<string, unknown>;
           if (typeof test.expectedStdout !== "string") return null;
 
           return {
             name: typeof test.name === "string" ? test.name : "test",
+            ...(typeof test.displayInput === "string" ? { displayInput: test.displayInput } : {}),
             expectedStdout: test.expectedStdout,
             harnessBefore:
               typeof test.harnessBefore === "string" ? test.harnessBefore : undefined,
             harnessAfter:
               typeof test.harnessAfter === "string" ? test.harnessAfter : undefined,
-          } satisfies RustPlaygroundTestCase;
+          };
         })
         .filter((entry): entry is RustPlaygroundTestCase => Boolean(entry))
     : [];
