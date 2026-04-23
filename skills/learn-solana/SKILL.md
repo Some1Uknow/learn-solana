@@ -1,6 +1,6 @@
 ---
 name: learn-solana
-description: Teach any Solana, Anchor, Rust-for-Solana, SPL Token, PDA, account model, CPI, wallet, transaction, validator, or dApp concept from first principles. Use when the user asks to understand, learn, explain, visualize, compare, practice, or turn a Solana topic into a lesson, tutorial, exercise, diagram, table, or temporary HTML teaching artifact.
+description: Teach any Solana, Anchor, Rust-for-Solana, SPL Token, PDA, account model, CPI, wallet, transaction, validator, or dApp concept from first principles. Use when the user asks to understand, learn, explain, visualize, compare, practice, or turn a Solana topic into a lesson, tutorial, exercise, diagram, table, or minimal temporary HTML notes-page explainer.
 license: MIT
 metadata:
   author: LearnSol
@@ -9,7 +9,7 @@ metadata:
 
 # Learn Solana
 
-This skill turns an agent into a Solana teacher. It is for explaining any Solana topic from first principles, then making the idea concrete with examples, diagrams, tables, exercises, and temporary HTML artifacts when useful.
+This skill turns an agent into a Solana teacher. It is for explaining any Solana topic from first principles, then making the idea concrete with examples, condensed notes, tables, exercises, and minimal temporary HTML explainers when useful.
 
 ## Activation
 
@@ -19,7 +19,7 @@ Use this skill when the user asks to:
 - learn Solana, Anchor, SPL Token, PDAs, CPIs, wallets, validators, transactions, programs, or accounts
 - compare Solana primitives or developer workflows
 - create lessons, MDX tutorials, quizzes, exercises, or checkpoints
-- make a temporary visual artifact to teach a Solana idea
+- make a temporary one-page HTML explainer to teach a Solana idea
 - debug confusion about how a Solana mechanism works
 
 Do not use this skill for generic blockchain explanations unless the answer is explicitly tied back to Solana.
@@ -38,11 +38,22 @@ Every teaching response must follow this shape unless the user asks for a differ
 
 Keep the language simple. Define every term before relying on it. Avoid unexplained jargon, vague metaphors, and hype.
 
-## Visual Teaching Rule
+## HTML Explainer Rule
 
-If the concept involves movement, ownership, relationships, state changes, or multiple actors, create or propose a visual artifact.
+When the user asks for a visual, HTML, page, notes, or artifact, create a minimal one-page explainer by default. Treat it like the notes page a master teacher would hand to a beginner before a hard topic: clear, condensed, structured, and elegant.
 
-Use visuals for:
+The output should answer: "If the learner knows nothing about this topic, what is the shortest complete page that makes the idea click?"
+
+Default artifact style:
+
+- Vercel-like minimalism: white or near-white page, black text, thin borders, restrained gray surfaces.
+- Typography first: strong title, short definition, compact sections, tables only when they clarify.
+- No decorative gradients, glows, hero art, heavy diagrams, or animation unless explicitly requested.
+- One HTML file with inline CSS, no runtime dependencies, and no external assets.
+- The page should read like dense but beginner-safe notes, not a landing page.
+- Prefer one excellent page over multiple files or a broad tutorial.
+
+Use compact notes-page explainers for:
 
 - transaction and instruction flow
 - account ownership and data layout
@@ -52,14 +63,14 @@ Use visuals for:
 - staking, validator, or consensus flows
 - Anchor account validation and instruction lifecycle
 
-For visual work, first read `references/html-teaching-artifacts.md`. Use `assets/teaching-artifact-template.html` as the base for temporary HTML files.
+For HTML explainer work, first read `references/html-teaching-artifacts.md`. Use `assets/teaching-artifact-template.html` as the base for temporary HTML files.
 
 ## Reference Loading
 
 Load only what the task needs:
 
 - `references/topic-framework.md` for the canonical explanation structure and topic-specific teaching angles.
-- `references/html-teaching-artifacts.md` when creating diagrams, tables, animations, or temporary HTML teaching files.
+- `references/html-teaching-artifacts.md` when creating temporary HTML notes pages, diagrams, tables, or teaching files.
 - `references/quality-rubric.md` before finalizing substantial lesson content or any reusable artifact.
 
 ## Temporary HTML Artifacts
@@ -68,10 +79,11 @@ When creating a temporary HTML artifact:
 
 - Put it in a scratch location such as `tmp/` or another project-appropriate temporary folder.
 - Make it self-contained: one HTML file with inline CSS and minimal inline JavaScript.
+- Default to zero JavaScript.
 - Use semantic sections, readable typography, high contrast, and responsive layout.
-- Prefer boxes, arrows, lanes, tables, and step animations over decorative graphics.
-- Use animation only to clarify sequence or state change.
-- Include labels directly on the diagram so it remains useful without narration.
+- Prefer concise notes, numbered steps, tiny tables, and callouts over large diagrams.
+- Use animation only if the user explicitly asks for animation.
+- Include the concept, why it matters, mental model, mechanics, example, pitfalls, and practice prompt.
 - Tell the user the local file path when finished.
 
 Do not introduce build dependencies for a teaching artifact unless the user asks for a production component.

@@ -1,96 +1,108 @@
 # HTML Teaching Artifacts
 
-Use this reference when creating temporary visual explanations.
+Use this reference when creating temporary HTML explainers.
 
 ## Artifact Goals
 
-An HTML artifact should make a concept visible. It should not be a decorative landing page.
+An HTML artifact should be a minimal one-page teaching note. It should feel like a polished Vercel-style technical article: calm typography, strong structure, white space, thin borders, and no visual noise.
+
+The default output is not a diagram dashboard. It is a condensed master-teacher notes page for someone who does not know the topic at all.
 
 Prioritize:
 
-- clear labels
-- before/after state
-- actor relationships
-- ordered steps
-- compact tables
-- one meaningful animation
+- one-sentence first-principles definition
+- why the concept exists
+- simple mental model
+- compact Solana-specific mechanics
+- one realistic example
+- tiny tables for relationships or before/after state
+- common mistakes
+- one practice prompt
 
 Avoid:
 
-- vague illustrations
-- hidden explanations that only live in prose
+- decorative illustrations
+- dashboard-style cards
+- large visual systems when text would teach better
 - complex frameworks
 - dependency installation
-- animation that does not teach sequence or causality
+- gradients, glows, shadows, bokeh, and stock decorative backgrounds
+- animation unless the user explicitly asks for it
 
 ## Required Structure
 
 Use one self-contained HTML file:
 
-- `<header>` for the concept name and one-sentence definition
-- `<main>` for the diagram, table, or stepper
-- `<section>` blocks for before/after state, common mistakes, and recap
+- `<header>` for the concept name, level, and one-sentence definition
+- `<main>` for the notes content
+- `<section>` blocks for mental model, mechanics, example, mistakes, and practice
 - inline `<style>` for CSS
-- small inline `<script>` only when interaction or animation improves learning
+- no JavaScript unless the user explicitly asks for interactivity
 
-## Visual Patterns
+## Required Page Sections
 
-### Account Relationship Diagram
+Use this sequence unless the user requests a different teaching format:
 
-Use boxes for accounts and arrows for authority or ownership.
+1. `What this is` - one plain-English definition and a tiny glossary if needed.
+2. `Why it exists` - the problem this concept solves.
+3. `Mental model` - a simple model, clearly marked as a simplification.
+4. `How Solana does it` - concrete mechanics and vocabulary.
+5. `Walkthrough` - ordered steps using realistic account/program names.
+6. `Tiny table` - comparison, before/after state, or actor responsibility.
+7. `Common mistakes` - short bullets.
+8. `Practice` - one exercise that checks understanding.
 
-Required labels:
+## Minimal Visual Patterns
 
-- address or role
-- owner program
-- data stored
-- who can modify it
+Use these only as compact teaching aids inside the notes page.
 
-### Transaction Flow
+### Relationship Table
 
-Use lanes for user, wallet, transaction, programs, and accounts.
+Use for account ownership, token roles, authority, or CPI privileges.
 
-Required labels:
+Columns should usually be:
 
-- signer
-- instruction order
-- accounts read
-- accounts written
-- final state
+- thing
+- what it means
+- who controls it
+- beginner translation
 
-### PDA Derivation
+### Before/After Table
 
-Use a recipe layout:
+Use when state changes.
 
-- seed 1
-- seed 2
-- program id
-- bump
-- derived PDA
+Columns should usually be:
 
-Add a signer comparison table explaining why a PDA has no private key.
+- step
+- account or actor
+- what changed
 
-### CPI Flow
+### Recipe List
 
-Use nested or stacked calls:
+Use for PDA seeds, transaction construction, or Anchor validation.
 
-- user signs transaction
-- program A starts
-- program A invokes program B
-- program B reads/writes passed accounts
-- control returns to program A
+Keep it as an ordered list or a two-column table. Avoid giant arrows unless the user asks.
 
-Show which signer privileges are forwarded.
+## Style Rules
 
-## Animation Guidance
+Use a restrained system:
 
-Use CSS animations for:
+- background: `#fff`
+- text: near black
+- muted text: neutral gray
+- accent: one restrained blue or black
+- borders: `1px solid #e5e7eb`
+- radius: 12px or less
+- no heavy shadows
 
-- moving from step 1 to step 2 to step 3
-- highlighting the current account being read or written
-- showing before/after state changes
+Typography:
 
-Keep animations slow enough to follow. Provide a non-animated table or labels so the artifact still works if animation is missed.
+- system sans for prose
+- system mono for code and addresses
+- body text around 16px
+- readable line-height
+- max content width around 920px
+- no huge hero typography
 
 ## File Naming
 
@@ -105,7 +117,9 @@ Use descriptive temporary names:
 
 - The artifact opens directly in a browser.
 - It has no external runtime dependencies.
-- The main idea is understandable from the visual alone.
-- The diagram labels match the prose explanation.
+- The main idea is understandable from the first screen.
+- The page can teach someone who has never seen the topic.
+- It is concise enough to scan in under five minutes.
+- It contains a concrete Solana example.
+- Tables clarify relationships instead of decorating the page.
 - The file path is reported to the user.
-

@@ -28,12 +28,14 @@ Use this before finalizing substantial Solana teaching output.
 ## Artifact Quality
 
 - Is the temporary HTML self-contained?
-- Are labels visible without hovering?
-- Does animation clarify order or causality?
+- Does it look like a minimal technical notes page instead of a landing page?
+- Is the first screen enough to orient a beginner?
+- Are sections ordered from first principles to concrete Solana mechanics?
+- Are tables compact and useful?
+- Does it avoid decorative gradients, glows, and unnecessary animation?
 - Is the layout usable on mobile and desktop?
 - Are colors high contrast and not purely decorative?
 
 ## Final Pass
 
 If any answer to the above is "no", revise before finalizing.
-
