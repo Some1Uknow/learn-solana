@@ -1,0 +1,9 @@
+interface:
+  display_name: "Learn Solana"
+  short_description: "Teach Solana concepts with visual lessons"
+  brand_color: "#14F195"
+  default_prompt: "Use $learn-solana to teach a Solana concept from first principles with simple language, examples, diagrams, tables, and temporary HTML teaching aids."
+
+policy:
+  allow_implicit_invocation: true
+

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solana Concept Explainer</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f4ed;
+        --ink: #17201b;
+        --muted: #5d665f;
+        --line: #c9d5ca;
+        --panel: #fffdf7;
+        --accent: #0a7c59;
+        --accent-2: #2563eb;
+        --warn: #b45309;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(135deg, rgba(10, 124, 89, 0.08), transparent 34%),
+          linear-gradient(225deg, rgba(37, 99, 235, 0.08), transparent 32%),
+          var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, "Avenir Next", "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      header,
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        padding: 48px 0 24px;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 5vw, 4.5rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .definition {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 247, 0.88);
+        box-shadow: 0 16px 40px rgba(23, 32, 27, 0.08);
+      }
+
+      .diagram {
+        min-height: 420px;
+        padding: 24px;
+      }
+
+      .side {
+        padding: 20px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step:last-child {
+        border-bottom: 0;
+      }
+
+      .badge {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+      }
+
+      .node-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin: 24px 0;
+      }
+
+      .node {
+        min-height: 120px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        position: relative;
+      }
+
+      .node strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .node small {
+        color: var(--muted);
+      }
+
+      .arrow {
+        height: 3px;
+        margin: 18px 8%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        transform-origin: left;
+        animation: grow 1.4s ease-out both;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      th,
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+      }
+
+      @keyframes grow {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      @media (max-width: 820px) {
+        .grid,
+        .node-row {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          padding-top: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Solana Concept</h1>
+      <p class="definition">Replace this with a one-sentence first-principles definition.</p>
+    </header>
+
+    <main class="grid">
+      <section class="panel diagram" aria-label="Concept diagram">
+        <div class="node-row">
+          <div class="node">
+            <strong>Before</strong>
+            <small>Show the starting state.</small>
+          </div>
+          <div class="node">
+            <strong>Operation</strong>
+            <small>Show the instruction, derivation, call, or transfer.</small>
+          </div>
+          <div class="node">
+            <strong>After</strong>
+            <small>Show the changed state.</small>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Part</th>
+              <th>Role</th>
+              <th>Beginner translation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Account</td>
+              <td>Stores data or lamports</td>
+              <td>A labeled storage box on-chain</td>
+            </tr>
+            <tr>
+              <td>Program</td>
+              <td>Runs logic</td>
+              <td>The rules that can change owned boxes</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <aside class="panel side" aria-label="Step by step explanation">
+        <div class="step">
+          <span class="badge">1</span>
+          <p>Define the concept in simple language.</p>
+        </div>
+        <div class="step">
+          <span class="badge">2</span>
+          <p>Show what changes on-chain.</p>
+        </div>
+        <div class="step">
+          <span class="badge">3</span>
+          <p>End with the mistake beginners usually make.</p>
+        </div>
+      </aside>
+    </main>
+  </body>
+</html>
+

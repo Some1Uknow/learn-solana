@@ -40,6 +40,16 @@ LearnSol gives you:
 👉 **Live:** https://learnsol.site  
 👉 **Demo:** https://youtu.be/pM1zKL5CbhA
 
+## Agent Skill
+
+This repo also ships a publishable Agent Skill for the Vercel skills ecosystem:
+
+```bash
+npx skills add Some1Uknow/learn-solana --skill learn-solana
+```
+
+The skill lives in [`skills/learn-solana`](skills/learn-solana) and teaches Solana concepts from first principles with simple explanations, examples, diagrams, tables, and temporary HTML teaching artifacts.
+
 <br/>
 
 ## 🖼 Product Overview
