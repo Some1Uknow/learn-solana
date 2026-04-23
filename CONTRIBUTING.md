@@ -1,255 +1,262 @@
-# Contributing to LearnSol
+# Contributing to learn.sol
 
-Thanks for your interest in contributing!  
-LearnSol is an open-source Solana curriculum built for the community — and your improvements help everyone learn faster.
+Thanks for contributing.
 
-This document explains how to contribute new lessons, fix issues, add examples, and improve the platform.
+learn.sol is an open-source Solana learning product built around structured curriculum, interactive tools, executable challenges, and source-grounded AI help. Good contributions make the product clearer, more correct, and more useful for builders trying to understand how Solana actually works.
 
----
+This guide covers the current repo structure and contribution workflow.
 
-# 📌 Before You Start
+## Before You Start
 
-### ✅ Requirements  
-To work on LearnSol locally, you should have:
+### Requirements
 
-- Node.js 18+  
-- pnpm  
-- Git  
-- PostgreSQL (only required if you want to regenerate embeddings)
+- Node.js 20+
+- pnpm 10+
+- Git
+- PostgreSQL if you need auth-backed progress, docs ingestion, or local DB features
+- A Privy app if you need to test login flows
+- An OpenAI API key if you need to rebuild embeddings or test the assistant end to end
 
-### 📁 Project Structure  
+### Core Areas of the Repo
+
+```text
+app/                    App Router pages, API routes, tools, docs endpoints
+components/             UI, auth, challenge, learn, and visual-builder components
+content/                MDX lesson content and challenge definitions
+data/                   Module catalog data
+drizzle/                Database migrations
+hooks/                  Client hooks
+lib/                    Auth, AI, DB, Solana helpers, challenge and tool logic
+public/                 Brand assets and static files
+scripts/                Migrations, SEO checks, docs ingestion
+skills/learn-solana/    Publishable Solana teaching agent skill
 ```
 
-content/
-week-1/
-week-2/
-week-3/
-week-4/
-app/
-components/
-lib/
-scripts/
+### Current Curriculum Structure
 
+The curriculum is module-based, not week-based.
+
+Main lesson content currently lives in:
+
+- `content/solana-foundations`
+- `content/rust-foundations`
+- `content/anchor-programs`
+- `content/solana-kit-clients`
+
+Challenge content currently lives in:
+
+- `content/challenges/rust`
+
+There is also a `content/tutorials` area for additional content.
+
+## Types of Contributions
+
+You can help in a few different ways:
+
+- Improve lesson clarity, correctness, or examples
+- Add or expand challenges
+- Improve Runtime Lab or Visual Builder behavior
+- Fix bugs in docs rendering, auth, AI, or tooling
+- Improve navigation, page UX, or content discoverability
+- Tighten scripts, ingestion, or database workflows
+- Add better source material for the `learn-solana` skill
+
+## Content Contributions
+
+### Editing Existing Lessons
+
+Lessons are MDX files inside the appropriate module directory under `content/`.
+
+Examples:
+
+```text
+content/solana-foundations/solana-architecture.mdx
+content/anchor-programs/pda-seed-derivation.mdx
+content/solana-kit-clients/wallet-standard-clients.mdx
 ```
 
-- All curriculum content lives in `content/week-*`
-- UI and platform code lives in `app/` and `components/`
+When editing lessons:
 
----
+- keep the writing direct and beginner-friendly
+- prefer concrete examples over long explanation
+- explain Solana-specific terms the first time they appear
+- avoid cargo-cult snippets without explaining why they work
+- keep links and code samples current
 
-# 📝 Types of Contributions
+### Adding a New Lesson
 
-You can contribute in multiple ways:
+1. Add the `.mdx` file in the correct module folder under `content/`.
+2. Update that module's `meta.json` so the page appears in the docs nav.
+3. If the lesson should also appear in the module catalog UI, update `data/contents-data.ts`.
+4. Run the app locally and verify the page renders under `/learn/...`.
+5. If the assistant search corpus should include the new content immediately, run `pnpm ingest-docs`.
 
-### 1. Improve Lessons
-- Fix typos, grammar, clarity  
-- Add missing explanations  
-- Add code comments  
-- Improve examples  
-- Add small challenges or tasks  
+### Adding a Challenge
 
-### 2. Add New Lessons or Pages
-- Build new pages inside `content/week-*`
-- Update that week’s `meta.json` to include the new page
+Challenges are content-driven and live under `content/challenges/<track>/`.
 
-### 3. Add Solana Examples
-- Rust examples  
-- Anchor examples  
-- Client-side examples  
-- Token/NFT utilities  
+Each challenge file should follow the existing frontmatter pattern used in the Rust challenge set, including fields like:
 
-### 4. Improve UI/UX
-- MDX layouts  
-- Lesson components  
-- Navigation improvements  
+- `title`
+- `description`
+- `track`
+- `slug`
+- `order`
+- `difficulty`
+- `tags`
+- `starterCode`
 
-### 5. Fix Bugs or Issues
-- Frontend bugs  
-- Broken links or images  
-- Example code errors  
-- Script issues  
+Before submitting a challenge change:
 
----
+- make sure the starter code is coherent
+- make sure the validator behavior still matches the prompt
+- keep the challenge scoped enough for learners to complete
 
-# ✍️ Adding or Editing Lessons
+## Product and Code Contributions
 
-All lessons are MDX files inside:
+### Interactive Tools
 
-```
+If you change Runtime Lab, Visual Builder, or challenge UX:
 
-content/week-*/<lesson>.mdx
+- preserve the current product tone and visual system
+- avoid adding explanatory chrome where the interaction itself can teach
+- make sure controls and text still fit on mobile and desktop
+- verify auth-required actions still behave correctly when signed out
 
-```
+### AI Assistant and Docs Search
 
-### 1. Create a new lesson
-Add a new `.mdx` file inside the appropriate week.
+The assistant is source-grounded and backed by embedded docs content in Postgres + pgvector.
 
-**Example:**
-```
+Relevant areas:
 
-content/week-3/pda-intro.mdx
+- `app/api/chat/route.ts`
+- `lib/ai/`
+- `scripts/ingest-docs.ts`
+- `lib/mdx/processor.ts`
 
-```
+When changing this area:
 
-### 2. Update `meta.json`
-Each week has a `meta.json` file:
+- do not bypass authentication for assistant usage
+- keep documentation URLs canonical
+- avoid changes that would wipe existing docs rows before embeddings are ready
+- verify unauthenticated requests fail cleanly
 
-```
+## Local Development
 
-{
-"title": "Week 3 — Anchor",
-"pages": [
-"anchor-introduction",
-"spl-token-integration",
-"pda-intro"
-]
-}
+Install dependencies:
 
-````
-
-Add your slug in the correct order.
-
-### 3. Preview locally
 ```bash
-npm run dev
-````
+pnpm install
+```
 
-### 4. (Optional) Rebuild search embeddings
+Create a local `.env` file with the variables described in the README.
 
-If your PR changes lesson content significantly:
+Start the app:
 
 ```bash
-npm run ingest-docs
+pnpm dev
 ```
 
-> ⚠️ Do **not** commit the generated embeddings.
-> The maintainer will run ingestion before merging.
+Open:
 
----
-
-# 🧪 Running Locally
-
-1. Install dependencies
-
-```bash
-npm install
-```
-
-2. Set up `.env.local`
-   Use the sample in the README.
-
-3. Start dev server
-
-```bash
-npm run dev
-```
-
-4. Visit
-
-```
+```text
 http://localhost:3000
 ```
 
----
-
-# 🔍 Search / AI (RAG) Notes
-
-LearnSol uses:
-
-* PostgreSQL
-* pgvector
-* Embeddings generated from lesson content
-
-If you add or edit content:
-
-### Rebuild the search index (local only)
+### Useful Commands
 
 ```bash
-npm run ingest-docs
+pnpm build
+pnpm db:generate
+pnpm db:migrate
+pnpm db:studio
+pnpm ingest-docs
+pnpm seo:check
+pnpm knip
+pnpm find:unused
 ```
 
-Do **not** run this in CI — the maintainer will handle it after PR approval.
+## Database and Ingestion Notes
 
----
+If your change affects:
 
-# 🧭 Project Standards
+- lesson content
+- challenge content used by search
+- docs URL structure
+- assistant retrieval behavior
 
-### Writing Style
-
-* Simple, clear, beginner-friendly
-* Avoid jargon unless explained
-* Prefer examples over theory
-* Lessons should be concise and practical
-
-### Code Style
-
-* Use relevant Solana best practices
-* Prefer clear code over clever code
-* Add comments when explaining concepts
-
-### Examples
-
-* Keep examples minimal and runnable
-* Always test them before submitting
-
----
-
-# 🔄 Pull Request Process
-
-1. Fork the repo
-2. Create a feature branch
+then you may need to rebuild embeddings locally:
 
 ```bash
-git checkout -b feature/my-change
+pnpm ingest-docs
 ```
 
-3. Make changes
-4. Commit with a clear message
+Do not commit generated database state. Commit the source changes, not local DB output.
 
-```bash
-git commit -m "Add PDA intro lesson for Week 3"
-```
+If you touch migrations:
 
-5. Push your branch
+- keep them narrowly scoped
+- make sure the migration matches the schema change
+- avoid bundling unrelated schema changes into one PR
 
-```bash
-git push origin feature/my-change
-```
+## Standards
 
-6. Open a PR on GitHub
-7. In the PR description, include:
+### Writing
 
-   * What you changed
-   * Why you changed it
-   * Screenshots (for UI/lesson edits)
+- write for builders, not marketers
+- keep explanations clear and concrete
+- define Solana-specific vocabulary
+- prefer real workflows, real account models, and real transaction reasoning
+- do not add fluff to lesson content
 
-The maintainer (@Some1Uknow) will:
+### Code
 
-* Review content
-* Run search ingestion (if needed)
-* Merge when ready
+- follow the existing patterns in the repo
+- keep changes scoped to the feature you are touching
+- prefer simple, explicit code over new abstractions
+- do not mix unrelated refactors into contribution PRs
 
----
+### UI
 
-# 🧡 Community & Discussions
+- match the existing visual language
+- keep interactions stable on mobile and desktop
+- avoid generic placeholder UX
+- make auth-gated actions fail clearly and predictably
 
-Have ideas, suggestions, or questions?
+## Pull Requests
 
-Open a discussion or issue here:
+1. Fork the repo.
+2. Create a branch for your change.
+3. Make a scoped change.
+4. Verify the relevant path locally.
+5. Open a PR with a clear summary.
+
+Good PR descriptions include:
+
+- what changed
+- why it changed
+- any routes or files that should be reviewed first
+- screenshots or recordings for UI changes
+- notes about migrations, ingestion, or env requirements if relevant
+
+## What to Avoid
+
+- committing unrelated file churn
+- reviving the old week-based structure in docs
+- mixing content rewrites, migrations, and UI redesigns into one PR unless they are tightly connected
+- checking in generated local artifacts
+- weakening assistant auth requirements
+
+## Questions and Issues
+
+If you hit a blocker or want to propose a bigger change, open an issue first:
+
 [https://github.com/Some1Uknow/learn-solana/issues](https://github.com/Some1Uknow/learn-solana/issues)
 
----
-
-# 📜 License
+## License
 
 By contributing, you agree that your contributions are licensed under the MIT License.
 
----
-
 <div align="center">
-  <strong>Thank you for helping builders learn Solana.</strong><br/>
-  Your contributions make this project better for everyone.
+  <strong>Thanks for helping builders learn Solana with better mental models.</strong>
 </div>
-```
-
----
