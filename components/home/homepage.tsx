@@ -1,8 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Inter, Space_Grotesk } from "next/font/google";
 import {
+  Check,
   ChevronRight,
+  Copy,
   Layers3,
   MessageSquareMore,
   Pickaxe,
@@ -87,6 +92,54 @@ const developerStats = [
   },
 ];
 
+const skillInstallCommand =
+  "npx skills add Some1Uknow/learn-solana --skill learn-solana";
+
+const compatibleAgents = [
+  {
+    name: "Codex",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg",
+    logoAlt: "OpenAI logo",
+  },
+  {
+    name: "Claude Code",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg",
+    logoAlt: "Claude logo",
+  },
+  {
+    name: "Cursor",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg",
+    logoAlt: "Cursor logo",
+  },
+  {
+    name: "GitHub Copilot",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/githubcopilot.svg",
+    logoAlt: "GitHub Copilot logo",
+  },
+  {
+    name: "Gemini CLI",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg",
+    logoAlt: "Google Gemini logo",
+  },
+  {
+    name: "Antigravity",
+    logoSrc: "https://upload.wikimedia.org/wikipedia/commons/5/50/Google_Antigravity_Logo.svg",
+    logoAlt: "Google Antigravity logo",
+    wide: true,
+  },
+  {
+    name: "Windsurf",
+    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/windsurf.svg",
+    logoAlt: "Windsurf logo",
+  },
+  {
+    name: "OpenCode",
+    logoSrc: "/assistant-logos/opencode.svg",
+    logoAlt: "OpenCode logo",
+    wide: true,
+  },
+];
+
 const ctaFeatures = [
   {
     title: "Structured modules",
@@ -156,6 +209,14 @@ const heroGlobeConfig = {
 };
 
 export function HomePage() {
+  const [copiedCommand, setCopiedCommand] = useState(false);
+
+  async function copySkillCommand() {
+    await navigator.clipboard.writeText(skillInstallCommand);
+    setCopiedCommand(true);
+    window.setTimeout(() => setCopiedCommand(false), 1800);
+  }
+
   return (
     <main className={`${styles.page} ${body.className}`}>
       <section className={styles.hero}>
@@ -182,6 +243,66 @@ export function HomePage() {
             <div className={styles.heroGlow} />
             <div className={styles.globeFrame}>
               <Globe className={styles.globeCanvas} config={heroGlobeConfig} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.agentSection}`} id="ai-agent-skill">
+        <div className={styles.shell}>
+          <div className={styles.agentStage}>
+            <div className={styles.agentHeader}>
+              <div className={`${styles.sectionKicker} ${mono.className}`}>Agent Skill</div>
+              <h2 className={`${styles.agentTitle} ${display.className}`}>
+                Learn with your AI agent
+              </h2>
+              <p className={styles.agentBody}>
+                Install the LearnSol skill once. Then ask your agent to explain any Solana
+                concept with first-principles language, diagrams, tables, and exercises.
+              </p>
+            </div>
+
+            <div className={styles.commandDeck}>
+              <div className={styles.commandRow}>
+                <code className={`${styles.commandText} ${mono.className}`}>
+                  {skillInstallCommand}
+                </code>
+                <button
+                  type="button"
+                  className={styles.copyButton}
+                  onClick={copySkillCommand}
+                  aria-label="Copy skills CLI install command"
+                >
+                  {copiedCommand ? (
+                    <Check className={styles.copyIcon} aria-hidden="true" />
+                  ) : (
+                    <Copy className={styles.copyIcon} aria-hidden="true" />
+                  )}
+                  <span>{copiedCommand ? "Copied" : "Copy"}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.agentMarquee} aria-label="Compatible AI agents">
+              <div className={styles.agentMarqueeTrack}>
+                {[...compatibleAgents, ...compatibleAgents].map((agent, index) => (
+                  <div
+                    key={`${agent.name}-${index}`}
+                    className={`${styles.agentPill} ${agent.wide ? styles.agentPillWide : ""}`}
+                  >
+                    <span className={styles.agentPillLogoWrap}>
+                      <Image
+                        src={agent.logoSrc}
+                        alt={agent.logoAlt}
+                        width={agent.wide ? 92 : 24}
+                        height={24}
+                        className={`${styles.agentPillLogo} ${agent.wide ? styles.agentPillLogoWide : ""}`}
+                      />
+                    </span>
+                    <span>{agent.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
