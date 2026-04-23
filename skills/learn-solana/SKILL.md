@@ -1,6 +1,6 @@
 ---
 name: learn-solana
-description: Teach any Solana, Anchor, Rust-for-Solana, SPL Token, PDA, account model, CPI, wallet, transaction, validator, or dApp concept from first principles. Use when the user asks to understand, learn, explain, visualize, compare, practice, or turn a Solana topic into a lesson, tutorial, exercise, diagram, table, or minimal temporary HTML notes-page explainer.
+description: Teach any Solana, Anchor, Rust-for-Solana, SPL Token, PDA, account model, CPI, wallet, transaction, validator, or dApp concept from first principles. Use when the user asks to understand, learn, explain, visualize, compare, practice, or turn a Solana topic into a lesson, tutorial, exercise, diagram, table, or finished single-page HTML masterclass explainer.
 license: MIT
 metadata:
   author: LearnSol
@@ -9,7 +9,7 @@ metadata:
 
 # Learn Solana
 
-This skill turns an agent into a Solana teacher. It is for explaining any Solana topic from first principles, then making the idea concrete with examples, condensed notes, tables, exercises, and minimal temporary HTML explainers when useful.
+This skill turns an agent into a Solana teacher. It is for explaining any Solana topic from first principles, then making the idea concrete with examples, condensed notes, mini diagrams, tables, exercises, and finished temporary HTML explainers when useful.
 
 ## Activation
 
@@ -40,18 +40,30 @@ Keep the language simple. Define every term before relying on it. Avoid unexplai
 
 ## HTML Explainer Rule
 
-When the user asks for a visual, HTML, page, notes, or artifact, create a minimal one-page explainer by default. Treat it like the notes page a master teacher would hand to a beginner before a hard topic: clear, condensed, structured, and elegant.
+When the user asks for a visual, HTML, page, notes, or artifact, create a finished single-page masterclass explainer by default. Treat it like the page a master teacher would hand to a beginner before a hard topic: complete, carefully sequenced, easy to scan, and concrete.
 
-The output should answer: "If the learner knows nothing about this topic, what is the shortest complete page that makes the idea click?"
+The output should answer: "If the learner knows nothing about this topic, what is the shortest complete page that makes the idea click without skipping the important details?"
 
 Default artifact style:
 
 - Vercel-like minimalism: white or near-white page, black text, thin borders, restrained gray surfaces.
-- Typography first: strong title, short definition, compact sections, tables only when they clarify.
-- No decorative gradients, glows, hero art, heavy diagrams, or animation unless explicitly requested.
+- Typography first: strong title, short definition, readable sections, small explanatory diagrams, and compact tables.
+- No decorative gradients, glows, hero art, or dashboard cards.
 - One HTML file with inline CSS, no runtime dependencies, and no external assets.
-- The page should read like dense but beginner-safe notes, not a landing page.
+- The page should read like a polished technical blog plus condensed notes, not a landing page.
 - Prefer one excellent page over multiple files or a broad tutorial.
+- Use subtle CSS-only motion only when it makes sequence or causality clearer, and include `prefers-reduced-motion`.
+
+Content requirements for finished HTML explainers:
+
+- Never leave placeholder copy.
+- Every section must be topic-specific.
+- Include a tiny glossary before using repeated jargon.
+- Include one "wrong mental model" and the correction.
+- Include at least one mini diagram made from HTML/CSS boxes, arrows, rows, or timelines.
+- Include one concrete Solana example using realistic account, program, instruction, signer, seed, or token names.
+- Include one table that shows relationships, responsibilities, or before/after state.
+- Include three short check-yourself questions and a one-minute recap.
 
 Use compact notes-page explainers for:
 
@@ -81,9 +93,9 @@ When creating a temporary HTML artifact:
 - Make it self-contained: one HTML file with inline CSS and minimal inline JavaScript.
 - Default to zero JavaScript.
 - Use semantic sections, readable typography, high contrast, and responsive layout.
-- Prefer concise notes, numbered steps, tiny tables, and callouts over large diagrams.
-- Use animation only if the user explicitly asks for animation.
-- Include the concept, why it matters, mental model, mechanics, example, pitfalls, and practice prompt.
+- Prefer precise prose, numbered steps, tiny diagrams, tables, and callouts over large visual systems.
+- Use animation only for subtle CSS sequence/highlight effects, or when the user explicitly asks for more.
+- Include the concept, why it matters, mental model, mechanics, example, pitfalls, check questions, recap, and practice prompt.
 - Tell the user the local file path when finished.
 
 Do not introduce build dependencies for a teaching artifact unless the user asks for a production component.
