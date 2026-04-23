@@ -1,393 +1,300 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { FormEvent, useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import {
-  MessageCircle,
-  X,
-  Send,
-  Bot,
-  User,
-  Search,
-  GripVertical,
-} from "lucide-react";
+import { Bot, Loader2, Lock, MessageCircle, Search, Send, User, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+
 import { useChatContext } from "./chat-context";
+import { authFetch } from "@/lib/auth/authFetch";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "@/hooks/use-toast";
+
+const suggestedQuestions = [
+  "What is a PDA and why does Solana use it?",
+  "How do signers and writable accounts work?",
+  "How should I think about Anchor account constraints?",
+  "What changes when I build clients with @solana/kit?",
+];
+
+function getMessageText(message: any) {
+  if (typeof message.content === "string") return message.content;
+  if (!Array.isArray(message.parts)) return "";
+
+  return message.parts
+    .filter((part: any) => part.type === "text" && typeof part.text === "string")
+    .map((part: any) => part.text)
+    .join("");
+}
+
+function SearchToolStatus({ message }: { message: any }) {
+  const parts = Array.isArray(message.parts) ? message.parts : [];
+  const hasTool = parts.some((part: any) => String(part.type || "").includes("searchDocumentation"));
+
+  if (!hasTool && !message.toolInvocations) return null;
+
+  return (
+    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#a9ff2f]/20 bg-[#a9ff2f]/10 px-2.5 py-1 text-[11px] font-medium text-[#d8ff98]">
+      <Search className="h-3 w-3" />
+      Searching learn.sol docs
+    </div>
+  );
+}
 
 export default function DocsChat() {
-  const { isOpen, setIsOpen, panelWidth, setPanelWidth } = useChatContext();
+  const { isOpen, setIsOpen } = useChatContext();
+  const { ready, authenticated, login } = useAuth();
   const [input, setInput] = useState("");
-  const [isResizing, setIsResizing] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const authPromptInFlightRef = useRef(false);
+  const lastAuthToastAtRef = useRef(0);
+
+  const promptForAssistantLogin = useCallback(
+    async (message = "Login is required to use the assistant.") => {
+      const now = Date.now();
+      const shouldToast = now - lastAuthToastAtRef.current > 2500;
+
+      if (shouldToast) {
+        toast({
+          title: "Login required",
+          description: message,
+        });
+        lastAuthToastAtRef.current = now;
+      }
+
+      if (authPromptInFlightRef.current) return;
+
+      authPromptInFlightRef.current = true;
+      try {
+        await login();
+      } finally {
+        authPromptInFlightRef.current = false;
+      }
+    },
+    [login]
+  );
 
   const chatTransport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
+        credentials: "include",
+        fetch: async (request, init) => {
+          const url =
+            typeof request === "string" || request instanceof URL ? request.toString() : request.url;
+          const response = await authFetch(url, init as any);
+
+          if (response.status === 401) {
+            await promptForAssistantLogin("Login is required to use the assistant.");
+          }
+
+          return response;
+        },
       }),
-    []
+    [promptForAssistantLogin]
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, clearError } = useChat({
     transport: chatTransport,
   });
 
-  // Better loading state: show loader until we have actual content
-  const lastMessage = messages.at(-1);
-  const hasActualContent = lastMessage?.role === "assistant" &&
-    lastMessage?.parts?.some((part: any) => part.type === "text" && part.text?.length > 0);
-
-  const isLoading = status === "submitted" ||
-    (status === "streaming" && lastMessage?.role === "assistant" && !hasActualContent);
-
-  const startResizing = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, []);
-
-  const stopResizing = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  const resize = useCallback(
-    (e: MouseEvent) => {
-      if (isResizing && panelRef.current) {
-        const newWidth = window.innerWidth - e.clientX;
-        // Ensure panel width is within viewport bounds and reasonable limits
-        const minWidth = 320;
-        const maxWidth = Math.min(800, window.innerWidth * 0.9); // Max 90% of viewport
-        const clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-        setPanelWidth(clampedWidth);
-      }
-    },
-    [isResizing, setPanelWidth]
-  );
+  const isLoading = status === "submitted" || status === "streaming";
 
   useEffect(() => {
-    if (isResizing) {
-      document.addEventListener("mousemove", resize);
-      document.addEventListener("mouseup", stopResizing);
-      document.body.style.cursor = "ew-resize";
-      document.body.style.userSelect = "none";
-    } else {
-      document.removeEventListener("mousemove", resize);
-      document.removeEventListener("mouseup", stopResizing);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
+    if (!isOpen) return;
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, isLoading, isOpen]);
+
+  async function submitQuestion(question: string) {
+    const trimmed = question.trim();
+    if (!trimmed || isLoading) return;
+
+    clearError();
+
+    if (!ready || !authenticated) {
+      setInput(trimmed);
+      await promptForAssistantLogin();
+      return;
     }
 
-    return () => {
-      document.removeEventListener("mousemove", resize);
-      document.removeEventListener("mouseup", stopResizing);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-  }, [isResizing, resize, stopResizing]);
-
-  // Handle window resize to ensure panel stays within bounds
-  useEffect(() => {
-    const handleWindowResize = () => {
-      const maxWidth = window.innerWidth * 0.9;
-      if (panelWidth > maxWidth) {
-        setPanelWidth(Math.max(320, maxWidth));
-      }
-    };
-
-    window.addEventListener("resize", handleWindowResize);
-    return () => window.removeEventListener("resize", handleWindowResize);
-  }, [panelWidth, setPanelWidth]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    sendMessage({ text: input });
+    sendMessage({ text: trimmed });
     setInput("");
-  };
+  }
 
-  const renderMessageContent = (message: any) => {
-    if (typeof message.content === "string") {
-      return <ReactMarkdown>{message.content}</ReactMarkdown>;
-    }
-    if (message.parts) {
-      return (
-        <div className="space-y-1">
-          {message.parts.map((part: any, index: number) => {
-            if (part.type === "text") {
-              return <ReactMarkdown key={index}>{part.text}</ReactMarkdown>;
-            }
-            return null;
-          })}
-        </div>
-      );
-    }
-    if (message.toolInvocations) {
-      return (
-        <div className="space-y-2">
-          {message.content && <ReactMarkdown>{message.content}</ReactMarkdown>}
-          {message.toolInvocations.map((toolInvocation: any, index: number) => (
-            <div
-              key={index}
-              className="border border-cyan-500/20 bg-black/30 backdrop-blur-md rounded-lg p-2 min-w-0"
-            >
-              {toolInvocation.toolName === "searchDocumentation" && (
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-1 text-cyan-300 font-medium text-xs">
-                    <Search size={12} className="flex-shrink-0" />
-                    <span className="truncate">Documentation Search</span>
-                  </div>
-
-                  {toolInvocation.state === "call" && (
-                    <div className="text-xs text-cyan-200/80 break-words">
-                      Searching for: "{toolInvocation.args?.query}"
-                    </div>
-                  )}
-
-                  {toolInvocation.result && (
-                    <div className="text-xs min-w-0">
-                      {typeof toolInvocation.result === "string" ? (
-                        <div className="text-gray-200 break-words">
-                          {toolInvocation.result}
-                        </div>
-                      ) : (
-                        <div className="space-y-1 min-w-0">
-                          <div className="font-medium text-emerald-300 break-words">
-                            {toolInvocation.result.success ? "✅ " : "❌ "}
-                            {toolInvocation.result.message}
-                          </div>
-                          {toolInvocation.result.totalSections && (
-                            <div className="text-xs text-gray-400">
-                              Found {toolInvocation.result.totalSections}{" "}
-                              relevant sections
-                            </div>
-                          )}
-                          {toolInvocation.result.suggestion && (
-                            <div className="text-xs text-amber-300 break-words">
-                              💡 {toolInvocation.result.suggestion}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return <ReactMarkdown>{message.content || ""}</ReactMarkdown>;
-  };
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void submitQuestion(input);
+  }
 
   return (
     <>
-      {/* Floating Chat Button */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 text-black dark:text-white bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 px-3 py-2 rounded-full shadow-[0_0_30px_-8px_rgba(34,211,238,0.6)] ring-1 ring-cyan-300/40 z-50 transition-all duration-300 hover:scale-105"
-        aria-label={isOpen ? "Close chat" : "Open chat"}
+        className="fixed bottom-5 right-5 z-50 grid h-14 w-14 place-items-center rounded-full border border-[#a9ff2f]/35 bg-black shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_24px_70px_rgba(169,255,47,0.22)] transition hover:-translate-y-0.5 hover:border-[#a9ff2f]/70"
+        aria-label={isOpen ? "Close LearnSol assistant" : "Open LearnSol assistant"}
       >
-        {isOpen ? <X size={18} /> : <MessageCircle size={18} />}
+        {isOpen ? (
+          <X className="h-5 w-5 text-[#a9ff2f]" />
+        ) : (
+          <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[#a9ff2f]">
+            <img src="/brand/learnsol-mark-lime.png" alt="" className="h-8 w-8 object-contain" />
+            <MessageCircle className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-black p-0.5 text-[#a9ff2f]" />
+          </span>
+        )}
       </button>
 
-      {/* Slide-out Chat Panel */}
       <div
-        ref={panelRef}
-        className={`fixed top-0 right-0 h-full bg-[#07090c]/80 dark:bg-[#07090c]/80 backdrop-blur-xl shadow-2xl z-40 transition-transform duration-300 ease-out border-l border-white/10 flex flex-col overflow-hidden ${isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        style={{
-          width: `${typeof window !== "undefined"
-            ? Math.min(panelWidth, window.innerWidth * 0.9)
-            : panelWidth
-            }px`,
-          maxWidth: "90vw",
-          minWidth: "320px",
-        }}
+        className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`fixed bottom-24 right-5 z-50 flex h-[min(720px,calc(100vh-8rem))] w-[min(440px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#050505]/92 text-white shadow-[0_28px_120px_rgba(0,0,0,0.62)] backdrop-blur-2xl transition-all duration-300 sm:right-6 ${
+          isOpen
+            ? "translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none translate-y-4 scale-[0.98] opacity-0"
+        }`}
+        aria-label="LearnSol AI assistant"
       >
-        {/* Edge glow */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-fuchsia-500/5 via-transparent to-cyan-500/10" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(169,255,47,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent_24%)]" />
 
-        {/* Resize Handle */}
-        <div
-          className="absolute left-0 top-0 h-full w-1 cursor-ew-resize group"
-          onMouseDown={startResizing}
-        >
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 bg-cyan-400/0 group-hover:bg-cyan-400/60 rounded-full p-1 transition-all">
-            <GripVertical
-              size={10}
-              className="text-cyan-300/0 group-hover:text-black"
-            />
-          </div>
-        </div>
-
-        {/* Header */}
-        <div className="relative text-white p-3 flex items-center justify-between flex-shrink-0 border-b border-white/10 min-w-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/10 via-transparent to-cyan-400/10" />
-          <div className="relative flex items-center gap-2 min-w-0 flex-1">
-            <div className="p-1.5 rounded-lg bg-black/30 ring-1 ring-white/10 flex-shrink-0">
-              <Bot size={14} className="text-cyan-300" />
+        <header className="relative flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#a9ff2f]">
+              <Bot className="h-5 w-5 text-black" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-semibold tracking-tight text-sm truncate">
-                Solana Assistant
-              </h3>
-              <p className="text-xs text-white/60 truncate">
-                AI-powered documentation helper
-              </p>
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-semibold tracking-tight">LearnSol Assistant</h2>
+              <p className="truncate text-xs text-white/52">Source-grounded help from the docs</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={() => setIsOpen(false)}
-            className="relative p-1.5 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
-            aria-label="Close chat"
-            title="Close chat"
+            className="rounded-full p-2 text-white/56 transition hover:bg-white/10 hover:text-white"
+            aria-label="Close assistant"
           >
-            <X size={14} />
+            <X className="h-4 w-4" />
           </button>
-        </div>
+        </header>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-2 bg-transparent min-w-0">
-          {messages.length === 0 && (
-            <div className="text-center py-4 min-w-0">
-              <div className="rounded-xl p-4 border border-white/10 bg-white/5 backdrop-blur-md shadow-lg">
-                <div className="mb-3">
-                  <div className="w-8 h-8 bg-cyan-400 rounded-full flex items-center justify-center mx-auto mb-2 shadow-[0_0_30px_-8px_rgba(34,211,238,0.6)]">
-                    <Search size={16} className="text-black" />
-                  </div>
-                  <h4 className="font-semibold text-white mb-1 text-sm">
-                    Welcome to Solana Assistant
-                  </h4>
-                  <p className="text-xs text-white/60">
-                    Ask specific questions about Solana development:
-                  </p>
+        <div ref={scrollRef} className="relative flex-1 overflow-y-auto px-4 py-4">
+          {messages.length === 0 ? (
+            <div className="flex min-h-full flex-col justify-end gap-4">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#a9ff2f]/20 bg-[#a9ff2f]/10 px-2.5 py-1 text-[11px] text-[#d8ff98]">
+                  <Lock className="h-3 w-3" />
+                  Login required to ask
                 </div>
-                <div className="grid gap-1.5 text-left">
-                  {[
-                    "How do I set up a Solana development environment?",
-                    "What is the Solana account model and how does it work?",
-                    "How do I write Rust programs for Solana?",
-                    "What are PDAs and how do I use them?",
-                    "How do I deploy a program to Solana?",
-                  ].map((question, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        sendMessage({ text: question });
-                      }}
-                      className="text-left p-2 text-xs rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/90 transition-colors break-words"
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </div>
+                <h3 className="text-lg font-semibold tracking-tight">Ask while you read.</h3>
+                <p className="mt-2 text-sm leading-6 text-white/60">
+                  The assistant searches the learn.sol docs first, then answers with citations
+                  back to the lesson pages.
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                {suggestedQuestions.map((question) => (
+                  <button
+                    key={question}
+                    type="button"
+                    onClick={() => void submitQuestion(question)}
+                    className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 text-left text-sm leading-5 text-white/78 transition hover:border-[#a9ff2f]/30 hover:bg-[#a9ff2f]/10 hover:text-white"
+                  >
+                    {question}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message: any) => {
+                const isUser = message.role === "user";
+                const text = getMessageText(message);
 
-          {messages.map((m: any) => (
-            <div key={m.id} className="space-y-2 min-w-0">
-              <div
-                className={`flex items-start gap-2 min-w-0 ${m.role === "user" ? "flex-row-reverse" : ""
-                  }`}
-              >
-                <div
-                  className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ring-1 ${m.role === "user"
-                    ? "bg-white/10 text-white ring-white/10"
-                    : "bg-black/30 text-cyan-300 ring-cyan-400/30"
-                    }`}
-                >
-                  {m.role === "user" ? <User size={12} /> : <Bot size={12} />}
-                </div>
-                <div
-                  className={`flex-1 min-w-0 rounded-xl p-3 shadow-lg border backdrop-blur-md ${m.role === "user"
-                    ? "bg-white/[0.06] border-white/10 text-white ml-6"
-                    : "bg-black/40 border-white/10 text-gray-100 mr-6"
-                    }`}
-                >
-                  {/* Show loading state for empty assistant messages */}
-                  {m.role === "assistant" && isLoading && (!m.parts || m.parts.length === 0 || !m.parts.some((part: any) => part.type === "text" && part.text?.length > 0)) ? (
-                    <div className="flex items-center gap-2 text-white/70">
-                      <div className="flex space-x-1 flex-shrink-0">
-                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
-                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:100ms]"></div>
-                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:200ms]"></div>
+                return (
+                  <div key={message.id} className={`flex gap-2 ${isUser ? "justify-end" : ""}`}>
+                    {!isUser && (
+                      <div className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#a9ff2f] text-black">
+                        <Bot className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-xs">Thinking...</span>
-                    </div>
-                  ) : (
+                    )}
                     <div
-                      className={`chat-message-content break-words text-sm leading-relaxed ${m.role === "user"
-                        ? "chat-message-user text-white"
-                        : "chat-message-bot text-gray-100"
-                        } [&_code]:text-cyan-300 [&_code]:bg-black/40 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_a]:text-cyan-300 hover:[&_a]:text-cyan-200 [&_a]:underline [&_strong]:font-semibold [&_em]:italic [&_pre]:bg-black/60 [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-xs [&_pre]:font-mono [&_pre]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-cyan-400/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-300`}
+                      className={`max-w-[86%] rounded-2xl border px-3.5 py-3 text-sm leading-6 ${
+                        isUser
+                          ? "border-[#a9ff2f]/25 bg-[#a9ff2f]/12 text-white"
+                          : "border-white/10 bg-white/[0.045] text-white/84"
+                      }`}
                     >
-                      {renderMessageContent(m)}
+                      {!isUser && <SearchToolStatus message={message} />}
+                      <div className="prose prose-invert max-w-none prose-p:my-2 prose-a:text-[#d8ff98] prose-code:rounded prose-code:bg-black/40 prose-code:px-1 prose-code:py-0.5 prose-code:text-[#d8ff98] prose-pre:border prose-pre:border-white/10 prose-pre:bg-black/55">
+                        <ReactMarkdown>{text}</ReactMarkdown>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Only show loading if no assistant message exists yet */}
-          {isLoading && (!messages.length || messages[messages.length - 1]?.role !== "assistant") && (
-            <div className="flex items-center gap-2 px-1 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-black/30 ring-1 ring-cyan-400/30 flex items-center justify-center flex-shrink-0">
-                <Bot size={12} className="text-cyan-300" />
-              </div>
-              <div className="rounded-xl p-3 shadow-lg border border-white/10 bg-black/40 backdrop-blur-md flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-white/70">
-                  <div className="flex space-x-1 flex-shrink-0">
-                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce"></div>
-                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:100ms]"></div>
-                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:200ms]"></div>
+                    {isUser && (
+                      <div className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/10 text-white">
+                        <User className="h-3.5 w-3.5" />
+                      </div>
+                    )}
                   </div>
-                  <span className="text-xs">Thinking...</span>
+                );
+              })}
+
+              {isLoading && (
+                <div className="flex items-center gap-2 text-sm text-white/56">
+                  <div className="grid h-7 w-7 place-items-center rounded-full bg-[#a9ff2f] text-black">
+                    <Bot className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-3 py-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-[#a9ff2f]" />
+                    Reading the docs
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="p-3 bg-transparent border-t border-white/10 flex-shrink-0 min-w-0">
-          <form onSubmit={handleSubmit} className="space-y-2 min-w-0">
-            <div className="flex gap-2 min-w-0">
-              <div className="flex-1 relative min-w-0">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about Solana development..."
-                  className="w-full px-3 py-2 pr-10 text-sm rounded-lg bg-white/[0.06] text-white placeholder-white/40 border border-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-300/30 transition-all min-w-0"
-                  disabled={isLoading}
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading || !input.trim()}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-1.5 rounded-md text-black bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 shadow-[0_0_24px_-6px_rgba(34,211,238,0.7)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
-                  aria-label="Send message"
-                  title="Send message"
-                >
-                  <Send size={14} />
-                </button>
-              </div>
+        <div className="relative border-t border-white/10 p-3">
+          {error && (
+            <div className="mb-2 rounded-2xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-100">
+              The assistant could not answer. If you just signed in, try sending again.
             </div>
-            <div className="flex items-center justify-between text-xs text-white/50 min-w-0">
-              <span className="truncate flex-1">
-                Ask specific questions for better results
-              </span>
-              <span className="flex-shrink-0 ml-2">
-                {typeof window !== "undefined"
-                  ? Math.min(panelWidth, window.innerWidth * 0.9)
-                  : panelWidth}
-                px
-              </span>
-            </div>
+          )}
+          <form onSubmit={handleSubmit} className="flex items-end gap-2">
+            <textarea
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
+              placeholder={authenticated ? "Ask about this lesson..." : "Login to ask the assistant..."}
+              rows={1}
+              className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm leading-5 text-white outline-none transition placeholder:text-white/36 focus:border-[#a9ff2f]/45 focus:ring-2 focus:ring-[#a9ff2f]/20"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#a9ff2f] text-black transition hover:bg-[#c8ff75] disabled:cursor-not-allowed disabled:opacity-45"
+              aria-label={authenticated ? "Send question" : "Login to send question"}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </button>
           </form>
         </div>
-      </div>
+      </aside>
     </>
   );
 }

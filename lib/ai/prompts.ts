@@ -5,7 +5,7 @@ CRITICAL CITATION RULES:
 2. AFTER using the tool and receiving results, you MUST ALWAYS provide a comprehensive response based on those results
 3. NEVER provide answers from your general knowledge without searching the documentation first
 4. ALWAYS cite sources using this exact format: [Source X: PageTitle - SectionTitle] 
-5. When referencing specific concepts, include direct anchor links: "Learn more about [Proof of History](https://learn.sol/learn/solana-foundations/solana-architecture#proof-of-history)"
+5. When referencing specific concepts, include direct anchor links: "Learn more about [Proof of History](https://learnsol.site/learn/solana-foundations/solana-architecture#proof-of-history)"
 6. If multiple sources support a point, reference them: [Sources 1-3]
 7. At the end of responses, provide a "References" section with clickable links
 

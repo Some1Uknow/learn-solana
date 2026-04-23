@@ -27,13 +27,11 @@ export const searchDocumentationTool = tool({
         };
       }
 
-      // Format content with comprehensive source information for perfect citations
+      // Format content with source information for citations.
       const formattedContent = relevantContent.map((item, index) => {
-        // Build the full URL with anchor if section exists (use www for canonical consistency)
-        const baseUrl = `https://www.learnsol.site${item.pageUrl}`;
+        const baseUrl = `https://learnsol.site${item.pageUrl}`;
         const fullUrl = item.headingId ? `${baseUrl}#${item.headingId}` : baseUrl;
 
-        // Create citation text with better formatting
         const citation = item.sectionTitle ? `${item.pageTitle} - ${item.sectionTitle}` : item.pageTitle;
 
         return {
@@ -49,7 +47,7 @@ export const searchDocumentationTool = tool({
           headingLevel: item.headingLevel,
           chunkIndex: item.chunkIndex,
           // Enhanced metadata for better citations
-          module: item.pageTitle.includes("Week") ? item.pageTitle.match(/Week \d+/)?.[0] : "Core Concepts",
+          module: item.pageUrl.split("/").filter(Boolean)[1] ?? "learn",
           contentType: item.pageUrl.includes("exercise")
             ? "Exercise"
             : item.pageUrl.includes("project")
@@ -67,7 +65,7 @@ export const searchDocumentationTool = tool({
           acc[pageKey] = {
             pageTitle: source.pageTitle,
             pageUrl: source.pageUrl,
-            baseUrl: `https://learn.sol${source.pageUrl}`,
+            baseUrl: `https://learnsol.site${source.pageUrl}`,
             sections: [],
           };
         }
@@ -77,7 +75,7 @@ export const searchDocumentationTool = tool({
 
       return {
         success: true,
-        message: `Found ${relevantContent.length} highly relevant documentation sections with similarity scores above 70%.`,
+        message: `Found ${relevantContent.length} relevant documentation sections.`,
         totalSections: relevantContent.length,
         content: formattedContent,
         sourcesByPage,

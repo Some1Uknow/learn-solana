@@ -136,10 +136,16 @@ function generateHeadingId(title: string): string {
 }
 
 function convertFilePathToUrl(filePath: string): string {
-  return '/learn/' + filePath
+  const normalizedPath = filePath
     .replace(/\.mdx?$/, '')
     .replace(/\\/g, '/')
-    .replace(/index$/, '');
+    .replace(/\/?index$/, '');
+
+  if (normalizedPath.startsWith('challenges/')) {
+    return '/' + normalizedPath;
+  }
+
+  return ('/learn/' + normalizedPath).replace(/\/$/, '');
 }
 
 function cleanContentForEmbedding(content: string): string {

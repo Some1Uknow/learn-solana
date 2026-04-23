@@ -2,11 +2,31 @@ import { openai } from "@ai-sdk/openai";
 import { convertToModelMessages, streamText, stepCountIs } from "ai";
 import { searchDocumentationTool } from "@/lib/ai/tools/searchDocumentation";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompts";
+import { requirePrivyUser } from "@/lib/auth/privy-server";
+import { syncAppUser } from "@/lib/auth/app-user";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
+    const verified = await requirePrivyUser(req);
+    if (!verified) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "Sign in to use the LearnSol assistant.",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    await syncAppUser({
+      privyUserId: verified.userId,
+    });
+
     const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {

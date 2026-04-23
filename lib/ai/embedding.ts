@@ -8,7 +8,7 @@ import { config } from "dotenv";
 
 config({ path: ".env" }); // Load environment variables from .env
 
-const embeddingModel = openai.embedding("text-embedding-ada-002");
+const embeddingModel = openai.embedding("text-embedding-3-small");
 
 export const generateEmbeddings = async (
   value: string
@@ -69,9 +69,9 @@ export const findRelevantContent = async (userQuery: string) => {
         headingLevel: embeddings.headingLevel,
       })
       .from(embeddings)
-      .where(gt(similarity, 0.7)) 
+      .where(gt(similarity, 0.45))
       .orderBy((t) => desc(t.similarity))
-      .limit(5);
+      .limit(8);
 
     return similarContent;
   } catch (error) {
