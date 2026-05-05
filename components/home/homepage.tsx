@@ -71,7 +71,7 @@ const stackCards = [
 
 const developerStats = [
   {
-    value: "1,200",
+    value: "2,128",
     label: "Developers",
     note: "Builders who have used the learning loop",
   },
