@@ -153,7 +153,7 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
                       </h3>
                       <p className={styles.trackSpotlightDescription}>{track.description}</p>
 
-                      <div className={styles.heroActions}>
+                      <div className={styles.trackCardActions}>
                         <button
                           type="button"
                           className={styles.primaryButton}

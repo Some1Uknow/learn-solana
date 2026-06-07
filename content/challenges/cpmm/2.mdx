@@ -1,0 +1,64 @@
+---
+title: Challenge 2 - Spot Price From Reserves
+description: >-
+  Compute the spot price implied by pool reserves using integer math scaled to
+  basis points.
+keywords:
+  - cpmm spot price
+  - amm pricing
+  - reserve ratio
+track: cpmm
+slug: spot-price-from-reserves
+order: 2
+difficulty: Easy
+tags:
+  - CPMM
+  - Pricing
+  - Integer Math
+starterCode: |-
+  fn spot_price_bps(x_reserve: u64, y_reserve: u64) -> u64 {
+      // Return the price of 1 X in units of Y, scaled by 10_000.
+      // For x=2_000 and y=3_000, the answer is 15_000.
+      0
+  }
+
+  fn main() {
+      println!("{}", spot_price_bps(2_000, 3_000));
+  }
+executor:
+  type: rust-playground
+  description: Compute the spot price using basis points scaling.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '15000'
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Challenge 2: Spot Price From Reserves
+
+A CPMM does not store a price directly. The current spot price is implied by the reserve ratio.
+
+## Task
+
+Implement `spot_price_bps(x_reserve, y_reserve)`.
+
+## Requirements
+
+- Return the price of 1 unit of X in units of Y.
+- Scale the result by `10_000` so you can stay in integer math.
+- For `x = 2_000` and `y = 3_000`, return `15_000`.
+
+That corresponds to:
+
+```txt
+3_000 / 2_000 = 1.5
+1.5 * 10_000 = 15_000
+```
+
+<Callout type="warn">
+Do multiplication before division when possible, or integer division will throw away precision too early.
+</Callout>

@@ -1,0 +1,66 @@
+---
+title: Challenge 13 - LP Shares Minted On Deposit
+description: >-
+  Mint LP shares for a proportional deposit based on the existing total LP
+  supply and reserve balances.
+keywords:
+  - cpmm lp minting
+  - proportional shares
+  - liquidity accounting
+track: cpmm
+slug: lp-shares-minted-on-deposit
+order: 13
+difficulty: Medium
+tags:
+  - CPMM
+  - LP Shares
+  - Accounting
+starterCode: |-
+  fn lp_shares_to_mint(total_lp_supply: u64, x_reserve: u64, x_deposit: u64) -> u64 {
+      // Mint shares proportional to the existing pool ownership.
+      // For total_lp_supply=1000, x_reserve=1000, x_deposit=250, the answer is 250.
+      0
+  }
+
+  fn main() {
+      println!("{}", lp_shares_to_mint(1_000, 1_000, 250));
+  }
+executor:
+  type: rust-playground
+  description: Compute LP shares minted for a proportional deposit.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '250'
+---
+
+# Challenge 13: LP Shares Minted On Deposit
+
+If a liquidity provider adds assets in the correct ratio, their LP shares should match the fraction of the pool they added.
+
+## Task
+
+Implement `lp_shares_to_mint`.
+
+## Formula
+
+Use:
+
+```txt
+x_deposit * total_lp_supply / x_reserve
+```
+
+## Example
+
+If the pool has:
+
+- total LP supply = `1000`
+- X reserve = `1000`
+
+And the depositor adds `250` X proportionally, they should receive:
+
+```txt
+250 * 1000 / 1000 = 250
+```

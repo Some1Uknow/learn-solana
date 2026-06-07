@@ -1,0 +1,64 @@
+---
+title: Challenge 4 - Fee Adjusted Swap Input
+description: >-
+  Apply a 30 basis point trading fee to the input amount before quoting the
+  output of a swap.
+keywords:
+  - cpmm fees
+  - basis points
+  - amm swap fee
+track: cpmm
+slug: fee-adjusted-swap-input
+order: 4
+difficulty: Medium
+tags:
+  - CPMM
+  - Fees
+  - Swaps
+starterCode: |-
+  fn fee_adjusted_input(x_in: u64) -> u64 {
+      // Apply a 30 bps fee and return the effective input.
+      // For x_in=1_000, the result should be 997.
+      0
+  }
+
+  fn main() {
+      println!("{}", fee_adjusted_input(1_000));
+  }
+executor:
+  type: rust-playground
+  description: Apply a 0.30% fee to the input amount.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '997'
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Challenge 4: Fee Adjusted Swap Input
+
+Real CPMMs usually apply a fee before the input amount touches the swap formula.
+
+## Task
+
+Implement `fee_adjusted_input(x_in)`.
+
+## Rules
+
+- Fee = `30` basis points.
+- `10_000` basis points = `100%`.
+- Effective input = `x_in * 9_970 / 10_000`.
+
+## Example
+
+```txt
+x_in = 1000
+1000 * 9970 / 10000 = 997
+```
+
+<Callout type="info">
+This challenge isolates fee math so you can reuse it in later swap logic.
+</Callout>

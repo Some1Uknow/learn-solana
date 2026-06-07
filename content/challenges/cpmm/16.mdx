@@ -1,0 +1,58 @@
+---
+title: Challenge 16 - Checked Product Helper
+description: >-
+  Build a safe multiplication helper that returns an error instead of silently
+  overflowing.
+keywords:
+  - cpmm checked math
+  - overflow protection
+  - rust checked_mul
+track: cpmm
+slug: checked-product-helper
+order: 16
+difficulty: Medium
+tags:
+  - CPMM
+  - Safety
+  - Arithmetic
+starterCode: |-
+  fn checked_product(a: u64, b: u64) -> Result<u64, &'static str> {
+      // Return Ok(a * b) when multiplication fits in u64.
+      // Otherwise return Err("overflow").
+      Err("not implemented")
+  }
+
+  fn main() {
+      match checked_product(2_000_000_000, 3_000_000_000) {
+          Ok(value) => println!("{}", value),
+          Err(message) => println!("{}", message),
+      }
+  }
+executor:
+  type: rust-playground
+  description: Use checked multiplication to avoid silent overflow.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '6000000000000000000'
+---
+
+# Challenge 16: Checked Product Helper
+
+Unchecked arithmetic is dangerous in financial code.
+
+## Task
+
+Implement `checked_product`.
+
+## Rules
+
+- Use `checked_mul`.
+- Return `Ok(product)` when multiplication succeeds.
+- Return `Err("overflow")` otherwise.
+
+## Why this matters
+
+Many Solana program bugs start with safe-looking arithmetic that fails at large values.

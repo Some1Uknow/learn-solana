@@ -1,0 +1,71 @@
+---
+title: Challenge 6 - Mutating Swap Reserves
+description: >-
+  Update pool reserves after an exact-in swap with a 30 basis point fee and
+  return the new reserve balances.
+keywords:
+  - cpmm reserve update
+  - amm swap state
+  - solana defi
+track: cpmm
+slug: mutating-swap-reserves
+order: 6
+difficulty: Medium
+tags:
+  - CPMM
+  - State Transition
+  - Swaps
+starterCode: |-
+  fn apply_swap(x_reserve: u64, y_reserve: u64, x_in: u64) -> (u64, u64) {
+      // Apply a 30 bps fee to x_in.
+      // Add the fee-adjusted amount to x_reserve.
+      // Use constant-product math to compute the new y_reserve.
+      // Return (new_x_reserve, new_y_reserve).
+      (0, 0)
+  }
+
+  fn main() {
+      let (new_x, new_y) = apply_swap(1_000, 2_000, 100);
+      println!("{} {}", new_x, new_y);
+  }
+executor:
+  type: rust-playground
+  description: Update reserves after a fee-adjusted swap.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '1099 1819'
+---
+
+# Challenge 6: Mutating Swap Reserves
+
+Earlier challenges quoted output. Now mutate pool state.
+
+## Task
+
+Implement `apply_swap`.
+
+## Rules
+
+- Fee = 30 bps.
+- Effective input = `x_in * 9_970 / 10_000`.
+- `new_x = x + effective_input`
+- `k = x * y`
+- `new_y = k / new_x`
+
+## Example
+
+For `x = 1000`, `y = 2000`, `x_in = 100`:
+
+- effective input = `99`
+- `new_x = 1099`
+- `k = 2_000_000`
+- `new_y = 1_819`
+
+Return:
+
+```txt
+1099 1819
+```

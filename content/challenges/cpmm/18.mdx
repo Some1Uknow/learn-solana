@@ -1,0 +1,56 @@
+---
+title: Challenge 18 - Pause State Guard
+description: >-
+  Reject swaps when the pool is paused and allow them only when the pool is
+  active.
+keywords:
+  - cpmm pause control
+  - amm state machine
+  - pool guard
+track: cpmm
+slug: pause-state-guard
+order: 18
+difficulty: Easy
+tags:
+  - CPMM
+  - State Machine
+  - Safety
+starterCode: |-
+  enum PoolState {
+      Active,
+      Paused,
+  }
+
+  fn can_swap(state: PoolState) -> bool {
+      // Return true only when the pool is active.
+      false
+  }
+
+  fn main() {
+      println!("{}", can_swap(PoolState::Active));
+  }
+executor:
+  type: rust-playground
+  description: Enforce a simple pause guard on swaps.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true'
+---
+
+# Challenge 18: Pause State Guard
+
+A production pool often includes a pause switch for emergencies.
+
+## Task
+
+Implement `can_swap`.
+
+## Requirement
+
+- `Active` => `true`
+- `Paused` => `false`
+
+This is simple, but it forces you to model state explicitly instead of assuming every instruction should always run.

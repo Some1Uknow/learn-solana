@@ -258,6 +258,19 @@ export function getTrackMeta(track: string) {
         "solana rust exercises",
       ],
     },
+    cpmm: {
+      name: "CPMM Builders Track",
+      description:
+        "Build the math and state-transition logic behind constant-product market makers, from swap quotes to LP shares, fees, slippage, and Solana-ready safety checks.",
+      keywords: [
+        "cpmm challenges",
+        "constant product market maker",
+        "solana amm",
+        "defi rust exercises",
+        "amm math",
+        "liquidity pool exercises",
+      ],
+    },
   };
 
   return (

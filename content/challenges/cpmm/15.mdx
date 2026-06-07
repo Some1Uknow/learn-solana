@@ -1,0 +1,58 @@
+---
+title: Challenge 15 - Reject Unbalanced Deposit
+description: >-
+  Check whether a proposed liquidity deposit is proportional to the current pool
+  reserves.
+keywords:
+  - cpmm deposit validation
+  - unbalanced liquidity
+  - pool price protection
+track: cpmm
+slug: reject-unbalanced-deposit
+order: 15
+difficulty: Medium
+tags:
+  - CPMM
+  - Validation
+  - Liquidity
+starterCode: |-
+  fn is_proportional_deposit(x_reserve: u64, y_reserve: u64, x_deposit: u64, y_deposit: u64) -> bool {
+      // Return true only if the deposit matches the reserve ratio exactly.
+      false
+  }
+
+  fn main() {
+      println!("{}", is_proportional_deposit(1_000, 2_000, 250, 500));
+  }
+executor:
+  type: rust-playground
+  description: Validate that liquidity is added in the current reserve ratio.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true'
+---
+
+# Challenge 15: Reject Unbalanced Deposit
+
+A deposit that changes the reserve ratio effectively moves the pool price.
+
+## Task
+
+Implement `is_proportional_deposit`.
+
+## Hint
+
+Instead of dividing, compare cross products:
+
+```txt
+x_deposit * y_reserve == y_deposit * x_reserve
+```
+
+Use `u128` for the multiplication.
+
+## Example
+
+For reserves `(1000, 2000)` and deposit `(250, 500)`, the ratio matches exactly, so return `true`.

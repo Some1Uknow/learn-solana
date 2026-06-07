@@ -1,0 +1,58 @@
+---
+title: Challenge 7 - Trading Fee Collected
+description: >-
+  Compute how much fee the protocol collects from a swap input amount when the
+  fee rate is 30 basis points.
+keywords:
+  - cpmm protocol fee
+  - basis points fee
+  - amm accounting
+track: cpmm
+slug: trading-fee-collected
+order: 7
+difficulty: Easy
+tags:
+  - CPMM
+  - Fees
+  - Accounting
+starterCode: |-
+  fn trading_fee(x_in: u64) -> u64 {
+      // Return the fee collected when the swap fee is 30 bps.
+      // For x_in=1000, the fee should be 3.
+      0
+  }
+
+  fn main() {
+      println!("{}", trading_fee(1_000));
+  }
+executor:
+  type: rust-playground
+  description: Compute the fee portion of swap input.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '3'
+---
+
+# Challenge 7: Trading Fee Collected
+
+Every swap has two related numbers:
+
+- the user input amount
+- the fee taken from that input
+
+## Task
+
+Implement `trading_fee(x_in)`.
+
+## Rules
+
+- Fee rate = `30` basis points.
+- `10_000` basis points = `100%`.
+- For `x_in = 1000`, fee = `1000 * 30 / 10_000 = 3`.
+
+## Why it matters
+
+A CPMM often needs to track the fee separately from the fee-adjusted input used in the quote formula.

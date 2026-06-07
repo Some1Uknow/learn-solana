@@ -1,0 +1,58 @@
+---
+title: Challenge 10 - Invariant Does Not Decrease
+description: >-
+  Verify that the post-swap reserve state does not decrease the pool invariant
+  when fees are applied.
+keywords:
+  - cpmm invariant check
+  - amm safety rule
+  - swap validation
+track: cpmm
+slug: invariant-does-not-decrease
+order: 10
+difficulty: Medium
+tags:
+  - CPMM
+  - Invariant
+  - Safety
+starterCode: |-
+  fn invariant_ok(old_x: u64, old_y: u64, new_x: u64, new_y: u64) -> bool {
+      // Return true if new_x * new_y >= old_x * old_y.
+      false
+  }
+
+  fn main() {
+      println!("{}", invariant_ok(1_000, 2_000, 1_099, 1_819));
+  }
+executor:
+  type: rust-playground
+  description: Confirm the post-swap state preserves or grows the invariant.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true'
+---
+
+# Challenge 10: Invariant Does Not Decrease
+
+A fee-charging CPMM should not end a valid swap with a smaller invariant.
+
+## Task
+
+Implement `invariant_ok`.
+
+## Rules
+
+- Do multiplication in `u128`.
+- Return `true` if the new invariant is greater than or equal to the old one.
+
+## Example
+
+Compare:
+
+- old state: `(1000, 2000)`
+- new state: `(1099, 1819)`
+
+You should find that the new invariant is slightly larger because fees stayed inside the pool.

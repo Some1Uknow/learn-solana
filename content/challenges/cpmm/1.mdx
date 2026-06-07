@@ -1,0 +1,73 @@
+---
+title: Challenge 1 - Constant Product Invariant
+description: >-
+  Implement the core constant-product invariant used by CPMMs and verify that
+  reserves produce the expected k value.
+keywords:
+  - cpmm
+  - constant product market maker
+  - amm invariant
+  - solana defi
+track: cpmm
+slug: constant-product-invariant
+order: 1
+difficulty: Easy
+tags:
+  - CPMM
+  - AMM Math
+  - Invariant
+starterCode: |-
+  fn constant_product(x_reserve: u64, y_reserve: u64) -> u128 {
+      // TODO: return x * y as u128 to avoid overflow
+      0
+  }
+
+  fn main() {
+      println!("{}", constant_product(1_000, 2_000));
+  }
+executor:
+  type: rust-playground
+  description: Your program should print the pool invariant.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '2000000'
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+# Challenge 1: Constant Product Invariant
+
+A constant-product market maker tracks the relationship:
+
+```txt
+x * y = k
+```
+
+Where:
+
+- `x` is token A reserve
+- `y` is token B reserve
+- `k` is the pool invariant
+
+## Task
+
+Implement `constant_product`.
+
+## Requirements
+
+- Accept two `u64` reserves.
+- Return a `u128`.
+- Cast before multiplying so large values do not overflow `u64` math.
+
+<Callout type="info">
+On Solana, token math often starts with `u64` amounts but intermediate math must use wider types.
+</Callout>
+
+## Hint
+
+```rust
+(x_reserve as u128) * (y_reserve as u128)
+```

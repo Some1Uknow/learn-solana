@@ -1,0 +1,67 @@
+---
+title: Challenge 12 - Proportional Deposit Quote
+description: >-
+  Given an X token deposit, compute how much Y must also be deposited to keep
+  the pool price unchanged.
+keywords:
+  - cpmm proportional deposit
+  - liquidity quote
+  - reserve ratio
+track: cpmm
+slug: proportional-deposit-quote
+order: 12
+difficulty: Medium
+tags:
+  - CPMM
+  - Liquidity
+  - Pricing
+starterCode: |-
+  fn required_y_deposit(x_reserve: u64, y_reserve: u64, x_deposit: u64) -> u64 {
+      // Return the Y deposit needed to preserve the current reserve ratio.
+      // For x=1000, y=2000, x_deposit=250, the answer should be 500.
+      0
+  }
+
+  fn main() {
+      println!("{}", required_y_deposit(1_000, 2_000, 250));
+  }
+executor:
+  type: rust-playground
+  description: Quote a proportional liquidity deposit.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '500'
+---
+
+# Challenge 12: Proportional Deposit Quote
+
+Liquidity should usually be added in the same ratio as the existing reserves.
+
+## Task
+
+Implement `required_y_deposit`.
+
+## Formula
+
+Use:
+
+```txt
+x_deposit * y_reserve / x_reserve
+```
+
+## Example
+
+For:
+
+- `x_reserve = 1000`
+- `y_reserve = 2000`
+- `x_deposit = 250`
+
+Then:
+
+```txt
+250 * 2000 / 1000 = 500
+```

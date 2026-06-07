@@ -1,0 +1,66 @@
+---
+title: Challenge 9 - Slippage In Basis Points
+description: >-
+  Compare spot price and execution price to compute realized slippage in basis
+  points.
+keywords:
+  - cpmm slippage bps
+  - amm price impact
+  - swap analysis
+track: cpmm
+slug: slippage-in-basis-points
+order: 9
+difficulty: Medium
+tags:
+  - CPMM
+  - Slippage
+  - Analytics
+starterCode: |-
+  fn slippage_bps(spot_price_bps: u64, execution_price_bps: u64) -> u64 {
+      // Return slippage in basis points relative to spot price.
+      // For spot=20_000 and execution=18_100, the result should be 950.
+      0
+  }
+
+  fn main() {
+      println!("{}", slippage_bps(20_000, 18_100));
+  }
+executor:
+  type: rust-playground
+  description: Measure slippage relative to the spot price.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '950'
+---
+
+# Challenge 9: Slippage In Basis Points
+
+Slippage measures how far the executed average price moved from the pre-trade spot price.
+
+## Task
+
+Implement `slippage_bps`.
+
+## Formula
+
+Use:
+
+```txt
+(spot_price_bps - execution_price_bps) * 10_000 / spot_price_bps
+```
+
+## Example
+
+For:
+
+- spot price = `20_000`
+- execution price = `18_100`
+
+Then:
+
+```txt
+(20_000 - 18_100) * 10_000 / 20_000 = 950
+```

@@ -1,0 +1,70 @@
+---
+title: Challenge 11 - Initial LP Supply
+description: >-
+  Compute the initial LP token supply for a brand new pool using the integer
+  square root of the reserve product.
+keywords:
+  - cpmm initial liquidity
+  - lp token minting
+  - geometric mean
+track: cpmm
+slug: initial-lp-supply
+order: 11
+difficulty: Medium
+tags:
+  - CPMM
+  - LP Shares
+  - Liquidity
+starterCode: |-
+  fn integer_sqrt(n: u128) -> u64 {
+      let mut x = 0u64;
+      while ((x + 1) as u128) * ((x + 1) as u128) <= n {
+          x += 1;
+      }
+      x
+  }
+
+  fn initial_lp_supply(x_reserve: u64, y_reserve: u64) -> u64 {
+      // Return floor(sqrt(x_reserve * y_reserve)).
+      0
+  }
+
+  fn main() {
+      println!("{}", initial_lp_supply(400, 900));
+  }
+executor:
+  type: rust-playground
+  description: Compute initial LP supply using the geometric mean.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '600'
+---
+
+# Challenge 11: Initial LP Supply
+
+When a brand new pool is created, LP shares are often based on the geometric mean of the starting reserves.
+
+## Task
+
+Implement `initial_lp_supply`.
+
+## Rule
+
+Return:
+
+```txt
+floor(sqrt(x_reserve * y_reserve))
+```
+
+A helper `integer_sqrt` is already provided.
+
+## Example
+
+For `400` and `900`:
+
+```txt
+sqrt(400 * 900) = sqrt(360000) = 600
+```

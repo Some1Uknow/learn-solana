@@ -8,7 +8,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronDown, ClipboardList, Play, Send, XCircle } from "lucide-react";
+import { CheckCircle2, ChevronDown, ClipboardList, Lock, Play, Send, XCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useExerciseProgress } from "@/hooks/use-exercise-progress";
 import { useLoginGate } from "@/hooks/use-login-gate";
@@ -308,6 +308,15 @@ export default function ChallengeEditorClient({
       return;
     }
 
+    setRunResult({
+      stdout: "",
+      stderr: "",
+      testResults: [],
+      passed: null,
+      mode: "submit",
+      message: "Sign in to submit solutions and save completion. You can still use Run while logged out.",
+    });
+
     requireLogin(() => {
       void executeChallenge("submit");
     });
@@ -396,27 +405,38 @@ export default function ChallengeEditorClient({
           style={{ minHeight: MIN_OUTPUT_HEIGHT, flex: "1 1 0%" }}
         >
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleRun}
-                disabled={isRunning || !canRun}
-                className={`${runButtonClasses} ${
-                  isRunning || !canRun ? "cursor-not-allowed opacity-60" : ""
-                }`}
-              >
-                <Play className="h-4 w-4" />
-                {runningAction === "run" ? "Running..." : "Run"}
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isRunning || !canRun}
-                className={`${submitButtonClasses} ${
-                  isRunning || !canRun ? "cursor-not-allowed opacity-60" : ""
-                }`}
-              >
-                <Send className="h-4 w-4" />
-                {runningAction === "submit" ? "Submitting..." : "Submit"}
-              </button>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRun}
+                  disabled={isRunning || !canRun}
+                  className={`${runButtonClasses} ${
+                    isRunning || !canRun ? "cursor-not-allowed opacity-60" : ""
+                  }`}
+                >
+                  <Play className="h-4 w-4" />
+                  {runningAction === "run" ? "Running..." : "Run"}
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={isRunning || !canRun}
+                  className={`${submitButtonClasses} ${
+                    isRunning || !canRun ? "cursor-not-allowed opacity-60" : ""
+                  }`}
+                >
+                  {authenticated ? <Send className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                  {runningAction === "submit"
+                    ? "Submitting..."
+                    : authenticated
+                      ? "Submit"
+                      : "Sign in to submit"}
+                </button>
+              </div>
+              {!authenticated ? (
+                <div className="text-xs text-zinc-500">
+                  Run works without login. Submit requires sign-in so completion can be saved.
+                </div>
+              ) : null}
             </div>
             <button
               type="button"
@@ -622,7 +642,7 @@ export default function ChallengeEditorClient({
         open={showModal}
         onOpenChange={setShowModal}
         title="Sign in to submit"
-        description="Run cases are available while you practice. Sign in to submit and save completion."
+        description="Run is open for practice. Sign in to submit, unlock completion, and sync your progress across devices."
       />
     </>
   );

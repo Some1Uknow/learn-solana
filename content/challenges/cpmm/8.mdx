@@ -1,0 +1,67 @@
+---
+title: Challenge 8 - Effective Execution Price
+description: >-
+  Calculate the average execution price of a swap using integer math scaled by
+  10,000.
+keywords:
+  - cpmm execution price
+  - amm average price
+  - slippage math
+track: cpmm
+slug: effective-execution-price
+order: 8
+difficulty: Medium
+tags:
+  - CPMM
+  - Pricing
+  - Slippage
+starterCode: |-
+  fn execution_price_bps(x_in: u64, y_out: u64) -> u64 {
+      // Return the average price paid, scaled by 10_000.
+      // For x_in=100 and y_out=181, the result should be 18_100.
+      0
+  }
+
+  fn main() {
+      println!("{}", execution_price_bps(100, 181));
+  }
+executor:
+  type: rust-playground
+  description: Compute average execution price from input and output amounts.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '18100'
+---
+
+# Challenge 8: Effective Execution Price
+
+Spot price is not the same as execution price.
+
+## Task
+
+Implement `execution_price_bps(x_in, y_out)`.
+
+## Formula
+
+If a trader spends `x_in` units of X and receives `y_out` units of Y, then the average price in Y-per-X is:
+
+```txt
+y_out / x_in
+```
+
+Scale by `10_000` so the result stays in integer math:
+
+```txt
+y_out * 10_000 / x_in
+```
+
+## Example
+
+For `x_in = 100` and `y_out = 181`:
+
+```txt
+181 * 10_000 / 100 = 18_100
+```

@@ -1,0 +1,59 @@
+---
+title: Challenge 17 - Conservative Quote Rounding
+description: >-
+  Round a quoted output amount down to the nearest whole token unit so the pool
+  never pays out too much.
+keywords:
+  - cpmm rounding policy
+  - conservative output
+  - amm safety
+track: cpmm
+slug: conservative-quote-rounding
+order: 17
+difficulty: Easy
+tags:
+  - CPMM
+  - Rounding
+  - Safety
+starterCode: |-
+  fn floor_output(raw_numerator: u128, raw_denominator: u128) -> u64 {
+      // Return floor(raw_numerator / raw_denominator) as u64.
+      // For 2000 / 11, the answer should be 181.
+      0
+  }
+
+  fn main() {
+      println!("{}", floor_output(2_000, 11));
+  }
+executor:
+  type: rust-playground
+  description: Round a quoted output amount down.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '181'
+---
+
+# Challenge 17: Conservative Quote Rounding
+
+In AMM math, rounding direction matters.
+
+## Task
+
+Implement `floor_output`.
+
+## Requirement
+
+Always round down.
+
+That means:
+
+```txt
+floor(2000 / 11) = 181
+```
+
+## Why this matters
+
+Rounding up user output can leak value from the pool over time.

@@ -1,0 +1,58 @@
+---
+title: Challenge 19 - Authority Match Check
+description: >-
+  Validate that the caller matches the configured admin authority before a
+  sensitive pool action is allowed.
+keywords:
+  - cpmm authority check
+  - admin validation
+  - solana access control
+track: cpmm
+slug: authority-match-check
+order: 19
+difficulty: Easy
+tags:
+  - CPMM
+  - Authority
+  - Access Control
+starterCode: |-
+  fn is_authority(expected: &str, provided: &str) -> bool {
+      // Return true only if the provided authority exactly matches the expected one.
+      false
+  }
+
+  fn main() {
+      println!("{}", is_authority("fee_admin", "fee_admin"));
+  }
+executor:
+  type: rust-playground
+  description: Compare an expected authority with the provided signer identity.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true'
+---
+
+# Challenge 19: Authority Match Check
+
+Many serious Solana bugs are not math bugs. They are authorization bugs.
+
+## Task
+
+Implement `is_authority`.
+
+## Requirement
+
+Return `true` only when the provided authority matches exactly.
+
+## Why it matters
+
+A CPMM usually has privileged actions like:
+
+- pausing the pool
+- changing fee config
+- collecting protocol fees
+
+Those should never run for the wrong signer.

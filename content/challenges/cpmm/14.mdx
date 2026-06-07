@@ -1,0 +1,65 @@
+---
+title: Challenge 14 - Withdraw Amounts From LP Burn
+description: >-
+  Given LP shares being burned, compute the proportional X and Y amounts the
+  liquidity provider should receive.
+keywords:
+  - cpmm withdrawal
+  - burn lp shares
+  - liquidity redemption
+track: cpmm
+slug: withdraw-amounts-from-lp-burn
+order: 14
+difficulty: Medium
+tags:
+  - CPMM
+  - Withdrawals
+  - LP Shares
+starterCode: |-
+  fn withdraw_amounts(total_lp_supply: u64, lp_burn: u64, x_reserve: u64, y_reserve: u64) -> (u64, u64) {
+      // Return (x_out, y_out) proportional to the burned LP shares.
+      // For supply=1000, burn=250, x=1200, y=2400, the answer is (300, 600).
+      (0, 0)
+  }
+
+  fn main() {
+      let (x_out, y_out) = withdraw_amounts(1_000, 250, 1_200, 2_400);
+      println!("{} {}", x_out, y_out);
+  }
+executor:
+  type: rust-playground
+  description: Redeem proportional reserves for burned LP shares.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '300 600'
+---
+
+# Challenge 14: Withdraw Amounts From LP Burn
+
+Burning LP shares returns the same fraction of each reserve.
+
+## Task
+
+Implement `withdraw_amounts`.
+
+## Formula
+
+Use:
+
+```txt
+x_out = lp_burn * x_reserve / total_lp_supply
+y_out = lp_burn * y_reserve / total_lp_supply
+```
+
+## Example
+
+Burning `250` LP out of `1000` total supply means burning `25%` of the pool.
+
+So from reserves `(1200, 2400)` the provider receives:
+
+```txt
+300 600
+```

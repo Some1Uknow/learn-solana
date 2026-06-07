@@ -50,8 +50,44 @@ const RUST_TRACK_GROUPS: ChallengeTrackGroup[] = [
   },
 ];
 
+const CPMM_TRACK_GROUPS: ChallengeTrackGroup[] = [
+  {
+    id: "amm-foundations",
+    title: "AMM Foundations",
+    days: "Challenges 1-5",
+    description: "Pool reserves, constant product math, quote basics, fees, and slippage.",
+    startOrder: 1,
+    endOrder: 5,
+  },
+  {
+    id: "swaps-and-fees",
+    title: "Swaps & Fees",
+    days: "Challenges 6-10",
+    description: "Mutating swaps, fee accounting, average price, and invariant checks.",
+    startOrder: 6,
+    endOrder: 10,
+  },
+  {
+    id: "liquidity-and-lp-shares",
+    title: "Liquidity & LP Shares",
+    days: "Challenges 11-15",
+    description: "Initial liquidity, proportional deposits, LP supply, and withdrawals.",
+    startOrder: 11,
+    endOrder: 15,
+  },
+  {
+    id: "solana-ready-security",
+    title: "Solana-Ready Security",
+    days: "Challenges 16-20",
+    description: "Checked arithmetic, rounding policy, pause controls, and secure CPMM state logic.",
+    startOrder: 16,
+    endOrder: 20,
+  },
+];
+
 const TRACK_GROUPS: Record<string, ChallengeTrackGroup[]> = {
   rust: RUST_TRACK_GROUPS,
+  cpmm: CPMM_TRACK_GROUPS,
 };
 
 export function getChallengeGroupsForTrack(track: string): ChallengeTrackGroup[] {

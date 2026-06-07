@@ -1,0 +1,78 @@
+---
+title: Challenge 3 - Exact In Swap Quote
+description: >-
+  Implement the basic constant-product exact-in quote for a swap without fees.
+keywords:
+  - cpmm swap quote
+  - exact in swap
+  - amm formula
+track: cpmm
+slug: exact-in-swap-quote
+order: 3
+difficulty: Medium
+tags:
+  - CPMM
+  - Swaps
+  - Quote Engine
+starterCode: |-
+  fn quote_exact_in(x_reserve: u64, y_reserve: u64, x_in: u64) -> u64 {
+      // Use the constant-product formula without fees.
+      // For x=1_000, y=2_000, x_in=100, the expected output is 182.
+      0
+  }
+
+  fn main() {
+      println!("{}", quote_exact_in(1_000, 2_000, 100));
+  }
+executor:
+  type: rust-playground
+  description: Quote an exact-in swap using constant-product math.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '182'
+---
+
+# Challenge 3: Exact In Swap Quote
+
+Now compute the output amount for an exact-in swap.
+
+## Formula
+
+Starting from:
+
+```txt
+x * y = k
+```
+
+After adding `x_in` to the X reserve:
+
+```txt
+new_x = x + x_in
+new_y = k / new_x
+y_out = y - new_y
+```
+
+## Task
+
+Implement `quote_exact_in`.
+
+## Requirements
+
+- Do intermediate math in `u128`.
+- Return the final output as `u64`.
+- Round down naturally through integer division.
+
+For the sample:
+
+```txt
+x = 1000
+y = 2000
+x_in = 100
+k = 2_000_000
+new_x = 1100
+new_y = 1818
+y_out = 182
+```
