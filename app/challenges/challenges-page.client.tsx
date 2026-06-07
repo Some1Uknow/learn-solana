@@ -63,6 +63,18 @@ function getTrackVisual(track: string) {
         imageAlt: "Solana logo",
         eyebrow: "Runtime track",
       };
+    case "cpmm":
+      return {
+        imageSrc: "/challenges/cpmm.png",
+        imageAlt: "CPMM Builders Track logo",
+        eyebrow: "AMM track",
+      };
+    case "orderbook":
+      return {
+        imageSrc: "/challenges/orderbook.png",
+        imageAlt: "Orderbook Matching Engine logo",
+        eyebrow: "Exchange track",
+      };
     default:
       return {
         imageSrc: null,

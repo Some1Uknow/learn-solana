@@ -1,0 +1,74 @@
+---
+title: Challenge 5 - Market Buy Against Asks
+description: >-
+  Match a market buy against ask liquidity from cheapest ask upward and compute filled base and quote spent.
+keywords:
+  - market buy matching
+  - consume asks
+  - orderbook fills
+track: orderbook
+slug: market-buy-against-asks
+order: 5
+difficulty: Medium
+tags:
+  - Orderbook
+  - Market Orders
+  - Matching
+starterCode: |-
+  struct Level {
+      price: u64,
+      quantity: u64,
+  }
+
+  fn market_buy(asks: &[Level], buy_quantity: u64) -> (u64, u64) {
+      // Consume asks from lowest price to highest price.
+      // Return (base_filled, quote_spent).
+      (0, 0)
+  }
+
+  fn main() {
+      let asks = vec![
+          Level { price: 100, quantity: 3 },
+          Level { price: 105, quantity: 4 },
+          Level { price: 110, quantity: 5 },
+      ];
+      let (filled, spent) = market_buy(&asks, 6);
+      println!("{} {}", filled, spent);
+  }
+executor:
+  type: rust-playground
+  description: Fill a market buy from the ask side.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '6 615'
+---
+
+# Challenge 5: Market Buy Against Asks
+
+A market buy consumes the cheapest available asks first.
+
+## Task
+
+Implement `market_buy`.
+
+## Rules
+
+- Assume asks are already sorted low-to-high.
+- Fill until the buy quantity is satisfied or asks run out.
+- Quote spent at a level is `filled_at_level * price`.
+
+## Example
+
+Buying `6` base units:
+
+- take `3` at `100` = `300`
+- take `3` at `105` = `315`
+
+Return:
+
+```txt
+6 615
+```

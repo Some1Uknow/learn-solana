@@ -271,6 +271,19 @@ export function getTrackMeta(track: string) {
         "liquidity pool exercises",
       ],
     },
+    orderbook: {
+      name: "Orderbook Matching Engine",
+      description:
+        "Build the core logic behind a limit orderbook: bids, asks, crossing checks, fills, cancellation, price-time priority, and exchange order behavior.",
+      keywords: [
+        "orderbook challenges",
+        "matching engine rust",
+        "limit orderbook",
+        "defi rust exercises",
+        "exchange matching engine",
+        "solana orderbook",
+      ],
+    },
   };
 
   return (

@@ -1,0 +1,63 @@
+---
+title: Challenge 8 - Insert Limit Order Sorted
+description: >-
+  Insert a limit order into one side of the book while preserving the side-specific price ordering.
+keywords:
+  - insert limit order
+  - sorted orderbook
+  - bid ask ordering
+track: orderbook
+slug: insert-limit-order-sorted
+order: 8
+difficulty: Medium
+tags:
+  - Orderbook
+  - Insertion
+  - Sorting
+starterCode: |-
+  enum Side {
+      Bid,
+      Ask,
+  }
+
+  struct Order {
+      price: u64,
+      quantity: u64,
+  }
+
+  fn insert_sorted(book: &mut Vec<Order>, order: Order, side: Side) {
+      // Bids sort high-to-low. Asks sort low-to-high.
+      book.push(order);
+      // TODO: sort the book for the given side.
+  }
+
+  fn main() {
+      let mut bids = vec![Order { price: 100, quantity: 1 }, Order { price: 98, quantity: 1 }];
+      insert_sorted(&mut bids, Order { price: 101, quantity: 1 }, Side::Bid);
+      println!("{} {} {}", bids[0].price, bids[1].price, bids[2].price);
+  }
+executor:
+  type: rust-playground
+  description: Preserve bid or ask ordering after insertion.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '101 100 98'
+---
+
+# Challenge 8: Insert Limit Order Sorted
+
+A book side must remain sorted after inserting a new limit order.
+
+## Task
+
+Implement `insert_sorted`.
+
+## Rules
+
+- Bid book: highest price first.
+- Ask book: lowest price first.
+
+This challenge focuses on maintaining book shape, not matching.

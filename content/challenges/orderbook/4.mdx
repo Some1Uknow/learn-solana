@@ -1,0 +1,56 @@
+---
+title: Challenge 4 - Single Fill Calculation
+description: >-
+  Compute the filled amount and remaining quantities when one taker order meets one maker order.
+keywords:
+  - order fill calculation
+  - partial fill
+  - matching engine
+track: orderbook
+slug: single-fill-calculation
+order: 4
+difficulty: Easy
+tags:
+  - Orderbook
+  - Fills
+  - Matching
+starterCode: |-
+  fn fill_once(taker_qty: u64, maker_qty: u64) -> (u64, u64, u64) {
+      // Return (filled_qty, taker_remaining, maker_remaining).
+      (0, 0, 0)
+  }
+
+  fn main() {
+      let (filled, taker_left, maker_left) = fill_once(7, 5);
+      println!("{} {} {}", filled, taker_left, maker_left);
+  }
+executor:
+  type: rust-playground
+  description: Calculate a single maker/taker fill.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '5 2 0'
+---
+
+# Challenge 4: Single Fill Calculation
+
+Before matching a full book, handle one maker order.
+
+## Task
+
+Implement `fill_once`.
+
+## Rule
+
+The filled quantity is the smaller of taker quantity and maker quantity.
+
+Return:
+
+```txt
+(filled_qty, taker_remaining, maker_remaining)
+```
+
+For taker `7` and maker `5`, fill `5`, leaving taker `2` and maker `0`.

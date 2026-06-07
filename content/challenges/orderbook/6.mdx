@@ -1,0 +1,74 @@
+---
+title: Challenge 6 - Market Sell Against Bids
+description: >-
+  Match a market sell against bid liquidity from highest bid downward and compute filled base and quote received.
+keywords:
+  - market sell matching
+  - consume bids
+  - orderbook engine
+track: orderbook
+slug: market-sell-against-bids
+order: 6
+difficulty: Medium
+tags:
+  - Orderbook
+  - Market Orders
+  - Matching
+starterCode: |-
+  struct Level {
+      price: u64,
+      quantity: u64,
+  }
+
+  fn market_sell(bids: &[Level], sell_quantity: u64) -> (u64, u64) {
+      // Consume bids from highest price to lowest price.
+      // Return (base_filled, quote_received).
+      (0, 0)
+  }
+
+  fn main() {
+      let bids = vec![
+          Level { price: 99, quantity: 2 },
+          Level { price: 98, quantity: 5 },
+          Level { price: 95, quantity: 5 },
+      ];
+      let (filled, received) = market_sell(&bids, 6);
+      println!("{} {}", filled, received);
+  }
+executor:
+  type: rust-playground
+  description: Fill a market sell from the bid side.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '6 590'
+---
+
+# Challenge 6: Market Sell Against Bids
+
+A market sell consumes the highest available bids first.
+
+## Task
+
+Implement `market_sell`.
+
+## Rules
+
+- Assume bids are already sorted high-to-low.
+- Fill until the sell quantity is satisfied or bids run out.
+- Quote received at a level is `filled_at_level * price`.
+
+## Example
+
+Selling `6` base units:
+
+- take `2` at `99` = `198`
+- take `4` at `98` = `392`
+
+Return:
+
+```txt
+6 590
+```

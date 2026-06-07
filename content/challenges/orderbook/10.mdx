@@ -1,0 +1,74 @@
+---
+title: Challenge 10 - Price Time Priority
+description: >-
+  Sort resting orders by best price first and earlier timestamp first when prices are equal.
+keywords:
+  - price time priority
+  - fifo matching
+  - orderbook sorting
+track: orderbook
+slug: price-time-priority
+order: 10
+difficulty: Medium
+tags:
+  - Orderbook
+  - Priority
+  - Sorting
+starterCode: |-
+  enum Side {
+      Bid,
+      Ask,
+  }
+
+  struct Order {
+      id: u64,
+      price: u64,
+      timestamp: u64,
+  }
+
+  fn sort_by_priority(book: &mut Vec<Order>, side: Side) {
+      // Bids: higher price first, then lower timestamp.
+      // Asks: lower price first, then lower timestamp.
+  }
+
+  fn main() {
+      let mut asks = vec![
+          Order { id: 1, price: 105, timestamp: 20 },
+          Order { id: 2, price: 101, timestamp: 30 },
+          Order { id: 3, price: 101, timestamp: 10 },
+      ];
+      sort_by_priority(&mut asks, Side::Ask);
+      println!("{} {} {}", asks[0].id, asks[1].id, asks[2].id);
+  }
+executor:
+  type: rust-playground
+  description: Apply price-time priority to one side of the book.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '3 2 1'
+---
+
+# Challenge 10: Price Time Priority
+
+Orderbooks usually use price-time priority.
+
+## Task
+
+Implement `sort_by_priority`.
+
+## Rules
+
+For bids:
+
+1. higher price first
+2. earlier timestamp first at the same price
+
+For asks:
+
+1. lower price first
+2. earlier timestamp first at the same price
+
+This is what makes matching deterministic and fair among same-price orders.

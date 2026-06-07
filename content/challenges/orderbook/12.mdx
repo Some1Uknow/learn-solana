@@ -1,0 +1,78 @@
+---
+title: Challenge 12 - Immediate Or Cancel Buy
+description: >-
+  Execute as much of an IOC buy as possible against asks and cancel any unfilled remainder instead of posting it.
+keywords:
+  - ioc order
+  - immediate or cancel
+  - orderbook matching engine
+track: orderbook
+slug: immediate-or-cancel-buy
+order: 12
+difficulty: Hard
+tags:
+  - Orderbook
+  - IOC
+  - Matching
+starterCode: |-
+  struct Level {
+      price: u64,
+      quantity: u64,
+  }
+
+  fn ioc_buy(asks: &[Level], buy_quantity: u64) -> (u64, u64, u64) {
+      // Consume asks from low to high.
+      // Return (base_filled, quote_spent, canceled_quantity).
+      // Do not post unfilled quantity.
+      (0, 0, 0)
+  }
+
+  fn main() {
+      let asks = vec![
+          Level { price: 100, quantity: 2 },
+          Level { price: 105, quantity: 3 },
+      ];
+      let (filled, spent, canceled) = ioc_buy(&asks, 8);
+      println!("{} {} {}", filled, spent, canceled);
+  }
+executor:
+  type: rust-playground
+  description: Fill available ask liquidity and cancel the remainder.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '5 515 3'
+---
+
+# Challenge 12: Immediate Or Cancel Buy
+
+An IOC order executes immediately and cancels whatever cannot fill.
+
+## Task
+
+Implement `ioc_buy`.
+
+## Rules
+
+- Consume asks from lowest price to highest price.
+- Track total base filled.
+- Track total quote spent.
+- Return leftover quantity as canceled.
+- Do not insert leftover quantity into the book.
+
+## Example
+
+Trying to buy `8` base units against:
+
+- `2` at `100`
+- `3` at `105`
+
+Only `5` units can fill:
+
+```txt
+filled = 5
+spent = 2*100 + 3*105 = 515
+canceled = 3
+```

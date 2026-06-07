@@ -1,0 +1,56 @@
+---
+title: Challenge 2 - Crossing Logic
+description: >-
+  Implement the core price-crossing rule that decides whether a taker order can match a maker order.
+keywords:
+  - orderbook crossing
+  - bid ask matching
+  - limit orderbook
+track: orderbook
+slug: crossing-logic
+order: 2
+difficulty: Easy
+tags:
+  - Orderbook
+  - Matching
+  - Prices
+starterCode: |-
+  enum Side {
+      Bid,
+      Ask,
+  }
+
+  fn crosses(taker_side: Side, taker_price: u64, maker_price: u64) -> bool {
+      // A bid crosses an ask when taker_price >= maker_price.
+      // An ask crosses a bid when taker_price <= maker_price.
+      false
+  }
+
+  fn main() {
+      println!("{} {}", crosses(Side::Bid, 105, 100), crosses(Side::Ask, 95, 100));
+  }
+executor:
+  type: rust-playground
+  description: Check bid/ask crossing rules.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true true'
+---
+
+# Challenge 2: Crossing Logic
+
+A match can happen only when prices cross.
+
+## Task
+
+Implement `crosses`.
+
+## Rules
+
+- Buy/taker bid crosses maker ask if `bid_price >= ask_price`.
+- Sell/taker ask crosses maker bid if `ask_price <= bid_price`.
+
+This is the central predicate used by limit orders, post-only orders, and IOC orders.

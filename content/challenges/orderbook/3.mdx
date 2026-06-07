@@ -1,0 +1,69 @@
+---
+title: Challenge 3 - Best Bid And Best Ask
+description: >-
+  Find the top of book: highest bid price and lowest ask price from a list of orders.
+keywords:
+  - best bid ask
+  - top of book
+  - orderbook state
+track: orderbook
+slug: best-bid-and-best-ask
+order: 3
+difficulty: Easy
+tags:
+  - Orderbook
+  - Top Of Book
+  - Iteration
+starterCode: |-
+  enum Side {
+      Bid,
+      Ask,
+  }
+
+  struct Order {
+      side: Side,
+      price: u64,
+      quantity: u64,
+  }
+
+  fn best_bid_ask(orders: &[Order]) -> (Option<u64>, Option<u64>) {
+      // Return (highest_bid, lowest_ask).
+      (None, None)
+  }
+
+  fn main() {
+      let orders = vec![
+          Order { side: Side::Bid, price: 99, quantity: 3 },
+          Order { side: Side::Bid, price: 101, quantity: 2 },
+          Order { side: Side::Ask, price: 108, quantity: 4 },
+          Order { side: Side::Ask, price: 105, quantity: 1 },
+      ];
+      let (bid, ask) = best_bid_ask(&orders);
+      println!("{} {}", bid.unwrap(), ask.unwrap());
+  }
+executor:
+  type: rust-playground
+  description: Find highest bid and lowest ask.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '101 105'
+---
+
+# Challenge 3: Best Bid And Best Ask
+
+The top of book is the most important summary of an orderbook.
+
+## Task
+
+Implement `best_bid_ask`.
+
+## Rules
+
+- Best bid = highest bid price.
+- Best ask = lowest ask price.
+- Return `None` when a side has no orders.
+
+Use iteration and comparisons; no matching is needed yet.

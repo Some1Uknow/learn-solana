@@ -1,0 +1,62 @@
+---
+title: Challenge 7 - Average Fill Price
+description: >-
+  Compute average execution price from total quote and base filled using integer math scaled by 10,000.
+keywords:
+  - average fill price
+  - execution price
+  - orderbook analytics
+track: orderbook
+slug: average-fill-price
+order: 7
+difficulty: Easy
+tags:
+  - Orderbook
+  - Pricing
+  - Analytics
+starterCode: |-
+  fn average_fill_price_bps(total_quote: u64, base_filled: u64) -> u64 {
+      // Return total_quote / base_filled scaled by 10_000.
+      0
+  }
+
+  fn main() {
+      println!("{}", average_fill_price_bps(615, 6));
+  }
+executor:
+  type: rust-playground
+  description: Compute average fill price with fixed scaling.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '1025000'
+---
+
+# Challenge 7: Average Fill Price
+
+After a market order fills across multiple prices, you need an average execution price.
+
+## Task
+
+Implement `average_fill_price_bps`.
+
+## Formula
+
+Use:
+
+```txt
+total_quote * 10_000 / base_filled
+```
+
+## Example
+
+If a market buy filled `6` base and spent `615` quote:
+
+```txt
+615 / 6 = 102.5
+102.5 * 10_000 = 1_025_000
+```
+
+Return `1025000`.

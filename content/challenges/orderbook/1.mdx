@@ -1,0 +1,69 @@
+---
+title: Challenge 1 - Valid Limit Order
+description: >-
+  Define the basic limit order model and reject orders with zero price or zero quantity.
+keywords:
+  - orderbook order struct
+  - limit order validation
+  - matching engine rust
+track: orderbook
+slug: valid-limit-order
+order: 1
+difficulty: Easy
+tags:
+  - Orderbook
+  - Validation
+  - Structs
+starterCode: |-
+  enum Side {
+      Bid,
+      Ask,
+  }
+
+  struct Order {
+      id: u64,
+      side: Side,
+      price: u64,
+      quantity: u64,
+      timestamp: u64,
+  }
+
+  fn new_order(id: u64, side: Side, price: u64, quantity: u64, timestamp: u64) -> Result<Order, &'static str> {
+      // Reject zero price with Err("invalid price").
+      // Reject zero quantity with Err("invalid quantity").
+      // Otherwise return Ok(Order { ... }).
+      Err("not implemented")
+  }
+
+  fn main() {
+      match new_order(1, Side::Bid, 100, 5, 10) {
+          Ok(order) => println!("{} {} {}", order.id, order.price, order.quantity),
+          Err(message) => println!("{}", message),
+      }
+  }
+executor:
+  type: rust-playground
+  description: Validate and construct a limit order.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: '1 100 5'
+---
+
+# Challenge 1: Valid Limit Order
+
+Every matching engine starts with a precise order model.
+
+## Task
+
+Implement `new_order`.
+
+## Rules
+
+- `price == 0` is invalid.
+- `quantity == 0` is invalid.
+- Otherwise construct and return the order.
+
+This locks in the fields every later challenge uses: side, price, quantity, and timestamp.

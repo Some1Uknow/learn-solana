@@ -1,0 +1,62 @@
+---
+title: Challenge 9 - Cancel Order By ID
+description: >-
+  Remove an order from the book by ID and return whether a matching order was found.
+keywords:
+  - cancel order
+  - orderbook mutation
+  - remove by id
+track: orderbook
+slug: cancel-order-by-id
+order: 9
+difficulty: Easy
+tags:
+  - Orderbook
+  - Cancellation
+  - Mutation
+starterCode: |-
+  struct Order {
+      id: u64,
+      price: u64,
+      quantity: u64,
+  }
+
+  fn cancel_order(book: &mut Vec<Order>, id: u64) -> bool {
+      // Remove the order with this id and return true.
+      // If it does not exist, return false.
+      false
+  }
+
+  fn main() {
+      let mut book = vec![
+          Order { id: 1, price: 100, quantity: 2 },
+          Order { id: 2, price: 101, quantity: 3 },
+      ];
+      let found = cancel_order(&mut book, 1);
+      println!("{} {}", found, book.len());
+  }
+executor:
+  type: rust-playground
+  description: Cancel a resting order by identifier.
+  channel: stable
+  edition: '2021'
+  mode: debug
+  tests:
+    - name: main
+      expectedStdout: 'true 1'
+---
+
+# Challenge 9: Cancel Order By ID
+
+Users must be able to cancel resting orders that have not fully filled.
+
+## Task
+
+Implement `cancel_order`.
+
+## Rules
+
+- Find the first order with matching `id`.
+- Remove it from the vector.
+- Return `true` if removed.
+- Return `false` if not found.

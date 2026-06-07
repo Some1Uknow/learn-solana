@@ -85,9 +85,45 @@ const CPMM_TRACK_GROUPS: ChallengeTrackGroup[] = [
   },
 ];
 
+const ORDERBOOK_TRACK_GROUPS: ChallengeTrackGroup[] = [
+  {
+    id: "foundations",
+    title: "Orderbook Foundations",
+    days: "Challenges 1-3",
+    description: "Order sides, crossing logic, and top-of-book discovery.",
+    startOrder: 1,
+    endOrder: 3,
+  },
+  {
+    id: "matching",
+    title: "Matching Engine",
+    days: "Challenges 4-7",
+    description: "Fills, market orders, and average execution price.",
+    startOrder: 4,
+    endOrder: 7,
+  },
+  {
+    id: "book-mutations",
+    title: "Book Mutations",
+    days: "Challenges 8-10",
+    description: "Insertion, cancellation, and price-time priority.",
+    startOrder: 8,
+    endOrder: 10,
+  },
+  {
+    id: "exchange-behavior",
+    title: "Exchange Behavior",
+    days: "Challenges 11-12",
+    description: "Post-only rejection and immediate-or-cancel matching.",
+    startOrder: 11,
+    endOrder: 12,
+  },
+];
+
 const TRACK_GROUPS: Record<string, ChallengeTrackGroup[]> = {
   rust: RUST_TRACK_GROUPS,
   cpmm: CPMM_TRACK_GROUPS,
+  orderbook: ORDERBOOK_TRACK_GROUPS,
 };
 
 export function getChallengeGroupsForTrack(track: string): ChallengeTrackGroup[] {
