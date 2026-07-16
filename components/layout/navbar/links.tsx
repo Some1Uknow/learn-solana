@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 const navigationItems = [
   { label: "Learn", href: "/modules" },
   { label: "Challenges", href: "/challenges" },
+  { label: "Build", href: "/build" },
   { label: "Tools", href: "/tools" },
 ];
 

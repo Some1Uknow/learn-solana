@@ -1,0 +1,24 @@
+[package]
+name = "learnsol-build-runner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.8.8", features = ["multipart"] }
+hex = "0.4.3"
+hmac = "0.12.1"
+jsonwebtoken = "9.3.1"
+mollusk-svm = "0.14.0"
+reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+sha2 = "0.10.9"
+solana-account = "4.3.0"
+solana-instruction = "3.2.0"
+solana-pubkey = "4.2.0"
+solana-sdk-ids = "3.1.0"
+tempfile = "3.26.0"
+tokio = { version = "1.49.0", features = ["macros", "process", "rt-multi-thread", "sync", "time"] }
+tower-http = { version = "0.6.8", features = ["cors", "limit", "trace"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }

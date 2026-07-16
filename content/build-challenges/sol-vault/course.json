@@ -1,0 +1,152 @@
+{
+  "slug": "sol-vault",
+  "title": "Build a SOL Vault",
+  "shortTitle": "SOL Vault",
+  "description": "Ship one small Anchor program that can hold SOL, enforce its authority, and survive adversarial tests.",
+  "difficulty": "Intermediate",
+  "estimatedMinutes": 75,
+  "framework": "Anchor",
+  "toolchain": {
+    "anchor": "0.31.x",
+    "solana": "2.2.x"
+  },
+  "programId": "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS",
+  "starter": {
+    "version": "v1",
+    "downloadUrl": "/build-starters/sol-vault-v1.zip",
+    "artifactPath": "target/deploy/sol_vault.so"
+  },
+  "prerequisites": [
+    { "label": "Anchor local setup", "href": "/learn/anchor-programs/anchor-local-setup" },
+    { "label": "Your first Anchor program", "href": "/learn/anchor-programs/first-anchor-program" },
+    { "label": "PDAs and seed derivation", "href": "/learn/anchor-programs/pda-seed-derivation" },
+    { "label": "Cross-program invocations", "href": "/learn/anchor-programs/cpi-cross-program" }
+  ],
+  "stages": [
+    {
+      "slug": "create-vault",
+      "order": 1,
+      "title": "Create the vault",
+      "promise": "Give every authority one deterministic vault PDA.",
+      "estimatedMinutes": 12,
+      "goal": "Initialize a vault at the PDA derived from the fixed namespace `vault` and the authority public key.",
+      "contract": [
+        "Use the exact seed formula: [b\\\"vault\\\", authority.key().as_ref()].",
+        "Store the authority, bump, and a zero tracked balance.",
+        "Only the authority pays for initialization."
+      ],
+      "task": "Finish the `initialize` instruction and its account constraints. Keep the starter program ID unchanged.",
+      "buildCommand": "anchor build",
+      "commonMistakes": [
+        "Using a random keypair account instead of the PDA.",
+        "Leaving the bump or authority unset.",
+        "Changing the declared program ID."
+      ],
+      "publicChecks": [
+        { "key": "vault-pda", "label": "Derives the vault PDA" },
+        { "key": "vault-state", "label": "Stores vault state" }
+      ],
+      "delayedHint": "The PDA constraint belongs on the vault account itself: initialize it with seeds, bump, and the authority as payer."
+    },
+    {
+      "slug": "accept-deposits",
+      "order": 2,
+      "title": "Accept deposits",
+      "promise": "Move SOL in and keep an honest internal balance.",
+      "estimatedMinutes": 14,
+      "goal": "Transfer positive lamport amounts from the authority into the vault through the system program.",
+      "contract": [
+        "Reject zero-value deposits.",
+        "Use a system-program CPI instead of mutating lamports directly.",
+        "Increase tracked balance with checked arithmetic."
+      ],
+      "task": "Implement `deposit(amount)` without changing the account interface in the starter.",
+      "buildCommand": "anchor build",
+      "commonMistakes": [
+        "Updating tracked balance before the CPI succeeds.",
+        "Allowing an amount of zero.",
+        "Using wrapping addition."
+      ],
+      "publicChecks": [
+        { "key": "deposit-cpi", "label": "Moves SOL with a CPI" },
+        { "key": "tracked-balance", "label": "Tracks deposited SOL" }
+      ],
+      "delayedHint": "Build `system_program::Transfer { from: authority, to: vault }`, invoke it, then update `vault.tracked_balance`."
+    },
+    {
+      "slug": "withdraw-safely",
+      "order": 3,
+      "title": "Withdraw safely",
+      "promise": "Let the owner withdraw without turning the vault into a drain.",
+      "estimatedMinutes": 16,
+      "goal": "Allow the stored authority to withdraw a positive amount that the vault has actually tracked.",
+      "contract": [
+        "Require the stored authority and the expected PDA.",
+        "Reject zero amounts and tracked-balance overdrafts.",
+        "Keep the vault rent-exempt after moving lamports."
+      ],
+      "task": "Implement `withdraw(amount)` with checked subtraction and an explicit rent-floor check.",
+      "buildCommand": "anchor build",
+      "commonMistakes": [
+        "Checking only account lamports instead of tracked balance.",
+        "Letting the vault fall below its rent floor.",
+        "Moving SOL before validating every invariant."
+      ],
+      "publicChecks": [
+        { "key": "authority-withdrawal", "label": "Lets the authority withdraw" },
+        { "key": "withdrawal-invariants", "label": "Keeps vault invariants" }
+      ],
+      "delayedHint": "Validate `tracked_balance >= amount` first, calculate the rent floor from `Rent::get()`, then adjust both lamport balances only after all checks pass."
+    },
+    {
+      "slug": "defend-the-vault",
+      "order": 4,
+      "title": "Defend the vault",
+      "promise": "Make the happy path hard to abuse.",
+      "estimatedMinutes": 18,
+      "goal": "Tighten every validation boundary around deposit and withdrawal.",
+      "contract": [
+        "Reject a wrong signer, wrong authority, wrong PDA, zero amount, and overdraft.",
+        "Use checked arithmetic for every stored balance update.",
+        "Preserve the vault rent floor on every successful withdrawal."
+      ],
+      "task": "Review the full program as an attacker would. Fix each validation gap without changing the public instruction interface.",
+      "buildCommand": "anchor build",
+      "commonMistakes": [
+        "Trusting the client-provided vault address.",
+        "Relying on a single `has_one` check without PDA seeds.",
+        "Returning a generic panic instead of an Anchor error."
+      ],
+      "publicChecks": [
+        { "key": "rejects-bad-input", "label": "Rejects bad input" },
+        { "key": "keeps-rent-floor", "label": "Preserves the rent floor" }
+      ],
+      "delayedHint": "Your account constraints should establish identity; handlers should establish amounts and lamport invariants. You need both layers."
+    },
+    {
+      "slug": "close-cleanly",
+      "order": 5,
+      "title": "Close cleanly",
+      "promise": "Leave no stranded state behind.",
+      "estimatedMinutes": 12,
+      "goal": "Close an empty vault to its authority and reclaim its rent.",
+      "contract": [
+        "Only the stored authority may close the vault.",
+        "Refuse to close if tracked balance is nonzero.",
+        "Use Anchor's close constraint to return account rent."
+      ],
+      "task": "Implement `close_vault` and ensure the state account can only be reclaimed after its recorded balance is zero.",
+      "buildCommand": "anchor build",
+      "commonMistakes": [
+        "Closing a vault that still reports a balance.",
+        "Sending rent to an arbitrary recipient.",
+        "Removing PDA validation from the close context."
+      ],
+      "publicChecks": [
+        { "key": "closes-empty-vault", "label": "Closes an empty vault" },
+        { "key": "protects-remaining-sol", "label": "Protects remaining SOL" }
+      ],
+      "delayedHint": "Put `close = authority` in the account constraint and make `tracked_balance == 0` a handler requirement before returning Ok."
+    }
+  ]
+}
