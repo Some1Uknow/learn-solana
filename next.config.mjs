@@ -185,6 +185,9 @@ const nextConfig = {
       "solana.com",
       "www.anchor-lang.com",
       "cdn.jsdelivr.net",
+      "superteam.fun",
+      "colosseum.com",
+      "cdn.sstatic.net",
       "copper-gigantic-kite-657.mypinata.cloud",
     ],
     remotePatterns: [
@@ -216,6 +219,21 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "cdn.jsdelivr.net",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "superteam.fun",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "colosseum.com",
+        pathname: "**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.sstatic.net",
         pathname: "**",
       },
       {

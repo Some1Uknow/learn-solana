@@ -106,12 +106,18 @@ export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
   const { stars: githubStars, isLoading } = useGithubStars();
 
   return (
-    <Link href={githubConfig.url} target="_blank" rel="noopener noreferrer">
-      <Button
-        variant="outline"
-        className={`flex h-10 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-0 text-white/80 hover:bg-white/[0.06] hover:text-white ${
-          isMobile ? "w-full justify-center" : ""
-        }`}
+    <Button
+      asChild
+      variant="outline"
+      className={`h-10 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-0 text-white/80 hover:bg-white/[0.06] hover:text-white ${
+        isMobile ? "w-full" : ""
+      }`}
+    >
+      <Link
+        href={githubConfig.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open ${githubConfig.fullRepoName} on GitHub`}
       >
         <Image
           src="/github.svg"
@@ -121,12 +127,12 @@ export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
           className="brightness-0 invert"
         />
         <div className="flex items-center gap-1">
-          <Star size={14} className="fill-yellow-400 text-yellow-400" />
+          <Star size={14} className="fill-[#a9ff2f]/20 text-[#a9ff2f]/75" aria-hidden="true" />
           <span className="text-sm font-semibold">
             {isLoading ? "..." : githubStars || "..."}
           </span>
         </div>
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }

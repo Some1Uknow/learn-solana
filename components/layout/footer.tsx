@@ -28,7 +28,7 @@ export function Footer() {
               alt="Solana Foundation"
               width={100}
               height={24}
-              className="object-contain opacity-60 hover:opacity-100 transition-opacity"
+              className="object-contain object-center opacity-60 transition-opacity hover:opacity-100"
             />
           </div>
 

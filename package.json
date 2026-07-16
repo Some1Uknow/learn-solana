@@ -20,6 +20,7 @@
     "db:migrate:drizzle": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "ingest-docs": "tsx scripts/ingest-docs.ts",
+    "resources:check": "tsx scripts/check-opportunity-resources.ts",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
