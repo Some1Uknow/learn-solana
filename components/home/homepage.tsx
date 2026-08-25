@@ -1,13 +1,8 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Inter, Space_Grotesk } from "next/font/google";
 import {
-  Check,
   ChevronRight,
-  Copy,
   Layers3,
   MessageSquareMore,
   Pickaxe,
@@ -17,6 +12,7 @@ import {
 import { Globe } from "@/components/ui/globe";
 import { BentoGrid } from "@/components/ui/bento-grid";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { CopySkillCommandButton } from "@/components/home/copy-skill-command-button";
 import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
@@ -199,24 +195,16 @@ const heroGlobeConfig = {
   markerColor: [110 / 255, 1, 42 / 255] as [number, number, number],
   glowColor: [1, 1, 1] as [number, number, number],
   markers: [
-    { location: [37.7749, -122.4194], size: 0.009 },
-    { location: [40.7128, -74.006], size: 0.009 },
-    { location: [51.5072, -0.1276], size: 0.008 },
-    { location: [19.076, 72.8777], size: 0.009 },
-    { location: [1.3521, 103.8198], size: 0.008 },
-    { location: [35.6762, 139.6503], size: 0.008 },
+    { location: [37.7749, -122.4194] as [number, number], size: 0.009 },
+    { location: [40.7128, -74.006] as [number, number], size: 0.009 },
+    { location: [51.5072, -0.1276] as [number, number], size: 0.008 },
+    { location: [19.076, 72.8777] as [number, number], size: 0.009 },
+    { location: [1.3521, 103.8198] as [number, number], size: 0.008 },
+    { location: [35.6762, 139.6503] as [number, number], size: 0.008 },
   ],
 };
 
 export function HomePage() {
-  const [copiedCommand, setCopiedCommand] = useState(false);
-
-  async function copySkillCommand() {
-    await navigator.clipboard.writeText(skillInstallCommand);
-    setCopiedCommand(true);
-    window.setTimeout(() => setCopiedCommand(false), 1800);
-  }
-
   return (
     <main className={`${styles.page} ${body.className}`}>
       <section className={styles.hero}>
@@ -267,19 +255,7 @@ export function HomePage() {
                 <code className={`${styles.commandText} ${mono.className}`}>
                   {skillInstallCommand}
                 </code>
-                <button
-                  type="button"
-                  className={styles.copyButton}
-                  onClick={copySkillCommand}
-                  aria-label="Copy skills CLI install command"
-                >
-                  {copiedCommand ? (
-                    <Check className={styles.copyIcon} aria-hidden="true" />
-                  ) : (
-                    <Copy className={styles.copyIcon} aria-hidden="true" />
-                  )}
-                  <span>{copiedCommand ? "Copied" : "Copy"}</span>
-                </button>
+                <CopySkillCommandButton command={skillInstallCommand} />
               </div>
             </div>
 

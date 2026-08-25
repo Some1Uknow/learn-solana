@@ -12,6 +12,26 @@ const nextConfig = {
   // SEO: Enforce consistent URL structure (no trailing slashes)
   // This prevents duplicate content and canonical/redirect mismatches
   trailingSlash: false,
+  async headers() {
+    return [
+      {
+        source: "/",
+        headers: [{ key: "Vary", value: "Accept, Accept-Encoding" }],
+      },
+      {
+        source: "/learn",
+        headers: [{ key: "Vary", value: "Accept, Accept-Encoding" }],
+      },
+      {
+        source: "/learn/:path*",
+        headers: [{ key: "Vary", value: "Accept, Accept-Encoding" }],
+      },
+      {
+        source: "/docs/:path*",
+        headers: [{ key: "Vary", value: "Accept, Accept-Encoding" }],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

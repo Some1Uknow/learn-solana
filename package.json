@@ -10,6 +10,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "test:agent-readiness": "node --import tsx --test scripts/agent-readiness.test.ts",
+    "verify:agent-readiness": "node scripts/verify-agent-readiness.mjs",
     "seo:check": "node scripts/check-seo-routes.mjs",
     "lint": "next lint",
     "postinstall": "fumadocs-mdx",

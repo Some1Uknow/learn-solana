@@ -1,6 +1,11 @@
-"use client";
-
 import Link from "next/link";
+import { headers } from "next/headers";
+
+import {
+  createAgentNotFoundMarkdown,
+  negotiateRepresentation,
+} from "@/lib/agent-readiness";
+import { siteUrl } from "@/lib/seo";
 
 const backgroundStyle = `
   radial-gradient(ellipse 120% 80% at 70% 20%, rgba(255, 20, 147, 0.15), transparent 50%),
@@ -10,7 +15,17 @@ const backgroundStyle = `
   #000000
 `;
 
-export default function NotFound() {
+export default async function NotFound() {
+  const requestHeaders = await headers();
+
+  if (negotiateRepresentation(requestHeaders.get("accept")) === "text/markdown") {
+    return (
+      <pre data-agent-not-found className="whitespace-pre-wrap p-6 text-sm leading-6">
+        {createAgentNotFoundMarkdown(siteUrl)}
+      </pre>
+    );
+  }
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
       <div className="absolute inset-0" style={{ background: backgroundStyle }} />
@@ -125,6 +140,11 @@ export default function NotFound() {
           <footer className="pb-8 pt-4 text-center space-y-4">
             <div className="text-xs text-zinc-500">
               If you believe this is an error, please check your connection and try again.
+            </div>
+            <div className="text-xs text-zinc-500">
+              Machine-readable recovery: <Link href="/llms.txt" className="text-zinc-300 underline underline-offset-4">docs index</Link>{" "}
+              · <a href="/llms-full.txt" className="text-zinc-300 underline underline-offset-4">full content</a>{" "}
+              · <a href="/sitemap.xml" className="text-zinc-300 underline underline-offset-4">sitemap</a>
             </div>
             <div className="text-xs text-zinc-600">
               Pro tip: In Solana, patience is a virtue. Transactions take time!

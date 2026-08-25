@@ -1,5 +1,3 @@
-"use client";
-
 import { Navbar } from "@/components/layout/navbar";
 import { HomePage } from "@/components/home/homepage";
 

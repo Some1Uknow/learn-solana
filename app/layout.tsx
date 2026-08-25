@@ -18,62 +18,7 @@ import {
   siteUrl,
 } from "@/lib/seo";
 import { brand } from "@/lib/brand";
-
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
-  name: brand.name,
-  alternateName: brand.alternateName,
-  url: siteUrl,
-  logo: `${siteUrl}${brand.assets.appleTouchIcon}`,
-  description: brand.longDescription,
-  sameAs: [brand.xUrl, brand.githubUrl],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      contactType: "support",
-      email: brand.email,
-    },
-  ],
-};
-
-const courseJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Course",
-  name: "Learn Solana Development",
-  description:
-    "Comprehensive Solana development course covering blockchain fundamentals, Rust programming, Anchor framework, and building dApps.",
-  provider: {
-    "@type": "EducationalOrganization",
-    name: brand.name,
-    url: siteUrl,
-  },
-  educationalLevel: "Beginner to Advanced",
-  isAccessibleForFree: true,
-  inLanguage: "en",
-  coursePrerequisites: "Basic programming knowledge",
-  teaches: ["Solana Development", "Rust Programming", "Smart Contracts", "Anchor Framework", "Solana Client Tooling"],
-  hasCourseInstance: {
-    "@type": "CourseInstance",
-    courseMode: "online",
-    courseWorkload: "PT40H",
-  },
-};
-
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: brand.name,
-  alternateName: brand.alternateName,
-  url: siteUrl,
-  // NOTE: SearchAction commented out - fumadocs uses a different search mechanism
-  // Uncomment when a /search page is implemented
-  // potentialAction: {
-  //   "@type": "SearchAction",
-  //   target: `${siteUrl}/search?q={search_term_string}`,
-  //   "query-input": "required name=search_term_string",
-  // },
-};
+import { createSiteStructuredData } from "@/lib/site-structured-data";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -138,27 +83,14 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <Script
-          id="jsonld-organization"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-        >
-          {JSON.stringify(organizationJsonLd)}
-        </Script>
-        <Script
-          id="jsonld-course"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-        >
-          {JSON.stringify(courseJsonLd)}
-        </Script>
-        <Script
-          id="jsonld-website"
-          type="application/ld+json"
-          strategy="beforeInteractive"
-        >
-          {JSON.stringify(websiteJsonLd)}
-        </Script>
+        {createSiteStructuredData(siteUrl).map((schema, index) => (
+          <script
+            key={`jsonld-site-${index}`}
+            id={`jsonld-site-${index}`}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
         {process.env.NEXT_PUBLIC_ENABLE_REACT_SCAN && (
           // react-scan performance analyzer (only enabled when explicitly requested)
           <Script

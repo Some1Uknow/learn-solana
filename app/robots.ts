@@ -20,6 +20,8 @@ export default function robots(): MetadataRoute.Robots {
           '/icon.ico',
           '/llms.txt',
           '/llms-full.txt',
+          '/llms-home',
+          '/llms-404',
           '/llms.mdx/',
           '/learn.mdx',
           '/learn.mdx/',
