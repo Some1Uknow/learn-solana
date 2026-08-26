@@ -32,8 +32,6 @@ const navigationItems = [
   { label: "Tools", href: "/tools" },
 ];
 
-const primaryOpportunityCategories = new Set<OpportunityCategory>(["grants", "jobs", "hackathons"]);
-
 const opportunityIcons: Record<OpportunityCategory, LucideIcon> = {
   grants: Award,
   jobs: BriefcaseBusiness,
@@ -54,45 +52,27 @@ interface NavbarLinksProps {
 }
 
 const desktopLinkClass =
-  "inline-flex min-h-10 items-center rounded-full px-3 text-sm font-medium transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a9ff2f] active:translate-y-px";
+  "ds-focus-ring inline-flex h-10 items-center rounded-lg px-3 text-sm font-medium transition-colors duration-150";
 
 export function NavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) {
   const pathname = usePathname();
 
-  if (isMobile) {
-    return (
-      <>
-        {navigationItems.map((item) => {
-          const isActive = isActivePath(pathname, item.href);
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex min-h-11 items-center rounded-xl px-3 text-sm font-medium transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a9ff2f]",
-                isActive ? "bg-white/[0.08] text-white" : "text-white/72 hover:bg-white/[0.05] hover:text-white",
-              )}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-0.5">
+    <div className={isMobile ? "grid gap-1" : "flex items-center gap-1"}>
       {navigationItems.map((item) => {
         const isActive = isActivePath(pathname, item.href);
         return (
           <Link
             key={item.label}
             href={item.href}
+            onClick={onNavigate}
             className={cn(
-              desktopLinkClass,
-              isActive ? "bg-white/[0.08] text-white" : "text-white/62 hover:bg-white/[0.05] hover:text-white",
+              isMobile
+                ? "ds-focus-ring flex min-h-10 items-center rounded-lg px-3 text-sm font-medium transition-colors duration-150"
+                : desktopLinkClass,
+              isActive
+                ? "bg-[#181818] text-[#fcfcfc]"
+                : "text-[#a0a0a0] hover:bg-[#181818] hover:text-[#fcfcfc]",
             )}
           >
             {item.label}
@@ -103,13 +83,9 @@ export function NavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) 
   );
 }
 
-function OpportunityDropdown({ mode }: { mode: "all" | "secondary" }) {
+function OpportunityDropdown({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const items = opportunityNavigation.filter((item) => {
-    if (mode === "all") return true;
-    return !primaryOpportunityCategories.has(item.href.slice(1) as OpportunityCategory);
-  });
-  const hasActiveItem = items.some((item) => isActivePath(pathname, item.href));
+  const hasActiveItem = opportunityNavigation.some((item) => isActivePath(pathname, item.href));
 
   return (
     <DropdownMenu>
@@ -117,22 +93,24 @@ function OpportunityDropdown({ mode }: { mode: "all" | "secondary" }) {
         className={cn(
           desktopLinkClass,
           "gap-1.5",
-          hasActiveItem ? "bg-white/[0.08] text-white" : "text-white/62 hover:bg-white/[0.05] hover:text-white",
+          hasActiveItem
+            ? "bg-[#181818] text-[#fcfcfc]"
+            : "text-[#a0a0a0] hover:bg-[#181818] hover:text-[#fcfcfc]",
         )}
       >
-        {mode === "all" ? "Opportunities" : "More"}
+        Opportunities
         <ChevronDown className="h-3.5 w-3.5 opacity-60" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="center"
-        sideOffset={10}
-        className="w-72 rounded-2xl border-white/[0.1] bg-[#0c0d0f]/98 p-2 text-white shadow-[0_20px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+        align="end"
+        sideOffset={8}
+        className="w-64 rounded-xl border-[#292929] bg-[#181818] p-1.5 text-[#fcfcfc] shadow-[0_24px_60px_-40px_rgba(0,0,0,0.7)]"
       >
-        <DropdownMenuLabel className="px-3 pb-2 pt-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
-          Build your next step
+        <DropdownMenuLabel className="px-2.5 py-2 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-[#a0a0a0]">
+          Opportunities
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="mx-2 bg-white/[0.08]" />
-        {items.map((item) => {
+        <DropdownMenuSeparator className="bg-[#292929]" />
+        {opportunityNavigation.map((item) => {
           const category = item.href.slice(1) as OpportunityCategory;
           const Icon = opportunityIcons[category];
           const active = isActivePath(pathname, item.href);
@@ -140,12 +118,13 @@ function OpportunityDropdown({ mode }: { mode: "all" | "secondary" }) {
             <DropdownMenuItem key={item.href} asChild>
               <Link
                 href={item.href}
+                onClick={onNavigate}
                 className={cn(
-                  "min-h-11 cursor-pointer rounded-xl px-3 text-sm text-white/72 transition-colors duration-100 focus:bg-white/[0.07] focus:text-white",
-                  active && "bg-[#a9ff2f]/10 text-[#dcffa8]",
+                  "min-h-10 cursor-pointer rounded-lg px-2.5 text-sm transition-colors focus:bg-[#232323] focus:text-[#fcfcfc]",
+                  active ? "bg-[#232323] text-[#fcfcfc]" : "text-[#a0a0a0]",
                 )}
               >
-                <Icon className="h-4 w-4 text-[#a9ff2f]/80" aria-hidden="true" />
+                <Icon className="h-4 w-4 text-[#a0a0a0]" aria-hidden="true" />
                 <span>{item.label}</span>
               </Link>
             </DropdownMenuItem>
@@ -157,59 +136,27 @@ function OpportunityDropdown({ mode }: { mode: "all" | "secondary" }) {
 }
 
 export function OpportunityNavbarLinks({ isMobile = false, onNavigate }: NavbarLinksProps) {
-  const pathname = usePathname();
-
-  if (isMobile) {
-    return (
-      <>
-        {opportunityNavigation.map((item) => {
-          const category = item.href.slice(1) as OpportunityCategory;
-          const Icon = opportunityIcons[category];
-          const isActive = isActivePath(pathname, item.href);
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onNavigate}
-              className={cn(
-                "flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a9ff2f]",
-                isActive ? "bg-[#a9ff2f]/10 text-[#e4ffb5]" : "text-white/68 hover:bg-white/[0.05] hover:text-white",
-              )}
-            >
-              <Icon className="h-4 w-4 text-[#a9ff2f]/75" aria-hidden="true" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </>
-    );
+  if (!isMobile) {
+    return <OpportunityDropdown onNavigate={onNavigate} />;
   }
 
   return (
-    <div className="flex items-center gap-0.5">
-      <div className="hidden items-center gap-0.5 xl:flex">
-        {opportunityNavigation
-          .filter((item) => primaryOpportunityCategories.has(item.href.slice(1) as OpportunityCategory))
-          .map((item) => {
-            const isActive = isActivePath(pathname, item.href);
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  desktopLinkClass,
-                  isActive ? "bg-[#a9ff2f]/10 text-[#e4ffb5]" : "text-white/62 hover:bg-white/[0.05] hover:text-white",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        <OpportunityDropdown mode="secondary" />
-      </div>
-      <div className="xl:hidden">
-        <OpportunityDropdown mode="all" />
-      </div>
+    <div className="grid gap-1">
+      {opportunityNavigation.map((item) => {
+        const category = item.href.slice(1) as OpportunityCategory;
+        const Icon = opportunityIcons[category];
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className="ds-focus-ring flex min-h-10 items-center gap-2.5 rounded-lg px-3 text-sm font-medium text-[#a0a0a0] transition-colors duration-150 hover:bg-[#181818] hover:text-[#fcfcfc]"
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+            {item.label}
+          </Link>
+        );
+      })}
     </div>
   );
 }
