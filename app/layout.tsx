@@ -1,5 +1,6 @@
 import type React from "react";
 import "./globals.css";
+import "./design-system.css";
 import type { Metadata, Viewport } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
