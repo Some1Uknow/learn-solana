@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
-import { Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { Star } from "lucide-react";
 
-// GitHub configuration
 const githubConfig = {
   repoName: "learn-solana",
   owner: "Some1Uknow",
@@ -18,121 +16,95 @@ interface NavbarGithubProps {
   isMobile?: boolean;
 }
 
-// Cache configuration
 const CACHE_KEY = "github-stars-cache";
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_DURATION = 60 * 60 * 1000;
 
 interface CacheData {
   stars: number;
   timestamp: number;
 }
 
-// Custom hook for fetching GitHub stars with caching
 function useGithubStars() {
   const [stars, setStars] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchStars = useCallback(async () => {
-    // Check cache first
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
         const cacheData: CacheData = JSON.parse(cached);
-        const now = Date.now();
-
-        // Use cached data if it's still fresh
-        if (now - cacheData.timestamp < CACHE_DURATION) {
+        if (Date.now() - cacheData.timestamp < CACHE_DURATION) {
           setStars(cacheData.stars);
           return;
         }
-      } catch (error) {
-        // Invalid cache, continue to fetch
+      } catch {
         localStorage.removeItem(CACHE_KEY);
       }
     }
 
-    setIsLoading(true);
-
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       const response = await fetch(
         `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repoName}`,
         {
           signal: controller.signal,
-          headers: {
-            Accept: "application/vnd.github.v3+json",
-          },
-        }
+          headers: { Accept: "application/vnd.github.v3+json" },
+        },
       );
-
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
+      if (!response.ok) return;
       const data = await response.json();
-      const starCount = data.stargazers_count || 0;
+      if (typeof data.stargazers_count !== "number") return;
 
-      // Cache the result
       const cacheData: CacheData = {
-        stars: starCount,
+        stars: data.stargazers_count,
         timestamp: Date.now(),
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-
-      setStars(starCount);
-    } catch (error) {
-      // If fetch fails and we have no cached data, use fallback
-      if (stars === null) {
-        setStars(42); // Fallback number
-      }
-      console.warn("Failed to fetch GitHub stars:", error);
-    } finally {
-      setIsLoading(false);
+      setStars(data.stargazers_count);
+    } catch {
+      // Star count is optional chrome; keep the GitHub link useful when the API is unavailable.
     }
-  }, [stars]);
+  }, []);
 
   useEffect(() => {
-    fetchStars();
+    void fetchStars();
   }, [fetchStars]);
 
-  return { stars, isLoading };
+  return stars;
 }
 
 export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
-  const { stars: githubStars, isLoading } = useGithubStars();
+  const githubStars = useGithubStars();
 
   return (
-    <Button
-      asChild
-      variant="outline"
-      className={`h-10 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-0 text-white/80 hover:bg-white/[0.06] hover:text-white ${
-        isMobile ? "w-full" : ""
+    <Link
+      href={githubConfig.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Open ${githubConfig.fullRepoName} on GitHub`}
+      className={`ds-focus-ring inline-flex h-10 items-center gap-2 rounded-lg border border-[#292929] bg-transparent px-3 text-sm font-medium text-[#a0a0a0] transition-colors duration-150 hover:bg-[#181818] hover:text-[#fcfcfc] ${
+        isMobile ? "w-full justify-between" : ""
       }`}
     >
-      <Link
-        href={githubConfig.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Open ${githubConfig.fullRepoName} on GitHub`}
-      >
+      <span className="inline-flex items-center gap-2">
         <Image
           src="/github.svg"
-          alt="GitHub"
+          alt=""
+          aria-hidden="true"
           width={16}
           height={16}
-          className="brightness-0 invert"
+          className="brightness-0 invert opacity-80"
         />
-        <div className="flex items-center gap-1">
-          <Star size={14} className="fill-[#a9ff2f]/20 text-[#a9ff2f]/75" aria-hidden="true" />
-          <span className="text-sm font-semibold">
-            {isLoading ? "..." : githubStars || "..."}
-          </span>
-        </div>
-      </Link>
-    </Button>
+        GitHub
+      </span>
+      {githubStars !== null && (
+        <span className="inline-flex items-center gap-1 text-xs text-[#a0a0a0]">
+          <Star size={13} aria-hidden="true" />
+          {githubStars}
+        </span>
+      )}
+    </Link>
   );
 }
