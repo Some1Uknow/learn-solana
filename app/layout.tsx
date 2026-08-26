@@ -1,8 +1,7 @@
 import type React from "react";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Inter, Roboto_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
@@ -19,6 +18,18 @@ import {
 } from "@/lib/seo";
 import { brand } from "@/lib/brand";
 import { createSiteStructuredData } from "@/lib/site-structured-data";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  variable: "--font-roboto-mono",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -92,7 +103,6 @@ export default async function RootLayout({
           />
         ))}
         {process.env.NEXT_PUBLIC_ENABLE_REACT_SCAN && (
-          // react-scan performance analyzer (only enabled when explicitly requested)
           <Script
             id="react-scan"
             src="https://unpkg.com/react-scan/dist/auto.global.js"
@@ -100,7 +110,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className={`${inter.variable} ${robotoMono.variable}`}>
         {process.env.NODE_ENV === "production" && clarityId && (
           <Script id="clarity-script" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){
