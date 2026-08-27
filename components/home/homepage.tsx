@@ -28,7 +28,7 @@ function SectionLabel({ current, total, children }: { current: string; total: st
 
 export function HomePage() {
   return (
-    <main className={styles.page}>
+    <main id="main-content" tabIndex={-1} className={styles.page}>
       <div className={styles.background} aria-hidden="true">
         <div className={styles.dots} />
         <div className={styles.edgeBlur} />

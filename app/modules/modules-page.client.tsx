@@ -23,7 +23,7 @@ export function ModulesPageClient() {
     <div className="min-h-screen bg-[#f5f5f5] text-[#181818]">
       <BreadcrumbSchema items={breadcrumbItems} />
       <Navbar />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <header className="border-b border-[#dedede] py-20">
           <div className="ds-shell">
             <p className="ds-section-label">Curriculum</p>

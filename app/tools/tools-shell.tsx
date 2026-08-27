@@ -45,7 +45,7 @@ export function ToolsPageFrame({
       {!fullscreen && <BreadcrumbSchema items={breadcrumbItems} />}
       {!fullscreen && <Navbar />}
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={`${styles.hero} ${fullscreen || compactHero ? styles.heroCompact : ""}`}>
           <div className={styles.shell}>
             <div className={`${styles.heroGrid} ${heroAside ? "" : styles.heroGridSingle}`}>

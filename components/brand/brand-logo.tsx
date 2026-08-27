@@ -7,7 +7,7 @@ type BrandLogoProps = {
   className?: string;
   imageClassName?: string;
   priority?: boolean;
-  variant?: "wordmark" | "mark" | "text";
+  variant?: "wordmark" | "mark" | "text" | "textBlack";
 };
 
 const assetConfig = {
@@ -25,6 +25,12 @@ const assetConfig = {
   },
   text: {
     src: brand.assets.text,
+    alt: brand.name,
+    width: 790,
+    height: 160,
+  },
+  textBlack: {
+    src: brand.assets.textBlackSource,
     alt: brand.name,
     width: 790,
     height: 160,

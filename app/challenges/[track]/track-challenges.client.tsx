@@ -67,7 +67,7 @@ export default function TrackChallengesClient({
     <div className={`${styles.page} ${body.className}`}>
       <Navbar />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero}>
           <div className={`${styles.shell} ${styles.heroGrid}`}>
             <div className={styles.heroCopy}>

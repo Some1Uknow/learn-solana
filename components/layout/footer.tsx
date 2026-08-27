@@ -13,8 +13,9 @@ export function Footer() {
       <div className="ds-shell py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left: Logo + Copyright */}
-          <div className="flex items-center gap-3">
-            <BrandLogo variant="text" className="w-[92px]" />
+          <div className="flex items-center gap-2.5">
+            <BrandLogo variant="mark" className="w-7" />
+            <BrandLogo variant="textBlack" className="w-[82px]" />
             <span className="text-sm text-[#636363]">
               © {new Date().getFullYear()}
             </span>
