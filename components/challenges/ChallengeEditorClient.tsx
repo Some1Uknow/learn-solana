@@ -563,7 +563,7 @@ export default function ChallengeEditorClient({
                             ) : null
                           ) : null}
                           {saveError ? (
-                            <div className="mt-3 rounded-md border border-amber-300/25 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-100">
+                            <div className="mt-3 rounded-md border border-rose-300/25 bg-rose-400/10 px-4 py-3 text-sm font-medium text-rose-100">
                               {saveError}
                             </div>
                           ) : null}
@@ -589,10 +589,10 @@ export default function ChallengeEditorClient({
 
                         {selectedCase.stderr ? (
                           <section>
-                            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-100/60">
+                            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-rose-100/60">
                               Compiler Output
                             </div>
-                            <pre className="whitespace-pre-wrap break-words rounded-md border border-amber-300/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-50">
+                            <pre className="whitespace-pre-wrap break-words rounded-md border border-rose-300/20 bg-rose-400/10 p-4 text-sm leading-6 text-rose-50">
                               {selectedCase.stderr}
                             </pre>
                           </section>

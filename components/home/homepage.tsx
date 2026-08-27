@@ -9,10 +9,10 @@ import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
 const modules = [
-  { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules" },
-  { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules" },
-  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules" },
-  { name: "Modern clients", description: "Build transactions and wallet flows with current Solana clients.", meta: "Connect an app", href: "/modules" },
+  { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules/rust-foundations", image: "/rust-2.png", imageAlt: "Rust" },
+  { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules/anchor-programs", image: "/anchor.png", imageAlt: "Anchor" },
+  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules/solana-foundations", image: "/solanaLogo.png", imageAlt: "Solana" },
+  { name: "Modern clients", description: "Build transactions and wallet flows with current Solana clients.", meta: "Connect an app", href: "/modules/solana-kit-clients", image: "/solana-kit.svg", imageAlt: "Solana Kit" },
 ];
 
 const productLinks = [
@@ -57,6 +57,9 @@ export function HomePage() {
           <div className={styles.moduleGrid}>
             {modules.map((module) => (
               <article className={styles.moduleCard} key={module.name}>
+                <div className={styles.moduleLogo}>
+                  <Image src={module.image} alt={`${module.imageAlt} logo`} width={56} height={56} />
+                </div>
                 <div>
                   <h3>{module.name}</h3>
                   <p>{module.description}</p>
