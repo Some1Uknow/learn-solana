@@ -27,11 +27,11 @@ export function Footer() {
           <div className="flex items-center gap-2 text-xs text-[#636363]">
             <span>Supported by</span>
             <Image
-              src="/solanaFndn.png"
+              src="/solanaFoundationLogo.svg"
               alt="Solana Foundation"
-              width={100}
+              width={145}
               height={24}
-              className="object-contain object-center opacity-60 transition-opacity hover:opacity-100"
+              className="object-contain object-center transition-opacity hover:opacity-80"
             />
           </div>
 

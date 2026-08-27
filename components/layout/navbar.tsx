@@ -34,7 +34,7 @@ export function Navbar() {
         aria-label="Primary navigation"
         className="ls-site-nav sticky top-3 z-50 my-3 hidden rounded-full border border-[#dedede] bg-[#f5f5f5]/95 backdrop-blur-lg min-[1180px]:block"
       >
-        <div className="ds-shell grid min-h-[72px] grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <div className="ls-site-nav-shell grid min-h-[72px] grid-cols-[1fr_auto_1fr] items-center gap-6">
           <div className="min-w-0 justify-self-start">
             <NavbarBranding />
           </div>
@@ -57,7 +57,7 @@ export function Navbar() {
           isMenuOpen ? "rounded-[28px] overflow-hidden" : "rounded-full"
         }`}
       >
-        <div className="mx-auto w-[calc(100vw-32px)] max-w-[1200px]">
+        <div className="ls-site-nav-mobile-shell">
           <div className="flex min-h-16 items-center justify-between gap-4">
             <NavbarBranding />
             <button
@@ -78,7 +78,7 @@ export function Navbar() {
             id="mobile-site-navigation"
             className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-[#dedede] bg-[#f5f5f5]"
           >
-            <div className="mx-auto grid w-[calc(100vw-32px)] max-w-[1200px] gap-5 py-4">
+            <div className="ls-site-nav-mobile-shell grid gap-5 py-4">
               <NavbarLinks isMobile onNavigate={() => setIsMenuOpen(false)} />
 
               <div className="border-t border-[#dedede] pt-4">

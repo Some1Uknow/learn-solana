@@ -84,6 +84,20 @@ code, kbd, pre, samp, .font-mono {
   margin-inline: auto;
 }
 
+.ls-site-nav-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  padding-inline: 32px;
+}
+
+.ls-site-nav-mobile-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  padding-inline: 16px;
+}
+
 .ds-reading-width { width: min(var(--ds-reading-width), 100%); }
 
 .ds-section-label {

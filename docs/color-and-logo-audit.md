@@ -53,4 +53,6 @@ Legacy duplicate exports such as `solanaMain.png`, `learnsol-logo.png`, and `lea
 
 The homepage hero uses a color-preserving ASCII treatment generated from the latest clean Solana source. The original gradient is sampled into the glyph field, and the source alpha is used as a strict shape gate so no fragments leak into the gaps between the three bars. The cleaned `public/solanaLogo4k.png` remains the high-resolution source for module and opportunity marks, while the matching poster/video pair powers the animated hero.
 
+The supplied `public/solanaFoundationLogo.svg` is the canonical Foundation lockup on light surfaces; its wordmark is ink-colored while the Solana mark keeps its source gradient.
+
 The light navigation and shared footer render the `learn.sol` name as text beside the transparent LearnSol mark. This avoids placing the legacy black-background text tile on a light surface.

@@ -140,7 +140,7 @@ export function HomePage() {
             <p>Read the curriculum without signing in. Sign in when you want to save module and challenge progress.</p>
             <div className={styles.supportedBy}>
               <span>Supported by</span>
-              <Image src="/solanaFndn.png" alt="Solana Foundation" width={132} height={32} />
+              <Image src="/solanaFoundationLogo.svg" alt="Solana Foundation" width={170} height={28} />
             </div>
           </div>
         </div>

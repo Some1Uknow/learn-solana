@@ -20,13 +20,13 @@ export function CopySkillCommandButton({ command }: { command: string }) {
       className={styles.copyButton}
       onClick={copyCommand}
       aria-label="Copy skills CLI install command"
+      title={copied ? "Copied" : "Copy install command"}
     >
       {copied ? (
         <Check className={styles.copyIcon} aria-hidden="true" />
       ) : (
         <Copy className={styles.copyIcon} aria-hidden="true" />
       )}
-      <span>{copied ? "Copied" : "Copy"}</span>
     </button>
   );
 }
