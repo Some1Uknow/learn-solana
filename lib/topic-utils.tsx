@@ -18,11 +18,11 @@ export const getTopicIcon = (type: string): ReactElement => {
 export const getTopicTypeStyle = (type: string): string => {
   switch (type) {
     case "theory":
-      return "bg-blue-500/20 text-blue-300";
+      return "bg-white/10 text-zinc-200";
     case "exercise":
-      return "bg-yellow-500/20 text-yellow-300";
+      return "bg-[#a9ff2f]/15 text-[#d9ff9e]";
     case "project":
-      return "bg-purple-500/20 text-purple-300";
+      return "bg-[#a9ff2f]/25 text-[#e8ffc8]";
     default:
       return "bg-gray-500/20 text-gray-300";
   }

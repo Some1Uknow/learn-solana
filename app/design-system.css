@@ -2,6 +2,14 @@
   --ds-background: #f5f5f5;
   --ds-foreground: #181818;
   --ds-card: #ffffff;
+  --ds-accent: #a9ff2f;
+  --ds-accent-ink: #172006;
+  --ds-accent-muted: #557b11;
+  --ds-accent-soft: #e8ffc8;
+  --ds-warning: #a86608;
+  --ds-warning-soft: #fff4d6;
+  --ds-danger: #b44343;
+  --ds-danger-soft: #fff0f0;
   --ds-card-foreground: #181818;
   --ds-secondary: #efefef;
   --ds-secondary-foreground: #181818;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 import { Footer } from "@/components/layout/footer";
@@ -28,7 +29,7 @@ export default function BuildChallengesPage() {
                 <h1 className="max-w-4xl text-4xl font-medium leading-none tracking-[-0.03em] sm:text-5xl">Build programs that pass real tests.</h1>
                 <p className="mt-6 max-w-2xl text-base leading-7 text-[#636363]">Start with an Anchor workspace. Build locally, upload the compiled program and pass each stage.</p>
               </div>
-              <p className="border-l border-[#dedede] pl-4 font-mono text-xs leading-6 text-[#636363]">No browser IDE.<br />No Git setup.<br />Build locally and run the tests.</p>
+              <div className="flex items-center gap-4 border-l border-[#dedede] pl-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] border border-[#dedede] bg-white"><Image src="/anchor.png" alt="Anchor logo" width={36} height={36} className="h-9 w-9 object-contain" /></span><p className="font-mono text-xs leading-6 text-[#636363]">Anchor workspace.<br />Local compiler.<br />Real staged tests.</p></div>
             </div>
           </div>
         </section>
@@ -43,7 +44,7 @@ export default function BuildChallengesPage() {
               <div className="divide-y divide-[#dedede]">
                 {challenges.map((challenge) => (
                   <Link key={challenge.slug} href={`/build/${challenge.slug}`} className="group grid min-h-36 gap-5 py-7 transition-colors duration-100 hover:bg-[#efefef] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6b8f27] sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:items-center sm:px-4">
-                    <span className="font-mono text-sm tabular-nums text-[#636363]">01</span>
+                    <span className="grid h-12 w-12 place-items-center rounded-[8px] border border-[#dedede] bg-white"><Image src="/capstone.png" alt="Capstone challenge" width={30} height={30} className="h-[30px] w-[30px] object-contain" /></span>
                     <div>
                       <h3 className="text-2xl font-medium tracking-tight transition-colors duration-100">{challenge.title}</h3>
                       <p className="mt-2 max-w-2xl text-sm leading-6 text-[#636363]">{challenge.description}</p>

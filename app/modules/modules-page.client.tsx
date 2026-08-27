@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Search } from "lucide-react";
 
@@ -40,7 +41,10 @@ export function ModulesPageClient() {
           <div className="ds-shell grid gap-5 md:grid-cols-2">
             {filtered.map((module, index) => (
               <article key={module.id} className="flex min-w-0 flex-col gap-5 rounded-xl border border-[#dedede] bg-white p-5 sm:p-6">
-                <p className="font-mono text-xs uppercase tracking-[0.12em] text-[#636363]">[ {String(index + 1).padStart(2, "0")} / {String(modules.length).padStart(2, "0")} ] · {module.topics.length + 1} lessons</p>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-[10px] border border-[#dedede] bg-[#f5f5f5]"><Image src={module.image} alt={`${module.title} logo`} width={34} height={34} className="h-[34px] w-[34px] object-contain" /></span>
+                  <p className="text-right font-mono text-xs uppercase tracking-[0.12em] text-[#636363]">[ {String(index + 1).padStart(2, "0")} / {String(modules.length).padStart(2, "0")} ] · {module.topics.length + 1} lessons</p>
+                </div>
                 <div><h2 className="text-xl font-medium leading-none tracking-[-0.02em]">{module.title.replace(/^[^\w]*/, "")}</h2><p className="mt-3 leading-6 text-[#636363]">{module.description}</p></div>
                 <div className="mt-auto flex items-center gap-2 text-sm text-[#636363]"><BookOpen className="h-4 w-4" />{module.goal}</div>
                 <Link href={`/modules/${module.id}`} className="ds-focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[6px] border border-[#dedede] bg-[#efefef] px-5 text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-80">Open module <ArrowRight className="h-4 w-4" /></Link>

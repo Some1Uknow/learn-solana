@@ -2,7 +2,8 @@
 
 import type { MouseEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, Blocks, Compass } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ToolsPageFrame } from "./tools-shell";
 import styles from "./tools.module.css";
@@ -20,7 +21,8 @@ const tools = [
     description: "Practice Solana runtime flow step by step.",
     href: "/tools/runtime-lab",
     meta: "Account progress",
-    icon: Compass,
+    logo: "/tool_icon.png",
+    logoAlt: "Runtime Lab",
   },
   {
     id: "visual-builder",
@@ -28,7 +30,8 @@ const tools = [
     description: "Sketch programs, instructions, accounts, and PDAs.",
     href: "/tools/visual-builder",
     meta: "Visual map",
-    icon: Blocks,
+    logo: "/anchor.png",
+    logoAlt: "Anchor logo",
   },
 ];
 
@@ -53,8 +56,6 @@ export function ToolsPageClient() {
         <div className={styles.shell}>
           <div className={styles.minimalToolGrid}>
             {tools.map((tool) => {
-              const Icon = tool.icon;
-
               return (
                 <Link
                   key={tool.id}
@@ -63,7 +64,7 @@ export function ToolsPageClient() {
                   className={styles.minimalToolCard}
                 >
                   <div className={styles.minimalToolIcon}>
-                    <Icon className="h-5 w-5" />
+                    <Image src={tool.logo} alt={tool.logoAlt} width={24} height={24} className="h-6 w-6 object-contain" />
                   </div>
                   <div className={styles.minimalToolCopy}>
                     <h2 className={`${styles.minimalToolTitle} ${toolsDisplay.className}`}>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type React from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Code, FileText, Rocket } from "lucide-react";
 import type { ModuleItem } from "@/components/learn/modules-grid";
@@ -18,6 +19,7 @@ export default function ModuleDetailPageClient({ module }: { module: ModuleItem 
         <header className="border-b border-[#dedede] py-14 md:py-20">
           <div className="ds-shell">
             <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-[#636363]" aria-label="Breadcrumb"><Link href="/modules" className="hover:text-[#181818]">Modules</Link><span>/</span><span aria-current="page">{module.title}</span></nav>
+            <div className="mb-6 grid h-16 w-16 place-items-center overflow-hidden rounded-xl border border-[#dedede] bg-white"><Image src={module.image || "/solanaLogo.png"} alt={`${module.title} logo`} width={40} height={40} className="h-10 w-10 object-contain" priority /></div>
             <p className="ds-section-label">Track Curriculum</p>
             <h1 className="mt-4 text-4xl font-medium leading-none tracking-[-0.03em] md:text-5xl">{module.title}</h1>
             <p className="mt-4 max-w-[720px] text-base leading-7 text-[#636363]">{module.description}</p>

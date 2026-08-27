@@ -33,9 +33,9 @@ const variantConfig = {
   },
   warning: {
     icon: AlertTriangle,
-    accentColor: "#ffbd2e",
-    bgGradient: "from-[#ffbd2e]/5 to-transparent",
-    borderGradient: "from-[#ffbd2e]/30 via-[#ffbd2e]/10 to-transparent",
+    accentColor: "#c58a13",
+    bgGradient: "from-[#c58a13]/5 to-transparent",
+    borderGradient: "from-[#c58a13]/30 via-[#c58a13]/10 to-transparent",
     defaultTitle: "Warning",
   },
   tip: {

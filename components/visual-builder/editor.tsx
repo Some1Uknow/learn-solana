@@ -577,7 +577,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
         </div>
 
         {exportWarnings.length > 0 && (
-          <div className="mt-3 border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+          <div className="mt-3 border border-[#c58a13]/30 bg-[#c58a13]/10 px-3 py-2 text-xs text-[#f1d18c]">
             {exportWarnings.map((warning) => (
               <div key={warning}>• {warning}</div>
             ))}

@@ -25,6 +25,8 @@
 .headingRow svg { width: 15px; }
 .moduleGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; padding: 24px; border-radius: 24px; background: #efefef; }
 .moduleCard { min-width: 0; display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid #dedede; border-radius: 12px; background: #fff; }
+.moduleLogo { display: grid; width: 56px; height: 56px; place-items: center; overflow: hidden; border: 1px solid #dedede; border-radius: 10px; background: #f5f5f5; }
+.moduleLogo img { width: 34px; height: 34px; object-fit: contain; }
 .moduleCard h3,.splitCard h3,.toolCard h3 { margin: 0; font-size: 20px; font-weight: 500; line-height: 1.2; letter-spacing: -.02em; }
 .moduleCard p,.splitCard p,.toolCard p { margin: 10px 0 0; color: #636363; font-size: 16px; line-height: 25px; }
 .moduleMeta { display: flex; align-items: center; gap: 8px; color: #181818; font-size: 14px; }
