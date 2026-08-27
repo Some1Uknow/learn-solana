@@ -1,390 +1,137 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Inter, Space_Grotesk } from "next/font/google";
-import {
-  ChevronRight,
-  Layers3,
-  MessageSquareMore,
-  Pickaxe,
-  Workflow,
-} from "lucide-react";
+import type React from "react";
+import { ArrowRight, BookOpen, Braces, Hammer, TerminalSquare } from "lucide-react";
 
-import { Globe } from "@/components/ui/globe";
-import { BentoGrid } from "@/components/ui/bento-grid";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { CopySkillCommandButton } from "@/components/home/copy-skill-command-button";
 import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const display = spaceGrotesk;
-const body = inter;
-const mono = inter;
-
-const stackCards = [
-  {
-    name: "Solana",
-    description:
-      "Core runtime thinking, account models, transaction flow, priority fees, and protocol behavior that matter once you leave toy demos.",
-    imageSrc: "/solanaLogo.png",
-    imageAlt: "Solana logo",
-    className: styles.stackPortraitSolana,
-  },
-  {
-    name: "Rust",
-    description:
-      "Ownership, borrowing, traits, pattern matching, and real problem-solving loops designed for Solana developers instead of generic language tourists.",
-    imageSrc: "/rust-2.png",
-    imageAlt: "Rust logo",
-    className: styles.stackPortraitRust,
-  },
-  {
-    name: "Anchor",
-    description:
-      "Macros, account validation, instruction design, constraints, and the production habits that stop Anchor from becoming magic glue.",
-    imageSrc: "/anchor.png",
-    imageAlt: "Anchor logo",
-    className: styles.stackPortraitAnchor,
-  },
-  {
-    name: "Solana Kit",
-    description:
-      "Modern client flows, transaction assembly, wallet-standard-first interfaces, and the newer tooling direction instead of legacy web3 habits.",
-    imageSrc: "/solana-kit.svg",
-    imageAlt: "Solana Kit logo",
-    className: styles.stackPortraitKit,
-  },
+const modules = [
+  { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules" },
+  { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules" },
+  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules" },
+  { name: "Modern clients", description: "Build transactions and wallet flows with current Solana clients.", meta: "Connect an app", href: "/modules" },
 ];
 
-const developerStats = [
-  {
-    value: "2,128",
-    label: "Developers",
-    note: "Builders who have used the learning loop",
-  },
-  {
-    value: "8,342",
-    label: "Learning Minutes",
-    note: "Time spent learning and shipping",
-  },
-  {
-    value: "4+",
-    label: "modules published end to end",
-    note: "Core stack coverage across the product",
-  },
-  {
-    value: "50",
-    label: "Challengers",
-    note: "Builders solving exercises and asking questions",
-  },
+const productLinks = [
+  { title: "Runtime Lab", description: "Step through transactions and see how accounts change.", href: "/tools/runtime-lab", Icon: TerminalSquare },
+  { title: "Visual Builder", description: "Plan a Solana program from instructions, accounts and constraints.", href: "/tools/visual-builder", Icon: Braces },
 ];
 
-const skillInstallCommand =
-  "npx skills add Some1Uknow/learn-solana --skill learn-solana";
+const skillInstallCommand = "npx skills add Some1Uknow/learn-solana --skill learn-solana";
 
-const compatibleAgents = [
-  {
-    name: "Codex",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg",
-    logoAlt: "OpenAI logo",
-  },
-  {
-    name: "Claude Code",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg",
-    logoAlt: "Claude logo",
-  },
-  {
-    name: "Cursor",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg",
-    logoAlt: "Cursor logo",
-  },
-  {
-    name: "GitHub Copilot",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/githubcopilot.svg",
-    logoAlt: "GitHub Copilot logo",
-  },
-  {
-    name: "Gemini CLI",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg",
-    logoAlt: "Google Gemini logo",
-  },
-  {
-    name: "Antigravity",
-    logoSrc: "https://upload.wikimedia.org/wikipedia/commons/5/50/Google_Antigravity_Logo.svg",
-    logoAlt: "Google Antigravity logo",
-    wide: true,
-  },
-  {
-    name: "Windsurf",
-    logoSrc: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/windsurf.svg",
-    logoAlt: "Windsurf logo",
-  },
-  {
-    name: "OpenCode",
-    logoSrc: "/assistant-logos/opencode.svg",
-    logoAlt: "OpenCode logo",
-    wide: true,
-  },
-];
-
-const ctaFeatures = [
-  {
-    title: "Structured modules",
-    body: "Public lessons that explain first principles instead of hiding behind shorthand.",
-    Icon: Workflow,
-  },
-  {
-    title: "Executable exercises",
-    body: "Saved progress and server-validated test cases so the product teaches through proof.",
-    Icon: Pickaxe,
-  },
-  {
-    title: "Entire stack coverage",
-    body: "Rust, Anchor, Solana runtime, and modern client tooling in one coherent learning loop.",
-    Icon: Layers3,
-  },
-  {
-    title: "Developer trust",
-    body: "Built from real questions, real feedback, and surfaces developers actually return to.",
-    Icon: MessageSquareMore,
-  },
-];
-
-const footerColumns = {
-  Platform: [
-    { label: "Learn", href: "/modules" },
-    { label: "Challenges", href: "/challenges" },
-    { label: "Build with Me", href: "/tools/visual-builder" },
-    { label: "Brand Kit", href: "/branding" },
-  ],
-  Explore: [
-    { label: "Tutorials", href: "/learn" },
-    { label: "Curriculum", href: "/modules" },
-    { label: "Runtime Lab", href: "/tools/runtime-lab" },
-    { label: "Visual Builder", href: "/tools/visual-builder" },
-  ],
-  Build: [
-    { label: "Partner", href: "/partner" },
-    { label: "Runtime Lab", href: "/tools/runtime-lab" },
-    { label: "Visual Builder", href: "/tools/visual-builder" },
-    { label: "Challenges", href: "/challenges" },
-  ],
-};
-
-const heroGlobeConfig = {
-  width: 800,
-  height: 800,
-  devicePixelRatio: 2,
-  phi: 0,
-  theta: 0.28,
-  dark: 0,
-  diffuse: 1.2,
-  mapSamples: 16000,
-  mapBrightness: 6,
-  mapBaseBrightness: 0.08,
-  baseColor: [1, 1, 1] as [number, number, number],
-  markerColor: [110 / 255, 1, 42 / 255] as [number, number, number],
-  glowColor: [1, 1, 1] as [number, number, number],
-  markers: [
-    { location: [37.7749, -122.4194] as [number, number], size: 0.009 },
-    { location: [40.7128, -74.006] as [number, number], size: 0.009 },
-    { location: [51.5072, -0.1276] as [number, number], size: 0.008 },
-    { location: [19.076, 72.8777] as [number, number], size: 0.009 },
-    { location: [1.3521, 103.8198] as [number, number], size: 0.008 },
-    { location: [35.6762, 139.6503] as [number, number], size: 0.008 },
-  ],
-};
+function SectionLabel({ current, total, children }: { current: string; total: string; children: React.ReactNode }) {
+  return <p className={styles.sectionLabel}><span>[ <b>{current}</b> / {total} ]</span> · {children}</p>;
+}
 
 export function HomePage() {
   return (
-    <main className={`${styles.page} ${body.className}`}>
+    <main className={styles.page}>
+      <div className={styles.background} aria-hidden="true">
+        <div className={styles.dots} />
+        <div className={styles.edgeBlur} />
+      </div>
+
       <section className={styles.hero}>
-        <div className={`${styles.shell} ${styles.heroGrid}`}>
-          <div className={styles.heroCopy}>
-            <h1 className={`${styles.heroTitle} ${display.className}`}>
-              {brand.tagline}
-            </h1>
-            <p className={styles.heroBody}>
-              Learn the stack, build faster, and keep your builder progress in
-              one durable product loop.
-            </p>
-            <div className={styles.heroActions}>
-              <Link className={styles.primaryButton} href="/modules">
-                Get Started
-              </Link>
-              <Link className={styles.secondaryButton} href="/challenges">
-                Solve challenges
-              </Link>
-            </div>
-          </div>
-
-          <div className={styles.heroVisual}>
-            <div className={styles.heroGlow} />
-            <div className={styles.globeFrame}>
-              <Globe className={styles.globeCanvas} config={heroGlobeConfig} />
-            </div>
+        <div className={styles.heroCopy}>
+          <h1>Learn to build on Solana.</h1>
+          <p>Learn Rust, Anchor, the Solana runtime and modern clients. Practice with coding challenges and build real programs.</p>
+          <div className={styles.heroActions}>
+            <Link className={styles.primaryButton} href="/modules">Start learning</Link>
+            <Link className={styles.secondaryButton} href="/challenges">View challenges</Link>
           </div>
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.agentSection}`} id="ai-agent-skill">
+      <section className={styles.section}>
         <div className={styles.shell}>
-          <div className={styles.agentStage}>
-            <div className={styles.agentHeader}>
-              <div className={`${styles.sectionKicker} ${mono.className}`}>Agent Skill</div>
-              <h2 className={`${styles.agentTitle} ${display.className}`}>
-                Learn with your AI agent
-              </h2>
-              <p className={styles.agentBody}>
-                Install the LearnSol skill once. Then ask your agent to explain any Solana
-                concept with first-principles language, diagrams, tables, and exercises.
-              </p>
-            </div>
-
-            <div className={styles.commandDeck}>
-              <div className={styles.commandRow}>
-                <code className={`${styles.commandText} ${mono.className}`}>
-                  {skillInstallCommand}
-                </code>
-                <CopySkillCommandButton command={skillInstallCommand} />
-              </div>
-            </div>
-
-            <div className={styles.agentMarquee} aria-label="Compatible AI agents">
-              <div className={styles.agentMarqueeTrack}>
-                {[...compatibleAgents, ...compatibleAgents].map((agent, index) => (
-                  <div
-                    key={`${agent.name}-${index}`}
-                    className={`${styles.agentPill} ${agent.wide ? styles.agentPillWide : ""}`}
-                  >
-                    <span className={styles.agentPillLogoWrap}>
-                      <Image
-                        src={agent.logoSrc}
-                        alt={agent.logoAlt}
-                        width={agent.wide ? 92 : 24}
-                        height={24}
-                        className={`${styles.agentPillLogo} ${agent.wide ? styles.agentPillLogoWide : ""}`}
-                      />
-                    </span>
-                    <span>{agent.name}</span>
-                  </div>
-                ))}
-              </div>
+          <div className={styles.sectionHeading}>
+            <SectionLabel current="01" total="05">Start Learning</SectionLabel>
+            <div className={styles.headingRow}>
+              <h2>Learning Modules</h2>
+              <Link href="/modules">View all modules <ArrowRight aria-hidden="true" /></Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className={`${styles.section} ${styles.sectionScreen}`} id="entire-stack">
-        <div className={`${styles.shell} ${styles.sectionCenter}`}>
-          <div className={styles.sectionHeader}>
-            <div className={`${styles.sectionKicker} ${mono.className}`}>Entire Stack</div>
-            <h2 className={`${styles.sectionTitle} ${display.className}`}>
-              learn.sol covers the entire stack
-            </h2>
-            <p className={styles.sectionBody}>
-              The product should not feel like isolated pockets of knowledge. It should
-              cover the runtime, the language, the framework, and the client layer as one
-              coherent system.
-            </p>
-          </div>
-
-          <BentoGrid className={styles.stackGridLayout}>
-            {stackCards.map((card) => (
-              <article key={card.name} className={`${styles.stackPortraitCard} ${card.className}`}>
-                <div className={styles.stackPortraitSurface}>
-                  <div className={styles.stackPortraitGlow} />
-                  <div className={styles.stackPortraitPattern} />
-                  <div className={styles.stackPortraitVisual}>
-                    <Image
-                      src={card.imageSrc}
-                      alt={card.imageAlt}
-                      fill
-                      sizes="(max-width: 820px) 160px, 220px"
-                      className={styles.stackPortraitImage}
-                    />
-                  </div>
-                  <div className={styles.stackPortraitBody}>
-                    <h3 className={`${styles.stackPortraitTitle} ${display.className}`}>{card.name}</h3>
-                    <p className={styles.stackPortraitDescription}>{card.description}</p>
-                  </div>
+          <div className={styles.moduleGrid}>
+            {modules.map((module) => (
+              <article className={styles.moduleCard} key={module.name}>
+                <div>
+                  <h3>{module.name}</h3>
+                  <p>{module.description}</p>
                 </div>
-              </article>
-            ))}
-          </BentoGrid>
-        </div>
-      </section>
-
-      <section className={`${styles.section} ${styles.sectionScreen} ${styles.listenSection}`} id="developer-listening">
-        <div className={`${styles.shell} ${styles.sectionCenter}`}>
-          <div className={styles.sectionHeader}>
-            <div className={`${styles.sectionKicker} ${mono.className}`}>Developer Listening</div>
-            <h2 className={`${styles.sectionTitle} ${display.className}`}>
-              Built from developer feedback
-            </h2>
-            <p className={styles.sectionBody}>
-              The strongest product decisions here came from removing friction, reducing
-              tech debt, and making the learning experience match what real builders
-              actually need.
-            </p>
-          </div>
-
-          <div className={styles.statsBentoGrid}>
-            {developerStats.map((stat) => (
-              <article key={stat.label} className={styles.statBentoCard}>
-                <div className={`${styles.statBentoValue} ${display.className}`}>{stat.value}</div>
-                <h3 className={styles.statBentoLabel}>{stat.label}</h3>
-                <p className={styles.statBentoNote}>{stat.note}</p>
+                <div className={styles.moduleMeta}><BookOpen aria-hidden="true" /> {module.meta}</div>
+                <Link className={styles.cardButton} href={module.href}>Open module</Link>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.sectionScreen}`}>
-        <div className={`${styles.shell} ${styles.sectionCenter}`}>
-          <div className={styles.ctaPanel}>
-            <div className={styles.ctaCopy}>
-              <div className={`${styles.sectionKicker} ${mono.className}`}>Build Better</div>
-              <h2 className={`${styles.ctaTitle} ${display.className}`}>
-                Build on Solana with one product that actually holds together
-              </h2>
-              <p className={styles.ctaBody}>
-                Public lessons, executable exercises, entire-stack coverage, and a product
-                shaped by real developer questions. The point is not more surfaces. The point
-                is a tighter loop that compounds.
-              </p>
-
-              <div className={styles.ctaActions}>
-                <Link className={styles.primaryButton} href="/modules">
-                  Explore modules
-                </Link>
-                <Link className={styles.secondaryButton} href="/challenges">
-                  Try exercises
-                </Link>
-              </div>
+      <section className={styles.section}>
+        <div className={styles.shell}>
+          <div className={styles.sectionHeading}>
+            <SectionLabel current="02" total="05">Practice</SectionLabel>
+            <h2>30 Rust coding challenges</h2>
+          </div>
+          <div className={styles.splitCard}>
+            <div>
+              <p className={styles.eyebrow}>Rust challenges</p>
+              <h3>Write code and run the tests</h3>
+              <p>Work through ownership, borrowing, collections and traits. Your progress is saved when you sign in.</p>
             </div>
+            <div className={styles.splitAction}>
+              <span><Hammer aria-hidden="true" /> 30 challenges</span>
+              <Link className={styles.primaryButton} href="/challenges">Start a challenge</Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <div className={styles.ctaFeatureGrid}>
-              {ctaFeatures.map((feature) => (
-                <article key={feature.title} className={styles.ctaFeatureCard}>
-                  <feature.Icon className={styles.ctaFeatureIcon} />
-                  <div>
-                    <h3 className={styles.ctaFeatureTitle}>{feature.title}</h3>
-                    <p className={styles.ctaFeatureBody}>{feature.body}</p>
-                  </div>
-                  <ChevronRight className={styles.ctaFeatureArrow} />
-                </article>
-              ))}
+      <section className={styles.section}>
+        <div className={styles.shell}>
+          <div className={styles.sectionHeading}>
+            <SectionLabel current="03" total="05">Build</SectionLabel>
+            <h2>Tools for understanding programs</h2>
+          </div>
+          <div className={styles.toolGrid}>
+            {productLinks.map(({ title, description, href, Icon }) => (
+              <Link className={styles.toolCard} href={href} key={title}>
+                <Icon aria-hidden="true" />
+                <div><h3>{title}</h3><p>{description}</p></div>
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section} id="ai-agent-skill">
+        <div className={styles.shell}>
+          <div className={styles.sectionHeading}>
+            <SectionLabel current="04" total="05">Use With Your Agent</SectionLabel>
+            <h2>Install the LearnSol skill</h2>
+            <p>Ask your coding agent for Solana explanations and exercises from this curriculum.</p>
+          </div>
+          <div className={styles.commandRow}>
+            <code>{skillInstallCommand}</code>
+            <CopySkillCommandButton command={skillInstallCommand} />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.shell}>
+          <div className={styles.sectionHeading}>
+            <SectionLabel current="05" total="05">Keep Building</SectionLabel>
+            <h2>Open lessons. Practical exercises.</h2>
+          </div>
+          <div className={styles.proofRow}>
+            <p>Read the curriculum without signing in. Sign in when you want to save module and challenge progress.</p>
+            <div className={styles.supportedBy}>
+              <span>Supported by</span>
+              <Image src="/solanaFndn.png" alt="Solana Foundation" width={132} height={32} />
             </div>
           </div>
         </div>
@@ -392,58 +139,15 @@ export function HomePage() {
 
       <footer className={styles.footer}>
         <div className={styles.shell}>
-          <div className={styles.footerGrid}>
-            <div>
-              <div className={`${styles.brand} ${mono.className}`}>
-                <BrandLogo variant="wordmark" className={styles.footerBrandLogo} />
-              </div>
-              <p className={styles.footerLead}>
-                A sharper, more durable way to learn Solana through lessons, exercises, and
-                guided building.
-              </p>
-            </div>
-
-            {Object.entries(footerColumns).map(([heading, links]) => (
-              <div key={heading}>
-                <div className={`${styles.footerHeading} ${mono.className}`}>{heading}</div>
-                <div className={styles.footerLinks}>
-                  {links.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            <div>
-              <div className={`${styles.footerHeading} ${mono.className}`}>Contact</div>
-              <div className={styles.footerLinks}>
-                <a href={`mailto:${brand.email}`} title={`Email ${brand.name}`}>
-                  Email
-                </a>
-                <a href={brand.xUrl} title={`${brand.name} on X`}>
-                  X
-                </a>
-                <a href={brand.githubUrl} title={`${brand.name} on GitHub`}>
-                  GitHub
-                </a>
-              </div>
-            </div>
+          <div className={styles.footerTop}>
+            <BrandLogo variant="wordmark" className={styles.footerLogo} />
+            <nav aria-label="Footer">
+              <Link href="/modules">Modules</Link><Link href="/challenges">Challenges</Link><Link href="/tools">Tools</Link><Link href="/partner">Partner</Link>
+            </nav>
           </div>
-
           <div className={styles.footerBottom}>
-            <span>© 2026 {brand.name}. Built for Solana developers.</span>
-            <span className={styles.footerSupport}>
-              <span className={mono.className}>Supported by</span>
-              <Image
-                src="/solanaFndn.png"
-                alt="Solana Foundation"
-                width={110}
-                height={26}
-                className={styles.footerSupportLogo}
-              />
-            </span>
+            <span>© {new Date().getFullYear()} {brand.name}</span>
+            <div><a href={brand.xUrl}>X</a><a href={brand.githubUrl}>GitHub</a><a href={`mailto:${brand.email}`}>Email</a></div>
           </div>
         </div>
       </footer>
