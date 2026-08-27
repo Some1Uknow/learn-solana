@@ -7,8 +7,8 @@
   --muted: #636363;
   --muted-strong: #434343;
   --lime: #a9ff2f;
-  --control: #8fca32;
-  --control-hover: #7eaf2e;
+  --control: var(--ds-accent-control, #8fca32);
+  --control-hover: var(--ds-accent-control-hover, #7eaf2e);
   --accent-ink: #46680d;
   --surface-subtle: #efefef;
   --surface-soft: #f8f8f8;

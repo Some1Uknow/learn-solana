@@ -1735,7 +1735,7 @@
   max-width: 60ch;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
   .ls-docs-layout #nd-page {
     display: block;
     padding-inline: clamp(1rem, 5vw, 2rem);
