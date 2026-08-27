@@ -10,6 +10,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { BreadcrumbSchema } from "@/components/seo";
+import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -201,7 +202,7 @@ export function RuntimeLabProgramClient({ program }: { program: RuntimeLabProgra
 
   if (!ready || !authenticated) {
     return (
-      <div className={`${styles.page} ${toolsBody.className}`}>
+      <div className={`${styles.page} ${styles.labAppTheme} ${toolsBody.className}`}>
         <BreadcrumbSchema items={breadcrumbItems} />
         <Navbar />
         <main className={styles.labAppMain}>
@@ -230,12 +231,13 @@ export function RuntimeLabProgramClient({ program }: { program: RuntimeLabProgra
             </div>
           </section>
         </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className={`${styles.page} ${toolsBody.className}`}>
+    <div className={`${styles.page} ${styles.labAppTheme} ${toolsBody.className}`}>
       <BreadcrumbSchema items={breadcrumbItems} />
       <Navbar />
 
@@ -419,9 +421,9 @@ export function RuntimeLabProgramClient({ program }: { program: RuntimeLabProgra
                   >
                     <div>
                       {isCorrect ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                        <CheckCircle2 className="h-4 w-4 text-[#3f7f16]" />
                       ) : (
-                        <TriangleAlert className="h-4 w-4 text-red-300" />
+                        <TriangleAlert className="h-4 w-4 text-[#b44343]" />
                       )}
                       <span>{isCorrect ? "Correct" : "Not quite"}</span>
                     </div>
@@ -436,6 +438,7 @@ export function RuntimeLabProgramClient({ program }: { program: RuntimeLabProgra
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }
