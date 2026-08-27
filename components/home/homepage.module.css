@@ -9,7 +9,7 @@
 .hero h1 { margin: 0; font-size: 48px; font-weight: 500; line-height: 1; letter-spacing: -.03em; }
 .hero p { max-width: 510px; margin: 0; color: #636363; font-size: 16px; line-height: 26px; }
 .heroActions { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 10px; margin-top: 8px; }
-.asciiStage { display: flex; min-width: 0; align-items: center; justify-content: center; }
+.solanaStage { display: flex; min-width: 0; align-items: center; justify-content: center; }
 .primaryButton,.secondaryButton,.cardButton { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; border-radius: 6px; padding: 0 20px; font-size: 14px; font-weight: 500; transition: opacity 150ms ease, background 150ms ease, transform 150ms ease; }
 .primaryButton { border: 1px solid transparent; background: var(--ds-accent-control); color: #172006; box-shadow: 0 1px 2px rgb(0 0 0 / 16%), inset 0 1px rgb(255 255 255 / 22%); }
 .secondaryButton,.cardButton { border: 1px solid #dedede; background: #efefef; color: #181818; box-shadow: 0 1px 2px rgb(0 0 0 / 12%), inset 0 1px rgb(255 255 255 / 45%); }

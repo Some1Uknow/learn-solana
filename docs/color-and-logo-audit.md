@@ -51,6 +51,6 @@ Legacy duplicate exports such as `solanaMain.png`, `learnsol-logo.png`, and `lea
 
 ## Identity pass
 
-The homepage hero uses `public/solanaLogo4k.png` as the source for the ASCII treatment. The exported animation is stored as `public/solana-ascii.mp4` with `public/solana-ascii-poster.png` as its static and reduced-motion fallback. The animation is composited onto the canvas color `#f5f5f5`, keeps the Solana hue family as a restrained tint, and is rendered without a runtime dependency on the generator.
+The homepage hero and Solana opportunity marks use the cleaned `public/solanaLogo4k.png`. Its original gradient pixels are preserved, while a geometric alpha mask removes the stray upscaler fragments between the three bars. The former ASCII animation files remain in `public` for compatibility but are no longer rendered by the homepage.
 
 The light navigation and shared footer render the `learn.sol` name as text beside the transparent LearnSol mark. This avoids placing the legacy black-background text tile on a light surface.
