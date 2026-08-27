@@ -752,6 +752,74 @@
   }
 }
 
+/* BuildAnything-derived light lesson reader */
+.ls-docs-layout {
+  --ls-docs-bg: #f5f5f5;
+  --ls-docs-surface: #ffffff;
+  --ls-docs-foreground: #181818;
+  --ls-docs-muted: #ebebeb;
+  --ls-docs-muted-foreground: #636363;
+  --ls-docs-border: #dedede;
+  --ls-docs-primary: #557b11;
+  background: #f5f5f5 !important;
+  color: #181818 !important;
+}
+
+.ls-docs-layout #nd-page article {
+  max-width: 45rem;
+}
+
+.ls-docs-layout .ls-docs-title {
+  color: #181818 !important;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: clamp(2.25rem, 5vw, 3rem) !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.ls-docs-layout .ls-docs-description,
+.ls-docs-layout #nd-page article p,
+.ls-docs-layout #nd-page article li {
+  color: #434343;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.ls-docs-layout #nd-page article h2 {
+  margin-top: 3rem;
+  color: #181818;
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 2rem;
+}
+
+.ls-docs-layout #nd-page article h3 { color: #181818; font-weight: 500; }
+.ls-docs-layout .ls-docs-lesson-number { color: rgb(24 24 24 / 4%) !important; }
+.ls-docs-layout .ls-docs-lesson-chip,
+.ls-docs-layout .ls-docs-action-button { border-color: #dedede !important; background: #fff !important; color: #181818 !important; border-radius: 6px !important; }
+.ls-docs-layout .ls-docs-breadcrumb,
+.ls-docs-layout .ls-docs-reading-time,
+.ls-docs-layout .ls-docs-lesson-position { color: #636363 !important; }
+.ls-docs-layout .ls-docs-toc-rail { color: #636363 !important; }
+.ls-docs-layout pre { border: 1px solid #dedede !important; border-radius: 8px !important; box-shadow: none !important; }
+
+.ls-docs-layout .ls-quick-check > div {
+  border-color: #dedede !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.ls-docs-layout .ls-quick-check > div > div:first-child { border-color: #dedede !important; }
+.ls-docs-layout .ls-quick-check p { color: #181818 !important; }
+.ls-docs-layout .ls-quick-check button { border-color: #dedede !important; background: #f5f5f5 !important; color: #434343 !important; }
+.ls-docs-layout .ls-quick-check button:hover { background: #efefef !important; }
+
+@media (max-width: 767px) {
+  .ls-docs-layout #nd-page article { max-width: 100%; }
+  .ls-docs-layout .ls-docs-title { font-size: 2.25rem !important; }
+}
+
 @media (width < 80rem) {
   .ls-docs-layout #nd-page {
     padding-top: var(--fd-tocnav-height);
