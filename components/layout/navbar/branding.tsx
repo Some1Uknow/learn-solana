@@ -17,11 +17,9 @@ export function NavbarBranding() {
         priority
         className="w-7 transition-opacity duration-150 group-hover:opacity-80"
       />
-      <BrandLogo
-        variant="textBlack"
-        priority
-        className="w-[88px] transition-opacity duration-150 group-hover:opacity-80"
-      />
+      <span className="text-[15px] font-medium leading-none tracking-[-0.035em] text-[#181818] transition-opacity duration-150 group-hover:opacity-80">
+        learn.sol
+      </span>
     </Link>
   );
 }

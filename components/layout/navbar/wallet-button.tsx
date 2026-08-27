@@ -276,7 +276,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   return (
     <Button
       onClick={login}
-      className={isMobile ? "w-full" : ""}
+      className={`bg-[var(--ds-accent-control)] text-[#172006] hover:bg-[var(--ds-accent-control-hover)] ${isMobile ? "w-full" : ""}`}
     >
       <UserPlus size={18} className="mr-2" />
       Login

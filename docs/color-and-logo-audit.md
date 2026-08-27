@@ -14,7 +14,8 @@ The product should use warm neutral surfaces with one brand accent. The lime is 
 | Border | `#dedede` | structural dividers |
 | Ink | `#181818` | primary text |
 | Muted ink | `#636363` | descriptions and metadata |
-| Brand lime | `#a9ff2f` | primary actions and active progress |
+| Brand lime | `#a9ff2f` | mark, active progress, small emphasis, and selected/focus states |
+| Control green | `#8fca32` | large light-theme actions where the canonical lime would overpower the surface |
 | Lime ink | `#172006` | text on brand lime |
 | Muted lime | `#557b11` | accessible accent text on light surfaces |
 | Soft lime | `#e8ffc8` | selected or instructional backgrounds |
@@ -47,3 +48,9 @@ The first six were normalized: brand/learning emphasis now uses lime, and errors
 - Game artwork stays inside the Solana Clicker experience; sprite sheets and game assets must not leak into general product navigation.
 
 Legacy duplicate exports such as `solanaMain.png`, `learnsol-logo.png`, and `learnsol-icon.png` are retained for compatibility, but canonical brand components use the files under `public/brand`. Repeating every duplicate asset would weaken hierarchy and create inconsistent marks.
+
+## Identity pass
+
+The homepage hero uses `public/solanaLogo4k.png` as the source for the ASCII treatment. The exported animation is stored as `public/solana-ascii.mp4` with `public/solana-ascii-poster.png` as its static and reduced-motion fallback. The animation is composited onto the canvas color `#f5f5f5`, keeps the Solana hue family as a restrained tint, and is rendered without a runtime dependency on the generator.
+
+The light navigation and shared footer render the `learn.sol` name as text beside the transparent LearnSol mark. This avoids placing the legacy black-background text tile on a light surface.
