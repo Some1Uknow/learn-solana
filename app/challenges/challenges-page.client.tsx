@@ -3,27 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Inter, Space_Grotesk } from "next/font/google";
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { BreadcrumbSchema } from "@/components/seo";
 import styles from "@/components/challenges/challenges-v2.module.css";
 
-const display = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const mono = Inter({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
+const display = { className: "" };
+const body = { className: "" };
+const mono = { className: "font-mono" };
 
 const breadcrumbItems = [
   { name: "Home", url: "/" },
@@ -107,7 +95,7 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
                 Challenges
               </h1>
               <p className={styles.heroBody}>
-                Minimal, focused practice tracks with saved progress and server validation.
+                Choose a track, write the code and run the tests. Sign in to save progress.
               </p>
 
               <div className={styles.heroActions}>

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Inter, Space_Grotesk } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, ChevronRight } from "lucide-react";
 
@@ -13,20 +12,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useExerciseProgress } from "@/hooks/use-exercise-progress";
 import styles from "@/components/challenges/challenges-v2.module.css";
 
-const display = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const mono = Inter({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
+const display = { className: "" };
+const body = { className: "" };
+const mono = { className: "font-mono" };
 
 interface Props {
   track: string;
@@ -198,7 +186,7 @@ export default function TrackChallengesClient({
                                   {tag}
                                 </span>
                               ))}
-                              <ChevronRight className="h-4 w-4 text-white/35" />
+                              <ChevronRight className="h-4 w-4 text-[#636363]" />
                             </div>
                           </button>
                         );

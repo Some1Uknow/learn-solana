@@ -1,10 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { ArrowRight, BookOpen, Search } from "lucide-react";
 
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -12,156 +10,46 @@ import { BreadcrumbSchema } from "@/components/seo";
 import { contentsData } from "../../data/contents-data";
 
 const modules = contentsData.modules;
-
-const breadcrumbItems = [
-  { name: "Home", url: "/" },
-  { name: "Modules", url: "/modules" },
-];
-
-const display = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-function ModuleCard({
-  module,
-  index,
-}: {
-  module: (typeof modules)[number];
-  index: number;
-}) {
-  const title = module.title.replace(/^[^\w]*/, "");
-
-  return (
-    <Link
-      href={`/modules/${module.id}`}
-      className="group relative overflow-hidden rounded-[28px] bg-[linear-gradient(180deg,rgba(15,15,15,0.98),rgba(8,8,8,0.98))] p-4 text-white shadow-[0_24px_64px_rgba(0,0,0,0.42),_0_0_0_1px_rgba(255,255,255,0.02)] transition duration-300 hover:-translate-y-1"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(169,255,47,0.12),transparent_28%),radial-gradient(circle_at_86%_8%,rgba(169,255,47,0.06),transparent_24%)] opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03),transparent_28%,transparent_72%,rgba(255,255,255,0.02))] opacity-70" />
-
-      <div className="relative z-10 flex min-h-[9rem] items-stretch gap-4 sm:gap-5">
-        <div className="flex w-28 shrink-0 items-center justify-center sm:w-32">
-          <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-[linear-gradient(180deg,rgba(169,255,47,0.12),rgba(169,255,47,0.04))]">
-            <Image
-              src={module.image || "/placeholder.png"}
-              alt={module.title}
-              fill
-              sizes="96px"
-              className="object-contain p-2.5"
-            />
-          </div>
-        </div>
-
-        <div className="min-w-0 flex-1 py-0.5">
-          <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-[#a9ff2f]/80">
-            <span className="inline-flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[9px] text-white/60">
-              Module {String(index + 1).padStart(2, "0")}
-            </span>
-            <span>{module.topics.length} lessons</span>
-          </div>
-
-          <h2 className={`mt-3 text-xl leading-[1.05] text-white sm:text-[1.65rem] ${display.className}`}>
-            {title}
-          </h2>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-white/58 sm:text-[0.95rem]">
-            {module.description}
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs text-white/42">
-              <span className="inline-block h-2 w-2 rounded-full bg-[#a9ff2f] shadow-[0_0_18px_rgba(169,255,47,0.45)]" />
-              <span>{module.goal}</span>
-            </div>
-
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#a9ff2f]/20 bg-[#a9ff2f]/10 px-3 py-2 text-xs font-semibold text-[#d8ff98] transition group-hover:border-[#a9ff2f]/30 group-hover:bg-[#a9ff2f]/15">
-              Open path
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+const breadcrumbItems = [{ name: "Home", url: "/" }, { name: "Modules", url: "/modules" }];
 
 export function ModulesPageClient() {
   const [query, setQuery] = useState("");
-
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    return modules.filter((m) => {
-      const inTitle = m.title.toLowerCase().includes(q);
-      const inDesc = m.description.toLowerCase().includes(q);
-      const inTopics = m.topics.some(
-        (topic: any) =>
-          topic.title.toLowerCase().includes(q) ||
-          topic.description.toLowerCase().includes(q)
-      );
-      return q ? inTitle || inDesc || inTopics : true;
-    });
+    return modules.filter((module) => !q || [module.title, module.description, ...module.topics.map((topic) => `${topic.title} ${topic.description}`)].some((text) => text.toLowerCase().includes(q)));
   }, [query]);
 
   return (
-    <div
-      className={`${body.className} min-h-screen overflow-x-clip bg-black text-white`}
-    >
+    <div className="min-h-screen bg-[#f5f5f5] text-[#181818]">
       <BreadcrumbSchema items={breadcrumbItems} />
       <Navbar />
-
-      <main className="pt-24">
-        <section className="border-b border-white/[0.04] pb-8">
-          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-[#a9ff2f]">
-                Learning Paths
-              </p>
-              <h1
-                className={`mt-4 text-4xl leading-[0.95] tracking-[-0.065em] text-white sm:text-5xl lg:text-6xl ${display.className}`}
-              >
-                Modules
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-white/58 sm:text-lg">
-                Structured learning paths from fundamentals to advanced Solana programming,
-                presented with the same visual language as the home page.
-              </p>
-            </div>
-
-            <div className="mt-8 flex max-w-xl items-center gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
-              <Search className="h-4 w-4 shrink-0 text-white/36" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search modules"
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/32"
-              />
-            </div>
+      <main>
+        <header className="border-b border-[#dedede] py-20">
+          <div className="ds-shell">
+            <p className="ds-section-label">Curriculum</p>
+            <h1 className="mt-4 text-4xl font-medium leading-none tracking-[-0.03em] md:text-5xl">Learning Modules</h1>
+            <p className="mt-4 max-w-[672px] leading-7 text-[#636363]">Learn Rust, Anchor, the Solana runtime and modern clients. Start with the fundamentals or search for a topic.</p>
+            <label className="mt-8 flex h-10 max-w-[560px] items-center gap-3 rounded-[6px] border border-[#dedede] bg-white px-3 focus-within:ring-2 focus-within:ring-[#6b8f27]/60">
+              <Search className="h-4 w-4 text-[#636363]" aria-hidden="true" />
+              <span className="sr-only">Search modules</span>
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search modules" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#858585]" />
+            </label>
           </div>
-        </section>
-
-        <section className="py-8 sm:py-10">
-          <div className="mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-4 md:grid-cols-2 md:auto-rows-fr">
-              {filtered.map((module, index) => (
-                <ModuleCard key={module.id} module={module} index={index} />
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="py-20 text-center text-sm text-white/46">
-                No modules found matching "{query}"
-              </div>
-            )}
+        </header>
+        <section className="py-16 md:py-20">
+          <div className="ds-shell grid gap-5 md:grid-cols-2">
+            {filtered.map((module, index) => (
+              <article key={module.id} className="flex min-w-0 flex-col gap-5 rounded-xl border border-[#dedede] bg-white p-5 sm:p-6">
+                <p className="font-mono text-xs uppercase tracking-[0.12em] text-[#636363]">[ {String(index + 1).padStart(2, "0")} / {String(modules.length).padStart(2, "0")} ] · {module.topics.length + 1} lessons</p>
+                <div><h2 className="text-xl font-medium leading-none tracking-[-0.02em]">{module.title.replace(/^[^\w]*/, "")}</h2><p className="mt-3 leading-6 text-[#636363]">{module.description}</p></div>
+                <div className="mt-auto flex items-center gap-2 text-sm text-[#636363]"><BookOpen className="h-4 w-4" />{module.goal}</div>
+                <Link href={`/modules/${module.id}`} className="ds-focus-ring inline-flex h-10 items-center justify-center gap-2 rounded-[6px] border border-[#dedede] bg-[#efefef] px-5 text-sm font-medium shadow-[0_1px_2px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-80">Open module <ArrowRight className="h-4 w-4" /></Link>
+              </article>
+            ))}
           </div>
+          {filtered.length === 0 && <div className="ds-shell py-16 text-center text-sm text-[#636363]">No modules match “{query}”.</div>}
         </section>
       </main>
-
       <Footer />
     </div>
   );
