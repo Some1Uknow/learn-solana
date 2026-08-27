@@ -21,7 +21,7 @@ export function OpportunityRoute({ category }: { category: OpportunityCategory }
   const page = getOpportunityPage(category);
   if (!page) notFound();
   return (
-    <div className="min-h-screen bg-[#070809] text-white">
+    <div className="ls-learn-shell">
       <Navbar />
       <OpportunityPageView page={page} />
       <Footer />
