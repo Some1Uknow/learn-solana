@@ -1,11 +1,12 @@
 .frame {
   position: relative;
   width: min(100%, 500px);
-  aspect-ratio: 1343 / 1171;
+  aspect-ratio: 768 / 670;
   overflow: hidden;
 }
 
-.logo {
+.poster,
+.video {
   position: absolute;
   inset: 0;
   display: block;
@@ -14,8 +15,23 @@
   object-fit: contain;
 }
 
+.poster {
+  z-index: 0;
+}
+
+.video {
+  z-index: 1;
+  background: #f5f5f5;
+}
+
 @media (max-width: 767px) {
   .frame {
     width: min(100%, 300px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video {
+    opacity: 0;
   }
 }
