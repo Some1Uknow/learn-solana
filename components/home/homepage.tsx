@@ -5,13 +5,14 @@ import { ArrowRight, BookOpen, Braces, Hammer, TerminalSquare } from "lucide-rea
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { CopySkillCommandButton } from "@/components/home/copy-skill-command-button";
+import { AsciiSolanaMark } from "@/components/home/ascii-solana-mark";
 import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
 const modules = [
   { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules/rust-foundations", image: "/rust-2.png", imageAlt: "Rust" },
   { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules/anchor-programs", image: "/anchor.png", imageAlt: "Anchor" },
-  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules/solana-foundations", image: "/solanaLogo.png", imageAlt: "Solana" },
+  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules/solana-foundations", image: "/solanaLogo4k.png", imageAlt: "Solana" },
   { name: "Modern clients", description: "Build transactions and wallet flows with current Solana clients.", meta: "Connect an app", href: "/modules/solana-kit-clients", image: "/solana-kit.svg", imageAlt: "Solana Kit" },
 ];
 
@@ -35,12 +36,17 @@ export function HomePage() {
       </div>
 
       <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <h1>Learn to build on Solana.</h1>
-          <p>Learn Rust, Anchor, the Solana runtime and modern clients. Practice with coding challenges and build real programs.</p>
-          <div className={styles.heroActions}>
-            <Link className={styles.primaryButton} href="/modules">Start learning</Link>
-            <Link className={styles.secondaryButton} href="/challenges">View challenges</Link>
+        <div className={styles.heroGrid}>
+          <div className={styles.heroCopy}>
+            <h1>Learn to build on Solana.</h1>
+            <p>Learn Rust, Anchor, the Solana runtime and modern clients. Practice with coding challenges and build real programs.</p>
+            <div className={styles.heroActions}>
+              <Link className={styles.primaryButton} href="/modules">Start learning</Link>
+              <Link className={styles.secondaryButton} href="/challenges">View challenges</Link>
+            </div>
+          </div>
+          <div className={styles.asciiStage}>
+            <AsciiSolanaMark />
           </div>
         </div>
       </section>

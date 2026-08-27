@@ -15,7 +15,9 @@ export function Footer() {
           {/* Left: Logo + Copyright */}
           <div className="flex items-center gap-2.5">
             <BrandLogo variant="mark" className="w-7" />
-            <BrandLogo variant="textBlack" className="w-[82px]" />
+            <span className="text-[14px] font-medium leading-none tracking-[-0.03em] text-[#181818]">
+              learn.sol
+            </span>
             <span className="text-sm text-[#636363]">
               © {new Date().getFullYear()}
             </span>
