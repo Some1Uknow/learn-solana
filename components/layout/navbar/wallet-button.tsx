@@ -56,9 +56,9 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     return (
       <Button
         disabled
-        className={`rounded-full border border-white/[0.08] bg-white/[0.03] text-white ${isMobile ? "w-full" : ""}`}
+        className={`border-[#dedede] bg-white text-[#636363] ${isMobile ? "w-full" : ""}`}
       >
-        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-[#dedede] border-t-[#636363]" />
         Loading...
       </Button>
     );
@@ -127,13 +127,13 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     if (isMobile) {
       return (
         <div className="space-y-3">
-          <div className="rounded-2xl border border-[#a9ff2f]/20 bg-[linear-gradient(180deg,rgba(169,255,47,0.12),rgba(169,255,47,0.04))] p-4">
+          <div className="rounded-xl border border-[#dedede] bg-white p-4">
             <div className="mb-2 flex items-center gap-2">
               <User size={16} />
-              <span className="text-sm font-medium text-[#a9ff2f]">Connected</span>
+              <span className="text-sm font-medium text-[#181818]">Connected</span>
             </div>
-            <div className="text-xs text-neutral-300">{label}</div>
-            <div className="mt-2 text-[11px] text-neutral-400">
+            <div className="text-xs text-[#181818]">{label}</div>
+            <div className="mt-2 text-[11px] text-[#636363]">
               {walletLabel ? `Solana wallet: ${walletLabel}` : "No embedded Solana wallet yet"}
             </div>
           </div>
@@ -142,7 +142,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
               <Button
                 onClick={handleCopyWallet}
                 variant="outline"
-                className="w-full rounded-2xl border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.07]"
+                className="w-full border-[#dedede] bg-white text-[#181818] hover:bg-[#efefef]"
               >
                 <Copy size={16} className="mr-2" />
                 Copy Wallet
@@ -151,7 +151,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
                 onClick={handleSignMessage}
                 disabled={isSigningMessage}
                 variant="outline"
-                className="w-full rounded-2xl border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.07]"
+                className="w-full border-[#dedede] bg-white text-[#181818] hover:bg-[#efefef]"
               >
                 <PenSquare size={16} className="mr-2" />
                 {isSigningMessage ? "Signing..." : "Sign Test Message"}
@@ -160,7 +160,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
                 onClick={handleExportWallet}
                 disabled={isExportingWallet}
                 variant="outline"
-                className="w-full rounded-2xl border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.07]"
+                className="w-full border-[#dedede] bg-white text-[#181818] hover:bg-[#efefef]"
               >
                 <KeyRound size={16} className="mr-2" />
                 {isExportingWallet ? "Opening..." : "Export Wallet"}
@@ -171,7 +171,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
               onClick={handleCreateWallet}
               disabled={isCreatingWallet}
               variant="outline"
-              className="w-full rounded-2xl border-[#a9ff2f]/20 bg-[#a9ff2f]/5 text-[#a9ff2f] hover:bg-[#a9ff2f]/10"
+              className="w-full border-[#dedede] bg-white text-[#181818] hover:bg-[#efefef]"
             >
               <Wallet size={16} className="mr-2" />
               {isCreatingWallet ? "Creating..." : "Create Solana Wallet"}
@@ -180,7 +180,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
           <Button
             onClick={logout}
             variant="outline"
-            className="w-full rounded-2xl border-red-500/20 bg-red-500/[0.03] text-red-400 hover:bg-red-500/10"
+            className="w-full border-red-200 bg-white text-red-700 hover:bg-red-50"
           >
             <LogOut size={16} className="mr-2" />
             Logout
@@ -192,33 +192,33 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="rounded-full border border-[#a9ff2f]/30 bg-[#a9ff2f] px-4 text-black hover:bg-[#98ea2a]">
+          <Button className="px-4">
             <User size={18} className="mr-2" />
             {label}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-[18rem] rounded-[24px] border border-white/[0.08] bg-[linear-gradient(180deg,rgba(15,15,15,0.98),rgba(8,8,8,0.98))] p-2 text-white shadow-[0_24px_64px_rgba(0,0,0,0.42)]"
+          className="w-[18rem] rounded-xl border border-[#dedede] bg-white p-2 text-[#181818] shadow-[0_24px_60px_-40px_rgba(0,0,0,0.35)]"
           align="end"
         >
-          <DropdownMenuLabel className="flex items-center gap-3 rounded-2xl px-3 py-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/10 text-sm font-semibold text-white">
+          <DropdownMenuLabel className="flex items-center gap-3 rounded-lg px-3 py-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#dedede] bg-[#efefef] text-sm font-semibold text-[#181818]">
               <User size={16} />
             </span>
             <div>
               <div className="text-sm">{label}</div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-[#636363]">
                 {userInfo?.email ?? "Connected account"}
               </div>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <div className="px-2 py-2">
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-3 py-3">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-gray-500">
+            <div className="rounded-lg border border-[#dedede] bg-[#f5f5f5] px-3 py-3">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-[#636363]">
                 Solana Wallet
               </div>
-              <div className="mt-1 text-sm text-white">
+              <div className="mt-1 text-sm text-[#181818]">
                 {walletLabel ?? "Not created yet"}
               </div>
             </div>
@@ -228,7 +228,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             <>
               <DropdownMenuItem
                 onClick={handleCopyWallet}
-                className="rounded-xl px-3 py-2.5 text-white/85 focus:bg-white/[0.06] focus:text-white"
+                className="rounded-lg px-3 py-2.5 text-[#636363] focus:bg-[#efefef] focus:text-[#181818]"
               >
                 <Copy size={16} className="mr-2" />
                 Copy wallet address
@@ -236,7 +236,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
               <DropdownMenuItem
                 onClick={handleSignMessage}
                 disabled={isSigningMessage}
-                className="rounded-xl px-3 py-2.5 text-white/85 focus:bg-white/[0.06] focus:text-white"
+                className="rounded-lg px-3 py-2.5 text-[#636363] focus:bg-[#efefef] focus:text-[#181818]"
               >
                 <PenSquare size={16} className="mr-2" />
                 {isSigningMessage ? "Signing..." : "Sign test message"}
@@ -244,7 +244,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
               <DropdownMenuItem
                 onClick={handleExportWallet}
                 disabled={isExportingWallet}
-                className="rounded-xl px-3 py-2.5 text-white/85 focus:bg-white/[0.06] focus:text-white"
+                className="rounded-lg px-3 py-2.5 text-[#636363] focus:bg-[#efefef] focus:text-[#181818]"
               >
                 <KeyRound size={16} className="mr-2" />
                 {isExportingWallet ? "Opening export..." : "Export wallet"}
@@ -254,7 +254,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
             <DropdownMenuItem
               onClick={handleCreateWallet}
               disabled={isCreatingWallet}
-              className="rounded-xl px-3 py-2.5 text-[#a9ff2f] focus:bg-[#a9ff2f]/10 focus:text-[#a9ff2f]"
+              className="rounded-lg px-3 py-2.5 text-[#46620b] focus:bg-[#efffd9] focus:text-[#2e4105]"
             >
               <Wallet size={16} className="mr-2" />
               {isCreatingWallet ? "Creating wallet..." : "Create Solana wallet"}
@@ -263,7 +263,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={logout}
-            className="rounded-xl px-3 py-2.5 text-red-400 focus:bg-red-500/10 focus:text-red-300"
+            className="rounded-lg px-3 py-2.5 text-red-700 focus:bg-red-50 focus:text-red-800"
           >
             <LogOut size={16} className="mr-2" />
             Logout
@@ -276,7 +276,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   return (
     <Button
       onClick={login}
-      className={`rounded-full border border-[#a9ff2f]/30 bg-[#a9ff2f] text-black hover:bg-[#98ea2a] ${isMobile ? "w-full" : ""}`}
+      className={isMobile ? "w-full" : ""}
     >
       <UserPlus size={18} className="mr-2" />
       Login

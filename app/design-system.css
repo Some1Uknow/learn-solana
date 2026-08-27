@@ -1,62 +1,60 @@
 :root {
-  --ds-background: #060606;
-  --ds-foreground: #fcfcfc;
-  --ds-card: #181818;
-  --ds-card-foreground: #fcfcfc;
-  --ds-secondary: #232323;
-  --ds-muted: #272727;
-  --ds-muted-foreground: #a0a0a0;
-  --ds-border: #292929;
+  --ds-background: #f5f5f5;
+  --ds-foreground: #181818;
+  --ds-card: #ffffff;
+  --ds-card-foreground: #181818;
+  --ds-secondary: #efefef;
+  --ds-secondary-foreground: #181818;
+  --ds-muted: #ebebeb;
+  --ds-muted-foreground: #636363;
+  --ds-border: #dedede;
+  --ds-input: #dedede;
   --ds-primary: #a9ff2f;
-  --ds-primary-foreground: #060606;
-  --ds-danger: #ec5448;
-  --ds-success: #22c55e;
-
+  --ds-primary-hover: #98eb22;
+  --ds-primary-foreground: #172006;
+  --ds-danger: #c83d35;
+  --ds-success: #3f7f16;
+  --ds-radius-sm: 4px;
   --ds-radius-md: 6px;
   --ds-radius-lg: 8px;
   --ds-radius-xl: 12px;
-
-  --ds-shell: 1200px;
-  --ds-reading-width: 768px;
-
+  --ds-shell: 1182px;
+  --ds-reading-width: 720px;
   --ds-duration-fast: 150ms;
-  --ds-duration-normal: 300ms;
+  --ds-duration-normal: 220ms;
   --ds-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html {
-  background: var(--ds-background);
-}
+html { background: var(--ds-background); }
 
 body {
+  background: var(--ds-background);
+  color: var(--ds-foreground);
   font-family: var(--font-inter), Inter, ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-code,
-kbd,
-pre,
-samp,
-.font-mono {
+code, kbd, pre, samp, .font-mono {
   font-family: var(--font-roboto-mono), "Roboto Mono", ui-monospace, SFMono-Regular,
     Menlo, monospace;
 }
+
+::selection { background: rgb(169 255 47 / 55%); color: #181818; }
 
 .ds-shell {
   width: min(var(--ds-shell), calc(100vw - 64px));
   margin-inline: auto;
 }
 
-.ds-reading-width {
-  width: min(var(--ds-reading-width), 100%);
-}
+.ds-reading-width { width: min(var(--ds-reading-width), 100%); }
 
 .ds-section-label {
-  font-family: var(--font-roboto-mono), "Roboto Mono", ui-monospace, monospace;
   color: var(--ds-muted-foreground);
+  font-family: var(--font-roboto-mono), "Roboto Mono", ui-monospace, monospace;
   font-size: 0.75rem;
   line-height: 1rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .ds-card {
@@ -67,20 +65,19 @@ samp,
 }
 
 .ds-focus-ring:focus-visible {
-  outline: 2px solid var(--ds-primary);
+  outline: 2px solid #6b8f27;
   outline-offset: 2px;
 }
 
 @media (max-width: 767px) {
-  .ds-shell {
-    width: min(var(--ds-shell), calc(100vw - 32px));
-  }
+  .ds-shell { width: min(var(--ds-shell), calc(100vw - 32px)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

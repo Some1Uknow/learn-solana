@@ -9,19 +9,19 @@ import { brand } from "@/lib/brand";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/[0.08] bg-black">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6">
+    <footer className="border-t border-[#dedede] bg-[#f5f5f5] text-[#181818]">
+      <div className="ds-shell py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left: Logo + Copyright */}
           <div className="flex items-center gap-3">
             <BrandLogo variant="text" className="w-[92px]" />
-            <span className="text-sm text-neutral-500">
+            <span className="text-sm text-[#636363]">
               © {new Date().getFullYear()}
             </span>
           </div>
 
           {/* Center: Supported by */}
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
+          <div className="flex items-center gap-2 text-xs text-[#636363]">
             <span>Supported by</span>
             <Image
               src="/solanaFndn.png"
@@ -36,7 +36,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <Link
               href="/branding"
-              className="rounded-lg border border-white/[0.08] px-3 py-2 text-xs font-semibold text-neutral-400 transition-colors hover:border-white/[0.16] hover:text-white"
+              className="ds-focus-ring rounded-[6px] border border-[#dedede] bg-white px-3 py-2 text-xs font-medium text-[#636363] transition-colors hover:bg-[#efefef] hover:text-[#181818]"
             >
               Brand Kit
             </Link>
@@ -44,7 +44,7 @@ export function Footer() {
               href={brand.xUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-500 hover:text-white transition-colors"
+              className="ds-focus-ring rounded-[4px] text-[#636363] transition-colors hover:text-[#181818]"
               aria-label={`${brand.name} on X`}
             >
               <Twitter size={18} />
@@ -53,7 +53,7 @@ export function Footer() {
               href={brand.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-500 hover:text-white transition-colors"
+              className="ds-focus-ring rounded-[4px] text-[#636363] transition-colors hover:text-[#181818]"
               aria-label={`${brand.name} on GitHub`}
             >
               <Github size={18} />

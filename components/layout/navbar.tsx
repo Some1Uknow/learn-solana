@@ -32,9 +32,9 @@ export function Navbar() {
       <nav
         data-site-nav
         aria-label="Primary navigation"
-        className="fixed inset-x-0 top-0 z-50 hidden border-b border-[#292929] bg-[#060606]/95 backdrop-blur-sm lg:block"
+        className="sticky inset-x-0 top-0 z-50 hidden border-b border-[#dedede] bg-[#f5f5f5]/80 backdrop-blur-lg lg:block"
       >
-        <div className="ds-shell flex min-h-16 items-center gap-5">
+        <div className="ds-shell flex min-h-[72px] items-center gap-5">
           <div className="shrink-0">
             <NavbarBranding />
           </div>
@@ -53,7 +53,7 @@ export function Navbar() {
 
       <nav
         aria-label="Mobile navigation"
-        className="fixed inset-x-0 top-0 z-50 border-b border-[#292929] bg-[#060606]/95 backdrop-blur-sm lg:hidden"
+        className="sticky inset-x-0 top-0 z-50 border-b border-[#dedede] bg-[#f5f5f5]/90 backdrop-blur-lg lg:hidden"
       >
         <div className="mx-auto w-[calc(100vw-32px)] max-w-[1200px]">
           <div className="flex min-h-16 items-center justify-between gap-4">
@@ -64,7 +64,7 @@ export function Navbar() {
               aria-expanded={isMenuOpen}
               aria-controls="mobile-site-navigation"
               aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              className="ds-focus-ring inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#292929] bg-transparent text-[#a0a0a0] transition-colors duration-150 hover:bg-[#181818] hover:text-[#fcfcfc]"
+              className="ds-focus-ring inline-flex h-10 w-10 items-center justify-center rounded-[6px] border border-[#dedede] bg-white text-[#636363] transition-colors duration-150 hover:bg-[#efefef] hover:text-[#181818]"
             >
               {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
@@ -74,19 +74,19 @@ export function Navbar() {
         {isMenuOpen && (
           <div
             id="mobile-site-navigation"
-            className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-[#292929] bg-[#060606]"
+            className="max-h-[calc(100dvh-64px)] overflow-y-auto border-t border-[#dedede] bg-[#f5f5f5]"
           >
             <div className="mx-auto grid w-[calc(100vw-32px)] max-w-[1200px] gap-5 py-4">
               <NavbarLinks isMobile onNavigate={() => setIsMenuOpen(false)} />
 
-              <div className="border-t border-[#292929] pt-4">
-                <p className="mb-2 px-3 font-mono text-[11px] uppercase tracking-[0.08em] text-[#a0a0a0]">
+              <div className="border-t border-[#dedede] pt-4">
+                <p className="mb-2 px-3 font-mono text-[11px] uppercase tracking-[0.08em] text-[#636363]">
                   Opportunities
                 </p>
                 <OpportunityNavbarLinks isMobile onNavigate={() => setIsMenuOpen(false)} />
               </div>
 
-              <div className="grid gap-2 border-t border-[#292929] pt-4">
+              <div className="grid gap-2 border-t border-[#dedede] pt-4">
                 <NavbarGithub isMobile />
                 <NavbarWalletButton isMobile />
               </div>

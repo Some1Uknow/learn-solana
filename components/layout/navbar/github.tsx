@@ -84,7 +84,7 @@ export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Open ${githubConfig.fullRepoName} on GitHub`}
-      className={`ds-focus-ring inline-flex h-10 items-center gap-2 rounded-lg border border-[#292929] bg-transparent px-3 text-sm font-medium text-[#a0a0a0] transition-colors duration-150 hover:bg-[#181818] hover:text-[#fcfcfc] ${
+      className={`ds-focus-ring inline-flex h-10 items-center gap-2 rounded-[6px] border border-[#dedede] bg-white px-3 text-sm font-medium text-[#636363] transition-colors duration-150 hover:bg-[#efefef] hover:text-[#181818] ${
         isMobile ? "w-full justify-between" : ""
       }`}
     >
@@ -95,12 +95,12 @@ export function NavbarGithub({ isMobile = false }: NavbarGithubProps) {
           aria-hidden="true"
           width={16}
           height={16}
-          className="brightness-0 invert opacity-80"
+          className="opacity-70"
         />
         GitHub
       </span>
       {githubStars !== null && (
-        <span className="inline-flex items-center gap-1 text-xs text-[#a0a0a0]">
+        <span className="inline-flex items-center gap-1 text-xs text-[#636363]">
           <Star size={13} aria-hidden="true" />
           {githubStars}
         </span>
