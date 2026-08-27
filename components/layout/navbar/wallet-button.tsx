@@ -56,7 +56,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     return (
       <Button
         disabled
-        className={`border-[#dedede] bg-white text-[#636363] ${isMobile ? "w-full" : ""}`}
+        className={`h-10 border-[#dedede] bg-white text-[#636363] ${isMobile ? "w-full" : ""}`}
       >
         <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-[#dedede] border-t-[#636363]" />
         Loading...
@@ -192,7 +192,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="px-4">
+          <Button className="h-10 px-4">
             <User size={18} className="mr-2" />
             {label}
           </Button>
@@ -276,7 +276,7 @@ export function NavbarWalletButton({ isMobile = false }: NavbarWalletButtonProps
   return (
     <Button
       onClick={login}
-      className={`bg-[var(--ds-accent-control)] text-[#172006] hover:bg-[var(--ds-accent-control-hover)] ${isMobile ? "w-full" : ""}`}
+      className={`h-10 bg-[var(--ds-accent-control)] text-[#172006] hover:bg-[var(--ds-accent-control-hover)] ${isMobile ? "w-full" : ""}`}
     >
       <UserPlus size={18} className="mr-2" />
       Login

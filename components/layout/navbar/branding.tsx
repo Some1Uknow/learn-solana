@@ -10,14 +10,14 @@ export function NavbarBranding() {
     <Link
       href="/"
       aria-label={`${brand.name} home`}
-      className="group inline-flex min-w-[132px] items-center gap-2.5"
+      className="ls-brand-lockup group inline-flex min-w-[132px] items-center gap-2.5"
     >
       <BrandLogo
         variant="mark"
         priority
-        className="w-7 transition-opacity duration-150 group-hover:opacity-80"
+        className="h-7 w-7 shrink-0 transition-opacity duration-150 group-hover:opacity-80"
       />
-      <span className="text-[15px] font-medium leading-none tracking-[-0.035em] text-[#181818] transition-opacity duration-150 group-hover:opacity-80">
+      <span className="ls-brand-wordmark transition-opacity duration-150 group-hover:opacity-80">
         learn.sol
       </span>
     </Link>
