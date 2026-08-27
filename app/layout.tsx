@@ -130,8 +130,8 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         )}
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <PrivyAppProvider>

@@ -1,323 +1,131 @@
 # LearnSol design system
 
-This document is the visual contract for the LearnSol redesign. The reference is BuildAnything's current product UI grammar: restrained, dense, literal, and product-first. LearnSol keeps its own identity, content, routes, and lime accent; it does not copy BuildAnything branding or assets.
+This is a forensic reconstruction of BuildAnything's live light UI, adapted only where LearnSol branding or product concepts require it. Measurements were taken on 27 August 2026 at 1440px, with responsive behavior checked at 768px and 390px. BuildAnything content and assets are not copied.
 
-## 1. Principles
+## A. Measured / observed
 
-1. **Product before decoration.** Show curriculum, progress, challenges, tools, and actions before marketing visuals.
-2. **Literal language.** UI labels describe what a user can do. Avoid abstract product language.
-3. **Dense, not cramped.** Prefer compact vertical rhythm and useful metadata over full-screen sections.
-4. **One strong accent.** Lime is a state/action color, not a background effect.
-5. **Flat hierarchy first.** Use spacing, type, borders, and contrast before shadows, gradients, or motion.
-6. **Functional cards.** A card should contain an action, status, metadata, or real content—not just decorate a logo.
-7. **Motion is feedback.** No ambient marquee, floating, orbit, glow, or continuous motion unless it communicates state.
+### 1. Design principles
 
-## 2. Core palette
+- Product-first, restrained and editorial: hierarchy comes from type, spacing, thin borders and neutral surfaces.
+- Dense enough to show curriculum and progress without full-viewport marketing sections.
+- Controls are compact and rectangular with a 6px radius. Cards are quiet white surfaces.
+- Decorative motion is absent. Interaction feedback uses opacity, color and a short active scale.
 
-Reference dark tokens extracted from BuildAnything and adapted for LearnSol:
+### 2. Color system
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `--ds-background` | `#060606` | page background |
-| `--ds-foreground` | `#fcfcfc` | primary text |
-| `--ds-card` | `#181818` | cards, menus, raised surfaces |
-| `--ds-secondary` | `#232323` | secondary controls / hover surfaces |
-| `--ds-muted` | `#272727` | quiet fills |
-| `--ds-muted-foreground` | `#a0a0a0` | descriptions, metadata |
-| `--ds-border` | `#292929` | default borders |
-| `--ds-primary` | `#a9ff2f` | LearnSol action / active / progress accent |
-| `--ds-primary-foreground` | `#060606` | text on lime |
-| `--ds-danger` | `#ec5448` | destructive states only |
-| `--ds-success` | `#22c55e` | success states only |
+Observed light tokens: background `#f5f5f5`, foreground `#181818`, card `#ffffff`, secondary `#efefef`, muted `#ebebeb`, muted foreground `#636363`, border/input `#dedede`. BuildAnything primary is `#6e54ff`.
 
-### Accent rules
+LearnSol maps primary action and progress states to `#a9ff2f`, with near-black `#172006` text. Lime is never a page or large-section surface and has no glow.
 
-Use lime for:
-- primary CTA
-- selected/current state
-- progress/completion emphasis
-- focus rings
-- a small number of important links
+### 3–7. Typography, roles, scale, line height and tracking
 
-Do not use lime for:
-- radial page glows
-- decorative halos
-- every heading or icon
-- large tinted panels unless the state is semantically important
+- UI/editorial: Inter variable. Code and utility labels: Roboto Mono variable. The reference also loads geistPixel but uses it selectively.
+- Body: 16px/24px; long-form lesson body: 16px/28px; muted hero copy: 16px/26px.
+- Hero and page H1 at desktop: 48px/48px, weight 500, tracking `-0.03em`.
+- Section H2: 30px/30px, weight 500, tracking `-0.02em`.
+- Lesson H2: 24px/32px, weight 500. Card title: 20px/20px, weight 500.
+- Button/navigation: 14px/20px, weight 500. Code: Roboto Mono 14px/24px.
+- Utility/section labels: Roboto Mono 12px/16px, uppercase, visibly expanded tracking.
 
-## 3. Typography
+### 8–12. Spacing, containers, grids and section rhythm
 
-### Families
+- Base spacing is a 4px system: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96.
+- Desktop content shell measured 1182px wide at 1440px, producing 129px side gutters.
+- Lesson reading column measured 720px; table-of-contents rail measured 275px; gap measured 32px.
+- Desktop hero content begins around 169px from viewport top beneath a 73px navigation.
+- Hero title → description: 16px; description → CTA: 24px. Standard page intro uses a 16px stack gap.
+- Track sections are full-width bands with content aligned to the 1182px shell; two-column content is used only where it carries real information.
 
-- **UI / editorial:** Inter, variable 100–900
-- **Code / utility labels:** Roboto Mono, variable 100–700
-- **Pixel display:** do not introduce by default; reserve for a deliberate, rare treatment if the design needs it later
+### 13. Background treatments
 
-Fallbacks:
+The page is a flat `#f5f5f5`. The homepage uses a fixed viewport-sized background layer behind the page:
 
 ```css
-font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+background-image: radial-gradient(rgb(24 24 24 / 20%) 1px, transparent 0);
+background-size: 26px 26px;
+background-position: center;
+mask-image: radial-gradient(ellipse 62% 52% at 50% 50%, black 28%, transparent 100%);
 ```
 
-### Scale
+A second outer layer applies `backdrop-filter: blur(1.25px)` through `radial-gradient(ellipse 82% 72% at 50% 50%, transparent 55%, black 100%)`. There is no hero color gradient. The content surface remains partially transparent in the hero and becomes an opaque flat background at the next section, creating the transition.
 
-Use the reference scale rather than inventing display sizes:
+### 14–16. Borders, radii and shadows
 
-| Name | Size | Typical use |
-| --- | ---: | --- |
-| xs | 12px | tiny metadata / section counters |
-| sm | 14px | navigation, labels, metadata |
-| base | 16px | body / card copy |
-| lg | 18px | lead copy |
-| xl | 20px | compact card headings |
-| 2xl | 24px | section subhead |
-| 3xl | 30px | section heading |
-| 4xl | 36px | large section heading |
-| 5xl | 48px | desktop hero ceiling |
-| 6xl | 60px | exceptional marketing use only |
+- Border: 1px `#dedede`.
+- Radius: 4px small, 6px controls, 8px compact panels, 12px cards. Pills are reserved for true status/tag concepts.
+- Cards use no visible elevation shadow. Buttons use `0 1px 2px rgb(0 0 0 / 20%)` plus a very faint inset top highlight.
 
-Rules:
-- hero copy should normally cap around 48px, not 80–90px
-- headings use `font-weight: 500–600`
-- body is 400
-- nav / compact UI is 500
-- use tight tracking (`-0.02em` to `-0.04em`) only on larger headings
-- body line-height: `1.5–1.625`
+### 17–18. Buttons and links
 
-## 4. Spacing
+- Default button: 40px high, 6px radius, 20px horizontal padding, 14px/20px medium text.
+- Primary uses the product accent; secondary uses `#efefef`; disabled returns to page background and muted text.
+- Hover reduces opacity or changes neutral fill. Active state scales to 0.97. Focus is a visible 2px ring with offset.
+- Text links stay literal and usually gain underline or opacity on hover. External links retain clear labels.
 
-Base unit: **4px**.
+### 19–20. Cards and section labels
 
-Preferred steps: `4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80`.
+- Card: white, 1px border, 12px radius, typically 24px padding; no gradients or decorative icon wells.
+- Track cards prioritize name, direct description, lesson count, action and access requirement.
+- Section label grammar is `[ 01 / 04 ] · Start Learning`, in mono 12px uppercase. The current number may use the product accent; punctuation and descriptor stay muted.
 
-Avoid arbitrary spacing unless a measured layout requires it.
+### 21. Navigation
 
-### Page rhythm
+- Desktop navigation is sticky, 73px high, 16px vertical padding, 1px bottom border, `#f5f5f5` at 80% opacity and `backdrop-filter: blur(16px)`.
+- Brand is left; flat text destinations occupy the center/right; utility controls and sign-in sit at the edge. Ordinary links do not use pills.
+- Mobile uses the same 64–73px bar and a single menu control, then a flat bordered menu. Escape closes it and body scroll is contained while open.
 
-- desktop shell horizontal gutter: `32–40px`
-- tablet: `24px`
-- mobile: `16px`
-- standard section block: `64–96px`, not `100svh`
-- compact section label → heading: `12–16px`
-- heading → supporting copy: `12–18px`
-- section heading → content grid: `32–48px`
+### 22. Tables
 
-## 5. Containers
+Leaderboard grammar is a restrained bordered data region with mono/compact column labels, horizontal row dividers, 14–16px values and right-aligned numeric columns. On narrow screens, preserve data with a locally scrollable table or collapse secondary columns; never cause page overflow.
 
-Reference container scale:
+### 23. Progress UI
 
-- `xs`: 320px
-- `sm`: 384px
-- `md`: 448px
-- `lg`: 512px
-- `xl`: 576px
-- `2xl`: 672px
-- `3xl`: 768px
-- `4xl`: 896px
+Progress is shown as direct counts, lesson metadata, completion state and compact bars. Accent is reserved for current/completed states. Unauthenticated states state the requirement beside the action.
 
-LearnSol application shell:
-
-```css
-width: min(1200px, calc(100vw - 64px));
-margin-inline: auto;
-```
+### 24. Form controls
 
-Use narrower reading widths for prose (`672–768px`).
+Controls are 40px minimum height, white or neutral-filled, 1px border, 6px radius, 14–16px text and an explicit focus ring. Errors sit adjacent to their field; disabled controls remain legible.
 
-Never use `100vw` children inside a centered shell to create decorative full-bleed motion.
+### 25. Code / mono UI
 
-## 6. Radius, borders, shadows
+Roboto Mono is used for code, counters, durations, XP, breadcrumbs where appropriate and section labels. Code blocks are bounded, high-contrast neutral surfaces with local horizontal scrolling and a 6–8px radius.
 
-Reference radius scale:
+### 26. Empty, loading and error states
 
-- `md`: 6px
-- `lg`: 8px
-- `xl`: 12px
-- `3xl`: 24px (rare)
+States use the same card/border system and one plain sentence plus one next action. Loading controls retain their dimensions. No mascot illustration or invented marketing copy is required.
 
-Defaults:
-- controls: `6–8px`
-- cards: `8–12px`
-- dialogs: `12px`
-- pills only for genuinely pill-shaped concepts such as tags/status chips
+### 27. Mobile behavior
 
-Border: `1px solid #292929`.
+- At 390px, page gutters are 16px and cards stack to one column.
+- Hero H1 steps down to 36px; section headings step down to 24px.
+- The lesson table of contents is hidden below desktop and navigation collapses before labels compress.
+- Controls remain at least 40px high. Long code and tables scroll inside their own containers.
 
-Default card shadow: none.
-
-Floating overlays may use restrained shadow such as:
+### 28–29. States and motion
 
-```css
-box-shadow: 0 24px 60px -40px rgba(0, 0, 0, 0.7);
-```
+- Hover: 150ms color/opacity transition. Focus: 2px visible ring. Active: 0.97 scale for buttons only.
+- Menus/dialogs may transition over 150–220ms. Respect `prefers-reduced-motion`.
+- No ambient marquee, float, glow, orbit, animated background or automatic carousel.
 
-Do not use glow shadows as hierarchy.
+### 30. Do / don't
 
-## 7. Navigation
+Do show real modules, challenges, progress and tool actions early. Use literal copy, stable reading widths, subtle borders and repeated primitives. Do fix overflow at its source.
 
-Navigation should be compact and stable.
-
-Desktop:
-- 64–68px tall
-- logo left
-- primary product navigation in normal document flow
-- utilities/actions right
-- no absolute-centered nav cluster
-- no ordinary nav pills
-- active state via text contrast / subtle surface, not glowing lime pills
-
-Mobile:
-- one compact menu button
-- flat list of destinations
-- preserve the same information architecture as desktop
-- avoid nested decorative cards inside the menu
-
-## 8. Buttons
-
-### Primary
-- lime background
-- near-black text
-- 40–44px default height
-- 8px radius
-- 14px / 500–600 text
-- no glow
-
-### Secondary
-- card/secondary background or transparent
-- 1px border
-- foreground text
-- same height/radius as primary
-
-### Ghost
-- transparent
-- muted foreground
-- secondary background on hover
-
-Focus: 2px lime ring with visible offset.
-
-No oversized 54px pill CTAs by default.
-
-## 9. Cards
-
-Cards must answer at least one of:
-- What is this?
-- What can I do here?
-- What is my progress/status?
-- What does this contain?
-
-Default card:
-- `#181818`
-- 1px `#292929` border
-- 8–12px radius
-- 16–24px padding
-- no decorative gradient
-- no giant empty illustration region
-
-Track cards should prioritize:
-1. track/title
-2. concise description
-3. lesson/challenge/progress metadata
-4. clear start/continue action
-
-## 10. Section headers
-
-Preferred grammar:
-
-```text
-[ 01 / 05 ] · Start learning
-Learning tracks
-Short literal description.
-```
-
-- counter/kicker: Roboto Mono, 12px, muted
-- heading: Inter 30–48px depending context
-- body: 16–18px, muted
-
-Do not make every section a full viewport.
-
-## 11. Forms and controls
-
-- backgrounds: `#181818` or `#232323`
-- border: `#292929`
-- focus: lime ring
-- 8px radius
-- labels 12–14px
-- help/error text adjacent to the control
-- preserve density in developer tools where density is useful
-
-## 12. Motion
-
-Allowed:
-- 150ms hover/focus color transitions
-- 150–300ms menu/dialog transitions
-- progress/state transitions
-
-Avoid:
-- infinite marquees
-- ambient float
-- ambient glow pulse
-- auto-rotating decorative objects
-- motion that consumes CPU without helping comprehension
-
-Always respect `prefers-reduced-motion`.
-
-## 13. Responsive behavior
-
-- no horizontal scrolling at 320px+
-- use `min-width: 0` in flexible/grid children
-- long code/commands may scroll within their own bounded container
-- cards collapse to one column when content no longer fits
-- navigation collapses before labels become compressed
-- do not hide layout problems using global `overflow-x: hidden`
-
-## 14. Copy rules
-
-UI copy is part of the design system.
-
-Prefer:
-- "30 Rust challenges"
-- "Run the code"
-- "Continue lesson"
-- "Learn Rust, Anchor, and Solana clients"
-
-Avoid:
-- "durable product loop"
-- "coherent system"
-- "developer trust"
-- "surfaces developers return to"
-- "tighter loop that compounds"
-- "entire-stack coverage" when a concrete list is available
-
-No generic AI/startup filler such as unlock, empower, seamless, supercharge, revolutionize, or journey.
-
-## 15. Do / don't
-
-### Do
-- show real curriculum early
-- show real progress and challenge metadata
-- use screenshots/product surfaces as proof
-- keep sections compact
-- let typography and borders carry hierarchy
-- reuse a small number of primitives
-
-### Don't
-- default to bento grids
-- put logos in 31rem poster cards
-- use giant globes or maps as generic crypto decoration
-- build fake stat cards around weak metrics
-- use marquees to show compatible logos
-- add gradients to make an empty layout feel designed
-- create one-off visual systems per section
-
-## 16. LearnSol-specific adaptation
-
-BuildAnything is the reference for density, typography, radius, border, spacing, and information hierarchy. LearnSol remains recognizably LearnSol through:
-
-- `learn.sol` brand assets
-- `#A9FF2F` primary accent
-- Solana/Rust/Anchor curriculum content
-- challenge/progress data
-- Runtime Lab, Visual Builder, and Agent Skill product surfaces
-
-When the reference and an existing LearnSol functional requirement conflict, preserve functionality and apply the closest compatible design-system rule.
+Do not use bento grids, glassmorphism, large lime surfaces, gradients as filler, glowing borders, floating blobs, giant pill CTAs, fake proof, invented metrics or a generic component-showcase aesthetic.
+
+## B. Inferred
+
+The following values could not be confirmed as authored tokens and are treated as implementation inferences:
+
+- Tablet horizontal gutter: 24px between 768px and 1023px.
+- Mobile section spacing: 64px; desktop section spacing: 80–96px depending content density.
+- Default card padding: 24px desktop and 20px mobile, inferred from repeated visual bounds.
+- Table row height: approximately 56px; exact authored value was not exposed as a single token.
+- Dropdown shadow: `0 24px 60px -40px rgb(0 0 0 / 35%)`, used only for floating layers.
+- Breakpoints follow common 768px/1024px boundaries suggested by the live responsive class behavior.
+
+## LearnSol-specific deviations
+
+- BuildAnything purple is replaced by LearnSol lime only for primary actions, progress, selected state and focus, because the products must remain separately branded.
+- LearnSol developer workspaces retain higher information density and locally dark code editors because syntax legibility and existing editor behavior take priority over applying a white surface everywhere.
+- Opportunity destinations remain accessible through one compact navigation group because LearnSol has more top-level concepts than the reference navigation.
