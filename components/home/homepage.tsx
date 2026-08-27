@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, Braces, Hammer, TerminalSquare } from "lucide-rea
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { CopySkillCommandButton } from "@/components/home/copy-skill-command-button";
-import { AsciiSolanaMark } from "@/components/home/ascii-solana-mark";
+import { SolanaMark } from "@/components/home/solana-mark";
 import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
@@ -45,8 +45,8 @@ export function HomePage() {
               <Link className={styles.secondaryButton} href="/challenges">View challenges</Link>
             </div>
           </div>
-          <div className={styles.asciiStage}>
-            <AsciiSolanaMark />
+          <div className={styles.solanaStage}>
+            <SolanaMark />
           </div>
         </div>
       </section>
