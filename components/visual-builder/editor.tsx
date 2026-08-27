@@ -40,13 +40,14 @@ import {
   VISUAL_BUILDER_TEMPLATES,
   type TemplateStep,
 } from "@/lib/visual-builder/templates";
+import styles from "@/app/tools/tools.module.css";
 
 const nodeTypes = {
   block: BlockNode,
 };
 
 const defaultEdgeOptions = {
-  style: { stroke: "#a9ff2f", strokeWidth: 1.2 },
+  style: { stroke: "#6b8f27", strokeWidth: 1.4 },
   animated: false,
 };
 
@@ -380,7 +381,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
   }, [steps.length]);
 
   return (
-    <div className={fullscreen ? "w-full" : "w-full border border-white/10 bg-white/[0.02]"}>
+    <div className={`${fullscreen ? "w-full" : "w-full"} ${styles.visualBuilderRoot}`}>
       <div className={fullscreen ? "px-4 py-4" : "border-b border-white/10 px-4 py-4"}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -613,7 +614,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
           snapToGrid
           snapGrid={[24, 24]}
         >
-          <Background gap={24} size={1} color="#1f2937" />
+          <Background gap={24} size={1} color="#dedede" />
           <Controls className="bg-black/60 border border-white/10" />
           <MiniMap
             pannable
@@ -623,7 +624,7 @@ function VisualBuilderCanvas({ fullscreen = false }: { fullscreen?: boolean }) {
               if (!nodeData?.kind) return "#1f2937";
               return getBlockDefinition(nodeData.kind).accent;
             }}
-            maskColor="rgba(0,0,0,0.6)"
+            maskColor="rgba(245,245,245,0.82)"
             className="bg-black/70 border border-white/10"
           />
         </ReactFlow>

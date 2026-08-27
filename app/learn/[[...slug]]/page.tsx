@@ -122,6 +122,7 @@ export default async function Page(props: {
         full={page.data.full}
         breadcrumb={{ enabled: false }}
         footer={{ component: <PageFooter className="ls-docs-footer-nav" /> }}
+        tableOfContentPopover={{ enabled: false }}
         tableOfContent={{
           component: (
             <PageTOC className="ls-docs-toc-rail">

@@ -2,13 +2,29 @@
   --bg: #f5f5f5;
   --panel: #ffffff;
   --border: #dedede;
+  --border-strong: #cfcfcf;
   --text: #181818;
   --muted: #636363;
   --muted-strong: #434343;
   --lime: #a9ff2f;
+  --control: var(--ds-accent-control, #8fca32);
+  --control-hover: var(--ds-accent-control-hover, #7eaf2e);
+  --accent-ink: #46680d;
+  --surface-subtle: #efefef;
+  --surface-soft: #f8f8f8;
   min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--text);
+}
+
+.page > main {
+  flex: 1 0 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .shell {
@@ -245,9 +261,13 @@
 }
 
 .primaryButton {
-  background: #a9ff2f;
+  background: var(--control);
   color: #172006;
   border: 1px solid transparent;
+}
+
+.primaryButton:hover {
+  background: var(--control-hover);
 }
 
 .primaryButton:hover,
@@ -301,7 +321,7 @@
 
 .accentPill {
   background: rgba(169, 255, 47, 0.14);
-  color: var(--lime);
+  color: var(--accent-ink);
   border-color: transparent;
 }
 
@@ -359,8 +379,8 @@
 
 .minimalToolCard,
 .minimalProgramCard {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  background: var(--panel);
   color: var(--text);
   text-decoration: none;
   border-radius: 8px;
@@ -371,8 +391,8 @@
 
 .minimalToolCard:hover,
 .minimalProgramCard:hover {
-  border-color: rgba(169, 255, 47, 0.24);
-  background: rgba(255, 255, 255, 0.045);
+  border-color: color-mix(in srgb, var(--accent-ink) 34%, var(--border));
+  background: var(--surface-soft);
 }
 
 .minimalToolCard {
@@ -389,8 +409,8 @@
   height: 2.35rem;
   place-items: center;
   border-radius: 8px;
-  background: rgba(169, 255, 47, 0.1);
-  color: var(--lime);
+  background: color-mix(in srgb, var(--lime) 22%, var(--panel));
+  color: var(--accent-ink);
 }
 
 .minimalToolCopy {
@@ -409,7 +429,7 @@
 
 .minimalToolCopy p {
   margin-top: 0.2rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.45;
 }
@@ -418,7 +438,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
   font-size: 0.76rem;
   white-space: nowrap;
 }
@@ -448,7 +468,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  color: rgba(255, 255, 255, 0.44);
+  color: var(--muted);
   font-size: 0.72rem;
 }
 
@@ -460,13 +480,13 @@
 
 .minimalProgramMain p {
   margin-top: 0.3rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.5;
 }
 
 .minimalProgramProgress {
-  color: rgba(169, 255, 47, 0.78) !important;
+  color: var(--accent-ink) !important;
 }
 
 .minimalProgramActions {
@@ -496,7 +516,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--lime);
+  color: var(--accent-ink);
 }
 
 .cardTitle {
@@ -577,13 +597,13 @@
   width: 100%;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--text);
   font-size: 0.9rem;
   outline: none;
 }
 
 .searchInput::placeholder {
-  color: rgba(255, 255, 255, 0.34);
+  color: var(--muted);
 }
 
 .toolsLayout {
@@ -1546,4 +1566,236 @@
     width: 2.45rem;
     flex: 0 0 2.45rem;
   }
+}
+
+/* Runtime Lab light surface pass. The interactive editor keeps its hierarchy,
+   but all readable copy and controls now share the product light theme. */
+.labAppTheme .labAppMain {
+  flex: 1 0 auto;
+  padding-top: 0;
+}
+
+.labAppTheme .labAppHeader {
+  border-bottom-color: var(--border);
+  background: var(--panel);
+}
+
+.labAppTheme .labCrumbs {
+  color: var(--muted);
+}
+
+.labAppTheme .labCrumbs a,
+.labAppTheme .labCrumbs a:hover {
+  color: var(--text);
+}
+
+.labAppTheme .labAppTitle,
+.labAppTheme .labPanelTitle,
+.labAppTheme .labQuestionBlock h3,
+.labAppTheme .labResultCard > div,
+.labAppTheme .labCheckRow span:first-child,
+.labAppTheme .labLogRow span,
+.labAppTheme .labAccountHeader h4,
+.labAppTheme .labFailureCard h4 {
+  color: var(--text);
+}
+
+.labAppTheme .labAppSubtitle,
+.labAppTheme .labPanelBody,
+.labAppTheme .labResultCard p,
+.labAppTheme .labCheckRow p,
+.labAppTheme .labLogRow p,
+.labAppTheme .labAccountHeader p,
+.labAppTheme .labFailureCard p,
+.labAppTheme .labDiffTable > div {
+  color: var(--muted);
+}
+
+.labAppTheme .labProgressSegment,
+.labAppTheme .labFlowSwitchButton,
+.labAppTheme .labFlowRow,
+.labAppTheme .labStepRow {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--muted-strong);
+}
+
+.labAppTheme .labProgressSegment:hover,
+.labAppTheme .labFlowSwitchButton:hover,
+.labAppTheme .labFlowRow:hover,
+.labAppTheme .labStepRow:hover {
+  border-color: color-mix(in srgb, var(--accent-ink) 34%, var(--border));
+  background: var(--panel);
+  color: var(--text);
+}
+
+.labAppTheme .labProgressSegmentActive,
+.labAppTheme .labFlowSwitchButtonActive,
+.labAppTheme .labFlowRowActive,
+.labAppTheme .labStepRowActive {
+  border-color: color-mix(in srgb, var(--accent-ink) 42%, var(--border));
+  background: color-mix(in srgb, var(--lime) 20%, var(--panel));
+  color: var(--text);
+}
+
+.labAppTheme .labProgressSegment span:first-child,
+.labAppTheme .labStepDot {
+  background: var(--border);
+}
+
+.labAppTheme .labProgressSegmentAnswered span:first-child,
+.labAppTheme .labStepDotAnswered {
+  background: var(--border-strong);
+}
+
+.labAppTheme .labProgressSegmentDone span:first-child,
+.labAppTheme .labStepDotDone {
+  background: color-mix(in srgb, var(--lime) 40%, var(--panel));
+  color: var(--accent-ink);
+}
+
+.labAppTheme .labFlowSwitchButton span:last-child,
+.labAppTheme .labFlowRow span:last-child,
+.labAppTheme .labStepRowIndex {
+  color: var(--muted);
+}
+
+.labAppTheme .labSidebarLabel {
+  color: var(--accent-ink);
+}
+
+.labAppTheme .labPredictionPanel,
+.labAppTheme .labSidebarPanel {
+  border-color: var(--border);
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.labAppTheme .labQuestionBlock,
+.labAppTheme .labFailureCard > div:last-child {
+  border-top-color: var(--border);
+}
+
+.labAppTheme .labOptionButton {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+
+.labAppTheme .labOptionButton:hover,
+.labAppTheme .labOptionButtonChosen {
+  border-color: color-mix(in srgb, var(--accent-ink) 34%, var(--border));
+  background: var(--panel);
+  color: var(--text);
+}
+
+.labAppTheme .labOptionButtonCorrect {
+  border-color: color-mix(in srgb, #3f7f16 42%, var(--border));
+  background: #edf8df;
+}
+
+.labAppTheme .labOptionButtonWrong {
+  border-color: color-mix(in srgb, #b44343 42%, var(--border));
+  background: #fff0f0;
+}
+
+.labAppTheme .labResultCard {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+
+.labAppTheme .labResultCardCorrect {
+  border-color: color-mix(in srgb, #3f7f16 36%, var(--border));
+  background: #edf8df;
+}
+
+.labAppTheme .labResultCardWrong {
+  border-color: color-mix(in srgb, #b44343 36%, var(--border));
+  background: #fff0f0;
+}
+
+.labAppTheme .labCheckRow,
+.labAppTheme .labLogRow,
+.labAppTheme .labAccountCard,
+.labAppTheme .labFailureCard {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+
+.labAppTheme .labInlineError {
+  border-color: color-mix(in srgb, #b44343 35%, var(--border));
+  background: #fff0f0;
+  color: #8f2f2f;
+}
+
+.labAppTheme .labAccountHeader > span,
+.labAppTheme .labFailureCard span {
+  color: var(--accent-ink);
+}
+
+/* Visual Builder uses a few legacy utility classes inside the canvas. Scope
+   the normalization to this editor so intentionally dark surfaces elsewhere
+   (code runners and chat) remain unchanged. */
+.visualBuilderRoot {
+  border: 1px solid var(--ds-border);
+  background: var(--ds-card);
+  color: var(--ds-foreground);
+  overflow: hidden;
+}
+
+.visualBuilderRoot :global([class*="border-white"]) {
+  border-color: var(--ds-border) !important;
+}
+
+.visualBuilderRoot :global([class*="bg-black"]) {
+  background: var(--ds-secondary) !important;
+}
+
+.visualBuilderRoot :global([class*="bg-white"]) {
+  background: var(--ds-card) !important;
+}
+
+.visualBuilderRoot :global([class*="text-white"]) {
+  color: var(--ds-foreground) !important;
+}
+
+.visualBuilderRoot :global([class*="text-zinc"]) {
+  color: var(--ds-muted-foreground) !important;
+}
+
+.visualBuilderRoot :global([class*="text-\[#a9ff2f\]"]) {
+  color: var(--ds-accent-muted) !important;
+}
+
+.visualBuilderRoot :global([class*="border-\[#a9ff2f\]"]) {
+  border-color: color-mix(in srgb, var(--ds-accent-muted) 45%, var(--ds-border)) !important;
+}
+
+.visualBuilderRoot :global([class*="bg-\[#a9ff2f\]"]) {
+  background: var(--ds-accent-soft) !important;
+}
+
+.visualBuilderRoot :global(.react-flow__controls) {
+  overflow: hidden;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: none;
+}
+
+.visualBuilderRoot :global(.react-flow__controls-button) {
+  border-bottom-color: var(--ds-border);
+  background: var(--ds-card);
+  color: var(--ds-foreground);
+  fill: var(--ds-foreground);
+}
+
+.visualBuilderRoot :global(.react-flow__controls-button:hover) {
+  background: var(--ds-secondary);
+}
+
+.visualBuilderRoot :global(.react-flow__minimap) {
+  overflow: hidden;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-card);
 }

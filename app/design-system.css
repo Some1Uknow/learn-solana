@@ -44,6 +44,23 @@ body {
     BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.ls-brand-lockup {
+  min-height: 2.5rem;
+}
+
+.ls-brand-wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  transform: translateY(1px);
+  color: var(--ds-foreground);
+  font-family: "Bree Serif", Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
 main:focus { outline: none; }
 
 a, button, input, textarea, select, summary {

@@ -1650,3 +1650,116 @@
     padding-top: 2rem;
   }
 }
+
+/* Lesson shell: one product navbar, one reading canvas, and a footer that
+   stays at the viewport edge when a page is short. */
+.ls-learn-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
+}
+
+.ls-learn-content {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ls-learn-content > .ls-docs-layout {
+  min-height: 0;
+  flex: 1 0 auto;
+}
+
+/* Fumadocs still owns the article and TOC primitives, but the course sidebar
+   is deliberately absent from the lesson reading mode. */
+.ls-docs-layout {
+  --fd-nav-height: 0px;
+  --fd-tocnav-height: 0px;
+  --fd-sidebar-width: 0px;
+  --fd-page-width: 1168px;
+  --fd-toc-width: 248px;
+}
+
+.ls-docs-layout #nd-sidebar {
+  display: none !important;
+}
+
+.ls-docs-layout #nd-page {
+  width: min(100%, var(--fd-page-width));
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(2rem, 6vw, 5.5rem);
+  margin-inline: auto;
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2.75rem) 5rem;
+  padding-inline-end: clamp(1rem, 4vw, 2.75rem);
+}
+
+.ls-docs-layout #nd-page article {
+  flex: 1 1 auto;
+  width: min(100%, 760px);
+  max-width: 760px;
+  margin: 0;
+  padding: 0;
+}
+
+.ls-docs-layout #nd-toc {
+  position: sticky;
+  top: 5.75rem !important;
+  bottom: auto !important;
+  flex: 0 0 var(--fd-toc-width);
+  width: var(--fd-toc-width);
+  min-width: var(--fd-toc-width);
+  max-width: var(--fd-toc-width);
+  max-height: calc(100dvh - 7rem);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.ls-docs-layout .ls-docs-hero {
+  margin-bottom: 2.75rem;
+  padding-bottom: 2rem;
+}
+
+.ls-docs-layout .ls-docs-title {
+  max-width: 21ch;
+  font-size: clamp(2.25rem, 4.6vw, 3.2rem) !important;
+  line-height: 0.98 !important;
+}
+
+.ls-docs-layout .ls-docs-description {
+  max-width: 60ch;
+}
+
+@media (max-width: 1279px) {
+  .ls-docs-layout #nd-page {
+    display: block;
+    padding-inline: clamp(1rem, 5vw, 2rem);
+  }
+
+  .ls-docs-layout #nd-page article {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .ls-docs-layout #nd-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .ls-docs-layout #nd-page {
+    padding-top: 1.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .ls-docs-layout .ls-docs-title {
+    max-width: none;
+    font-size: clamp(2rem, 10vw, 2.65rem) !important;
+  }
+}

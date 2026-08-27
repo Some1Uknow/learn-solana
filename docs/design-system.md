@@ -15,7 +15,7 @@ This is a forensic reconstruction of BuildAnything's live light UI, adapted only
 
 Observed light tokens: background `#f5f5f5`, foreground `#181818`, card `#ffffff`, secondary `#efefef`, muted `#ebebeb`, muted foreground `#636363`, border/input `#dedede`. BuildAnything primary is `#6e54ff`.
 
-LearnSol maps primary action and progress states to `#a9ff2f`, with near-black `#172006` text. Lime is never a page or large-section surface and has no glow.
+LearnSol keeps `#a9ff2f` for the mark, progress and small selected indicators. Large light-theme controls use the calmer derived green `#8fca32` (hover `#7eaf2e`) with near-black `#172006` text. Lime is never a page or large-section surface and has no glow.
 
 ### 3–7. Typography, roles, scale, line height and tracking
 
@@ -98,7 +98,7 @@ States use the same card/border system and one plain sentence plus one next acti
 
 - At 390px, page gutters are 16px and cards stack to one column.
 - Hero H1 steps down to 36px; section headings step down to 24px.
-- The lesson table of contents is hidden below desktop and navigation collapses before labels compress.
+- The lesson course sidebar is removed from the reader; a compact right-hand table of contents remains on desktop and is hidden below the desktop reading breakpoint. Navigation collapses before labels compress.
 - Controls remain at least 40px high. Long code and tables scroll inside their own containers.
 
 ### 28–29. States and motion
