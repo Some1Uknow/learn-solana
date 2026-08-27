@@ -7,6 +7,8 @@
   --muted: #636363;
   --muted-strong: #434343;
   --lime: #a9ff2f;
+  --control: #8fca32;
+  --control-hover: #7eaf2e;
   --accent-ink: #46680d;
   --surface-subtle: #efefef;
   --surface-soft: #f8f8f8;
@@ -259,9 +261,13 @@
 }
 
 .primaryButton {
-  background: #a9ff2f;
+  background: var(--control);
   color: #172006;
   border: 1px solid transparent;
+}
+
+.primaryButton:hover {
+  background: var(--control-hover);
 }
 
 .primaryButton:hover,
@@ -315,7 +321,7 @@
 
 .accentPill {
   background: rgba(169, 255, 47, 0.14);
-  color: var(--lime);
+  color: var(--accent-ink);
   border-color: transparent;
 }
 
@@ -510,7 +516,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--lime);
+  color: var(--accent-ink);
 }
 
 .cardTitle {

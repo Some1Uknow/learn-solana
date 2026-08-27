@@ -1670,13 +1670,15 @@
 }
 
 .ls-learn-content > .ls-docs-layout {
-  min-height: 100%;
+  min-height: 0;
   flex: 1 0 auto;
 }
 
 /* Fumadocs still owns the article and TOC primitives, but the course sidebar
    is deliberately absent from the lesson reading mode. */
 .ls-docs-layout {
+  --fd-nav-height: 0px;
+  --fd-tocnav-height: 0px;
   --fd-sidebar-width: 0px;
   --fd-page-width: 1168px;
   --fd-toc-width: 248px;
@@ -1707,7 +1709,8 @@
 
 .ls-docs-layout #nd-toc {
   position: sticky;
-  top: 5.75rem;
+  top: 5.75rem !important;
+  bottom: auto !important;
   flex: 0 0 var(--fd-toc-width);
   width: var(--fd-toc-width);
   min-width: var(--fd-toc-width);
