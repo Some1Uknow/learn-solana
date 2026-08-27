@@ -80,7 +80,7 @@ export function ChallengesPageClient({ tracks }: { tracks: ChallengeTrackSummary
       <BreadcrumbSchema items={breadcrumbItems} />
       <Navbar />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className={styles.hero}>
           <div className={styles.shell}>
             <div className={styles.heroCopy}>

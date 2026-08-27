@@ -112,6 +112,12 @@ export default async function RootLayout({
         )}
       </head>
       <body className={`${inter.variable} ${robotoMono.variable}`}>
+        <a
+          href="#main-content"
+          className="fixed left-4 top-4 z-[60] -translate-y-20 rounded-[6px] bg-[#181818] px-4 py-2 text-sm font-medium text-white transition-transform focus:translate-y-0"
+        >
+          Skip to content
+        </a>
         {process.env.NODE_ENV === "production" && clarityId && (
           <Script id="clarity-script" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){

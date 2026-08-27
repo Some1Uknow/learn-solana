@@ -32,19 +32,19 @@ export function Navbar() {
       <nav
         data-site-nav
         aria-label="Primary navigation"
-        className="sticky inset-x-0 top-0 z-50 hidden border-b border-[#dedede] bg-[#f5f5f5]/80 backdrop-blur-lg lg:block"
+        className="sticky inset-x-0 top-0 z-50 hidden border-b border-[#dedede] bg-[#f5f5f5]/80 backdrop-blur-lg min-[1180px]:block"
       >
-        <div className="ds-shell flex min-h-[72px] items-center gap-5">
-          <div className="shrink-0">
+        <div className="ds-shell grid min-h-[72px] grid-cols-[1fr_auto_1fr] items-center gap-6">
+          <div className="min-w-0 justify-self-start">
             <NavbarBranding />
           </div>
 
-          <div className="flex min-w-0 flex-1 items-center gap-1">
+          <div className="flex min-w-0 items-center justify-center gap-1">
             <NavbarLinks />
             <OpportunityNavbarLinks />
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 justify-self-end">
             <NavbarGithub />
             <NavbarWalletButton />
           </div>
@@ -53,7 +53,7 @@ export function Navbar() {
 
       <nav
         aria-label="Mobile navigation"
-        className="sticky inset-x-0 top-0 z-50 border-b border-[#dedede] bg-[#f5f5f5]/90 backdrop-blur-lg lg:hidden"
+        className="sticky inset-x-0 top-0 z-50 border-b border-[#dedede] bg-[#f5f5f5]/90 backdrop-blur-lg min-[1180px]:hidden"
       >
         <div className="mx-auto w-[calc(100vw-32px)] max-w-[1200px]">
           <div className="flex min-h-16 items-center justify-between gap-4">

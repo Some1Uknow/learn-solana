@@ -14,7 +14,7 @@ export default function ModuleDetailPageClient({ module }: { module: ModuleItem 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#181818]">
       <Navbar />
-      <main className="pb-20">
+      <main id="main-content" tabIndex={-1} className="pb-20">
         <header className="border-b border-[#dedede] py-14 md:py-20">
           <div className="ds-shell">
             <nav className="mb-8 flex flex-wrap items-center gap-2 text-sm text-[#636363]" aria-label="Breadcrumb"><Link href="/modules" className="hover:text-[#181818]">Modules</Link><span>/</span><span aria-current="page">{module.title}</span></nav>

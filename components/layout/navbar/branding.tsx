@@ -10,12 +10,17 @@ export function NavbarBranding() {
     <Link
       href="/"
       aria-label={`${brand.name} home`}
-      className="group inline-flex min-w-[132px] items-center gap-2"
+      className="group inline-flex min-w-[132px] items-center gap-2.5"
     >
       <BrandLogo
-        variant="wordmark"
+        variant="mark"
         priority
-        className="w-[132px] transition-opacity duration-200 group-hover:opacity-85"
+        className="w-7 transition-opacity duration-150 group-hover:opacity-80"
+      />
+      <BrandLogo
+        variant="textBlack"
+        priority
+        className="w-[88px] transition-opacity duration-150 group-hover:opacity-80"
       />
     </Link>
   );

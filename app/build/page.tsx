@@ -19,7 +19,7 @@ export default function BuildChallengesPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#181818]">
       <Navbar />
-      <main className="pt-20">
+      <main id="main-content" tabIndex={-1} className="pt-20">
         <section className="border-b border-[#dedede] px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-[1182px]">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-[#557b11]">Build on Solana</p>
