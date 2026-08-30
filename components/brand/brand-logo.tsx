@@ -12,16 +12,16 @@ type BrandLogoProps = {
 
 const assetConfig = {
   wordmark: {
-    src: brand.assets.wordmark,
+    src: brand.assets.wordmarkOptimized,
     alt: `${brand.name} wordmark`,
-    width: 808,
-    height: 276,
+    width: 404,
+    height: 138,
   },
   mark: {
     src: brand.assets.markOptimized,
     alt: `${brand.name} mark`,
-    width: 128,
-    height: 128,
+    width: 64,
+    height: 64,
   },
   text: {
     src: brand.assets.text,
