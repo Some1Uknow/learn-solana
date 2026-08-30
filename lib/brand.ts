@@ -14,6 +14,7 @@ export const brand = {
     mark: "/brand/learnsol-mark-lime.png",
     markOptimized: "/brand/learnsol-mark-lime.webp",
     wordmark: "/brand/learnsol-wordmark-lime.png",
+    wordmarkOptimized: "/brand/learnsol-wordmark-lime.webp",
     text: "/brand/learnsol-text-lime.png",
     wordmarkBlackSource: "/brand/learn.sol-black.png",
     wordmarkWhiteSource: "/brand/learn.sol.png",
