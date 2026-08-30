@@ -69,7 +69,11 @@ function useGithubStars() {
   }, []);
 
   useEffect(() => {
-    void fetchStars();
+    const timeoutId = window.setTimeout(() => {
+      void fetchStars();
+    }, 1500);
+
+    return () => window.clearTimeout(timeoutId);
   }, [fetchStars]);
 
   return stars;

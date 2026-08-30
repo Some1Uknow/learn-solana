@@ -84,8 +84,12 @@ check("sitemap static routes use source-backed mtimes", includes(sitemapSource, 
 check("sitemap excludes runtime lab detail pages", includes(sitemapSource, "Runtime Lab program detail pages are intentionally excluded"));
 
 check("robots references canonical sitemap", includes(robotsSource, "sitemap: `${siteUrl}/sitemap.xml`"));
-for (const disallowed of ["/api/", "/_next/", "/llms.txt", "/llms-full.txt", "/llms.mdx/", "/learn.mdx/", "/docs/"]) {
+for (const disallowed of ["/api/", "/_next/", "/docs/"]) {
   check(`robots disallows ${disallowed}`, includes(robotsSource, `'${disallowed}'`) || includes(robotsSource, `"${disallowed}"`));
+}
+
+for (const allowed of ["/llms.txt", "/llms-full.txt", "/llms.mdx/", "/learn.mdx/"]) {
+  check(`robots allows ${allowed}`, !includes(robotsSource, `'${allowed}'`) && !includes(robotsSource, `"${allowed}"`));
 }
 
 for (const [from, to] of [

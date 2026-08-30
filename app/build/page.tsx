@@ -29,7 +29,7 @@ export default function BuildChallengesPage() {
                 <h1 className="max-w-4xl text-4xl font-medium leading-none tracking-[-0.03em] sm:text-5xl">Build programs that pass real tests.</h1>
                 <p className="mt-6 max-w-2xl text-base leading-7 text-[#636363]">Start with an Anchor workspace. Build locally, upload the compiled program and pass each stage.</p>
               </div>
-              <div className="flex items-center gap-4 border-l border-[#dedede] pl-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] border border-[#dedede] bg-white"><Image src="/anchor.png" alt="Anchor logo" width={36} height={36} className="h-9 w-9 object-contain" /></span><p className="font-mono text-xs leading-6 text-[#636363]">Anchor workspace.<br />Local compiler.<br />Real staged tests.</p></div>
+              <div className="flex items-center gap-4 border-l border-[#dedede] pl-4"><span className="grid h-14 w-14 shrink-0 place-items-center rounded-[10px] border border-[#dedede] bg-white"><Image src="/anchor.webp" alt="Anchor logo" width={36} height={36} className="h-9 w-9 object-contain" /></span><p className="font-mono text-xs leading-6 text-[#636363]">Anchor workspace.<br />Local compiler.<br />Real staged tests.</p></div>
             </div>
           </div>
         </section>

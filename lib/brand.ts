@@ -12,6 +12,7 @@ export const brand = {
   domainLabel: "learnsol.site",
   assets: {
     mark: "/brand/learnsol-mark-lime.png",
+    markOptimized: "/brand/learnsol-mark-lime.webp",
     wordmark: "/brand/learnsol-wordmark-lime.png",
     text: "/brand/learnsol-text-lime.png",
     wordmarkBlackSource: "/brand/learn.sol-black.png",

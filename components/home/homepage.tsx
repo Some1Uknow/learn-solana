@@ -10,9 +10,9 @@ import { brand } from "@/lib/brand";
 import styles from "./homepage.module.css";
 
 const modules = [
-  { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules/rust-foundations", image: "/rust-2.png", imageAlt: "Rust" },
-  { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules/anchor-programs", image: "/anchor.png", imageAlt: "Anchor" },
-  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules/solana-foundations", image: "/solanaLogo4k.png", imageAlt: "Solana" },
+  { name: "Rust", description: "Ownership, borrowing, traits and pattern matching for Solana programs.", meta: "Start with Rust", href: "/modules/rust-foundations", image: "/rust-2.webp", imageAlt: "Rust" },
+  { name: "Anchor", description: "Accounts, instructions, constraints and testing with Anchor.", meta: "Build programs", href: "/modules/anchor-programs", image: "/anchor.webp", imageAlt: "Anchor" },
+  { name: "Solana runtime", description: "Transactions, accounts, programs, fees and runtime behavior.", meta: "Understand the runtime", href: "/modules/solana-foundations", image: "/solanaLogo4k.webp", imageAlt: "Solana" },
   { name: "Modern clients", description: "Build transactions and wallet flows with current Solana clients.", meta: "Connect an app", href: "/modules/solana-kit-clients", image: "/solana-kit.svg", imageAlt: "Solana Kit" },
 ];
 

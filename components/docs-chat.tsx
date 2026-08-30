@@ -142,7 +142,7 @@ export default function DocsChat() {
           <X className="h-5 w-5 text-[#a9ff2f]" />
         ) : (
           <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[#a9ff2f]">
-            <img src="/brand/learnsol-mark-lime.png" alt="" className="h-8 w-8 object-contain" />
+            <img src="/brand/learnsol-mark-lime.webp" alt="" className="h-8 w-8 object-contain" />
             <MessageCircle className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-black p-0.5 text-[#a9ff2f]" />
           </span>
         )}

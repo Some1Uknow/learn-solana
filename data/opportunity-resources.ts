@@ -210,7 +210,7 @@ export const opportunityPages: Record<OpportunityCategory, OpportunityPage> = {
         summary:
           "The official calendar for upcoming Solana and community events, with direct registration links.",
         logo: {
-          src: "/solanaLogo4k.png",
+          src: "/solanaLogo4k.webp",
           alt: "Solana",
           variant: "mark",
         },
@@ -235,7 +235,7 @@ export const opportunityPages: Record<OpportunityCategory, OpportunityPage> = {
         summary:
           "Official communication channels for engineering discussions, announcements, events, and media.",
         logo: {
-          src: "/solanaLogo4k.png",
+          src: "/solanaLogo4k.webp",
           alt: "Solana",
           variant: "mark",
         },
@@ -288,7 +288,7 @@ export const opportunityPages: Record<OpportunityCategory, OpportunityPage> = {
         summary:
           "Explore network resources, community programs, events, research, and use-case categories.",
         logo: {
-          src: "/solanaLogo4k.png",
+          src: "/solanaLogo4k.webp",
           alt: "Solana",
           variant: "mark",
         },
@@ -302,7 +302,7 @@ export const opportunityPages: Record<OpportunityCategory, OpportunityPage> = {
         summary:
           "A starting point for official documentation, tools, guides, courses, and developer support.",
         logo: {
-          src: "/solanaLogo4k.png",
+          src: "/solanaLogo4k.webp",
           alt: "Solana",
           variant: "mark",
         },

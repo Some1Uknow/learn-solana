@@ -2,9 +2,15 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 import type { ReactNode } from "react";
-import { PrivyAuthBridge } from "@/components/auth/auth-context";
+import { PrivyAuthBridge } from "@/components/auth/privy-auth-bridge";
 
-export default function PrivyAppProvider({ children }: { children: ReactNode }) {
+export default function PrivyAppProvider({
+  children,
+  onReady,
+}: {
+  children: ReactNode;
+  onReady?: () => void;
+}) {
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   const clientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID;
 
@@ -32,7 +38,7 @@ export default function PrivyAppProvider({ children }: { children: ReactNode }) 
         loginMethods: ["email", "google", "github", "passkey"],
       }}
     >
-      <PrivyAuthBridge>{children}</PrivyAuthBridge>
+      <PrivyAuthBridge onReady={onReady}>{children}</PrivyAuthBridge>
     </PrivyProvider>
   );
 }

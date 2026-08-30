@@ -69,7 +69,7 @@ export const contentsData = {
       description:
         "Learn the Rust syntax and ownership model you need before writing Solana programs.",
       goal: "Build enough Rust fluency to reason clearly about ownership, data modeling, control flow, and common program structure.",
-      image: "/rust-2.png",
+      image: "/rust-2.webp",
       icon: "rust",
       overviewUrl: "/learn/rust-foundations",
       topics: [
@@ -158,7 +158,7 @@ export const contentsData = {
       description:
         "Learn Anchor from setup and core concepts through PDAs, CPIs, token flows, and guided projects.",
       goal: "Build production-minded Solana programs with Anchor using clear account models, validation, tests, and project work.",
-      image: "/anchor.png",
+      image: "/anchor.webp",
       icon: "anchor",
       overviewUrl: "/learn/anchor-programs",
       topics: [
