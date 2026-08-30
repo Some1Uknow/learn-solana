@@ -54,7 +54,7 @@ body {
   min-height: 2rem;
   transform: translateY(1px);
   color: var(--ds-foreground);
-  font-family: "Bree Serif", Georgia, serif;
+  font-family: var(--font-bree-serif), Georgia, serif;
   font-size: 1.15rem;
   font-weight: 400;
   letter-spacing: -0.025em;

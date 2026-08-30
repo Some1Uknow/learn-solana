@@ -29,13 +29,13 @@ function getTrackVisual(track: string) {
   switch (track) {
     case "rust":
       return {
-        imageSrc: "/rust-2.png",
+        imageSrc: "/rust-2.webp",
         imageAlt: "Rust logo",
         eyebrow: "Language track",
       };
     case "anchor":
       return {
-        imageSrc: "/anchor.png",
+        imageSrc: "/anchor.webp",
         imageAlt: "Anchor logo",
         eyebrow: "Framework track",
       };

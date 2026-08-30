@@ -29,14 +29,14 @@ export const source = loader({
         });
       case "Rust":
         return createElement(Image, {
-          src: "/rust-2.png",
+          src: "/rust-2.webp",
           alt: "Rust",
           width: 48,
           height: 48,
         });
       case "Anchor":
         return createElement(Image, {
-          src: "/anchor.png",
+          src: "/anchor.webp",
           alt: "Anchor",
           width: 48,
           height: 48,

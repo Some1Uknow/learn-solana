@@ -30,7 +30,7 @@ const tools = [
     description: "Sketch programs, instructions, accounts, and PDAs.",
     href: "/tools/visual-builder",
     meta: "Visual map",
-    logo: "/anchor.png",
+    logo: "/anchor.webp",
     logoAlt: "Anchor logo",
   },
 ];

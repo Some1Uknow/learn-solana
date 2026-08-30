@@ -2,14 +2,14 @@ import type React from "react";
 import "./globals.css";
 import "./design-system.css";
 import type { Metadata, Viewport } from "next";
-import { Inter, Roboto_Mono } from "next/font/google";
+import { Bree_Serif, Inter, Roboto_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { RootProvider } from "fumadocs-ui/provider";
-import PrivyAppProvider from "@/components/auth/privy-provider";
+import DeferredAuthRuntime from "@/components/auth/deferred-auth-runtime";
+import { DeferredAnalytics } from "@/components/analytics/deferred-analytics";
 import { RouteGuard } from "@/components/route-guard";
 import Script from "next/script";
-import { Analytics } from "@vercel/analytics/next";
 import {
   courseKeywords,
   defaultOpenGraphImage,
@@ -29,6 +29,13 @@ const inter = Inter({
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
   variable: "--font-roboto-mono",
+  display: "swap",
+});
+
+const breeSerif = Bree_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bree-serif",
   display: "swap",
 });
 
@@ -95,12 +102,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap"
-        />
         {createSiteStructuredData(siteUrl).map((schema, index) => (
           <script
             key={`jsonld-site-${index}`}
@@ -117,7 +118,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className={`${inter.variable} ${robotoMono.variable}`}>
+      <body className={`${inter.variable} ${robotoMono.variable} ${breeSerif.variable}`}>
         <a
           href="#main-content"
           className="fixed left-4 top-4 z-[60] -translate-y-20 rounded-[6px] bg-[#181818] px-4 py-2 text-sm font-medium text-white transition-transform focus:translate-y-0"
@@ -125,7 +126,7 @@ export default async function RootLayout({
           Skip to content
         </a>
         {process.env.NODE_ENV === "production" && clarityId && (
-          <Script id="clarity-script" strategy="afterInteractive">
+          <Script id="clarity-script" strategy="lazyOnload">
             {`(function(c,l,a,r,i,t,y){
 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
@@ -137,7 +138,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           <Script
             src="https://analytics.ahrefs.com/analytics.js"
             data-key="jirAR70ve59bhS08RdDhqw"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
         )}
         <ThemeProvider
@@ -146,14 +147,14 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
           enableSystem={false}
           disableTransitionOnChange
         >
-          <PrivyAppProvider>
+          <DeferredAuthRuntime>
             <RouteGuard>
               <RootProvider>
                 {children}
-                <Analytics />
+                <DeferredAnalytics />
               </RootProvider>
             </RouteGuard>
-          </PrivyAppProvider>
+          </DeferredAuthRuntime>
 
           <Toaster />
         </ThemeProvider>

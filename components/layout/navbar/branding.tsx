@@ -14,7 +14,6 @@ export function NavbarBranding() {
     >
       <BrandLogo
         variant="mark"
-        priority
         className="h-7 w-7 shrink-0 transition-opacity duration-150 group-hover:opacity-80"
       />
       <span className="ls-brand-wordmark transition-opacity duration-150 group-hover:opacity-80">

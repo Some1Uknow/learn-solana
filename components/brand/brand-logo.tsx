@@ -18,10 +18,10 @@ const assetConfig = {
     height: 276,
   },
   mark: {
-    src: brand.assets.mark,
+    src: brand.assets.markOptimized,
     alt: `${brand.name} mark`,
-    width: 530,
-    height: 530,
+    width: 128,
+    height: 128,
   },
   text: {
     src: brand.assets.text,
