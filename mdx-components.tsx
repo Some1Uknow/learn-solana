@@ -12,6 +12,7 @@ import { Callout, InfoCallout, WarningCallout, TipCallout, DeepDive } from '@/co
 import { QuickCheck } from '@/components/learn/quick-check';
 import { ConceptCard, ConceptCardGrid, ConceptCards } from '@/components/learn/concept-card';
 import { UpNextCard } from '@/components/learn/up-next';
+import { PdaPlayground } from '@/components/learn/pda-playground';
 
 function extractMermaidChart(children: unknown): string | null {
   const nodes = Children.toArray(children);
@@ -52,6 +53,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ConceptCardGrid,
     ConceptCards,
     UpNextCard,
+    PdaPlayground,
     pre: ({ ref: _ref, ...props }) => {
       const chart = extractMermaidChart(props.children);
 
